@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1778310779980,
+      "tag": "0000_fancy_toxin",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778347566973,
+      "tag": "0001_past_vampiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778352676950,
+      "tag": "0002_lonely_kronos",
+      "breakpoints": true
+    }
+  ]
+}

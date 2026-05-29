@@ -1,0 +1,162 @@
+'use client';
+
+import { useState } from 'react';
+import { toast } from 'sonner';
+import type { Exam } from '@seena/shared';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+
+type Props = {
+  examId: string;
+  initialPayload: Exam;
+  title: string;
+};
+
+export function ExamView({ examId, initialPayload, title }: Props) {
+  const [exam, setExam] = useState<Exam>(initialPayload);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function regenerate(sectionIndex: number, questionIndex: number) {
+    const key = `r-${sectionIndex}-${questionIndex}`;
+    setBusy(key);
+    try {
+      const res = await fetch(`/api/exams/${examId}/regenerate-question`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ examId, sectionIndex, questionIndex }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      const next = structuredClone(exam);
+      next.sections[sectionIndex]!.questions[questionIndex] = data.question;
+      setExam(next);
+      toast.success('Question regenerated.');
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function savePayload(next: Exam) {
+    setExam(next);
+    setBusy('save');
+    try {
+      const res = await fetch(`/api/exams/${examId}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ payload: next }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function exportPdf() {
+    setBusy('export');
+    try {
+      const res = await fetch(`/api/exams/${examId}/export`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ format: 'pdf' }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      window.open(data.url, '_blank');
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  let questionCounter = 0;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">{title}</h1>
+          <p className="text-sm text-muted-foreground">
+            {exam.pattern} · {exam.total_marks} marks
+          </p>
+        </div>
+        <Button onClick={exportPdf} disabled={busy === 'export'}>
+          {busy === 'export' ? 'Rendering…' : 'Export PDF'}
+        </Button>
+      </div>
+
+      {exam.sections.map((section, si) => (
+        <Card key={si}>
+          <CardHeader>
+            <CardTitle>{section.title}</CardTitle>
+            <p className="text-sm text-muted-foreground">{section.instructions}</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {section.questions.map((q, qi) => {
+              questionCounter += 1;
+              const sourcePages = (q as { source_pages?: number[] }).source_pages ?? [];
+              return (
+                <div key={qi} className="rounded-md border p-3">
+                  <div className="flex items-start gap-3">
+                    <span className="font-medium">{questionCounter}.</span>
+                    <div className="flex-1">
+                      <Textarea
+                        value={q.prompt}
+                        onChange={(e) => {
+                          const next = structuredClone(exam);
+                          next.sections[si]!.questions[qi]!.prompt = e.target.value;
+                          setExam(next);
+                        }}
+                        className="text-sm"
+                      />
+                      {q.type === 'mcq' && 'options' in q && q.options ? (
+                        <div className="mt-2 space-y-1">
+                          {q.options.map((opt: string, oi: number) => (
+                            <div key={oi} className="flex items-center gap-2 text-sm">
+                              <span className="w-6 text-muted-foreground">
+                                {String.fromCharCode(65 + oi)}.
+                              </span>
+                              <span>{opt}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        Answer:{' '}
+                        <span className="font-medium text-foreground">
+                          {(q as { answer?: string }).answer}
+                        </span>{' '}
+                        · {q.marks} marks · pages {sourcePages.join(', ') || '—'}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => regenerate(si, qi)}
+                        disabled={busy === `r-${si}-${qi}`}
+                      >
+                        {busy === `r-${si}-${qi}` ? '…' : 'Regenerate'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      ))}
+
+      <div className="flex justify-end">
+        <Button onClick={() => savePayload(exam)} disabled={busy === 'save'} variant="outline">
+          {busy === 'save' ? 'Saving…' : 'Save edits'}
+        </Button>
+      </div>
+    </div>
+  );
+}

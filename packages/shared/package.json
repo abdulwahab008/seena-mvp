@@ -1,0 +1,29 @@
+{
+  "name": "@seena/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schemas/*": "./src/schemas/*.ts",
+    "./patterns": "./src/patterns/index.ts",
+    "./patterns/*": "./src/patterns/*.ts",
+    "./rag/chunk": "./src/rag/chunk.ts",
+    "./rag/namespace": "./src/rag/namespace.ts",
+    "./rag/strategies": "./src/rag/strategies.ts",
+    "./db/schema": "./src/db/schema.ts"
+  },
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.38.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
