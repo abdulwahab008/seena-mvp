@@ -22,6 +22,13 @@
       "when": 1778352676950,
       "tag": "0002_lonely_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780128348219,
+      "tag": "0003_cuddly_pixie",
+      "breakpoints": true
     }
   ]
 }

@@ -24,6 +24,12 @@ export const organizations = pgTable('organizations', {
   name: text('name').notNull(),
   logoUrl: text('logo_url'),
   plan: text('plan').notNull().default('free'),
+  // Cost guard: max exams an org may generate per calendar month.
+  monthlyExamLimit: integer('monthly_exam_limit').notNull().default(100),
+  // Hard USD backstop across all LLM calls per calendar month (catches regen spam).
+  monthlyCostCapUsd: numeric('monthly_cost_cap_usd', { precision: 10, scale: 2 })
+    .notNull()
+    .default(sql`'15'`),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

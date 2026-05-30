@@ -1,0 +1,2 @@
+ALTER TABLE "organizations" ADD COLUMN "monthly_exam_limit" integer DEFAULT 100 NOT NULL;--> statement-breakpoint
+ALTER TABLE "organizations" ADD COLUMN "monthly_cost_cap_usd" numeric(10, 2) DEFAULT '15' NOT NULL;

@@ -4,12 +4,15 @@ import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { GenerateExamRequest } from '@seena/shared';
 import { generateExam } from '@/lib/generation/generate-exam';
+import { assertExamQuota, QuotaExceededError } from '@/lib/quota';
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
   try {
     const { userId, orgId } = await requireSession();
     const body = GenerateExamRequest.parse(await req.json());
+
+    await assertExamQuota(orgId);
 
     const [book] = await db
       .select()
@@ -73,6 +76,9 @@ export async function POST(req: Request) {
       copyrightViolationsDropped: result.copyrightViolationsDropped,
     });
   } catch (e) {
+    if (e instanceof QuotaExceededError) {
+      return NextResponse.json({ error: e.message, quota: e.quota }, { status: 429 });
+    }
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }

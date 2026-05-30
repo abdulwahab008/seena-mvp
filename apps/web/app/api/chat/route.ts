@@ -6,6 +6,7 @@ import { requireSession } from '@/lib/auth';
 import { parseIntent } from '@/lib/generation/parse-intent';
 import { generateExam } from '@/lib/generation/generate-exam';
 import { resolvePattern } from '@/lib/patterns/resolver';
+import { assertExamQuota, QuotaExceededError } from '@/lib/quota';
 import type { Board } from '@seena/shared';
 
 const Body = z.object({ message: z.string().min(1).max(2000) });
@@ -15,6 +16,9 @@ export async function POST(req: Request) {
   try {
     const { userId, orgId } = await requireSession();
     const body = Body.parse(await req.json());
+
+    // Cost guard — check before any paid LLM call (including intent parsing).
+    await assertExamQuota(orgId);
 
     const books = await db
       .select({
@@ -127,6 +131,12 @@ export async function POST(req: Request) {
       copyrightViolationsDropped: result.copyrightViolationsDropped,
     });
   } catch (e) {
+    if (e instanceof QuotaExceededError) {
+      return NextResponse.json(
+        { kind: 'message', message: e.message, quota: e.quota },
+        { status: 429 },
+      );
+    }
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }

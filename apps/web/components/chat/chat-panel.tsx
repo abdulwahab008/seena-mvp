@@ -65,18 +65,19 @@ export function ChatPanel({
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ message: content }),
       });
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      if (data.kind === 'exam') {
+      const data = await res.json().catch(() => null);
+      if (data?.kind === 'exam') {
         setMessages((m) => [
           ...m,
           { role: 'assistant-exam', examId: data.exam.id, title: data.exam.title },
         ]);
+      } else if (data?.message) {
+        // Covers clarifying messages and the 429 quota notice.
+        setMessages((m) => [...m, { role: 'assistant', content: data.message }]);
+      } else if (!res.ok) {
+        throw new Error(data?.error || `Request failed (${res.status})`);
       } else {
-        setMessages((m) => [
-          ...m,
-          { role: 'assistant', content: data.message ?? 'OK.' },
-        ]);
+        setMessages((m) => [...m, { role: 'assistant', content: 'OK.' }]);
       }
     } catch (e) {
       toast.error((e as Error).message);
