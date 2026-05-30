@@ -34,8 +34,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
             );
           })}
         </nav>
-        <div className="mt-auto pt-4">
-          <UserButton />
+        <div className="mt-auto flex items-center gap-2 pt-4">
+          <UserButton afterSignOutUrl="/" />
+          <span className="text-xs text-muted-foreground">Account</span>
         </div>
       </aside>
       <main className="overflow-y-auto p-8">{children}</main>
