@@ -16,3 +16,5 @@ coverage
 
 drizzle/.snapshots
 *.tsbuildinfo
+
+.playwright-mcp/
