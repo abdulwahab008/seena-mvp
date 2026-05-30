@@ -4,15 +4,24 @@ import { and, eq } from 'drizzle-orm';
 import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { createSignedUploadUrl } from '@/lib/storage';
+import { rateLimit } from '@/lib/ratelimit';
+import { apiError } from '@/lib/http';
 
 const Body = z.object({
-  filename: z.string().min(1),
-  contentType: z.string().default('application/pdf'),
+  filename: z
+    .string()
+    .min(1)
+    .max(200)
+    .regex(/\.(pdf|png|jpe?g|webp)$/i, 'file must be a PDF or image (png/jpg/webp)'),
+  contentType: z
+    .enum(['application/pdf', 'image/png', 'image/jpeg', 'image/webp'])
+    .default('application/pdf'),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { orgId } = await requireSession();
+    await rateLimit(`sheet-upload:${orgId}`, 30, 60);
     const { id } = await params;
 
     const [exam] = await db
@@ -25,6 +34,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const { key, signedUrl } = await createSignedUploadUrl(orgId, body.filename);
     return NextResponse.json({ key, signedUrl });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

@@ -6,12 +6,15 @@ import { requireSession } from '@/lib/auth';
 import { Exam } from '@seena/shared';
 import { renderExamPdf } from '@/lib/pdf/render';
 import { uploadBuffer, getSignedReadUrl } from '@/lib/storage';
+import { rateLimit } from '@/lib/ratelimit';
+import { apiError } from '@/lib/http';
 
 const Body = z.object({ format: z.enum(['pdf']).default('pdf') });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { orgId } = await requireSession();
+    await rateLimit(`export:${orgId}`, 30, 60);
     const { id } = await params;
     Body.parse(await req.json().catch(() => ({})));
 
@@ -45,7 +48,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json({ url, export: exportRow });
   } catch (e) {
-    console.error('[export-pdf] failed', e);
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

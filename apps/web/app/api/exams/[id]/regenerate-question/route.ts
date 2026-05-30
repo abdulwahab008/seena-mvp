@@ -6,6 +6,9 @@ import { RegenerateQuestionRequest, Exam, Question } from '@seena/shared';
 import { llm, estimateCostUsd } from '@/lib/llm';
 import { env } from '@/lib/env';
 import { formatContext, retrieveChunks } from '@/lib/rag/retrieve';
+import { assertExamQuota } from '@/lib/quota';
+import { rateLimit } from '@/lib/ratelimit';
+import { apiError } from '@/lib/http';
 
 const QUESTION_TOOL = {
   type: 'function' as const,
@@ -32,6 +35,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const startedAt = Date.now();
   try {
     const { orgId, userId } = await requireSession();
+    await rateLimit(`regenerate:${orgId}`, 20, 60);
     const { id } = await params;
     const body = RegenerateQuestionRequest.parse({
       ...(await req.json()),
@@ -43,6 +47,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       .from(schema.exams)
       .where(and(eq(schema.exams.id, id), eq(schema.exams.orgId, orgId)));
     if (!exam) return NextResponse.json({ error: 'not found' }, { status: 404 });
+
+    // Regeneration is a paid LLM call — guard against the monthly cap.
+    await assertExamQuota(orgId);
 
     const examPayload = Exam.parse(exam.payload);
     const section = examPayload.sections[body.sectionIndex];
@@ -116,6 +123,6 @@ ${context}`,
 
     return NextResponse.json({ exam: updated, question: newQuestion });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

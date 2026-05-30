@@ -7,6 +7,8 @@ import { parseIntent } from '@/lib/generation/parse-intent';
 import { generateExam } from '@/lib/generation/generate-exam';
 import { resolvePattern } from '@/lib/patterns/resolver';
 import { assertExamQuota, QuotaExceededError } from '@/lib/quota';
+import { rateLimit } from '@/lib/ratelimit';
+import { apiError } from '@/lib/http';
 import type { Board } from '@seena/shared';
 
 const Body = z.object({ message: z.string().min(1).max(2000) });
@@ -15,6 +17,7 @@ export async function POST(req: Request) {
   const startedAt = Date.now();
   try {
     const { userId, orgId } = await requireSession();
+    await rateLimit(`chat:${orgId}`, 20, 60);
     const body = Body.parse(await req.json());
 
     // Cost guard — check before any paid LLM call (including intent parsing).
@@ -137,7 +140,7 @@ export async function POST(req: Request) {
         { status: 429 },
       );
     }
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }
 
