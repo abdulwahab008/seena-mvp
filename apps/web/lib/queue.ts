@@ -19,8 +19,15 @@ export function redis(): IORedis {
 export const QUEUE_NAMES = {
   bookProcess: 'book-process',
   bookRechunk: 'book-rechunk',
+  gradeSubmission: 'grade-submission',
   examExport: 'exam-export',
 } as const;
+
+export type GradeSubmissionJob = {
+  submissionId: string;
+  examId: string;
+  orgId: string;
+};
 
 export type BookProcessJob = {
   bookId: string;
@@ -53,6 +60,10 @@ export function bookProcessQueue() {
 
 export function bookRechunkQueue() {
   return getQueue(QUEUE_NAMES.bookRechunk);
+}
+
+export function gradeSubmissionQueue() {
+  return getQueue(QUEUE_NAMES.gradeSubmission);
 }
 
 export function examExportQueue() {

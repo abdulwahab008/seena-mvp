@@ -204,6 +204,43 @@ export const exams = pgTable(
   }),
 );
 
+export const submissions = pgTable(
+  'submissions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    examId: uuid('exam_id')
+      .notNull()
+      .references(() => exams.id, { onDelete: 'cascade' }),
+    createdBy: uuid('created_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'set null' as never }),
+    studentName: text('student_name'),
+    storageKey: text('storage_key').notNull(),
+    sourceUrl: text('source_url'),
+    status: text('status').notNull().default('pending'), // pending | processing | graded | failed
+    totalMarks: integer('total_marks'),
+    obtainedMarks: numeric('obtained_marks', { precision: 6, scale: 2 }),
+    result: jsonb('result'), // GradedResult shape from @seena/shared
+    ocrMethod: text('ocr_method'),
+    failureReason: text('failure_reason'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    gradedAt: timestamp('graded_at', { withTimezone: true }),
+  },
+  (t) => ({
+    orgIdx: index('submissions_org_idx').on(t.orgId),
+    examIdx: index('submissions_exam_idx').on(t.examId),
+  }),
+);
+
+export const submissionRelations = relations(submissions, ({ one }) => ({
+  org: one(organizations, { fields: [submissions.orgId], references: [organizations.id] }),
+  exam: one(exams, { fields: [submissions.examId], references: [exams.id] }),
+  grader: one(users, { fields: [submissions.createdBy], references: [users.id] }),
+}));
+
 export const examExports = pgTable('exam_exports', {
   id: uuid('id').primaryKey().defaultRandom(),
   examId: uuid('exam_id')

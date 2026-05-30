@@ -3,6 +3,7 @@ import { Redis } from 'ioredis';
 import { env } from './env.js';
 import { processBook, type BookProcessJob } from './jobs/book-process.js';
 import { rechunkBook, type BookRechunkJob } from './jobs/book-rechunk.js';
+import { gradeSubmission, type GradeSubmissionJob } from './jobs/grade-submission.js';
 
 const connection = new Redis(env().REDIS_URL, { maxRetriesPerRequest: null });
 
@@ -55,11 +56,31 @@ rechunkWorker.on('failed', (job, err) => {
   console.error(`[worker] book-rechunk ${job?.id ?? '?'} ✗`, err.message);
 });
 
+const gradeWorker = new Worker<GradeSubmissionJob>(
+  'grade-submission',
+  async (job: Job<GradeSubmissionJob>) => {
+    await gradeSubmission(job.data);
+  },
+  {
+    connection,
+    concurrency: env().WORKER_CONCURRENCY,
+    ...LONG_JOB_OPTS,
+  },
+);
+
+gradeWorker.on('completed', (job) => {
+  console.log(`[worker] grade-submission ${job.id} ✓`);
+});
+
+gradeWorker.on('failed', (job, err) => {
+  console.error(`[worker] grade-submission ${job?.id ?? '?'} ✗`, err.message);
+});
+
 console.log(`[worker] online — concurrency=${env().WORKER_CONCURRENCY}`);
 
 async function shutdown(signal: string) {
   console.log(`[worker] received ${signal}, draining…`);
-  await Promise.all([bookWorker.close(), rechunkWorker.close()]);
+  await Promise.all([bookWorker.close(), rechunkWorker.close(), gradeWorker.close()]);
   await connection.quit();
   process.exit(0);
 }

@@ -6,6 +6,7 @@ import type { Exam } from '@seena/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { SubmissionsPanel } from './submissions-panel';
 
 type Props = {
   examId: string;
@@ -156,6 +157,11 @@ export function ExamView({ examId, initialPayload, title }: Props) {
         <Button onClick={() => savePayload(exam)} disabled={busy === 'save'} variant="outline">
           {busy === 'save' ? 'Saving…' : 'Save edits'}
         </Button>
+      </div>
+
+      <div className="space-y-3 pt-4">
+        <h2 className="text-xl font-semibold">Student Submissions (auto-grading)</h2>
+        <SubmissionsPanel examId={examId} />
       </div>
     </div>
   );

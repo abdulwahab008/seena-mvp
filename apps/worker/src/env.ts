@@ -5,6 +5,7 @@ const EnvSchema = z.object({
   REDIS_URL: z.string().min(1),
   OPENROUTER_API_KEY: z.string().min(1),
   OPENROUTER_BASE_URL: z.string().url().default('https://openrouter.ai/api/v1'),
+  OPENROUTER_MODEL: z.string().default('anthropic/claude-sonnet-4.5'),
   OPENROUTER_EMBEDDING_MODEL: z.string().default('openai/text-embedding-3-large'),
   OPENROUTER_VISION_MODEL: z.string().default('google/gemini-3.5-flash'),
   OPENROUTER_APP_NAME: z.string().default('Seena Exams'),
