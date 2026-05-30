@@ -6,8 +6,9 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/index.ts",
-    "build": "tsc -p tsconfig.json",
-    "start": "node --env-file=.env dist/index.js",
+    "build": "tsc --noEmit",
+    "start": "tsx src/index.ts",
+    "start:local": "tsx --env-file=.env src/index.ts",
     "lint": "echo 'no lint configured'",
     "typecheck": "tsc --noEmit",
     "backfill:labels": "tsx --env-file=.env src/scripts/backfill-exercise-labels.ts"
@@ -24,12 +25,12 @@
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
     "postgres": "^3.4.5",
+    "tsx": "^4.19.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
     "@types/pdf-parse": "^1.1.4",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
 }
