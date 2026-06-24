@@ -1,12 +1,20 @@
 import Link from 'next/link';
 import { UserButton } from '@clerk/nextjs';
-import { BookOpen, FileText, MessageSquare, LayoutDashboard, Settings } from 'lucide-react';
+import {
+  BookOpen,
+  FileText,
+  MessageSquare,
+  LayoutDashboard,
+  Settings,
+  Library,
+} from 'lucide-react';
 import { requireSession } from '@/lib/auth';
 
 const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/books', label: 'Books', icon: BookOpen },
   { href: '/exams', label: 'Exams', icon: FileText },
+  { href: '/bank', label: 'Question Bank', icon: Library },
   { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/settings/patterns', label: 'Settings', icon: Settings },
 ];

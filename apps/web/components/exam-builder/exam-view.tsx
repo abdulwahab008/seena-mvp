@@ -41,6 +41,25 @@ export function ExamView({ examId, initialPayload, title }: Props) {
     }
   }
 
+  async function saveToBank(sectionIndex: number, questionIndex: number) {
+    const key = `bank-${sectionIndex}-${questionIndex}`;
+    setBusy(key);
+    try {
+      const question = exam.sections[sectionIndex]!.questions[questionIndex];
+      const res = await fetch('/api/bank', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ examId, question }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success('Saved to question bank.');
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function savePayload(next: Exam) {
     setExam(next);
     setBusy('save');
@@ -162,6 +181,14 @@ export function ExamView({ examId, initialPayload, title }: Props) {
                         disabled={busy === `r-${si}-${qi}`}
                       >
                         {busy === `r-${si}-${qi}` ? '…' : 'Regenerate'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => saveToBank(si, qi)}
+                        disabled={busy === `bank-${si}-${qi}`}
+                      >
+                        {busy === `bank-${si}-${qi}` ? '…' : 'Save to bank'}
                       </Button>
                     </div>
                   </div>

@@ -312,6 +312,33 @@ export const generations = pgTable(
   }),
 );
 
+// Reusable question bank — teachers save good generated/edited questions to reuse.
+// `payload` is the full Question (@seena/shared); the columns are denormalized for filtering.
+export const bankQuestions = pgTable(
+  'bank_questions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' as never }),
+    sourceExamId: uuid('source_exam_id').references(() => exams.id, {
+      onDelete: 'set null' as never,
+    }),
+    subject: text('subject'),
+    board: text('board'),
+    grade: integer('grade'),
+    chapter: text('chapter'),
+    type: text('type').notNull(),
+    payload: jsonb('payload').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    orgIdx: index('bank_questions_org_idx').on(t.orgId),
+    orgTypeIdx: index('bank_questions_org_type_idx').on(t.orgId, t.type),
+  }),
+);
+
 export const orgRelations = relations(organizations, ({ many }) => ({
   memberships: many(memberships),
   books: many(books),
