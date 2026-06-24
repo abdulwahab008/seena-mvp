@@ -6,6 +6,7 @@ import type { GradedResult } from '@seena/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 
 type SubmissionStatus = 'pending' | 'processing' | 'graded' | 'failed';
@@ -22,6 +23,8 @@ type SubmissionRow = {
 
 type SubmissionDetail = SubmissionRow & {
   result: GradedResult | null;
+  reviewedResult: GradedResult | null;
+  reviewedAt: string | null;
   failureReason: string | null;
 };
 
@@ -120,6 +123,13 @@ export function SubmissionsPanel({ examId }: { examId: string }) {
     }
   }
 
+  const loadDetail = useCallback(async (id: string) => {
+    const res = await fetch(`/api/submissions/${id}`);
+    if (!res.ok) throw new Error(await res.text());
+    const data = (await res.json()) as { submission: SubmissionDetail };
+    setDetail(data.submission);
+  }, []);
+
   async function toggleView(id: string) {
     if (expandedId === id) {
       setExpandedId(null);
@@ -130,10 +140,7 @@ export function SubmissionsPanel({ examId }: { examId: string }) {
     setDetail(null);
     setDetailLoading(true);
     try {
-      const res = await fetch(`/api/submissions/${id}`);
-      if (!res.ok) throw new Error(await res.text());
-      const data = (await res.json()) as { submission: SubmissionDetail };
-      setDetail(data.submission);
+      await loadDetail(id);
     } catch (e) {
       toast.error((e as Error).message);
       setExpandedId(null);
@@ -217,7 +224,15 @@ export function SubmissionsPanel({ examId }: { examId: string }) {
                         Grading failed: {detail.failureReason ?? 'unknown error'}
                       </p>
                     ) : detail?.result ? (
-                      <GradedDetail result={detail.result} />
+                      <GradedDetail
+                        submissionId={detail.id}
+                        result={detail.reviewedResult ?? detail.result}
+                        reviewed={detail.reviewedAt != null}
+                        onSaved={async () => {
+                          await loadDetail(detail.id);
+                          await refresh();
+                        }}
+                      />
                     ) : (
                       <p className="text-sm text-muted-foreground">No result available.</p>
                     )}
@@ -232,36 +247,141 @@ export function SubmissionsPanel({ examId }: { examId: string }) {
   );
 }
 
-function GradedDetail({ result }: { result: GradedResult }) {
+function GradedDetail({
+  submissionId,
+  result,
+  reviewed,
+  onSaved,
+}: {
+  submissionId: string;
+  result: GradedResult;
+  reviewed: boolean;
+  onSaved: () => Promise<void>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<GradedResult>(result);
+  const [saving, setSaving] = useState(false);
+
+  // Re-sync when a different submission (or a fresh save) loads.
+  useEffect(() => {
+    setDraft(result);
+    setEditing(false);
+  }, [result]);
+
+  const shown = editing ? draft : result;
+  const totalAwarded = editing
+    ? draft.questions.reduce((s, q) => s + (Number.isFinite(q.awarded) ? q.awarded : 0), 0)
+    : result.totalAwarded;
+  const pct = result.totalMax > 0 ? Math.round((totalAwarded / result.totalMax) * 100) : 0;
+
+  function setQuestion(i: number, patch: Partial<GradedResult['questions'][number]>) {
+    setDraft((d) => ({
+      ...d,
+      questions: d.questions.map((q, idx) => (idx === i ? { ...q, ...patch } : q)),
+    }));
+  }
+
+  async function save() {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/submissions/${submissionId}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ result: draft }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      toast.success('Marks saved.');
+      setEditing(false);
+      await onSaved();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex items-baseline gap-3">
-        <span className="text-lg font-semibold">
-          {result.totalAwarded} / {result.totalMax}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {Math.round(result.percentage)}%
-        </span>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-3">
+          <span className="text-lg font-semibold tabular-nums">
+            {totalAwarded} / {result.totalMax}
+          </span>
+          <span className="text-sm text-muted-foreground">{pct}%</span>
+          {reviewed && !editing ? (
+            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+              Teacher-reviewed
+            </span>
+          ) : null}
+        </div>
+        {editing ? (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setDraft(result);
+                setEditing(false);
+              }}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button size="sm" onClick={() => void save()} disabled={saving}>
+              {saving ? 'Saving…' : 'Save marks'}
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+            Review &amp; edit
+          </Button>
+        )}
       </div>
       {result.overallFeedback ? (
         <p className="text-sm text-muted-foreground">{result.overallFeedback}</p>
       ) : null}
       <div className="space-y-2">
-        {result.questions.map((q) => (
+        {shown.questions.map((q, i) => (
           <div key={q.number} className="rounded-md border bg-background p-3 text-sm">
             <div className="flex items-center gap-2">
               <span className="font-medium">
                 Q{q.number} <span className="text-muted-foreground">[{q.section}]</span>
               </span>
               <span className="text-muted-foreground">·</span>
-              <span className="tabular-nums">
-                {q.awarded}/{q.max}
-              </span>
+              {editing ? (
+                <span className="flex items-center gap-1">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={q.max}
+                    step={0.5}
+                    value={q.awarded}
+                    onChange={(e) =>
+                      setQuestion(i, {
+                        awarded: e.target.value === '' ? 0 : Number(e.target.value),
+                      })
+                    }
+                    className="h-7 w-16 px-2 py-1 text-right tabular-nums"
+                  />
+                  <span className="text-muted-foreground">/ {q.max}</span>
+                </span>
+              ) : (
+                <span className="tabular-nums">
+                  {q.awarded}/{q.max}
+                </span>
+              )}
               <span className={q.correct ? 'text-green-700' : 'text-red-700'}>
                 {q.correct ? '✓' : '✗'}
               </span>
             </div>
-            {q.feedback ? (
+            {editing ? (
+              <Textarea
+                value={q.feedback}
+                onChange={(e) => setQuestion(i, { feedback: e.target.value })}
+                placeholder="Feedback"
+                className="mt-2 min-h-[48px] text-sm"
+              />
+            ) : q.feedback ? (
               <p className="mt-1 text-muted-foreground">{q.feedback}</p>
             ) : null}
             <details className="mt-2 text-xs text-muted-foreground">

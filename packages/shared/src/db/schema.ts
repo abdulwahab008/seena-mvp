@@ -223,7 +223,12 @@ export const submissions = pgTable(
     status: text('status').notNull().default('pending'), // pending | processing | graded | failed
     totalMarks: integer('total_marks'),
     obtainedMarks: numeric('obtained_marks', { precision: 6, scale: 2 }),
-    result: jsonb('result'), // GradedResult shape from @seena/shared
+    result: jsonb('result'), // AI GradedResult shape from @seena/shared (immutable original)
+    // Human-in-the-loop: teacher's corrected GradedResult. Null until reviewed.
+    // `result` is kept as the AI original so AI-vs-human marks can be compared (calibration).
+    reviewedResult: jsonb('reviewed_result'),
+    reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' as never }),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     ocrMethod: text('ocr_method'),
     failureReason: text('failure_reason'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
