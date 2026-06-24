@@ -26,11 +26,3 @@ export function pineconeIndex() {
 export function getNamespace(orgId: string, embeddingModel?: string | null) {
   return pineconeIndex().namespace(pineconeNamespace(orgId, embeddingModel ?? null));
 }
-
-/**
- * Backwards-compatible accessor for the legacy per-org namespace
- * (`org_<orgId>`). Prefer `getNamespace(orgId, embeddingModel)` for new code.
- */
-export function orgIndex(orgId: string) {
-  return getNamespace(orgId);
-}

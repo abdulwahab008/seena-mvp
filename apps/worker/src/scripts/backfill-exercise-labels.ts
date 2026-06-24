@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@seena/shared/db/schema';
 import { env } from '../env.js';
-import { orgIndex } from '../pinecone.js';
+import { getNamespace } from '../pinecone.js';
 
 type ChunkRow = {
   id: string;
@@ -111,7 +111,7 @@ async function main(): Promise<void> {
         (r) => r.chapterLabel != null || r.exerciseLabel != null,
       );
       if (pineconeUpdates.length > 0) {
-        const ix = orgIndex(book.orgId);
+        const ix = getNamespace(book.orgId);
         for (const u of pineconeUpdates) {
           await withRetry(`pinecone update ${u.id}`, () =>
             ix.update({
