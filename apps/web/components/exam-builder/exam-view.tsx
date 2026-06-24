@@ -17,6 +17,7 @@ type Props = {
 export function ExamView({ examId, initialPayload, title }: Props) {
   const [exam, setExam] = useState<Exam>(initialPayload);
   const [busy, setBusy] = useState<string | null>(null);
+  const [versions, setVersions] = useState(1);
 
   async function regenerate(sectionIndex: number, questionIndex: number) {
     const key = `r-${sectionIndex}-${questionIndex}`;
@@ -63,7 +64,7 @@ export function ExamView({ examId, initialPayload, title }: Props) {
       const res = await fetch(`/api/exams/${examId}/export`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ format: 'pdf' }),
+        body: JSON.stringify({ format: 'pdf', versions }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -86,9 +87,27 @@ export function ExamView({ examId, initialPayload, title }: Props) {
             {exam.pattern} · {exam.total_marks} marks
           </p>
         </div>
-        <Button onClick={exportPdf} disabled={busy === 'export'}>
-          {busy === 'export' ? 'Rendering…' : 'Export PDF'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <select
+            value={versions}
+            onChange={(e) => setVersions(Number(e.target.value))}
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+            aria-label="Number of shuffled versions"
+            title="Shuffled anti-leak versions"
+          >
+            <option value={1}>1 version</option>
+            <option value={2}>2 versions</option>
+            <option value={3}>3 versions</option>
+            <option value={4}>4 versions</option>
+          </select>
+          <Button onClick={exportPdf} disabled={busy === 'export'}>
+            {busy === 'export'
+              ? 'Rendering…'
+              : versions > 1
+                ? `Export ${versions} versions`
+                : 'Export PDF'}
+          </Button>
+        </div>
       </div>
 
       {exam.sections.map((section, si) => (
