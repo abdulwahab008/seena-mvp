@@ -35,6 +35,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       exam: examPayload,
       orgName: org?.name ?? 'Seena Exams',
       orgLogoUrl: org?.logoUrl ?? null,
+      language: exam.language as 'en' | 'ur' | 'mixed',
     });
 
     const key = `org_${orgId}/exports/${id}-${Date.now()}.pdf`;

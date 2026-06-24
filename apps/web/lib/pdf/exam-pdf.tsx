@@ -1,5 +1,13 @@
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
 import type { Exam } from '@seena/shared';
+
+// Urdu/Arabic-script glyphs for bilingual papers — Times/Helvetica have none, so Urdu text
+// would render as blank boxes without this. ponytail: fetched from jsDelivr at render (cached
+// per process); vendor the .ttf if offline PDF export is ever required.
+Font.register({
+  family: 'NotoNaskhArabic',
+  src: 'https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoNaskhArabic/full/ttf/NotoNaskhArabic-Regular.ttf',
+});
 
 const COLOR = {
   ink: '#0f172a',
@@ -22,6 +30,8 @@ const styles = StyleSheet.create({
     color: COLOR.body,
     lineHeight: 1.45,
   },
+  none: {},
+  rtl: { fontFamily: 'NotoNaskhArabic', textAlign: 'right' },
 
   // Header band
   header: {
@@ -177,12 +187,15 @@ export type ExamPdfProps = {
   exam: Exam;
   orgName: string;
   orgLogoUrl?: string | null;
+  language?: 'en' | 'ur' | 'mixed';
 };
 
-export function ExamDocument({ exam, orgName, orgLogoUrl }: ExamPdfProps) {
+export function ExamDocument({ exam, orgName, orgLogoUrl, language }: ExamPdfProps) {
   let questionCounter = 0;
   const totalQuestions = exam.sections.reduce((sum, s) => sum + s.questions.length, 0);
   const dateStr = formatDate();
+  const isUrdu = language === 'ur' || language === 'mixed';
+  const rtl = isUrdu ? styles.rtl : styles.none;
 
   return (
     <Document title={exam.title} author={orgName}>
@@ -199,7 +212,7 @@ export function ExamDocument({ exam, orgName, orgLogoUrl }: ExamPdfProps) {
 
         {/* Title */}
         <View style={styles.titleBlock}>
-          <Text style={styles.title}>{exam.title}</Text>
+          <Text style={[styles.title, rtl]}>{exam.title}</Text>
           <Text style={styles.subtitle}>{exam.pattern}</Text>
         </View>
 
@@ -229,12 +242,12 @@ export function ExamDocument({ exam, orgName, orgLogoUrl }: ExamPdfProps) {
           return (
             <View key={si} style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{section.title}</Text>
+                <Text style={[styles.sectionTitle, rtl]}>{section.title}</Text>
                 <Text style={styles.sectionMarks}>
                   {section.questions.length} question{section.questions.length === 1 ? '' : 's'} · {sectionMarks} mark{sectionMarks === 1 ? '' : 's'}
                 </Text>
               </View>
-              <Text style={styles.sectionInstructions}>{section.instructions}</Text>
+              <Text style={[styles.sectionInstructions, rtl]}>{section.instructions}</Text>
 
               {section.questions.map((q, qi) => {
                 questionCounter += 1;
@@ -244,7 +257,7 @@ export function ExamDocument({ exam, orgName, orgLogoUrl }: ExamPdfProps) {
                       <Text style={styles.qNumber}>{questionCounter}.</Text>
                     </View>
                     <View style={styles.qBody}>
-                      <Text style={styles.qPrompt}>
+                      <Text style={[styles.qPrompt, rtl]}>
                         {q.prompt} <Text style={styles.qMarks}>({q.marks} mark{q.marks === 1 ? '' : 's'})</Text>
                       </Text>
                       {q.type === 'mcq' && 'options' in q && q.options ? (
@@ -252,7 +265,7 @@ export function ExamDocument({ exam, orgName, orgLogoUrl }: ExamPdfProps) {
                           {q.options.map((opt: string, oi: number) => (
                             <View key={oi} style={styles.optionRow}>
                               <Text style={styles.optionLetter}>{String.fromCharCode(65 + oi)}.</Text>
-                              <Text style={styles.optionText}>{opt}</Text>
+                              <Text style={[styles.optionText, rtl]}>{opt}</Text>
                             </View>
                           ))}
                         </View>
@@ -292,7 +305,7 @@ export function ExamDocument({ exam, orgName, orgLogoUrl }: ExamPdfProps) {
           let n = 0;
           return exam.sections.map((section, si) => (
             <View key={si} style={styles.answerSection}>
-              <Text style={styles.answerSectionTitle}>{section.title}</Text>
+              <Text style={[styles.answerSectionTitle, rtl]}>{section.title}</Text>
               {section.questions.map((q, qi) => {
                 n += 1;
                 const answer = (q as { answer?: string }).answer ?? '—';
@@ -302,11 +315,11 @@ export function ExamDocument({ exam, orgName, orgLogoUrl }: ExamPdfProps) {
                   <View key={qi} style={styles.answerRow} wrap={false}>
                     <Text style={styles.answerNum}>{n}.</Text>
                     <View style={styles.answerBody}>
-                      <Text style={styles.answerText}>{answer}</Text>
+                      <Text style={[styles.answerText, rtl]}>{answer}</Text>
                       <Text style={styles.answerMeta}>
                         {q.marks} mark{q.marks === 1 ? '' : 's'} · source page{pages.length === 1 ? '' : 's'} {pages.join(', ') || '—'}
                       </Text>
-                      {explanation ? <Text style={styles.answerExpl}>{explanation}</Text> : null}
+                      {explanation ? <Text style={[styles.answerExpl, rtl]}>{explanation}</Text> : null}
                     </View>
                   </View>
                 );
