@@ -51,3 +51,9 @@ export async function uploadBuffer(key: string, buffer: Buffer, contentType: str
     .upload(key, buffer, { contentType, upsert: true });
   if (error) throw error;
 }
+
+export async function deleteObject(key: string): Promise<void> {
+  const e = env();
+  const { error } = await supabaseAdmin().storage.from(e.SUPABASE_BUCKET).remove([key]);
+  if (error) throw error;
+}

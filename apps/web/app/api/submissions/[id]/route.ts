@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { GradedResult } from '@seena/shared';
 import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
+import { deleteObject } from '@/lib/storage';
 import { apiError } from '@/lib/http';
 
 const ReviewBody = z.object({ result: GradedResult });
@@ -68,10 +69,16 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const { orgId } = await requireSession();
   const { id } = await params;
   const [submission] = await db
-    .select({ id: schema.submissions.id })
+    .select({ id: schema.submissions.id, storageKey: schema.submissions.storageKey })
     .from(schema.submissions)
     .where(and(eq(schema.submissions.id, id), eq(schema.submissions.orgId, orgId)));
   if (!submission) return NextResponse.json({ error: 'not found' }, { status: 404 });
+  // Remove the student answer-sheet PDF too, not just the DB row.
+  try {
+    await deleteObject(submission.storageKey);
+  } catch (e) {
+    console.warn('storage delete failed (non-fatal)', e);
+  }
   await db.delete(schema.submissions).where(eq(schema.submissions.id, id));
   return NextResponse.json({ ok: true });
 }
