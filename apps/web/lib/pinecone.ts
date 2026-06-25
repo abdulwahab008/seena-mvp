@@ -21,8 +21,3 @@ export function index(): Index {
 export function getNamespace(orgId: string, embeddingModel?: string | null) {
   return index().namespace(pineconeNamespace(orgId, embeddingModel));
 }
-
-// Backwards-compat shim — used by routes that delete vectors when a book is deleted etc.
-export function orgIndex(orgId: string, embeddingModel?: string | null) {
-  return getNamespace(orgId, embeddingModel);
-}

@@ -9,6 +9,14 @@ export const QuestionType = z.enum([
 ]);
 export type QuestionType = z.infer<typeof QuestionType>;
 
+// Bloom cognitive level (FBISE 3-level model — "application" folds in analyze/evaluate/create)
+// and difficulty band, for Table-of-Specifications compliance. Optional so exams generated
+// before this field existed still parse.
+export const CognitiveLevel = z.enum(['knowledge', 'understanding', 'application']);
+export type CognitiveLevel = z.infer<typeof CognitiveLevel>;
+export const QuestionDifficulty = z.enum(['easy', 'moderate', 'difficult']);
+export type QuestionDifficulty = z.infer<typeof QuestionDifficulty>;
+
 export const McqQuestion = z.object({
   type: z.literal('mcq'),
   prompt: z.string().min(5),
@@ -16,6 +24,8 @@ export const McqQuestion = z.object({
   answer: z.string().min(1),
   marks: z.number().min(0.5).max(20),
   source_pages: z.array(z.number().int().min(1)).min(1),
+  cognitiveLevel: CognitiveLevel.optional(),
+  difficulty: QuestionDifficulty.optional(),
   explanation: z.string().optional(),
 });
 export type McqQuestion = z.infer<typeof McqQuestion>;
@@ -26,6 +36,8 @@ export const ShortQuestion = z.object({
   answer: z.string().min(1),
   marks: z.number().min(0.5).max(20),
   source_pages: z.array(z.number().int().min(1)).min(1),
+  cognitiveLevel: CognitiveLevel.optional(),
+  difficulty: QuestionDifficulty.optional(),
   explanation: z.string().optional(),
 });
 export type ShortQuestion = z.infer<typeof ShortQuestion>;
@@ -36,6 +48,8 @@ export const LongQuestion = z.object({
   answer: z.string().min(1),
   marks: z.number().min(0.5).max(40),
   source_pages: z.array(z.number().int().min(1)).min(1),
+  cognitiveLevel: CognitiveLevel.optional(),
+  difficulty: QuestionDifficulty.optional(),
   explanation: z.string().optional(),
   rubric: z.string().optional(),
 });
@@ -47,6 +61,8 @@ export const FillBlankQuestion = z.object({
   answer: z.string().min(1),
   marks: z.number().min(0.5).max(5),
   source_pages: z.array(z.number().int().min(1)).min(1),
+  cognitiveLevel: CognitiveLevel.optional(),
+  difficulty: QuestionDifficulty.optional(),
 });
 export type FillBlankQuestion = z.infer<typeof FillBlankQuestion>;
 
@@ -56,6 +72,8 @@ export const TrueFalseQuestion = z.object({
   answer: z.enum(['true', 'false']),
   marks: z.number().min(0.5).max(5),
   source_pages: z.array(z.number().int().min(1)).min(1),
+  cognitiveLevel: CognitiveLevel.optional(),
+  difficulty: QuestionDifficulty.optional(),
   explanation: z.string().optional(),
 });
 export type TrueFalseQuestion = z.infer<typeof TrueFalseQuestion>;

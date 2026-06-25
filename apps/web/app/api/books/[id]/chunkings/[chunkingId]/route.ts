@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { and, eq, ne } from 'drizzle-orm';
 import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
+import { apiError } from '@/lib/http';
 import { index } from '@/lib/pinecone';
 
 const PatchBody = z.object({
@@ -80,7 +81,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<RoutePar
 
     return NextResponse.json({ error: 'no-op' }, { status: 400 });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }
 
@@ -121,6 +122,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<RouteP
     await db.delete(schema.chunkings).where(eq(schema.chunkings.id, chunkingId));
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

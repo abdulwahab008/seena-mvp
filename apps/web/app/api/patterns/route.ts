@@ -9,6 +9,7 @@ import {
 } from '@seena/shared';
 import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
+import { apiError } from '@/lib/http';
 import { customRowToSpec } from '@/lib/patterns/resolver';
 
 const CreateBody = z.object({
@@ -42,7 +43,7 @@ export async function GET() {
       custom: rows.map(customRowToSpec),
     });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 401 });
+    return apiError(e);
   }
 }
 
@@ -71,6 +72,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ pattern: customRowToSpec(row) });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

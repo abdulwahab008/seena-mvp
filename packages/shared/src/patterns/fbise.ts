@@ -32,6 +32,8 @@ export const fbisePatterns: PatternSpec[] = [
         marksPerQuestion: 8,
       },
     ],
+    cognitive: { knowledge: 30, understanding: 50, application: 20 },
+    difficultyMix: { easy: 40, moderate: 40, difficult: 20 },
     notes: 'Approximate FBISE SSC physics pattern. Tune to actual examination scheme.',
   },
   {
@@ -65,6 +67,8 @@ export const fbisePatterns: PatternSpec[] = [
         marksPerQuestion: 8,
       },
     ],
+    cognitive: { knowledge: 30, understanding: 50, application: 20 },
+    difficultyMix: { easy: 40, moderate: 40, difficult: 20 },
   },
   {
     id: 'fbise-ssc-midterm',
@@ -154,5 +158,7 @@ export const fbisePatterns: PatternSpec[] = [
         marksPerQuestion: 8,
       },
     ],
+    cognitive: { knowledge: 30, understanding: 50, application: 20 },
+    difficultyMix: { easy: 40, moderate: 40, difficult: 20 },
   },
 ];

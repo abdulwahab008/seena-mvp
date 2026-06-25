@@ -4,6 +4,8 @@ import { and, desc, eq } from 'drizzle-orm';
 import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { bookRechunkQueue } from '@/lib/queue';
+import { rateLimit } from '@/lib/ratelimit';
+import { apiError } from '@/lib/http';
 import {
   CHUNK_STRATEGIES,
   EMBEDDING_MODELS,
@@ -64,13 +66,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       })),
     });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { orgId } = await requireSession();
+    await rateLimit(`rechunk:${orgId}`, 10, 60);
     const { id: bookId } = await params;
 
     const [book] = await db
@@ -145,6 +148,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       },
     });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

@@ -5,15 +5,22 @@ import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { Exam } from '@seena/shared';
 import { renderExamPdf } from '@/lib/pdf/render';
+import { shuffleExam, VERSION_LABELS } from '@/lib/generation/shuffle-exam';
 import { uploadBuffer, getSignedReadUrl } from '@/lib/storage';
+import { rateLimit } from '@/lib/ratelimit';
+import { apiError } from '@/lib/http';
 
-const Body = z.object({ format: z.enum(['pdf']).default('pdf') });
+const Body = z.object({
+  format: z.enum(['pdf']).default('pdf'),
+  versions: z.number().int().min(1).max(6).default(1),
+});
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { orgId } = await requireSession();
+    await rateLimit(`export:${orgId}`, 30, 60);
     const { id } = await params;
-    Body.parse(await req.json().catch(() => ({})));
+    const { versions: versionCount } = Body.parse(await req.json().catch(() => ({})));
 
     const [exam] = await db
       .select()
@@ -28,10 +35,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const examPayload = Exam.parse(exam.payload);
 
+    // 1 version → original paper unchanged; N>1 → seeded-shuffled anti-leak variants.
+    const versionList =
+      versionCount <= 1
+        ? [{ exam: examPayload }]
+        : Array.from({ length: versionCount }, (_, i) => ({
+            exam: shuffleExam(examPayload, (i + 1) * 0x9e3779b1),
+            label: VERSION_LABELS[i],
+          }));
+
     const pdfBuffer = await renderExamPdf({
-      exam: examPayload,
+      versions: versionList,
       orgName: org?.name ?? 'Seena Exams',
       orgLogoUrl: org?.logoUrl ?? null,
+      language: exam.language as 'en' | 'ur' | 'mixed',
     });
 
     const key = `org_${orgId}/exports/${id}-${Date.now()}.pdf`;
@@ -45,7 +62,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json({ url, export: exportRow });
   } catch (e) {
-    console.error('[export-pdf] failed', e);
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

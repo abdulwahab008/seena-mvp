@@ -6,6 +6,8 @@ import { requireSession } from '@/lib/auth';
 import { bookProcessQueue } from '@/lib/queue';
 import { BookMetadata } from '@seena/shared';
 import { getSignedReadUrl } from '@/lib/storage';
+import { rateLimit } from '@/lib/ratelimit';
+import { apiError } from '@/lib/http';
 
 const CreateBody = BookMetadata.extend({
   storageKey: z.string().min(1),
@@ -24,7 +26,12 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const { userId, orgId } = await requireSession();
+    await rateLimit(`book-create:${orgId}`, 10, 60);
     const body = CreateBody.parse(await req.json());
+    // Prevent cross-org file access: the key must live under this org's prefix.
+    if (!body.storageKey.startsWith(`org_${orgId}/`)) {
+      return NextResponse.json({ error: 'invalid storage key' }, { status: 403 });
+    }
     const sourceUrl = await getSignedReadUrl(body.storageKey, 60 * 60 * 24);
     const [book] = await db
       .insert(schema.books)
@@ -50,6 +57,6 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ book });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

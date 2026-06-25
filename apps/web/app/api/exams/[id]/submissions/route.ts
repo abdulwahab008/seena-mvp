@@ -4,6 +4,9 @@ import { and, desc, eq } from 'drizzle-orm';
 import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { gradeSubmissionQueue } from '@/lib/queue';
+import { assertExamQuota } from '@/lib/quota';
+import { rateLimit } from '@/lib/ratelimit';
+import { apiError } from '@/lib/http';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { orgId } = await requireSession();
@@ -40,14 +43,22 @@ const CreateBody = z.object({
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { userId, orgId } = await requireSession();
+    await rateLimit(`grade:${orgId}`, 20, 60);
     const { id } = await params;
     const body = CreateBody.parse(await req.json());
+    // Prevent cross-org file access: the key must live under this org's prefix.
+    if (!body.storageKey.startsWith(`org_${orgId}/`)) {
+      return NextResponse.json({ error: 'invalid storage key' }, { status: 403 });
+    }
 
     const [exam] = await db
       .select({ id: schema.exams.id })
       .from(schema.exams)
       .where(and(eq(schema.exams.id, id), eq(schema.exams.orgId, orgId)));
     if (!exam) return NextResponse.json({ error: 'not found' }, { status: 404 });
+
+    // Grading invokes the LLM in the worker — guard against the monthly cap.
+    await assertExamQuota(orgId);
 
     const [submission] = await db
       .insert(schema.submissions)
@@ -70,6 +81,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json({ submission });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

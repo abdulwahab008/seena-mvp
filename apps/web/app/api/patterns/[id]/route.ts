@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { Board, Format, PatternSection } from '@seena/shared';
 import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
+import { apiError } from '@/lib/http';
 import { customRowToSpec } from '@/lib/patterns/resolver';
 
 const PatchBody = z.object({
@@ -35,7 +36,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     if (!row) return NextResponse.json({ error: 'not found' }, { status: 404 });
     return NextResponse.json({ pattern: customRowToSpec(row) });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 401 });
+    return apiError(e);
   }
 }
 
@@ -66,7 +67,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!row) return NextResponse.json({ error: 'not found' }, { status: 404 });
     return NextResponse.json({ pattern: customRowToSpec(row) });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }
 
@@ -84,6 +85,6 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     if (!row) return NextResponse.json({ error: 'not found' }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return apiError(e);
   }
 }

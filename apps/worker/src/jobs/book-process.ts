@@ -15,6 +15,7 @@ import { getNamespace, pineconeIndex } from '../pinecone.js';
 
 const MAX_CHUNKS_PER_BOOK = 1500;
 const PINECONE_BATCH = 100;
+const MAX_PDF_BYTES = 50 * 1024 * 1024; // 50MB — guards worker memory on download
 
 export type BookProcessJob = {
   bookId: string;
@@ -43,6 +44,11 @@ export async function processBook(job: BookProcessJob): Promise<void> {
 
     // 2. Download + extract pages (with OCR fallback when text is sparse).
     const buffer = await downloadObject(book.storageKey);
+    if (buffer.byteLength > MAX_PDF_BYTES) {
+      throw new Error(
+        `PDF is ${Math.round(buffer.byteLength / 1e6)}MB; the limit is ${MAX_PDF_BYTES / 1e6}MB.`,
+      );
+    }
     const extracted = await extractPagesWithOcr(buffer, { tag: bookId });
     const { pages, numPages, ocrMethod, ocrModel, needsOcr } = extracted;
 

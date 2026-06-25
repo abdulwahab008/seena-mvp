@@ -16,6 +16,19 @@ export const PatternSection = z.object({
 });
 export type PatternSection = z.infer<typeof PatternSection>;
 
+// Target Table-of-Specifications percentages (0-100). Per-subject: e.g. FBISE Maths
+// SSC is 20/50/30 (knowledge/understanding/application) while most subjects are 30/50/20.
+export const CognitiveDistribution = z.object({
+  knowledge: z.number(),
+  understanding: z.number(),
+  application: z.number(),
+});
+export const DifficultyMix = z.object({
+  easy: z.number(),
+  moderate: z.number(),
+  difficult: z.number(),
+});
+
 export const PatternSpec = z.object({
   id: z.string(),
   name: z.string(),
@@ -25,6 +38,9 @@ export const PatternSpec = z.object({
   subject: z.string().nullable(),
   totalMarks: z.number().int().positive(),
   sections: z.array(PatternSection).min(1),
+  // Optional ToS targets; when set, generation enforces the cognitive/difficulty mix.
+  cognitive: CognitiveDistribution.optional(),
+  difficultyMix: DifficultyMix.optional(),
   notes: z.string().optional(),
 });
 export type PatternSpec = z.infer<typeof PatternSpec>;

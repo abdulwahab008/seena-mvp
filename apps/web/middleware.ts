@@ -6,16 +6,23 @@ const isProtectedRoute = createRouteMatcher([
   '/exams(.*)',
   '/chat(.*)',
   '/settings(.*)',
+  '/bank(.*)',
   '/api/books(.*)',
   '/api/exams(.*)',
   '/api/chat(.*)',
   '/api/patterns(.*)',
   '/api/submissions(.*)',
+  '/api/bank(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
-    await auth.protect();
+    // Page routes send signed-out users to sign-in; API routes get a 404/401.
+    if (req.nextUrl.pathname.startsWith('/api')) {
+      await auth.protect();
+    } else {
+      await auth.protect({ unauthenticatedUrl: new URL('/sign-in', req.url).toString() });
+    }
   }
 });
 

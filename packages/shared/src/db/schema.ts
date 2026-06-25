@@ -223,7 +223,12 @@ export const submissions = pgTable(
     status: text('status').notNull().default('pending'), // pending | processing | graded | failed
     totalMarks: integer('total_marks'),
     obtainedMarks: numeric('obtained_marks', { precision: 6, scale: 2 }),
-    result: jsonb('result'), // GradedResult shape from @seena/shared
+    result: jsonb('result'), // AI GradedResult shape from @seena/shared (immutable original)
+    // Human-in-the-loop: teacher's corrected GradedResult. Null until reviewed.
+    // `result` is kept as the AI original so AI-vs-human marks can be compared (calibration).
+    reviewedResult: jsonb('reviewed_result'),
+    reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' as never }),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     ocrMethod: text('ocr_method'),
     failureReason: text('failure_reason'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -304,6 +309,33 @@ export const generations = pgTable(
   },
   (t) => ({
     orgIdx: index('generations_org_idx').on(t.orgId),
+  }),
+);
+
+// Reusable question bank — teachers save good generated/edited questions to reuse.
+// `payload` is the full Question (@seena/shared); the columns are denormalized for filtering.
+export const bankQuestions = pgTable(
+  'bank_questions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' as never }),
+    sourceExamId: uuid('source_exam_id').references(() => exams.id, {
+      onDelete: 'set null' as never,
+    }),
+    subject: text('subject'),
+    board: text('board'),
+    grade: integer('grade'),
+    chapter: text('chapter'),
+    type: text('type').notNull(),
+    payload: jsonb('payload').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    orgIdx: index('bank_questions_org_idx').on(t.orgId),
+    orgTypeIdx: index('bank_questions_org_type_idx').on(t.orgId, t.type),
   }),
 );
 

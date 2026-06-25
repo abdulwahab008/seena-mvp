@@ -30,6 +30,10 @@ export type ExtractOptions = {
  * Shared by the initial book-process job and the book-rechunk legacy backfill
  * path. The output is suitable for inserting into `book_pages`.
  */
+// OCR is the expensive LLM path — cap pages so a huge scanned PDF can't trigger
+// hundreds of vision calls. Text PDFs above this still parse (pdf-parse is cheap).
+const MAX_OCR_PAGES = 800;
+
 export async function extractPagesWithOcr(
   buffer: Buffer,
   opts: ExtractOptions = {},
@@ -46,6 +50,11 @@ export async function extractPagesWithOcr(
   }
 
   needsOcr = true;
+  if (numPages > MAX_OCR_PAGES) {
+    throw new Error(
+      `PDF has ${numPages} pages; OCR is capped at ${MAX_OCR_PAGES}. Upload a file with selectable text or split it.`,
+    );
+  }
   if (isOcrConfigured()) {
     console.log(`[extract] ${tag} text density low, running Document AI OCR`);
     const ocrPages = await ocrPdf(buffer);

@@ -9,7 +9,9 @@ ABSOLUTE RULES:
 4. Match the requested pattern exactly — section names, question counts, and marks per question.
 5. For MCQs: provide exactly 4 options unless the pattern specifies otherwise. The "answer" must be the full text of the correct option, not a letter.
 6. Difficulty should match what the requested grade level expects.
-7. Output strictly valid JSON conforming to the provided tool schema. No prose outside the JSON.`;
+7. Tag every question with "cognitiveLevel" (knowledge | understanding | application — FBISE's 3-level model, where "application" covers all higher-order skills) and "difficulty" (easy | moderate | difficult). When a target distribution is given, choose questions so the overall mix lands within ±5% of each target.
+8. Honour the requested LANGUAGE: for Urdu, write every prompt, option, and answer in Urdu script using standard academic terminology.
+9. Output strictly valid JSON conforming to the provided tool schema. No prose outside the JSON.`;
 
 export type GenerationContext = {
   pattern: PatternSpec;
@@ -30,6 +32,29 @@ export function buildGenerationUserPrompt(g: GenerationContext): string {
     )
     .join('\n');
 
+  const cog = g.pattern.cognitive;
+  const dif = g.pattern.difficultyMix;
+  const tosLines: string[] = [];
+  if (cog)
+    tosLines.push(
+      `- Cognitive levels: ${cog.knowledge}% knowledge, ${cog.understanding}% understanding, ${cog.application}% application`,
+    );
+  if (dif)
+    tosLines.push(
+      `- Difficulty: ${dif.easy}% easy, ${dif.moderate}% moderate, ${dif.difficult}% difficult`,
+    );
+  const tos =
+    tosLines.length > 0
+      ? `\nTABLE OF SPECIFICATIONS (aim within ±5% across all questions):\n${tosLines.join('\n')}\n`
+      : '';
+
+  const langDirective =
+    g.language === 'ur'
+      ? '\nWRITE THE ENTIRE PAPER IN URDU: every question prompt, all options, and every answer must be in Urdu script.\n'
+      : g.language === 'mixed'
+        ? '\nBILINGUAL: write each question prompt in Urdu followed by its English translation in parentheses.\n'
+        : '';
+
   return `Generate an exam paper.
 
 EXAM TITLE: ${g.examTitle}
@@ -40,16 +65,16 @@ PATTERN: ${g.pattern.name} (${g.pattern.id})
 TOTAL MARKS: ${g.pattern.totalMarks}
 DIFFICULTY: ${g.difficulty}
 LANGUAGE: ${g.language}
-
+${langDirective}
 PATTERN SECTIONS (must match exactly):
 ${sectionsBrief}
-
+${tos}
 CONTEXT FROM TEXTBOOK (cite page numbers from these markers):
 ---
 ${g.context}
 ---
 
-Generate the exam now using the provided tool. Every question must have a "source_pages" array.`;
+Generate the exam now using the provided tool. Every question must have a "source_pages" array plus a "cognitiveLevel" and "difficulty" tag.`;
 }
 
 export const INTENT_PARSER_SYSTEM = `You parse a teacher's natural-language request for exam generation into a strict JSON object. The teacher may name a book, chapter, exercise, pattern, difficulty, or specific question counts in any phrasing.
