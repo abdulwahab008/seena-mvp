@@ -50,6 +50,7 @@ export function SubmissionsPanel({ examId }: { examId: string }) {
   const [studentName, setStudentName] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [consentAck, setConsentAck] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<SubmissionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -85,6 +86,8 @@ export function SubmissionsPanel({ examId }: { examId: string }) {
   async function onGrade(e: React.FormEvent) {
     e.preventDefault();
     if (!file) return toast.error('Pick a PDF or image first.');
+    if (!consentAck)
+      return toast.error('Please confirm you have consent to process this student’s work.');
     setSubmitting(true);
     try {
       const urlRes = await fetch(`/api/exams/${examId}/submissions/upload-url`, {
@@ -177,6 +180,17 @@ export function SubmissionsPanel({ examId }: { examId: string }) {
           <Button type="submit" disabled={submitting}>
             {submitting ? 'Uploading…' : 'Grade'}
           </Button>
+          <label className="flex w-full items-start gap-2 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={consentAck}
+              onChange={(e) => setConsentAck(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span>
+              I confirm I have the authority/consent to upload and process this student’s work.
+            </span>
+          </label>
         </form>
 
         <div className="flex items-center justify-between">
