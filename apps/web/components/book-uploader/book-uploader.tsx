@@ -30,11 +30,13 @@ export function BookUploader() {
   const [board, setBoard] = useState('PUNJAB');
   const [language, setLanguage] = useState('en');
   const [submitting, setSubmitting] = useState(false);
+  const [rightsAck, setRightsAck] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!file) return toast.error('Pick a PDF first.');
     if (!title || !subject) return toast.error('Title and subject are required.');
+    if (!rightsAck) return toast.error('Please confirm you have the right to upload this material.');
     setSubmitting(true);
     try {
       const urlRes = await fetch('/api/books/upload-url', {
@@ -153,6 +155,21 @@ export function BookUploader() {
               </select>
             </div>
           </div>
+          <label className="flex items-start gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={rightsAck}
+              onChange={(e) => setRightsAck(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span>
+              I have the right to upload this material and to have it processed (see the{' '}
+              <a href="/acceptable-use" target="_blank" className="underline">
+                Acceptable Use Policy
+              </a>
+              ).
+            </span>
+          </label>
           <Button type="submit" disabled={submitting}>
             {submitting ? 'Uploading…' : 'Upload'}
           </Button>

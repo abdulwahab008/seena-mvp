@@ -51,3 +51,24 @@ export async function uploadBuffer(key: string, buffer: Buffer, contentType: str
     .upload(key, buffer, { contentType, upsert: true });
   if (error) throw error;
 }
+
+export async function deleteObject(key: string): Promise<void> {
+  const e = env();
+  const { error } = await supabaseAdmin().storage.from(e.SUPABASE_BUCKET).remove([key]);
+  if (error) throw error;
+}
+
+/** Recursively delete every object under an org's storage prefix. Best-effort. */
+export async function deleteOrgStorage(orgId: string): Promise<void> {
+  const bucket = supabaseAdmin().storage.from(env().SUPABASE_BUCKET);
+  async function rm(path: string): Promise<void> {
+    const { data, error } = await bucket.list(path, { limit: 1000 });
+    if (error || !data) return;
+    const files = data.filter((it) => it.id !== null).map((it) => `${path}/${it.name}`);
+    if (files.length) await bucket.remove(files);
+    for (const folder of data.filter((it) => it.id === null)) {
+      await rm(`${path}/${folder.name}`);
+    }
+  }
+  await rm(`org_${orgId}`);
+}

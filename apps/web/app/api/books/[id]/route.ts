@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { index } from '@/lib/pinecone';
+import { deleteObject } from '@/lib/storage';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { orgId } = await requireSession();
@@ -45,6 +46,13 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     }
   } catch (e) {
     console.warn('pinecone delete failed (non-fatal)', e);
+  }
+
+  // Remove the uploaded source PDF too, not just the DB row.
+  try {
+    await deleteObject(book.storageKey);
+  } catch (e) {
+    console.warn('storage delete failed (non-fatal)', e);
   }
 
   await db.delete(schema.books).where(eq(schema.books.id, id));

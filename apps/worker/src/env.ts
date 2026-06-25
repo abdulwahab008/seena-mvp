@@ -20,6 +20,8 @@ const EnvSchema = z.object({
   GOOGLE_DOCUMENT_AI_PROCESSOR: z.string().optional(),
   GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
   WORKER_CONCURRENCY: z.coerce.number().default(2),
+  // Auto-delete submissions (+ their stored PDFs) older than N days. Unset = retention off.
+  SUBMISSION_RETENTION_DAYS: z.coerce.number().int().positive().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 

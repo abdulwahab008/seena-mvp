@@ -22,6 +22,17 @@ export default function LandingPage() {
         FBISE, Punjab Board, BISE Rawalpindi, Cambridge IGCSE — bring your own books, generate
         on-pattern papers with answer keys.
       </p>
+      <footer className="mt-8 flex gap-4 text-sm text-muted-foreground">
+        <Link href="/privacy" className="hover:underline">
+          Privacy
+        </Link>
+        <Link href="/terms" className="hover:underline">
+          Terms
+        </Link>
+        <Link href="/acceptable-use" className="hover:underline">
+          Acceptable Use
+        </Link>
+      </footer>
     </main>
   );
 }
