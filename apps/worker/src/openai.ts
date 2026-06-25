@@ -10,6 +10,8 @@ export function llm(): OpenAI {
   _client = new OpenAI({
     apiKey: e.OPENROUTER_API_KEY,
     baseURL: e.OPENROUTER_BASE_URL,
+    timeout: 300_000,
+    maxRetries: 2,
     defaultHeaders: {
       'HTTP-Referer': e.OPENROUTER_APP_URL,
       'X-Title': e.OPENROUTER_APP_NAME,

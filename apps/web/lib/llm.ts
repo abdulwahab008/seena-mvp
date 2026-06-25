@@ -16,6 +16,8 @@ export function llm(): OpenAI {
   globalThis.__llm = new OpenAI({
     apiKey: e.OPENROUTER_API_KEY,
     baseURL: e.OPENROUTER_BASE_URL,
+    timeout: 120_000,
+    maxRetries: 2,
     defaultHeaders: {
       'HTTP-Referer': e.OPENROUTER_APP_URL,
       'X-Title': e.OPENROUTER_APP_NAME,

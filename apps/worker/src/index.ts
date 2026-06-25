@@ -78,6 +78,14 @@ gradeWorker.on('failed', (job, err) => {
 
 console.log(`[worker] online — concurrency=${env().WORKER_CONCURRENCY}`);
 
+// A stray rejection/exception must not silently take down all three workers.
+process.on('unhandledRejection', (reason) => {
+  console.error('[worker] unhandledRejection', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[worker] uncaughtException', err);
+});
+
 async function shutdown(signal: string) {
   console.log(`[worker] received ${signal}, draining…`);
   await Promise.all([bookWorker.close(), rechunkWorker.close(), gradeWorker.close()]);
