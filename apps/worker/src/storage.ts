@@ -16,3 +16,8 @@ export async function downloadObject(key: string): Promise<Buffer> {
   if (error || !data) throw error ?? new Error('download failed');
   return Buffer.from(await data.arrayBuffer());
 }
+
+export async function deleteObject(key: string): Promise<void> {
+  const { error } = await supabaseAdmin().storage.from(env().SUPABASE_BUCKET).remove([key]);
+  if (error) throw error;
+}
