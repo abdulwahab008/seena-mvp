@@ -73,9 +73,14 @@ export default async function PatternsPage({
             Reusable templates that drive how exams are structured.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/settings/patterns/new">New pattern</Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <Link href="/settings/account" className="text-sm text-muted-foreground underline">
+            Account &amp; data
+          </Link>
+          <Button asChild>
+            <Link href="/settings/patterns/new">New pattern</Link>
+          </Button>
+        </div>
       </div>
 
       <PatternFilter active={activeFormat} formats={FORMAT_VALUES} />
