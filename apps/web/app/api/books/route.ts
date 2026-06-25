@@ -28,6 +28,10 @@ export async function POST(req: Request) {
     const { userId, orgId } = await requireSession();
     await rateLimit(`book-create:${orgId}`, 10, 60);
     const body = CreateBody.parse(await req.json());
+    // Prevent cross-org file access: the key must live under this org's prefix.
+    if (!body.storageKey.startsWith(`org_${orgId}/`)) {
+      return NextResponse.json({ error: 'invalid storage key' }, { status: 403 });
+    }
     const sourceUrl = await getSignedReadUrl(body.storageKey, 60 * 60 * 24);
     const [book] = await db
       .insert(schema.books)

@@ -67,7 +67,7 @@ export async function requireSession(): Promise<SessionContext> {
   if (!org) throw new Error('FAILED_TO_RESOLVE_ORG');
 
   // Upsert membership — admin by default for personal/first-org case.
-  const desiredRole: 'admin' | 'teacher' = orgRole === 'org:admin' ? 'admin' : 'admin';
+  const desiredRole: 'admin' | 'teacher' = orgRole === 'org:admin' ? 'admin' : 'teacher';
   await db
     .insert(schema.memberships)
     .values({ userId: user.id, orgId: org.id, role: desiredRole })

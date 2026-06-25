@@ -46,6 +46,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await rateLimit(`grade:${orgId}`, 20, 60);
     const { id } = await params;
     const body = CreateBody.parse(await req.json());
+    // Prevent cross-org file access: the key must live under this org's prefix.
+    if (!body.storageKey.startsWith(`org_${orgId}/`)) {
+      return NextResponse.json({ error: 'invalid storage key' }, { status: 403 });
+    }
 
     const [exam] = await db
       .select({ id: schema.exams.id })
