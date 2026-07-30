@@ -186,6 +186,32 @@ export const proposeFeePlanOverrideSchema = z.object({
 });
 export type ProposeFeePlanOverrideInput = z.infer<typeof proposeFeePlanOverrideSchema>;
 
+export const CONCESSION_CALC_TYPES = ['percentage', 'fixed_amount'] as const;
+
+// Mirrors create_concession_scheme()'s own checks in
+// supabase/migrations/20260731080000_concession_schemes.sql — the DB's
+// ck_concession_value_range and ck_concession_applicable_heads_not_empty
+// constraints are the real gate, this is the earlier UX floor.
+export const createConcessionSchemeSchema = z
+  .object({
+    code: z
+      .string()
+      .min(1, 'Required')
+      .max(50)
+      .regex(/^[A-Za-z0-9_]+$/, 'Letters, numbers and underscores only'),
+    nameEn: z.string().min(1, 'Required').max(200),
+    nameUr: z.string().min(1, 'Urdu name is required').max(200),
+    calcType: z.enum(CONCESSION_CALC_TYPES),
+    value: z.coerce.number().nonnegative('Enter a value'),
+    applicableHeadIds: z.array(z.string().uuid()).min(1, 'Choose at least one fee head'),
+    requiresDocument: z.boolean(),
+  })
+  .refine((v) => v.calcType !== 'percentage' || v.value <= 100, {
+    message: 'A percentage cannot exceed 100',
+    path: ['value'],
+  });
+export type CreateConcessionSchemeInput = z.infer<typeof createConcessionSchemeSchema>;
+
 // Mirrors apply_for_leave()'s own checks in
 // supabase/migrations/20260730220544_leave_ledger_and_application.sql — the
 // RPC (balance, dates) is the real gate, this is the earlier UX floor.

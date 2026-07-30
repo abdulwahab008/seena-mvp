@@ -11,6 +11,7 @@ const LINKS = [
   { href: '/students', label: 'Students' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },
+  { href: '/fees/concessions', label: 'Concessions' },
 ];
 
 export function AppNav() {

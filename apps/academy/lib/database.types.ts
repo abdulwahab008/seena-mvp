@@ -1226,6 +1226,78 @@ export type Database = {
           },
         ]
       }
+      concession_scheme: {
+        Row: {
+          applicable_head_ids: string[]
+          approver_role: Database["public"]["Enums"]["app_role"]
+          calc_type: Database["public"]["Enums"]["concession_calc_type"]
+          category: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          default_validity_months: number
+          id: string
+          is_active: boolean
+          max_value: number | null
+          name_en: string
+          name_ur: string
+          requires_document: boolean
+          tenant_id: string
+          value: number
+        }
+        Insert: {
+          applicable_head_ids: string[]
+          approver_role?: Database["public"]["Enums"]["app_role"]
+          calc_type: Database["public"]["Enums"]["concession_calc_type"]
+          category?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          default_validity_months?: number
+          id?: string
+          is_active?: boolean
+          max_value?: number | null
+          name_en: string
+          name_ur: string
+          requires_document?: boolean
+          tenant_id: string
+          value: number
+        }
+        Update: {
+          applicable_head_ids?: string[]
+          approver_role?: Database["public"]["Enums"]["app_role"]
+          calc_type?: Database["public"]["Enums"]["concession_calc_type"]
+          category?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          default_validity_months?: number
+          id?: string
+          is_active?: boolean
+          max_value?: number | null
+          name_en?: string
+          name_ur?: string
+          requires_document?: boolean
+          tenant_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concession_scheme_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "concession_scheme_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       department: {
         Row: {
           code: string
@@ -4271,6 +4343,22 @@ export type Database = {
         }
         Returns: string
       }
+      create_concession_scheme: {
+        Args: {
+          p_applicable_head_ids: string[]
+          p_approver_role?: Database["public"]["Enums"]["app_role"]
+          p_calc_type: Database["public"]["Enums"]["concession_calc_type"]
+          p_category?: string
+          p_code: string
+          p_default_validity_months?: number
+          p_max_value?: number
+          p_name_en: string
+          p_name_ur: string
+          p_requires_document?: boolean
+          p_value: number
+        }
+        Returns: string
+      }
       create_draft_structure: {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: string
@@ -4839,6 +4927,10 @@ export type Database = {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
       }
+      set_concession_scheme_active: {
+        Args: { p_id: string; p_is_active: boolean }
+        Returns: undefined
+      }
       set_current_session: {
         Args: { p_session_id: string }
         Returns: undefined
@@ -4964,6 +5056,7 @@ export type Database = {
         | "AKU_EB"
         | "CAMBRIDGE"
       campus_status: "active" | "archived"
+      concession_calc_type: "percentage" | "fixed_amount"
       contract_type:
         | "permanent"
         | "contract"
@@ -5240,6 +5333,7 @@ export const Constants = {
         "CAMBRIDGE",
       ],
       campus_status: ["active", "archived"],
+      concession_calc_type: ["percentage", "fixed_amount"],
       contract_type: [
         "permanent",
         "contract",

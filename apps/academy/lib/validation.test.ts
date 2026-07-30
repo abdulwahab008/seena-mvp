@@ -12,6 +12,7 @@ import {
   createFeeHeadSchema,
   addStructureLineSchema,
   proposeFeePlanOverrideSchema,
+  createConcessionSchemeSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -241,5 +242,33 @@ describe('proposeFeePlanOverrideSchema', () => {
 
   it('rejects a missing reason — matches REASON_REQUIRED', () => {
     expect(proposeFeePlanOverrideSchema.safeParse({ ...base, reason: '' }).success).toBe(false);
+  });
+});
+
+describe('createConcessionSchemeSchema', () => {
+  const base = {
+    code: 'SIBLING2',
+    nameEn: 'Sibling 2nd Child',
+    nameUr: 'دوسرا بہن بھائی',
+    calcType: 'percentage' as const,
+    value: 10,
+    applicableHeadIds: ['11111111-1111-1111-1111-111111111111'],
+    requiresDocument: false,
+  };
+
+  it('accepts a valid percentage scheme', () => {
+    expect(createConcessionSchemeSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a percentage over 100', () => {
+    expect(createConcessionSchemeSchema.safeParse({ ...base, value: 150 }).success).toBe(false);
+  });
+
+  it('accepts a fixed_amount value over 100 — it is paisa, not a percentage', () => {
+    expect(createConcessionSchemeSchema.safeParse({ ...base, calcType: 'fixed_amount', value: 150000 }).success).toBe(true);
+  });
+
+  it('rejects zero applicable heads', () => {
+    expect(createConcessionSchemeSchema.safeParse({ ...base, applicableHeadIds: [] }).success).toBe(false);
   });
 });
