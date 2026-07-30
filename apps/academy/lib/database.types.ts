@@ -2098,6 +2098,42 @@ export type Database = {
           },
         ]
       }
+      fee_job_run: {
+        Row: {
+          completed_at: string | null
+          duration_ms: number | null
+          error_text: string | null
+          id: string
+          job_name: string
+          rows_written: number
+          run_date: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_text?: string | null
+          id?: string
+          job_name: string
+          rows_written?: number
+          run_date: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          duration_ms?: number | null
+          error_text?: string | null
+          id?: string
+          job_name?: string
+          rows_written?: number
+          run_date?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       fee_ledger: {
         Row: {
           amount_paisa: number
@@ -4906,6 +4942,7 @@ export type Database = {
         }
         Returns: string
       }
+      apply_late_fees: { Args: { p_run_date?: string }; Returns: Json }
       archive_campus: { Args: { p_campus_id: string }; Returns: undefined }
       assign_class_teacher: {
         Args: {
