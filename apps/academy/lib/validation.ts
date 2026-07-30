@@ -134,3 +134,35 @@ export type LinkGuardianInput = z.infer<typeof linkGuardianSchema>;
 
 export const enrolStudentSchema = z.object({ sectionId: z.string().uuid('Choose a section') });
 export type EnrolStudentInput = z.infer<typeof enrolStudentSchema>;
+
+// Mirrors apply_for_leave()'s own checks in
+// supabase/migrations/20260730220544_leave_ledger_and_application.sql — the
+// RPC (balance, dates) is the real gate, this is the earlier UX floor.
+// toDate is only required/range-checked when not a half day: the half-day
+// field is hidden client-side and mirrored to fromDate before submit.
+export const applyLeaveSchema = z
+  .object({
+    leaveTypeId: z.string().uuid('Choose a leave type'),
+    fromDate: z.string().min(1, 'Required'),
+    toDate: z.string(),
+    isHalfDay: z.boolean(),
+    reason: z.string().max(500).optional(),
+  })
+  .refine((v) => v.isHalfDay || v.toDate.length > 0, { message: 'Required', path: ['toDate'] })
+  .refine((v) => v.isHalfDay || v.toDate >= v.fromDate, {
+    message: 'End date must be on or after the start date',
+    path: ['toDate'],
+  });
+export type ApplyLeaveInput = z.infer<typeof applyLeaveSchema>;
+
+// Mirrors advance_leave_approval() / fn_decide_leave_application()'s shared
+// decision domain in
+// supabase/migrations/20260730231822_leave_approval_chain.sql.
+export const LEAVE_DECISIONS = ['approved', 'rejected'] as const;
+
+export const decideLeaveSchema = z.object({
+  applicationId: z.string().uuid(),
+  decision: z.enum(LEAVE_DECISIONS),
+  comment: z.string().max(500).optional(),
+});
+export type DecideLeaveInput = z.infer<typeof decideLeaveSchema>;

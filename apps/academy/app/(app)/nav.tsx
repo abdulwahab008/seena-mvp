@@ -4,6 +4,7 @@ const LINKS = [
   { href: '/campuses', label: 'Campuses' },
   { href: '/sessions', label: 'Sessions' },
   { href: '/staff', label: 'Staff' },
+  { href: '/leave', label: 'Leave' },
   { href: '/admissions/enquiries', label: 'Admissions' },
   { href: '/academic-setup/curriculum', label: 'Curriculum' },
   { href: '/students', label: 'Students' },
