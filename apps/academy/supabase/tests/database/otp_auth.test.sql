@@ -43,12 +43,19 @@ select throws_ok(
 select is(public.is_otp_locked('+923009999003'), false, 'a phone with no attempts at all is not locked');
 
 -- 4 wrong verifications after an issuance: not yet locked.
+-- register_otp_attempt is service_role-only (an anon-callable writer let
+-- anyone forge an 'issued' row and reset the strike counter) — the
+-- superuser test role stands in for it, same as elsewhere in this suite.
 select public.issue_otp('+923009999004');
+reset role;
 select public.register_otp_attempt('+923009999004', 'verify_failed') from generate_series(1, 4);
+set local role anon;
 select is(public.is_otp_locked('+923009999004'), false, '4 wrong verifications does not lock the code');
 
 -- 5th wrong verification: locked.
+reset role;
 select public.register_otp_attempt('+923009999004', 'verify_failed');
+set local role anon;
 select is(public.is_otp_locked('+923009999004'), true, 'the 5th wrong verification locks the code');
 
 select * from finish();

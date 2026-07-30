@@ -1,6 +1,6 @@
 'use server';
 
-import { supabaseServer } from '@/lib/supabase/server';
+import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
 import { otpPhoneSchema, otpCodeSchema } from '@/lib/validation';
 
 // normalize_pk_phone() (and this app's own otp_attempt rate-limit/lockout
@@ -55,7 +55,13 @@ export async function verifyOtpCode(_prev: VerifyOtpState, formData: FormData): 
   if (locked) return { error: 'Too many wrong attempts. Request a new code.', ok: false };
 
   const { error } = await supabase.auth.verifyOtp({ phone: toGoTruePhone(phone), token: parsed.data.code, type: 'sms' });
-  await supabase.rpc('register_otp_attempt', { p_phone: phone, p_kind: error ? 'verify_failed' : 'verify_succeeded' });
+  // Same reasoning as register_login_attempt: ground truth from this
+  // action's own verifyOtp call, written via the service-role client so a
+  // direct RPC caller can't assert their own outcome.
+  await supabaseServiceRole().rpc('register_otp_attempt', {
+    p_phone: phone,
+    p_kind: error ? 'verify_failed' : 'verify_succeeded',
+  });
   if (error) return { error: 'Incorrect or expired code.', ok: false };
 
   return { error: null, ok: true };

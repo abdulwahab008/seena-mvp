@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { supabaseServer } from '@/lib/supabase/server';
+import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
 
 const SignInSchema = z.object({
   email: z.string().email(),
@@ -31,7 +31,10 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
   }
 
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  await supabase.rpc('register_login_attempt', { p_identifier: parsed.data.email, p_succeeded: !error });
+  // Written via the service-role client, not the anon-key client above: the
+  // outcome must be ground truth from this action's own signInWithPassword
+  // call, not something a direct RPC caller could assert for themselves.
+  await supabaseServiceRole().rpc('register_login_attempt', { p_identifier: parsed.data.email, p_succeeded: !error });
   if (error) return { error: 'Incorrect email or password.', ok: false };
 
   return { error: null, ok: true };
