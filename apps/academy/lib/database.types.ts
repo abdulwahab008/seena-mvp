@@ -1226,6 +1226,145 @@ export type Database = {
           },
         ]
       }
+      concession_award: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          calc_type: Database["public"]["Enums"]["concession_calc_type"]
+          campus_id: string
+          created_at: string
+          effective_from: string
+          effective_to: string
+          enrolment_id: string
+          id: string
+          rejection_reason: string | null
+          requested_by: string | null
+          scheme_id: string
+          status: Database["public"]["Enums"]["concession_award_status"]
+          tenant_id: string
+          value: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          calc_type: Database["public"]["Enums"]["concession_calc_type"]
+          campus_id: string
+          created_at?: string
+          effective_from: string
+          effective_to: string
+          enrolment_id: string
+          id?: string
+          rejection_reason?: string | null
+          requested_by?: string | null
+          scheme_id: string
+          status?: Database["public"]["Enums"]["concession_award_status"]
+          tenant_id: string
+          value: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          calc_type?: Database["public"]["Enums"]["concession_calc_type"]
+          campus_id?: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string
+          enrolment_id?: string
+          id?: string
+          rejection_reason?: string | null
+          requested_by?: string | null
+          scheme_id?: string
+          status?: Database["public"]["Enums"]["concession_award_status"]
+          tenant_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concession_award_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "concession_award_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concession_award_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concession_award_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "concession_award_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "concession_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concession_award_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      concession_award_document: {
+        Row: {
+          award_id: string
+          doc_type: string | null
+          id: string
+          storage_path: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          award_id: string
+          doc_type?: string | null
+          id?: string
+          storage_path: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          award_id?: string
+          doc_type?: string | null
+          id?: string
+          storage_path?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concession_award_document_award_id_fkey"
+            columns: ["award_id"]
+            isOneToOne: false
+            referencedRelation: "concession_award"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concession_award_document_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       concession_scheme: {
         Row: {
           applicable_head_ids: string[]
@@ -4525,12 +4664,24 @@ export type Database = {
         }
       }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      decide_concession_award: {
+        Args: {
+          p_approve: boolean
+          p_award_id: string
+          p_rejection_reason?: string
+        }
+        Returns: undefined
+      }
       decide_fee_plan_override: {
         Args: { p_approve: boolean; p_line_id: string }
         Returns: undefined
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
       delete_stream: { Args: { p_id: string }; Returns: undefined }
+      edit_concession_award: {
+        Args: { p_award_id: string; p_new_value: number }
+        Returns: undefined
+      }
       eligible_leave_types: {
         Args: { p_staff_id: string }
         Returns: {
@@ -4910,6 +5061,17 @@ export type Database = {
         Args: { p_line_id: string; p_reason?: string }
         Returns: undefined
       }
+      request_concession_award: {
+        Args: {
+          p_document_paths?: string[]
+          p_effective_from: string
+          p_effective_to: string
+          p_enrolment_id: string
+          p_scheme_id: string
+          p_value: number
+        }
+        Returns: string
+      }
       seed_default_class_levels: {
         Args: { p_tenant_id: string }
         Returns: undefined
@@ -5056,6 +5218,7 @@ export type Database = {
         | "AKU_EB"
         | "CAMBRIDGE"
       campus_status: "active" | "archived"
+      concession_award_status: "pending" | "approved" | "rejected"
       concession_calc_type: "percentage" | "fixed_amount"
       contract_type:
         | "permanent"
@@ -5333,6 +5496,7 @@ export const Constants = {
         "CAMBRIDGE",
       ],
       campus_status: ["active", "archived"],
+      concession_award_status: ["pending", "approved", "rejected"],
       concession_calc_type: ["percentage", "fixed_amount"],
       contract_type: [
         "permanent",

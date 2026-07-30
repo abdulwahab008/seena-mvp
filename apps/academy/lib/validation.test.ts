@@ -13,6 +13,8 @@ import {
   addStructureLineSchema,
   proposeFeePlanOverrideSchema,
   createConcessionSchemeSchema,
+  requestConcessionAwardSchema,
+  decideConcessionAwardSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -270,5 +272,40 @@ describe('createConcessionSchemeSchema', () => {
 
   it('rejects zero applicable heads', () => {
     expect(createConcessionSchemeSchema.safeParse({ ...base, applicableHeadIds: [] }).success).toBe(false);
+  });
+});
+
+describe('requestConcessionAwardSchema', () => {
+  const base = {
+    schemeId: '11111111-1111-1111-1111-111111111111',
+    value: 10,
+    effectiveFrom: '2026-09-01',
+    effectiveTo: '2027-03-31',
+  };
+
+  it('accepts a valid request', () => {
+    expect(requestConcessionAwardSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects effectiveTo not after effectiveFrom', () => {
+    expect(requestConcessionAwardSchema.safeParse({ ...base, effectiveTo: '2026-09-01' }).success).toBe(false);
+  });
+});
+
+describe('decideConcessionAwardSchema', () => {
+  const base = { awardId: '11111111-1111-1111-1111-111111111111', approve: true };
+
+  it('accepts an approval with no reason', () => {
+    expect(decideConcessionAwardSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a rejection with a reason under 10 characters', () => {
+    expect(decideConcessionAwardSchema.safeParse({ ...base, approve: false, rejectionReason: 'too short' }).success).toBe(false);
+  });
+
+  it('accepts a rejection with a reason of 10+ characters', () => {
+    expect(
+      decideConcessionAwardSchema.safeParse({ ...base, approve: false, rejectionReason: 'insufficient supporting evidence' }).success
+    ).toBe(true);
   });
 });

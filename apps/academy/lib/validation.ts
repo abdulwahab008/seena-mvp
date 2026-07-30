@@ -212,6 +212,35 @@ export const createConcessionSchemeSchema = z
   });
 export type CreateConcessionSchemeInput = z.infer<typeof createConcessionSchemeSchema>;
 
+// Mirrors request_concession_award()'s own checks in
+// supabase/migrations/20260731090000_concession_awards.sql.
+export const requestConcessionAwardSchema = z
+  .object({
+    schemeId: z.string().uuid('Choose a scheme'),
+    value: z.coerce.number().nonnegative('Enter a value'),
+    effectiveFrom: z.string().min(1, 'Required'),
+    effectiveTo: z.string().min(1, 'Required'),
+    documentPath: z.string().max(500).optional(),
+  })
+  .refine((v) => v.effectiveTo > v.effectiveFrom, {
+    message: 'End date must be after the start date',
+    path: ['effectiveTo'],
+  });
+export type RequestConcessionAwardInput = z.infer<typeof requestConcessionAwardSchema>;
+
+// Mirrors decide_concession_award()'s REJECTION_REASON_TOO_SHORT check.
+export const decideConcessionAwardSchema = z
+  .object({
+    awardId: z.string().uuid(),
+    approve: z.boolean(),
+    rejectionReason: z.string().max(500).optional(),
+  })
+  .refine((v) => v.approve || (v.rejectionReason?.trim().length ?? 0) >= 10, {
+    message: 'Rejection reason must be at least 10 characters',
+    path: ['rejectionReason'],
+  });
+export type DecideConcessionAwardInput = z.infer<typeof decideConcessionAwardSchema>;
+
 // Mirrors apply_for_leave()'s own checks in
 // supabase/migrations/20260730220544_leave_ledger_and_application.sql — the
 // RPC (balance, dates) is the real gate, this is the earlier UX floor.

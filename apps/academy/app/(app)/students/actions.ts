@@ -1,7 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createStudentSchema, linkGuardianSchema, enrolStudentSchema, proposeFeePlanOverrideSchema } from '@/lib/validation';
+import {
+  createStudentSchema,
+  linkGuardianSchema,
+  enrolStudentSchema,
+  proposeFeePlanOverrideSchema,
+  requestConcessionAwardSchema,
+  decideConcessionAwardSchema,
+} from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type CreateStudentState = { error: string | null; studentId: string | null };
@@ -168,6 +175,71 @@ export async function removeFeePlanLine(studentId: string, lineId: string): Prom
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to remove fee plan lines.' };
     if (error.message.includes('ALREADY_REMOVED')) return { error: 'This line was already removed.' };
     return { error: 'Could not remove the line.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+// FR-K06: request a concession award against a published scheme.
+// Value-vs-scheme-max_value and requires_document are enforced inside
+// request_concession_award() itself.
+export async function requestConcessionAward(
+  studentId: string,
+  enrolmentId: string,
+  _prev: FeePlanActionState,
+  formData: FormData
+): Promise<FeePlanActionState> {
+  const parsed = requestConcessionAwardSchema.safeParse({
+    schemeId: formData.get('schemeId'),
+    value: formData.get('value'),
+    effectiveFrom: formData.get('effectiveFrom'),
+    effectiveTo: formData.get('effectiveTo'),
+    documentPath: formData.get('documentPath') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('request_concession_award', {
+    p_enrolment_id: enrolmentId,
+    p_scheme_id: parsed.data.schemeId,
+    p_value: parsed.data.value,
+    p_effective_from: parsed.data.effectiveFrom,
+    p_effective_to: parsed.data.effectiveTo,
+    p_document_paths: parsed.data.documentPath ? [parsed.data.documentPath] : [],
+  });
+  if (error) {
+    if (error.message.includes('VALUE_EXCEEDS_MAXIMUM')) return { error: 'This value exceeds the scheme’s maximum.' };
+    if (error.message.includes('DOCUMENT_REQUIRED')) return { error: 'This scheme requires a supporting document.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to request concession awards.' };
+    return { error: 'Could not submit the request.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+// FR-K06: approve or reject a pending award. Gated inside
+// decide_concession_award() to the scheme's own approver_role.
+export async function decideConcessionAward(
+  studentId: string,
+  awardId: string,
+  approve: boolean,
+  rejectionReason?: string
+): Promise<FeePlanActionState> {
+  const parsed = decideConcessionAwardSchema.safeParse({ awardId, approve, rejectionReason });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('decide_concession_award', {
+    p_award_id: parsed.data.awardId,
+    p_approve: parsed.data.approve,
+    p_rejection_reason: parsed.data.rejectionReason,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to decide this award.' };
+    if (error.message.includes('AWARD_NOT_PENDING')) return { error: 'This award was already decided.' };
+    return { error: 'Could not record the decision.' };
   }
 
   revalidatePath(`/students/${studentId}`);

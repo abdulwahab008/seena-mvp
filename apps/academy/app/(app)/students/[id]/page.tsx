@@ -4,6 +4,7 @@ import { GuardianForm } from './guardian-form';
 import { GuardianList } from './guardian-list';
 import { EnrolForm } from './enrol-form';
 import { FeePlanView, type FeePlanLineRow } from './fee-plan-view';
+import { ConcessionAwardView, type AwardRow } from './concession-award-view';
 
 // supabase-js types every embedded to-one relation as a possible array —
 // the FK is unique per enrolment/section row, so it's really ever 0 or 1.
@@ -69,6 +70,38 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const role = appUser?.app_role;
   const canAdjust = role === 'super_admin' || role === 'owner' || role === 'accountant';
   const canApprove = role === 'super_admin' || role === 'owner' || role === 'principal';
+  const canRequestAward = role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'accountant';
+
+  const { data: schemes } = await supabase
+    .from('concession_scheme')
+    .select('id, code, name_en, calc_type')
+    .eq('is_active', true)
+    .order('code');
+
+  let awards: AwardRow[] = [];
+  if (enrolment) {
+    const { data: awardRows } = await supabase
+      .from('concession_award')
+      .select(
+        'id, calc_type, value, effective_from, effective_to, status, rejection_reason, concession_scheme(name_en, approver_role)'
+      )
+      .eq('enrolment_id', enrolment.id)
+      .order('created_at', { ascending: false });
+    awards = (awardRows ?? []).map((a) => {
+      const scheme = one(a.concession_scheme);
+      return {
+        id: a.id,
+        schemeName: scheme?.name_en ?? 'Unknown',
+        calcType: a.calc_type,
+        value: a.value,
+        effectiveFrom: a.effective_from,
+        effectiveTo: a.effective_to,
+        status: a.status,
+        rejectionReason: a.rejection_reason,
+        canApprove: role === 'super_admin' || role === 'owner' || role === scheme?.approver_role,
+      };
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -104,6 +137,19 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <h2 className="text-lg font-medium">Fees</h2>
         <FeePlanView studentId={student.id} lines={feePlanLines} canAdjust={canAdjust} canApprove={canApprove} />
       </section>
+
+      {enrolment && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-medium">Concession awards</h2>
+          <ConcessionAwardView
+            studentId={student.id}
+            enrolmentId={enrolment.id}
+            awards={awards}
+            schemes={schemes ?? []}
+            canRequest={canRequestAward}
+          />
+        </section>
+      )}
     </div>
   );
 }
