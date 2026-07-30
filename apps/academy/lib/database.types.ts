@@ -1007,6 +1007,49 @@ export type Database = {
           },
         ]
       }
+      challan_counter: {
+        Row: {
+          campus_id: string
+          last_no: number
+          session_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          last_no?: number
+          session_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          last_no?: number
+          session_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challan_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challan_counter_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challan_counter_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_level: {
         Row: {
           board_stage: string | null
@@ -4557,6 +4600,7 @@ export type Database = {
         Returns: number
       }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
+      challan_check_digit: { Args: { p_digits: string }; Returns: number }
       confirm_family_group: { Args: { p_group_id: string }; Returns: undefined }
       confirm_probation: { Args: { p_contract_id: string }; Returns: undefined }
       copy_class_subject_map: {
@@ -5141,6 +5185,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      next_challan_no: {
+        Args: { p_campus_id: string; p_session_id: string; p_tenant_id: string }
+        Returns: string
       }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
       post_ledger_entry: {
