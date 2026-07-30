@@ -2795,6 +2795,143 @@ export type Database = {
           },
         ]
       }
+      fee_receipt: {
+        Row: {
+          campus_id: string
+          client_idempotency_key: string | null
+          counter_session_id: string | null
+          created_at: string
+          id: string
+          payment_id: string
+          printed_count: number
+          receipt_no: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          client_idempotency_key?: string | null
+          counter_session_id?: string | null
+          created_at?: string
+          id?: string
+          payment_id: string
+          printed_count?: number
+          receipt_no: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          client_idempotency_key?: string | null
+          counter_session_id?: string | null
+          created_at?: string
+          id?: string
+          payment_id?: string
+          printed_count?: number
+          receipt_no?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_receipt_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_receipt_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "fee_payment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_receipt_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_receipt_counter: {
+        Row: {
+          campus_id: string
+          last_no: number
+          session_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          last_no?: number
+          session_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          last_no?: number
+          session_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_receipt_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_receipt_counter_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_receipt_counter_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_receipt_print_log: {
+        Row: {
+          id: string
+          printed_at: string
+          printed_by: string | null
+          receipt_id: string
+        }
+        Insert: {
+          id?: string
+          printed_at?: string
+          printed_by?: string | null
+          receipt_id: string
+        }
+        Update: {
+          id?: string
+          printed_at?: string
+          printed_by?: string | null
+          receipt_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_receipt_print_log_printed_by_fkey"
+            columns: ["printed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_receipt_print_log_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "fee_receipt"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_structure: {
         Row: {
           approved_by: string | null
@@ -5516,6 +5653,7 @@ export type Database = {
         Returns: undefined
       }
       allocate_payment: { Args: { p_payment_id: string }; Returns: Json }
+      amount_in_words: { Args: { p_amount_paisa: number }; Returns: string }
       apply_advance_credit: {
         Args: { p_challan_id: string; p_enrolment_id: string }
         Returns: number
@@ -5569,6 +5707,16 @@ export type Database = {
       }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
+      collect_cash_payment: {
+        Args: {
+          p_amount_paisa: number
+          p_challan_id: string
+          p_client_idempotency_key: string
+          p_mode?: Database["public"]["Enums"]["fee_payment_mode"]
+          p_reference_no?: string
+        }
+        Returns: Json
+      }
       compute_late_fee: {
         Args: { p_as_of?: string; p_challan_id: string }
         Returns: number
@@ -6168,6 +6316,10 @@ export type Database = {
         Args: { p_staff_id: string; p_user_id: string }
         Returns: undefined
       }
+      lookup_challan_for_counter: {
+        Args: { p_challan_no: string }
+        Returns: Json
+      }
       mark_staff_attendance_bulk: {
         Args: { p_campus_id: string; p_date: string; p_rows: Json }
         Returns: Json
@@ -6218,6 +6370,7 @@ export type Database = {
         }
         Returns: string
       }
+      print_receipt: { Args: { p_receipt_id: string }; Returns: Json }
       propose_fee_plan_override: {
         Args: {
           p_line_id: string

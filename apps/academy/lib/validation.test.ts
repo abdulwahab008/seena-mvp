@@ -26,6 +26,9 @@ import {
   updateStructureLineAmountSchema,
   setChallanTemplateSchema,
   recordPaymentSchema,
+  lookupChallanSchema,
+  collectCashPaymentSchema,
+  printReceiptSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -492,5 +495,46 @@ describe('recordPaymentSchema', () => {
 
   it('rejects an unknown mode', () => {
     expect(recordPaymentSchema.safeParse({ ...base, mode: 'crypto' }).success).toBe(false);
+  });
+});
+
+describe('lookupChallanSchema', () => {
+  it('accepts a non-empty challan number', () => {
+    expect(lookupChallanSchema.safeParse({ challanNo: '00000000001' }).success).toBe(true);
+  });
+
+  it('rejects an empty challan number', () => {
+    expect(lookupChallanSchema.safeParse({ challanNo: '' }).success).toBe(false);
+  });
+});
+
+describe('collectCashPaymentSchema', () => {
+  const base = {
+    challanId: '11111111-1111-1111-1111-111111111111',
+    amountRupees: 5000,
+    mode: 'cash' as const,
+    clientIdempotencyKey: 'a-uuid-or-similar-key',
+  };
+
+  it('accepts a valid collection', () => {
+    expect(collectCashPaymentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing idempotency key', () => {
+    expect(collectCashPaymentSchema.safeParse({ ...base, clientIdempotencyKey: '' }).success).toBe(false);
+  });
+
+  it('rejects a zero amount', () => {
+    expect(collectCashPaymentSchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(false);
+  });
+});
+
+describe('printReceiptSchema', () => {
+  it('accepts a valid receipt id', () => {
+    expect(printReceiptSchema.safeParse({ receiptId: '11111111-1111-1111-1111-111111111111' }).success).toBe(true);
+  });
+
+  it('rejects a non-uuid receipt id', () => {
+    expect(printReceiptSchema.safeParse({ receiptId: 'not-a-uuid' }).success).toBe(false);
   });
 });

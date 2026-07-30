@@ -447,3 +447,25 @@ export const recordPaymentSchema = z.object({
   referenceNo: z.string().max(100).optional(),
 });
 export type RecordPaymentInput = z.infer<typeof recordPaymentSchema>;
+
+// Mirrors lookup_challan_for_counter()'s own signature in
+// supabase/migrations/20260731270000_cash_counter_receipt.sql.
+export const lookupChallanSchema = z.object({
+  challanNo: z.string().min(1, 'Scan or enter a challan number'),
+});
+export type LookupChallanInput = z.infer<typeof lookupChallanSchema>;
+
+// Mirrors collect_cash_payment()'s own checks — the client idempotency
+// key is generated once per lookup and reused across retries of the
+// same attempt, never regenerated on its own.
+export const collectCashPaymentSchema = z.object({
+  challanId: z.string().uuid(),
+  amountRupees: z.coerce.number().positive('Enter an amount'),
+  mode: z.enum(FEE_PAYMENT_MODES),
+  clientIdempotencyKey: z.string().min(1),
+  referenceNo: z.string().max(100).optional(),
+});
+export type CollectCashPaymentInput = z.infer<typeof collectCashPaymentSchema>;
+
+export const printReceiptSchema = z.object({ receiptId: z.string().uuid() });
+export type PrintReceiptInput = z.infer<typeof printReceiptSchema>;

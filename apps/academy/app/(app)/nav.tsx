@@ -13,6 +13,7 @@ const LINKS = [
   { href: '/fees/structure', label: 'Fee Structure' },
   { href: '/fees/concessions', label: 'Concessions' },
   { href: '/fees/challans', label: 'Challans' },
+  { href: '/fees/counter', label: 'Cash Counter' },
   { href: '/fees/late-fee-rules', label: 'Late Fee Rules' },
   { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
 ];
