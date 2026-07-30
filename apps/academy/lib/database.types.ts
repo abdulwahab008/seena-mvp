@@ -1596,6 +1596,158 @@ export type Database = {
           },
         ]
       }
+      fee_plan: {
+        Row: {
+          campus_id: string
+          created_at: string
+          effective_from: string
+          enrolment_id: string
+          id: string
+          session_id: string
+          structure_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          effective_from?: string
+          enrolment_id: string
+          id?: string
+          session_id: string
+          structure_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          effective_from?: string
+          enrolment_id?: string
+          id?: string
+          session_id?: string
+          structure_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_plan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_plan_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: true
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_plan_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_plan_structure_id_fkey"
+            columns: ["structure_id"]
+            isOneToOne: false
+            referencedRelation: "fee_structure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_plan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_plan_line: {
+        Row: {
+          amount_paisa: number
+          approved_at: string | null
+          approved_by: string | null
+          billing_month_mask: number
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          fee_head_id: string
+          frequency: Database["public"]["Enums"]["fee_frequency"]
+          id: string
+          override_reason: string | null
+          override_status: Database["public"]["Enums"]["fee_plan_override_status"]
+          pending_amount_paisa: number | null
+          plan_id: string
+          source_structure_line_id: string | null
+        }
+        Insert: {
+          amount_paisa: number
+          approved_at?: string | null
+          approved_by?: string | null
+          billing_month_mask: number
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          fee_head_id: string
+          frequency: Database["public"]["Enums"]["fee_frequency"]
+          id?: string
+          override_reason?: string | null
+          override_status?: Database["public"]["Enums"]["fee_plan_override_status"]
+          pending_amount_paisa?: number | null
+          plan_id: string
+          source_structure_line_id?: string | null
+        }
+        Update: {
+          amount_paisa?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          billing_month_mask?: number
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          fee_head_id?: string
+          frequency?: Database["public"]["Enums"]["fee_frequency"]
+          id?: string
+          override_reason?: string | null
+          override_status?: Database["public"]["Enums"]["fee_plan_override_status"]
+          pending_amount_paisa?: number | null
+          plan_id?: string
+          source_structure_line_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_plan_line_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_plan_line_fee_head_id_fkey"
+            columns: ["fee_head_id"]
+            isOneToOne: false
+            referencedRelation: "fee_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_plan_line_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_plan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_plan_line_source_structure_line_id_fkey"
+            columns: ["source_structure_line_id"]
+            isOneToOne: false
+            referencedRelation: "fee_structure_line"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_structure: {
         Row: {
           campus_id: string
@@ -4083,6 +4235,7 @@ export type Database = {
         }
         Returns: number
       }
+      build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
       confirm_family_group: { Args: { p_group_id: string }; Returns: undefined }
       confirm_probation: { Args: { p_contract_id: string }; Returns: undefined }
       copy_class_subject_map: {
@@ -4284,6 +4437,10 @@ export type Database = {
         }
       }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      decide_fee_plan_override: {
+        Args: { p_approve: boolean; p_line_id: string }
+        Returns: undefined
+      }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
       delete_stream: { Args: { p_id: string }; Returns: undefined }
       eligible_leave_types: {
@@ -4637,6 +4794,14 @@ export type Database = {
         }
       }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
+      propose_fee_plan_override: {
+        Args: {
+          p_line_id: string
+          p_new_amount_paisa: number
+          p_reason: string
+        }
+        Returns: undefined
+      }
       provision_tenant: {
         Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
         Returns: string
@@ -4651,6 +4816,10 @@ export type Database = {
       }
       register_otp_attempt: {
         Args: { p_kind: string; p_phone: string }
+        Returns: undefined
+      }
+      remove_fee_plan_line: {
+        Args: { p_line_id: string; p_reason?: string }
         Returns: undefined
       }
       seed_default_class_levels: {
@@ -4815,6 +4984,11 @@ export type Database = {
       enquiry_status: "open" | "converted" | "lost"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
       fee_frequency: "monthly" | "quarterly" | "annual" | "one_time"
+      fee_plan_override_status:
+        | "none"
+        | "pending_approval"
+        | "approved"
+        | "rejected"
       fee_structure_status: "draft" | "published" | "superseded"
       followup_channel: "call" | "whatsapp" | "sms" | "email" | "in_person"
       followup_outcome:
@@ -5088,6 +5262,12 @@ export const Constants = {
       enquiry_status: ["open", "converted", "lost"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
       fee_frequency: ["monthly", "quarterly", "annual", "one_time"],
+      fee_plan_override_status: [
+        "none",
+        "pending_approval",
+        "approved",
+        "rejected",
+      ],
       fee_structure_status: ["draft", "published", "superseded"],
       followup_channel: ["call", "whatsapp", "sms", "email", "in_person"],
       followup_outcome: [

@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createStudentSchema, linkGuardianSchema, enrolStudentSchema } from '@/lib/validation';
+import { createStudentSchema, linkGuardianSchema, enrolStudentSchema, proposeFeePlanOverrideSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type CreateStudentState = { error: string | null; studentId: string | null };
@@ -109,6 +109,65 @@ export async function enrolStudentIntoSection(studentId: string, _prev: EnrolStu
     if (error.message.includes('SECTION_GENDER_RESTRICTED')) return { error: 'This section does not admit this student’s gender.' };
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to enrol students at this campus.' };
     return { error: 'Could not enrol the student.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+export type FeePlanActionState = { error: string | null };
+
+// FR-K04: propose lowering (or raising) a fee plan line's amount.
+// amountRupees converts to paisa only here, at the server-action boundary
+// — never touches the live amount_paisa until a Principal approves.
+export async function proposeFeePlanOverride(studentId: string, _prev: FeePlanActionState, formData: FormData): Promise<FeePlanActionState> {
+  const parsed = proposeFeePlanOverrideSchema.safeParse({
+    lineId: formData.get('lineId'),
+    amountRupees: formData.get('amountRupees'),
+    reason: formData.get('reason'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('propose_fee_plan_override', {
+    p_line_id: parsed.data.lineId,
+    p_new_amount_paisa: Math.round(parsed.data.amountRupees * 100),
+    p_reason: parsed.data.reason,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to adjust fee plan lines.' };
+    return { error: 'Could not propose the adjustment.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+// FR-K04: approve or reject a pending override. Approval is the only path
+// that ever moves amount_paisa after the plan's initial snapshot.
+export async function decideFeePlanOverride(studentId: string, lineId: string, approve: boolean): Promise<FeePlanActionState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('decide_fee_plan_override', { p_line_id: lineId, p_approve: approve });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to decide fee plan overrides.' };
+    if (error.message.includes('OVERRIDE_NOT_PENDING')) return { error: 'This override was already decided.' };
+    return { error: 'Could not record the decision.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+// FR-K04: remove a fee plan line. End-dated to the close of the current
+// billing month inside remove_fee_plan_line() — never deleted, so a
+// challan already issued this month stays correct.
+export async function removeFeePlanLine(studentId: string, lineId: string): Promise<FeePlanActionState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('remove_fee_plan_line', { p_line_id: lineId });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to remove fee plan lines.' };
+    if (error.message.includes('ALREADY_REMOVED')) return { error: 'This line was already removed.' };
+    return { error: 'Could not remove the line.' };
   }
 
   revalidatePath(`/students/${studentId}`);

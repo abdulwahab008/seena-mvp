@@ -11,6 +11,7 @@ import {
   respondToOfferSchema,
   createFeeHeadSchema,
   addStructureLineSchema,
+  proposeFeePlanOverrideSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -228,5 +229,17 @@ describe('addStructureLineSchema', () => {
 
   it('rejects no months selected', () => {
     expect(addStructureLineSchema.safeParse({ ...base, months: [] }).success).toBe(false);
+  });
+});
+
+describe('proposeFeePlanOverrideSchema', () => {
+  const base = { lineId: '11111111-1111-1111-1111-111111111111', amountRupees: 4000, reason: 'board approved staff rate' };
+
+  it('accepts a valid override proposal', () => {
+    expect(proposeFeePlanOverrideSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing reason — matches REASON_REQUIRED', () => {
+    expect(proposeFeePlanOverrideSchema.safeParse({ ...base, reason: '' }).success).toBe(false);
   });
 });

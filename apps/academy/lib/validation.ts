@@ -178,6 +178,14 @@ export type AddStructureLineInput = z.infer<typeof addStructureLineSchema>;
 export const createDraftStructureSchema = z.object({ campusId: z.string().uuid(), sessionId: z.string().uuid() });
 export type CreateDraftStructureInput = z.infer<typeof createDraftStructureSchema>;
 
+// Mirrors propose_fee_plan_override()'s own REASON_REQUIRED check.
+export const proposeFeePlanOverrideSchema = z.object({
+  lineId: z.string().uuid(),
+  amountRupees: z.coerce.number().nonnegative('Enter an amount'),
+  reason: z.string().min(1, 'A reason is required').max(500),
+});
+export type ProposeFeePlanOverrideInput = z.infer<typeof proposeFeePlanOverrideSchema>;
+
 // Mirrors apply_for_leave()'s own checks in
 // supabase/migrations/20260730220544_leave_ledger_and_application.sql — the
 // RPC (balance, dates) is the real gate, this is the earlier UX floor.

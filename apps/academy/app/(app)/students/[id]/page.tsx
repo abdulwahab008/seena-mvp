@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { GuardianForm } from './guardian-form';
 import { GuardianList } from './guardian-list';
 import { EnrolForm } from './enrol-form';
+import { FeePlanView, type FeePlanLineRow } from './fee-plan-view';
 
 // supabase-js types every embedded to-one relation as a possible array —
 // the FK is unique per enrolment/section row, so it's really ever 0 or 1.
@@ -21,7 +22,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     .maybeSingle();
   if (!student) notFound();
 
-  const [{ data: enrolment }, { data: sections }, { data: guardianLinks }] = await Promise.all([
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [{ data: enrolment }, { data: sections }, { data: guardianLinks }, { data: appUser }] = await Promise.all([
     supabase
       .from('enrolment')
       .select('id, roll_no, class_section(name, class_level(name_en))')
@@ -34,7 +39,36 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       .select('guardian_id, relationship, is_primary, receives_billing, may_collect_child, guardian(name_en, phone_e164, cnic)')
       .eq('student_id', id)
       .is('to_date', null),
+    supabase.from('app_user').select('app_role').eq('user_id', user!.id).single(),
   ]);
+
+  let feePlanLines: FeePlanLineRow[] = [];
+  if (enrolment) {
+    const { data: plan } = await supabase.from('fee_plan').select('id').eq('enrolment_id', enrolment.id).maybeSingle();
+    if (plan) {
+      const { data: lineRows } = await supabase
+        .from('fee_plan_line')
+        .select(
+          'id, amount_paisa, pending_amount_paisa, override_reason, override_status, frequency, effective_to, fee_head(name_en, code)'
+        )
+        .eq('plan_id', plan.id);
+      feePlanLines = (lineRows ?? []).map((l) => ({
+        id: l.id,
+        headName: one(l.fee_head)?.name_en ?? 'Unknown',
+        headCode: one(l.fee_head)?.code ?? 'unknown',
+        amountPaisa: l.amount_paisa,
+        pendingAmountPaisa: l.pending_amount_paisa,
+        overrideReason: l.override_reason,
+        overrideStatus: l.override_status,
+        frequency: l.frequency,
+        effectiveTo: l.effective_to,
+      }));
+    }
+  }
+
+  const role = appUser?.app_role;
+  const canAdjust = role === 'super_admin' || role === 'owner' || role === 'accountant';
+  const canApprove = role === 'super_admin' || role === 'owner' || role === 'principal';
 
   return (
     <div className="space-y-6">
@@ -64,6 +98,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <h2 className="text-lg font-medium">Guardians</h2>
         <GuardianList links={guardianLinks ?? []} />
         <GuardianForm studentId={student.id} />
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-lg font-medium">Fees</h2>
+        <FeePlanView studentId={student.id} lines={feePlanLines} canAdjust={canAdjust} canApprove={canApprove} />
       </section>
     </div>
   );
