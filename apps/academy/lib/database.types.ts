@@ -1543,6 +1543,7 @@ export type Database = {
           gl_code: string | null
           id: string
           is_active: boolean
+          is_mandatory: boolean
           is_refundable: boolean
           name_en: string
           name_ur: string
@@ -1557,6 +1558,7 @@ export type Database = {
           gl_code?: string | null
           id?: string
           is_active?: boolean
+          is_mandatory?: boolean
           is_refundable?: boolean
           name_en: string
           name_ur: string
@@ -1571,6 +1573,7 @@ export type Database = {
           gl_code?: string | null
           id?: string
           is_active?: boolean
+          is_mandatory?: boolean
           is_refundable?: boolean
           name_en?: string
           name_ur?: string
@@ -1589,6 +1592,142 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_structure: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["fee_structure_status"]
+          tenant_id: string
+          version_no: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["fee_structure_status"]
+          tenant_id: string
+          version_no?: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["fee_structure_status"]
+          tenant_id?: string
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_structure_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_structure_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_structure_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_structure_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_structure_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_structure_line: {
+        Row: {
+          amount_paisa: number
+          billing_month_mask: number
+          class_id: string
+          created_at: string
+          fee_head_id: string
+          frequency: Database["public"]["Enums"]["fee_frequency"]
+          group_code: string | null
+          id: string
+          structure_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          billing_month_mask?: number
+          class_id: string
+          created_at?: string
+          fee_head_id: string
+          frequency: Database["public"]["Enums"]["fee_frequency"]
+          group_code?: string | null
+          id?: string
+          structure_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          billing_month_mask?: number
+          class_id?: string
+          created_at?: string
+          fee_head_id?: string
+          frequency?: Database["public"]["Enums"]["fee_frequency"]
+          group_code?: string | null
+          id?: string
+          structure_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_structure_line_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_structure_line_fee_head_id_fkey"
+            columns: ["fee_head_id"]
+            isOneToOne: false
+            referencedRelation: "fee_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_structure_line_structure_id_fkey"
+            columns: ["structure_id"]
+            isOneToOne: false
+            referencedRelation: "fee_structure"
             referencedColumns: ["id"]
           },
         ]
@@ -3882,6 +4021,18 @@ export type Database = {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
         Returns: string
       }
+      add_structure_line: {
+        Args: {
+          p_amount_paisa: number
+          p_billing_month_mask?: number
+          p_class_id: string
+          p_fee_head_id: string
+          p_frequency: Database["public"]["Enums"]["fee_frequency"]
+          p_group_code?: string
+          p_structure_id: string
+        }
+        Returns: string
+      }
       advance_leave_approval: {
         Args: {
           p_application_id: string
@@ -3967,6 +4118,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_draft_structure: {
+        Args: { p_campus_id: string; p_session_id: string }
+        Returns: string
+      }
       create_enquiry: {
         Args: {
           p_age_override_reason?: string
@@ -3991,6 +4146,7 @@ export type Database = {
           p_code: string
           p_default_frequency?: Database["public"]["Enums"]["fee_frequency"]
           p_gl_code?: string
+          p_is_mandatory?: boolean
           p_is_refundable?: boolean
           p_name_en: string
           p_name_ur: string
@@ -4485,6 +4641,10 @@ export type Database = {
         Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
         Returns: string
       }
+      publish_fee_structure: {
+        Args: { p_structure_id: string }
+        Returns: undefined
+      }
       register_login_attempt: {
         Args: { p_identifier: string; p_succeeded: boolean }
         Returns: undefined
@@ -4655,6 +4815,7 @@ export type Database = {
       enquiry_status: "open" | "converted" | "lost"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
       fee_frequency: "monthly" | "quarterly" | "annual" | "one_time"
+      fee_structure_status: "draft" | "published" | "superseded"
       followup_channel: "call" | "whatsapp" | "sms" | "email" | "in_person"
       followup_outcome:
         | "connected"
@@ -4927,6 +5088,7 @@ export const Constants = {
       enquiry_status: ["open", "converted", "lost"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
       fee_frequency: ["monthly", "quarterly", "annual", "one_time"],
+      fee_structure_status: ["draft", "published", "superseded"],
       followup_channel: ["call", "whatsapp", "sms", "email", "in_person"],
       followup_outcome: [
         "connected",

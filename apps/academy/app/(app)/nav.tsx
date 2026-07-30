@@ -10,6 +10,7 @@ const LINKS = [
   { href: '/academic-setup/curriculum', label: 'Curriculum' },
   { href: '/students', label: 'Students' },
   { href: '/fees/heads', label: 'Fee Heads' },
+  { href: '/fees/structure', label: 'Fee Structure' },
 ];
 
 export function AppNav() {

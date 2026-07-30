@@ -10,6 +10,7 @@ import {
   issueOfferSchema,
   respondToOfferSchema,
   createFeeHeadSchema,
+  addStructureLineSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -200,5 +201,32 @@ describe('createFeeHeadSchema', () => {
 
   it('rejects an invalid frequency', () => {
     expect(createFeeHeadSchema.safeParse({ ...base, defaultFrequency: 'weekly' }).success).toBe(false);
+  });
+});
+
+describe('addStructureLineSchema', () => {
+  const base = {
+    structureId: '11111111-1111-1111-1111-111111111111',
+    classId: '22222222-2222-2222-2222-222222222222',
+    feeHeadId: '33333333-3333-3333-3333-333333333333',
+    amountRupees: 5000,
+    frequency: 'monthly' as const,
+    months: [0, 1, 2],
+  };
+
+  it('accepts a valid line', () => {
+    expect(addStructureLineSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a zero amount (a waived/free head)', () => {
+    expect(addStructureLineSchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(true);
+  });
+
+  it('rejects a negative amount — money as bigint paisa is never negative on a structure line', () => {
+    expect(addStructureLineSchema.safeParse({ ...base, amountRupees: -100 }).success).toBe(false);
+  });
+
+  it('rejects no months selected', () => {
+    expect(addStructureLineSchema.safeParse({ ...base, months: [] }).success).toBe(false);
   });
 });

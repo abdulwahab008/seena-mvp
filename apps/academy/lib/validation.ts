@@ -153,6 +153,31 @@ export const createFeeHeadSchema = z.object({
 });
 export type CreateFeeHeadInput = z.infer<typeof createFeeHeadSchema>;
 
+export const MONTH_LABELS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+] as const;
+
+// Mirrors add_structure_line()'s own checks in
+// supabase/migrations/20260731060000_fee_structure.sql — amountRupees is
+// converted to paisa (amount * 100) only at the server-action boundary,
+// never carried as a float through the schema itself.
+export const addStructureLineSchema = z.object({
+  structureId: z.string().uuid(),
+  classId: z.string().uuid('Choose a class'),
+  groupCode: z.string().max(50).optional(),
+  feeHeadId: z.string().uuid('Choose a fee head'),
+  amountRupees: z.coerce.number().nonnegative('Enter an amount'),
+  frequency: z.enum(FEE_FREQUENCIES),
+  // Checkbox groups hand React Hook Form an array of string values
+  // ("0".."11") — coerce rather than expect numbers already.
+  months: z.array(z.coerce.number().int().min(0).max(11)).min(1, 'Choose at least one month'),
+});
+export type AddStructureLineInput = z.infer<typeof addStructureLineSchema>;
+
+export const createDraftStructureSchema = z.object({ campusId: z.string().uuid(), sessionId: z.string().uuid() });
+export type CreateDraftStructureInput = z.infer<typeof createDraftStructureSchema>;
+
 // Mirrors apply_for_leave()'s own checks in
 // supabase/migrations/20260730220544_leave_ledger_and_application.sql — the
 // RPC (balance, dates) is the real gate, this is the earlier UX floor.
