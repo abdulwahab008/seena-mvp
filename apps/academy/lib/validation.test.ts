@@ -7,6 +7,8 @@ import {
   termsSchema,
   createEnquirySchema,
   createStudentSchema,
+  issueOfferSchema,
+  respondToOfferSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -145,5 +147,37 @@ describe('createStudentSchema', () => {
 
   it('rejects an invalid gender value', () => {
     expect(createStudentSchema.safeParse({ ...base, gender: 'unknown' }).success).toBe(false);
+  });
+});
+
+describe('issueOfferSchema', () => {
+  const base = { applicationId: '11111111-1111-1111-1111-111111111111', feeAmount: 5000 };
+
+  it('accepts a valid fee amount', () => {
+    expect(issueOfferSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a zero fee amount', () => {
+    expect(issueOfferSchema.safeParse({ ...base, feeAmount: 0 }).success).toBe(false);
+  });
+
+  it('rejects a negative fee amount', () => {
+    expect(issueOfferSchema.safeParse({ ...base, feeAmount: -100 }).success).toBe(false);
+  });
+});
+
+describe('respondToOfferSchema', () => {
+  const base = { offerId: '11111111-1111-1111-1111-111111111111', response: 'accepted' as const };
+
+  it('accepts an acceptance with no reason', () => {
+    expect(respondToOfferSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a decline with no reason (matches DECLINE_REASON_REQUIRED)', () => {
+    expect(respondToOfferSchema.safeParse({ ...base, response: 'declined' }).success).toBe(false);
+  });
+
+  it('accepts a decline once a reason is given', () => {
+    expect(respondToOfferSchema.safeParse({ ...base, response: 'declined', declineReason: 'fee_too_high' }).success).toBe(true);
   });
 });

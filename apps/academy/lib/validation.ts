@@ -166,3 +166,41 @@ export const decideLeaveSchema = z.object({
   comment: z.string().max(500).optional(),
 });
 export type DecideLeaveInput = z.infer<typeof decideLeaveSchema>;
+
+// Mirrors public.academic_group in
+// supabase/migrations/20260730163812_admissions_pipeline.sql.
+export const ACADEMIC_GROUPS = ['pre_medical', 'pre_engineering', 'computer_science', 'commerce', 'arts'] as const;
+
+// Mirrors fn_submit_application()'s own "group required for classes 9-12"
+// check — a group given for a lower class is harmlessly cleared server-side,
+// so there's no client-side conditional here either.
+export const submitApplicationSchema = z.object({
+  enquiryId: z.string().uuid(),
+  groupApplied: z.enum(ACADEMIC_GROUPS).optional(),
+});
+export type SubmitApplicationInput = z.infer<typeof submitApplicationSchema>;
+
+// Mirrors fn_issue_offer()'s own checks in
+// supabase/migrations/20260730163812_admissions_pipeline.sql — the RPC
+// (seat availability) is the real gate, this is the earlier UX floor.
+export const issueOfferSchema = z.object({
+  applicationId: z.string().uuid(),
+  feeAmount: z.coerce.number().positive('Enter a fee amount'),
+});
+export type IssueOfferInput = z.infer<typeof issueOfferSchema>;
+
+// Mirrors public.offer_decline_reason in the same migration.
+export const OFFER_DECLINE_REASONS = ['fee_too_high', 'chose_other_school', 'relocation', 'distance', 'other'] as const;
+
+// Mirrors fn_respond_to_offer()'s DECLINE_REASON_REQUIRED check.
+export const respondToOfferSchema = z
+  .object({
+    offerId: z.string().uuid(),
+    response: z.enum(['accepted', 'declined']),
+    declineReason: z.enum(OFFER_DECLINE_REASONS).optional(),
+  })
+  .refine((v) => v.response !== 'declined' || !!v.declineReason, {
+    message: 'Choose a reason for declining',
+    path: ['declineReason'],
+  });
+export type RespondToOfferInput = z.infer<typeof respondToOfferSchema>;

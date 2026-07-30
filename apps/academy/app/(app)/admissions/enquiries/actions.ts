@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createEnquirySchema } from '@/lib/validation';
+import { createEnquirySchema, submitApplicationSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type CreateEnquiryState = { error: string | null };
@@ -58,5 +58,34 @@ export async function createEnquiry(_prev: CreateEnquiryState, formData: FormDat
   }
 
   revalidatePath('/admissions/enquiries');
+  return { error: null };
+}
+
+export type SubmitApplicationState = { error: string | null };
+
+// FR-B08: convert a qualified enquiry into an application. Classes 9-12
+// requiring a group, and the enquiry->converted transition, are both
+// enforced inside fn_submit_application() itself.
+export async function submitApplication(_prev: SubmitApplicationState, formData: FormData): Promise<SubmitApplicationState> {
+  const parsed = submitApplicationSchema.safeParse({
+    enquiryId: formData.get('enquiryId'),
+    groupApplied: formData.get('groupApplied') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_submit_application', {
+    p_enquiry_id: parsed.data.enquiryId,
+    p_group_applied: parsed.data.groupApplied,
+  });
+  if (error) {
+    if (error.message.includes('Group is required')) return { error: 'Choose a group — required for classes 9-12.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to submit applications.' };
+    if (error.message.includes('ENQUIRY_NOT_FOUND')) return { error: 'Enquiry not found.' };
+    return { error: 'Could not submit the application.' };
+  }
+
+  revalidatePath('/admissions/enquiries');
+  revalidatePath('/admissions/applications');
   return { error: null };
 }
