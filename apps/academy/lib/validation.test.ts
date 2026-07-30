@@ -18,6 +18,8 @@ import {
   postLedgerEntrySchema,
   reverseLedgerEntrySchema,
   generateChallansSchema,
+  createLateFeeRuleSchema,
+  previewLateFeeSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -355,5 +357,45 @@ describe('generateChallansSchema', () => {
 
   it('rejects a malformed period', () => {
     expect(generateChallansSchema.safeParse({ ...base, period: 'August 2026' }).success).toBe(false);
+  });
+});
+
+describe('createLateFeeRuleSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    graceDays: 3,
+  };
+
+  it('accepts a per_day rule with an amount', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'per_day', amountRupees: 50 }).success).toBe(true);
+  });
+
+  it('rejects a per_day rule with no amount', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'per_day' }).success).toBe(false);
+  });
+
+  it('accepts a percentage rule with a percentage', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'percentage', percentage: 2 }).success).toBe(true);
+  });
+
+  it('rejects a percentage rule with no percentage', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'percentage' }).success).toBe(false);
+  });
+
+  it('rejects a percentage over 100', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'percentage', percentage: 140 }).success).toBe(false);
+  });
+});
+
+describe('previewLateFeeSchema', () => {
+  it('accepts a valid challan id and date', () => {
+    expect(
+      previewLateFeeSchema.safeParse({ challanId: '11111111-1111-1111-1111-111111111111', asOf: '2026-08-20' }).success
+    ).toBe(true);
+  });
+
+  it('rejects a missing challan id', () => {
+    expect(previewLateFeeSchema.safeParse({ challanId: '', asOf: '2026-08-20' }).success).toBe(false);
   });
 });

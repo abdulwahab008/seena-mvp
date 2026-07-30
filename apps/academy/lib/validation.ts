@@ -341,3 +341,37 @@ export const generateChallansSchema = z.object({
   dryRun: z.boolean(),
 });
 export type GenerateChallansInput = z.infer<typeof generateChallansSchema>;
+
+// Mirrors public.late_fee_basis and create_late_fee_rule()'s own
+// PERCENTAGE_REQUIRED / AMOUNT_REQUIRED checks in
+// supabase/migrations/20260731130000_late_fee_rules.sql.
+export const LATE_FEE_BASES = ['flat', 'per_day', 'percentage'] as const;
+
+export const createLateFeeRuleSchema = z
+  .object({
+    campusId: z.string().uuid(),
+    sessionId: z.string().uuid(),
+    basis: z.enum(LATE_FEE_BASES),
+    graceDays: z.coerce.number().int().nonnegative(),
+    amountRupees: z.coerce.number().nonnegative().optional(),
+    percentage: z.coerce.number().min(0).max(100).optional(),
+    capRupees: z.coerce.number().nonnegative().optional(),
+  })
+  .refine((v) => v.basis !== 'percentage' || v.percentage !== undefined, {
+    message: 'Enter a percentage',
+    path: ['percentage'],
+  })
+  .refine((v) => v.basis === 'percentage' || v.amountRupees !== undefined, {
+    message: 'Enter an amount',
+    path: ['amountRupees'],
+  });
+export type CreateLateFeeRuleInput = z.infer<typeof createLateFeeRuleSchema>;
+
+// Mirrors compute_late_fee()'s own signature — a read-only preview, no
+// state changes, so there's nothing here to mirror beyond "both fields
+// are required".
+export const previewLateFeeSchema = z.object({
+  challanId: z.string().uuid('Choose a challan'),
+  asOf: z.string().min(1, 'Required'),
+});
+export type PreviewLateFeeInput = z.infer<typeof previewLateFeeSchema>;

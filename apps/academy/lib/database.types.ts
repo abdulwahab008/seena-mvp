@@ -2691,6 +2691,89 @@ export type Database = {
           },
         ]
       }
+      late_fee_rule: {
+        Row: {
+          amount_paisa: number | null
+          applicable_head_ids: string[] | null
+          basis: Database["public"]["Enums"]["late_fee_basis"]
+          campus_id: string
+          cap_paisa: number | null
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          exempt_concession_categories: string[] | null
+          grace_days: number
+          id: string
+          max_days: number | null
+          percentage: number | null
+          session_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa?: number | null
+          applicable_head_ids?: string[] | null
+          basis: Database["public"]["Enums"]["late_fee_basis"]
+          campus_id: string
+          cap_paisa?: number | null
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          exempt_concession_categories?: string[] | null
+          grace_days?: number
+          id?: string
+          max_days?: number | null
+          percentage?: number | null
+          session_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number | null
+          applicable_head_ids?: string[] | null
+          basis?: Database["public"]["Enums"]["late_fee_basis"]
+          campus_id?: string
+          cap_paisa?: number | null
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          exempt_concession_categories?: string[] | null
+          grace_days?: number
+          id?: string
+          max_days?: number | null
+          percentage?: number | null
+          session_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "late_fee_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "late_fee_rule_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "late_fee_rule_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "late_fee_rule_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_application: {
         Row: {
           campus_id: string
@@ -4856,6 +4939,10 @@ export type Database = {
       }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
+      compute_late_fee: {
+        Args: { p_as_of?: string; p_challan_id: string }
+        Returns: number
+      }
       confirm_family_group: { Args: { p_group_id: string }; Returns: undefined }
       confirm_probation: { Args: { p_contract_id: string }; Returns: undefined }
       copy_class_subject_map: {
@@ -4948,6 +5035,22 @@ export type Database = {
           p_channel: Database["public"]["Enums"]["followup_channel"]
           p_due_at: string
           p_enquiry_id: string
+        }
+        Returns: string
+      }
+      create_late_fee_rule: {
+        Args: {
+          p_amount_paisa?: number
+          p_applicable_head_ids?: string[]
+          p_basis: Database["public"]["Enums"]["late_fee_basis"]
+          p_campus_id: string
+          p_cap_paisa?: number
+          p_effective_from?: string
+          p_exempt_concession_categories?: string[]
+          p_grace_days?: number
+          p_max_days?: number
+          p_percentage?: number
+          p_session_id: string
         }
         Returns: string
       }
@@ -5717,6 +5820,7 @@ export type Database = {
         | "legal_guardian"
         | "other"
       id_document_type: "cnic" | "passport"
+      late_fee_basis: "flat" | "per_day" | "percentage"
       leave_accrual_method: "annual_grant" | "monthly_accrual" | "none"
       leave_application_status:
         | "pending"
@@ -6013,6 +6117,7 @@ export const Constants = {
         "other",
       ],
       id_document_type: ["cnic", "passport"],
+      late_fee_basis: ["flat", "per_day", "percentage"],
       leave_accrual_method: ["annual_grant", "monthly_accrual", "none"],
       leave_application_status: [
         "pending",
