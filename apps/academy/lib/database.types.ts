@@ -347,6 +347,97 @@ export type Database = {
           },
         ]
       }
+      admission_followup: {
+        Row: {
+          assigned_to: string | null
+          campus_id: string
+          channel: Database["public"]["Enums"]["followup_channel"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string | null
+          due_at: string
+          enquiry_id: string
+          id: string
+          outcome: Database["public"]["Enums"]["followup_outcome"] | null
+          outcome_note: string | null
+          tenant_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          campus_id: string
+          channel: Database["public"]["Enums"]["followup_channel"]
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_at: string
+          enquiry_id: string
+          id?: string
+          outcome?: Database["public"]["Enums"]["followup_outcome"] | null
+          outcome_note?: string | null
+          tenant_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          campus_id?: string
+          channel?: Database["public"]["Enums"]["followup_channel"]
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_at?: string
+          enquiry_id?: string
+          id?: string
+          outcome?: Database["public"]["Enums"]["followup_outcome"] | null
+          outcome_note?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_followup_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_followup_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_followup_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_followup_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_followup_enquiry_id_fkey"
+            columns: ["enquiry_id"]
+            isOneToOne: false
+            referencedRelation: "admission_enquiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_followup_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admission_offer: {
         Row: {
           admission_fee_amount: number
@@ -3773,6 +3864,14 @@ export type Database = {
         Args: { p_campus_id: string; p_staff_id: string }
         Returns: undefined
       }
+      available_seats: {
+        Args: {
+          p_campus_id: string
+          p_class_level_id: string
+          p_session_id: string
+        }
+        Returns: number
+      }
       confirm_family_group: { Args: { p_group_id: string }; Returns: undefined }
       confirm_probation: { Args: { p_contract_id: string }; Returns: undefined }
       copy_class_subject_map: {
@@ -3823,6 +3922,15 @@ export type Database = {
           p_session_id: string
           p_source: Database["public"]["Enums"]["enquiry_source"]
           p_whatsapp_opt_in: boolean
+        }
+        Returns: string
+      }
+      create_followup: {
+        Args: {
+          p_assigned_to?: string
+          p_channel: Database["public"]["Enums"]["followup_channel"]
+          p_due_at: string
+          p_enquiry_id: string
         }
         Returns: string
       }
@@ -4016,6 +4124,21 @@ export type Database = {
         }
         Returns: undefined
       }
+      fn_close_enquiry: {
+        Args: {
+          p_enquiry_id: string
+          p_status: Database["public"]["Enums"]["enquiry_status"]
+        }
+        Returns: undefined
+      }
+      fn_complete_followup: {
+        Args: {
+          p_followup_id: string
+          p_outcome: Database["public"]["Enums"]["followup_outcome"]
+          p_outcome_note?: string
+        }
+        Returns: undefined
+      }
       fn_decide_leave_application: {
         Args: {
           p_application_id: string
@@ -4144,6 +4267,10 @@ export type Database = {
         }
         Returns: string
       }
+      fn_reassign_followups: {
+        Args: { p_from_user: string; p_to_user: string }
+        Returns: number
+      }
       fn_reinstate_offer: { Args: { p_offer_id: string }; Returns: undefined }
       fn_resequence_roll_numbers: {
         Args: {
@@ -4256,6 +4383,30 @@ export type Database = {
       mark_staff_attendance_bulk: {
         Args: { p_campus_id: string; p_date: string; p_rows: Json }
         Returns: Json
+      }
+      my_overdue_followups: {
+        Args: never
+        Returns: {
+          assigned_to: string | null
+          campus_id: string
+          channel: Database["public"]["Enums"]["followup_channel"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string | null
+          due_at: string
+          enquiry_id: string
+          id: string
+          outcome: Database["public"]["Enums"]["followup_outcome"] | null
+          outcome_note: string | null
+          tenant_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "admission_followup"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
       provision_tenant: {
@@ -4423,6 +4574,14 @@ export type Database = {
       enquiry_source: "walk_in" | "phone" | "web" | "referral" | "other"
       enquiry_status: "open" | "converted" | "lost"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
+      followup_channel: "call" | "whatsapp" | "sms" | "email" | "in_person"
+      followup_outcome:
+        | "connected"
+        | "no_answer"
+        | "wrong_number"
+        | "call_later"
+        | "visit_scheduled"
+        | "not_interested"
       gender: "male" | "female" | "other"
       guardian_relationship:
         | "father"
@@ -4686,6 +4845,15 @@ export const Constants = {
       enquiry_source: ["walk_in", "phone", "web", "referral", "other"],
       enquiry_status: ["open", "converted", "lost"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
+      followup_channel: ["call", "whatsapp", "sms", "email", "in_person"],
+      followup_outcome: [
+        "connected",
+        "no_answer",
+        "wrong_number",
+        "call_later",
+        "visit_scheduled",
+        "not_interested",
+      ],
       gender: ["male", "female", "other"],
       guardian_relationship: [
         "father",
