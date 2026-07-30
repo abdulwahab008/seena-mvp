@@ -64,7 +64,11 @@ select throws_ok(
   'issuing an offer with zero sections (zero capacity) for the class is rejected'
 );
 
-select public.create_section(p_campus_id => :'campus_id', p_session_id => :'session_id', p_class_level_id => :'class1_id', p_name => 'A', p_capacity => 1) as section_a_id \gset
+-- Capacity 2, not 1: the "second offer for the same application" test
+-- below must reach the uq_offer_active_per_application constraint, not get
+-- pre-empted by NO_SEATS_AVAILABLE (fn_available_seats now also counts
+-- live offers — see offer_aware_seat_availability.test.sql for that).
+select public.create_section(p_campus_id => :'campus_id', p_session_id => :'session_id', p_class_level_id => :'class1_id', p_name => 'A', p_capacity => 2) as section_a_id \gset
 select public.fn_issue_offer(:'class1_app_id'::uuid, 5000) as offer_id \gset
 select is(
   (select status from public.admission_application where id = :'class1_app_id'),
