@@ -9,6 +9,7 @@ import {
   createStudentSchema,
   issueOfferSchema,
   respondToOfferSchema,
+  createFeeHeadSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -179,5 +180,25 @@ describe('respondToOfferSchema', () => {
 
   it('accepts a decline once a reason is given', () => {
     expect(respondToOfferSchema.safeParse({ ...base, response: 'declined', declineReason: 'fee_too_high' }).success).toBe(true);
+  });
+});
+
+describe('createFeeHeadSchema', () => {
+  const base = { code: 'TUITION', nameEn: 'Tuition Fee', nameUr: 'فیس تعلیم', isRefundable: false, defaultFrequency: 'monthly' as const };
+
+  it('accepts a valid fee head', () => {
+    expect(createFeeHeadSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a code with spaces or punctuation', () => {
+    expect(createFeeHeadSchema.safeParse({ ...base, code: 'TUITION FEE!' }).success).toBe(false);
+  });
+
+  it('rejects a missing Urdu name (mandatory from day one, per FR-K01)', () => {
+    expect(createFeeHeadSchema.safeParse({ ...base, nameUr: '' }).success).toBe(false);
+  });
+
+  it('rejects an invalid frequency', () => {
+    expect(createFeeHeadSchema.safeParse({ ...base, defaultFrequency: 'weekly' }).success).toBe(false);
   });
 });

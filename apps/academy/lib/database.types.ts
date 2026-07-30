@@ -1533,6 +1533,66 @@ export type Database = {
           },
         ]
       }
+      fee_head: {
+        Row: {
+          carry_forward_on_arrears: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          default_frequency: Database["public"]["Enums"]["fee_frequency"]
+          gl_code: string | null
+          id: string
+          is_active: boolean
+          is_refundable: boolean
+          name_en: string
+          name_ur: string
+          tenant_id: string
+        }
+        Insert: {
+          carry_forward_on_arrears?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          default_frequency?: Database["public"]["Enums"]["fee_frequency"]
+          gl_code?: string | null
+          id?: string
+          is_active?: boolean
+          is_refundable?: boolean
+          name_en: string
+          name_ur: string
+          tenant_id: string
+        }
+        Update: {
+          carry_forward_on_arrears?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          default_frequency?: Database["public"]["Enums"]["fee_frequency"]
+          gl_code?: string | null
+          id?: string
+          is_active?: boolean
+          is_refundable?: boolean
+          name_en?: string
+          name_ur?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_head_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_head_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gr_ledger: {
         Row: {
           allocated_at: string
@@ -3925,6 +3985,18 @@ export type Database = {
         }
         Returns: string
       }
+      create_fee_head: {
+        Args: {
+          p_carry_forward_on_arrears?: boolean
+          p_code: string
+          p_default_frequency?: Database["public"]["Enums"]["fee_frequency"]
+          p_gl_code?: string
+          p_is_refundable?: boolean
+          p_name_en: string
+          p_name_ur: string
+        }
+        Returns: string
+      }
       create_followup: {
         Args: {
           p_assigned_to?: string
@@ -4425,6 +4497,10 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: undefined
       }
+      seed_default_fee_heads: {
+        Args: { p_tenant_id: string }
+        Returns: undefined
+      }
       seed_tenant_roles: { Args: { p_tenant_id: string }; Returns: undefined }
       set_academic_terms: {
         Args: { p_session_id: string; p_terms: Json }
@@ -4436,6 +4512,10 @@ export type Database = {
       }
       set_current_session: {
         Args: { p_session_id: string }
+        Returns: undefined
+      }
+      set_fee_head_active: {
+        Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
       }
       set_gr_sequence: {
@@ -4574,6 +4654,7 @@ export type Database = {
       enquiry_source: "walk_in" | "phone" | "web" | "referral" | "other"
       enquiry_status: "open" | "converted" | "lost"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
+      fee_frequency: "monthly" | "quarterly" | "annual" | "one_time"
       followup_channel: "call" | "whatsapp" | "sms" | "email" | "in_person"
       followup_outcome:
         | "connected"
@@ -4845,6 +4926,7 @@ export const Constants = {
       enquiry_source: ["walk_in", "phone", "web", "referral", "other"],
       enquiry_status: ["open", "converted", "lost"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
+      fee_frequency: ["monthly", "quarterly", "annual", "one_time"],
       followup_channel: ["call", "whatsapp", "sms", "email", "in_person"],
       followup_outcome: [
         "connected",

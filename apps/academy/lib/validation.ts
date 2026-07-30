@@ -135,6 +135,24 @@ export type LinkGuardianInput = z.infer<typeof linkGuardianSchema>;
 export const enrolStudentSchema = z.object({ sectionId: z.string().uuid('Choose a section') });
 export type EnrolStudentInput = z.infer<typeof enrolStudentSchema>;
 
+// Mirrors public.fee_frequency in supabase/migrations/20260731050000_fee_heads.sql.
+export const FEE_FREQUENCIES = ['monthly', 'quarterly', 'annual', 'one_time'] as const;
+
+// Mirrors create_fee_head()'s own shape — the fee_head_tenant_code_uq
+// case-insensitive uniqueness check is the DB's job, not duplicated here.
+export const createFeeHeadSchema = z.object({
+  code: z
+    .string()
+    .min(1, 'Required')
+    .max(50)
+    .regex(/^[A-Za-z0-9_]+$/, 'Letters, numbers and underscores only'),
+  nameEn: z.string().min(1, 'Required').max(200),
+  nameUr: z.string().min(1, 'Urdu name is required').max(200),
+  isRefundable: z.boolean(),
+  defaultFrequency: z.enum(FEE_FREQUENCIES),
+});
+export type CreateFeeHeadInput = z.infer<typeof createFeeHeadSchema>;
+
 // Mirrors apply_for_leave()'s own checks in
 // supabase/migrations/20260730220544_leave_ledger_and_application.sql — the
 // RPC (balance, dates) is the real gate, this is the earlier UX floor.
