@@ -1,0 +1,22 @@
+import Link from 'next/link';
+
+const LINKS = [
+  { href: '/campuses', label: 'Campuses' },
+  { href: '/sessions', label: 'Sessions' },
+  { href: '/staff', label: 'Staff' },
+  { href: '/admissions/enquiries', label: 'Admissions' },
+  { href: '/academic-setup/curriculum', label: 'Curriculum' },
+  { href: '/students', label: 'Students' },
+];
+
+export function AppNav() {
+  return (
+    <nav className="mb-6 flex gap-4 border-b pb-3 text-sm">
+      {LINKS.map((l) => (
+        <Link key={l.href} href={l.href} className="text-muted-foreground hover:text-foreground">
+          {l.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}

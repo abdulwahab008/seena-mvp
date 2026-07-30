@@ -1,0 +1,149 @@
+import { describe, expect, it } from 'vitest';
+import {
+  provisionTenantSchema,
+  slugSchema,
+  createCampusSchema,
+  createSessionSchema,
+  termsSchema,
+  createEnquirySchema,
+  createStudentSchema,
+} from './validation';
+
+describe('slugSchema', () => {
+  it('accepts a valid lowercase slug', () => {
+    expect(slugSchema.safeParse('beaconhouse-gulberg').success).toBe(true);
+  });
+
+  it('rejects uppercase (must match tenant_slug_format DB constraint)', () => {
+    expect(slugSchema.safeParse('Beaconhouse').success).toBe(false);
+  });
+
+  it('rejects spaces', () => {
+    expect(slugSchema.safeParse('not a valid slug!').success).toBe(false);
+  });
+
+  it('rejects a leading hyphen', () => {
+    expect(slugSchema.safeParse('-beaconhouse').success).toBe(false);
+  });
+
+  it('rejects fewer than 3 characters', () => {
+    expect(slugSchema.safeParse('ab').success).toBe(false);
+  });
+
+  it('rejects more than 50 characters', () => {
+    expect(slugSchema.safeParse('a'.repeat(51)).success).toBe(false);
+  });
+});
+
+describe('provisionTenantSchema', () => {
+  const valid = { slug: 'city-school-dha', legalName: 'City School DHA', ownerEmail: 'owner@city.test' };
+
+  it('accepts a fully valid payload', () => {
+    expect(provisionTenantSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it('rejects a missing legal name', () => {
+    expect(provisionTenantSchema.safeParse({ ...valid, legalName: '' }).success).toBe(false);
+  });
+
+  it('rejects a malformed email', () => {
+    expect(provisionTenantSchema.safeParse({ ...valid, ownerEmail: 'not-an-email' }).success).toBe(false);
+  });
+});
+
+describe('createCampusSchema', () => {
+  it('accepts a short alphanumeric code', () => {
+    expect(createCampusSchema.safeParse({ code: 'GUL', name: 'Gulberg Campus' }).success).toBe(true);
+  });
+
+  it('rejects a code with punctuation', () => {
+    expect(createCampusSchema.safeParse({ code: 'GUL-1', name: 'Gulberg Campus' }).success).toBe(false);
+  });
+
+  it('rejects an empty name', () => {
+    expect(createCampusSchema.safeParse({ code: 'GUL', name: '' }).success).toBe(false);
+  });
+});
+
+describe('createSessionSchema', () => {
+  it('accepts a valid range', () => {
+    expect(createSessionSchema.safeParse({ name: '2027-28', startsOn: '2027-01-01', endsOn: '2027-12-31' }).success).toBe(true);
+  });
+
+  it('rejects an end date on or before the start date', () => {
+    expect(createSessionSchema.safeParse({ name: '2027-28', startsOn: '2027-06-01', endsOn: '2027-01-01' }).success).toBe(false);
+  });
+});
+
+describe('termsSchema', () => {
+  const term = (name: string, weightage: number) => ({ name, startsOn: '2027-01-01', endsOn: '2027-04-30', weightage });
+
+  it('accepts terms summing to exactly 100', () => {
+    expect(termsSchema.safeParse({ terms: [term('First', 30), term('Mid', 30), term('Final', 40)] }).success).toBe(true);
+  });
+
+  it('rejects terms summing to 95 (matches the DB TERM_WEIGHTAGE_SUM check)', () => {
+    expect(termsSchema.safeParse({ terms: [term('First', 30), term('Mid', 30), term('Final', 35)] }).success).toBe(false);
+  });
+
+  it('rejects zero terms', () => {
+    expect(termsSchema.safeParse({ terms: [] }).success).toBe(false);
+  });
+
+  it('rejects more than 4 terms even if they sum to 100', () => {
+    expect(
+      termsSchema.safeParse({ terms: [term('A', 20), term('B', 20), term('C', 20), term('D', 20), term('E', 20)] }).success,
+    ).toBe(false);
+  });
+});
+
+describe('createEnquirySchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    childName: 'Ali Khan',
+    dob: '2020-01-01',
+    classAppliedId: '33333333-3333-3333-3333-333333333333',
+    parentName: 'Ahmed Khan',
+    phone: '03001234567',
+    whatsappOptIn: false,
+    source: 'walk_in' as const,
+  };
+
+  it('accepts a valid walk-in enquiry', () => {
+    expect(createEnquirySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a referral enquiry with no referrer name (matches the DB check)', () => {
+    expect(createEnquirySchema.safeParse({ ...base, source: 'referral' }).success).toBe(false);
+  });
+
+  it('accepts a referral enquiry once a referrer name is given', () => {
+    expect(createEnquirySchema.safeParse({ ...base, source: 'referral', referrerName: 'A. Student' }).success).toBe(true);
+  });
+
+  it('rejects a non-UUID campusId', () => {
+    expect(createEnquirySchema.safeParse({ ...base, campusId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('createStudentSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    nameEn: 'Ali Khan',
+    dob: '2015-01-01',
+    gender: 'male' as const,
+  };
+
+  it('accepts the minimal required fields', () => {
+    expect(createStudentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing name', () => {
+    expect(createStudentSchema.safeParse({ ...base, nameEn: '' }).success).toBe(false);
+  });
+
+  it('rejects an invalid gender value', () => {
+    expect(createStudentSchema.safeParse({ ...base, gender: 'unknown' }).success).toBe(false);
+  });
+});
