@@ -6,6 +6,7 @@ import { EnrolForm } from './enrol-form';
 import { FeePlanView, type FeePlanLineRow } from './fee-plan-view';
 import { ConcessionAwardView, type AwardRow } from './concession-award-view';
 import { LedgerView, type LedgerEntryRow } from './ledger-view';
+import { PaymentView, type PaymentRow } from './payment-view';
 
 // supabase-js types every embedded to-one relation as a possible array —
 // the FK is unique per enrolment/section row, so it's really ever 0 or 1.
@@ -75,6 +76,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'accountant' || role === 'admissions_officer';
   const canPostLedger = role === 'super_admin' || role === 'owner' || role === 'accountant';
   const canReverseLedger = role === 'super_admin' || role === 'owner';
+  const canRecordPayment = role === 'super_admin' || role === 'owner' || role === 'accountant';
 
   const { data: schemes } = await supabase
     .from('concession_scheme')
@@ -131,6 +133,37 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     balancePaisa = balance ?? 0;
   }
 
+  let payments: PaymentRow[] = [];
+  if (enrolment) {
+    const { data: paymentRows } = await supabase
+      .from('fee_payment')
+      .select('id, amount_paisa, mode, value_date, reference_no')
+      .eq('enrolment_id', enrolment.id)
+      .order('received_at', { ascending: false });
+    const paymentIds = (paymentRows ?? []).map((p) => p.id);
+    const { data: allocationRows } =
+      paymentIds.length > 0
+        ? await supabase
+            .from('fee_payment_allocation')
+            .select('payment_id, amount_paisa, fee_challan(challan_no), fee_head(code)')
+            .in('payment_id', paymentIds)
+        : { data: [] };
+    payments = (paymentRows ?? []).map((p) => ({
+      id: p.id,
+      amountPaisa: p.amount_paisa,
+      mode: p.mode,
+      valueDate: p.value_date,
+      referenceNo: p.reference_no,
+      allocations: (allocationRows ?? [])
+        .filter((a) => a.payment_id === p.id)
+        .map((a) => ({
+          challanNo: one(a.fee_challan)?.challan_no ?? 'unknown',
+          feeHeadCode: one(a.fee_head)?.code ?? 'unknown',
+          amountPaisa: a.amount_paisa,
+        })),
+    }));
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -176,6 +209,13 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             schemes={schemes ?? []}
             canRequest={canRequestAward}
           />
+        </section>
+      )}
+
+      {enrolment && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-medium">Payments</h2>
+          <PaymentView studentId={student.id} enrolmentId={enrolment.id} payments={payments} canRecord={canRecordPayment} />
         </section>
       )}
 

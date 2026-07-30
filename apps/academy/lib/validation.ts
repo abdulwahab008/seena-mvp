@@ -436,3 +436,14 @@ export type SetChallanTemplateInput = z.infer<typeof setChallanTemplateSchema>;
 
 export const buildChallanRenderPayloadSchema = z.object({ challanId: z.string().uuid() });
 export type BuildChallanRenderPayloadInput = z.infer<typeof buildChallanRenderPayloadSchema>;
+
+export const FEE_PAYMENT_MODES = ['cash', 'bank_challan', 'online', 'cheque', 'adjustment'] as const;
+
+// Mirrors record_payment()'s own checks in
+// supabase/migrations/20260731250000_payment_allocation_waterfall.sql.
+export const recordPaymentSchema = z.object({
+  amountRupees: z.coerce.number().positive('Enter an amount'),
+  mode: z.enum(FEE_PAYMENT_MODES),
+  referenceNo: z.string().max(100).optional(),
+});
+export type RecordPaymentInput = z.infer<typeof recordPaymentSchema>;

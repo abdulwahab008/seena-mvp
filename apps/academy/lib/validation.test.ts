@@ -25,6 +25,7 @@ import {
   createNextStructureVersionSchema,
   updateStructureLineAmountSchema,
   setChallanTemplateSchema,
+  recordPaymentSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -471,5 +472,25 @@ describe('setChallanTemplateSchema', () => {
 
   it('rejects a missing bank name', () => {
     expect(setChallanTemplateSchema.safeParse({ ...base, bankName: '' }).success).toBe(false);
+  });
+});
+
+describe('recordPaymentSchema', () => {
+  const base = { amountRupees: 5000, mode: 'cash' as const };
+
+  it('accepts a valid cash payment', () => {
+    expect(recordPaymentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts an optional reference number', () => {
+    expect(recordPaymentSchema.safeParse({ ...base, mode: 'bank_challan', referenceNo: 'CHQ-1029' }).success).toBe(true);
+  });
+
+  it('rejects a zero amount', () => {
+    expect(recordPaymentSchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(false);
+  });
+
+  it('rejects an unknown mode', () => {
+    expect(recordPaymentSchema.safeParse({ ...base, mode: 'crypto' }).success).toBe(false);
   });
 });

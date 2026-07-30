@@ -2197,6 +2197,39 @@ export type Database = {
           },
         ]
       }
+      fee_head_priority: {
+        Row: {
+          fee_head_id: string
+          priority: number
+          tenant_id: string
+        }
+        Insert: {
+          fee_head_id: string
+          priority: number
+          tenant_id: string
+        }
+        Update: {
+          fee_head_id?: string
+          priority?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_head_priority_fee_head_id_fkey"
+            columns: ["fee_head_id"]
+            isOneToOne: false
+            referencedRelation: "fee_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_head_priority_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_increase_approval: {
         Row: {
           approved_at: string
@@ -2388,6 +2421,123 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_payment: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          collected_by: string | null
+          enrolment_id: string
+          id: string
+          mode: Database["public"]["Enums"]["fee_payment_mode"]
+          received_at: string
+          reference_no: string | null
+          tenant_id: string
+          value_date: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          collected_by?: string | null
+          enrolment_id: string
+          id?: string
+          mode: Database["public"]["Enums"]["fee_payment_mode"]
+          received_at?: string
+          reference_no?: string | null
+          tenant_id: string
+          value_date?: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          collected_by?: string | null
+          enrolment_id?: string
+          id?: string
+          mode?: Database["public"]["Enums"]["fee_payment_mode"]
+          received_at?: string
+          reference_no?: string | null
+          tenant_id?: string
+          value_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_payment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_collected_by_fkey"
+            columns: ["collected_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_payment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_payment_allocation: {
+        Row: {
+          amount_paisa: number
+          challan_id: string
+          created_at: string
+          fee_head_id: string
+          id: string
+          payment_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          challan_id: string
+          created_at?: string
+          fee_head_id: string
+          id?: string
+          payment_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          challan_id?: string
+          created_at?: string
+          fee_head_id?: string
+          id?: string
+          payment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_payment_allocation_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_allocation_fee_head_id_fkey"
+            columns: ["fee_head_id"]
+            isOneToOne: false
+            referencedRelation: "fee_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_allocation_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "fee_payment"
             referencedColumns: ["id"]
           },
         ]
@@ -5222,6 +5372,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      allocate_payment: { Args: { p_payment_id: string }; Returns: Json }
+      apply_advance_credit: {
+        Args: { p_challan_id: string; p_enrolment_id: string }
+        Returns: number
+      }
       apply_for_leave: {
         Args: {
           p_from_date: string
@@ -5928,6 +6083,16 @@ export type Database = {
         Args: { p_regulator_reference?: string; p_structure_id: string }
         Returns: undefined
       }
+      record_payment: {
+        Args: {
+          p_amount_paisa: number
+          p_enrolment_id: string
+          p_mode: Database["public"]["Enums"]["fee_payment_mode"]
+          p_reference_no?: string
+          p_value_date?: string
+        }
+        Returns: string
+      }
       register_login_attempt: {
         Args: { p_identifier: string; p_succeeded: boolean }
         Returns: undefined
@@ -6002,6 +6167,10 @@ export type Database = {
       }
       set_fee_head_active: {
         Args: { p_id: string; p_is_active: boolean }
+        Returns: undefined
+      }
+      set_fee_head_priority: {
+        Args: { p_fee_head_id: string; p_priority: number }
         Returns: undefined
       }
       set_fee_policy: {
@@ -6171,6 +6340,12 @@ export type Database = {
         | "adjustment"
         | "write_off"
         | "reversal"
+      fee_payment_mode:
+        | "cash"
+        | "bank_challan"
+        | "online"
+        | "cheque"
+        | "adjustment"
       fee_plan_override_status:
         | "none"
         | "pending_approval"
@@ -6464,6 +6639,13 @@ export const Constants = {
         "adjustment",
         "write_off",
         "reversal",
+      ],
+      fee_payment_mode: [
+        "cash",
+        "bank_challan",
+        "online",
+        "cheque",
+        "adjustment",
       ],
       fee_plan_override_status: [
         "none",

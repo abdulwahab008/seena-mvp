@@ -10,6 +10,7 @@ import {
   decideConcessionAwardSchema,
   postLedgerEntrySchema,
   reverseLedgerEntrySchema,
+  recordPaymentSchema,
 } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
@@ -293,6 +294,35 @@ export async function reverseLedgerEntry(studentId: string, _prev: FeePlanAction
     if (error.message.includes('CANNOT_REVERSE_A_REVERSAL')) return { error: 'A reversal entry cannot itself be reversed.' };
     if (error.message.includes('duplicate key')) return { error: 'This entry was already reversed.' };
     return { error: 'Could not reverse the entry.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+// FR-K16: record a payment. The waterfall allocation across outstanding
+// challans/heads runs inside record_payment() itself, in the same
+// transaction as the payment insert — this action only shapes the
+// client-facing error.
+export async function recordPayment(studentId: string, enrolmentId: string, _prev: FeePlanActionState, formData: FormData): Promise<FeePlanActionState> {
+  const parsed = recordPaymentSchema.safeParse({
+    amountRupees: formData.get('amountRupees'),
+    mode: formData.get('mode'),
+    referenceNo: formData.get('referenceNo') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('record_payment', {
+    p_enrolment_id: enrolmentId,
+    p_amount_paisa: Math.round(parsed.data.amountRupees * 100),
+    p_mode: parsed.data.mode,
+    p_reference_no: parsed.data.referenceNo,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to record payments.' };
+    if (error.message.includes('AMOUNT_MUST_BE_POSITIVE')) return { error: 'Enter a positive amount.' };
+    return { error: 'Could not record the payment.' };
   }
 
   revalidatePath(`/students/${studentId}`);
