@@ -1007,6 +1007,64 @@ export type Database = {
           },
         ]
       }
+      cash_book_day: {
+        Row: {
+          book_date: string
+          campus_id: string
+          closing_paisa: number
+          disbursements_paisa: number
+          finalised_at: string
+          finalised_by: string | null
+          opening_paisa: number
+          receipts_paisa: number
+          tenant_id: string
+        }
+        Insert: {
+          book_date: string
+          campus_id: string
+          closing_paisa: number
+          disbursements_paisa: number
+          finalised_at?: string
+          finalised_by?: string | null
+          opening_paisa: number
+          receipts_paisa: number
+          tenant_id: string
+        }
+        Update: {
+          book_date?: string
+          campus_id?: string
+          closing_paisa?: number
+          disbursements_paisa?: number
+          finalised_at?: string
+          finalised_by?: string | null
+          opening_paisa?: number
+          receipts_paisa?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_book_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_book_day_finalised_by_fkey"
+            columns: ["finalised_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "cash_book_day_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challan_counter: {
         Row: {
           campus_id: string
@@ -2455,6 +2513,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fee_ledger_reversal_of_id_fkey"
+            columns: ["reversal_of_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["ledger_id"]
+          },
+          {
             foreignKeyName: "fee_ledger_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -2591,6 +2656,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_payment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_allocation_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["payment_id"]
           },
         ]
       }
@@ -2843,6 +2915,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_payment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_receipt_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["payment_id"]
           },
           {
             foreignKeyName: "fee_receipt_tenant_id_fkey"
@@ -5390,6 +5469,48 @@ export type Database = {
           },
         ]
       }
+      v_daily_collection: {
+        Row: {
+          amount_paisa: number | null
+          campus_id: string | null
+          enrolment_id: string | null
+          ledger_id: string | null
+          mode: Database["public"]["Enums"]["fee_payment_mode"] | null
+          payment_id: string | null
+          tenant_id: string | null
+          value_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_ledger_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_guardian_children: {
         Row: {
           campus_id: string | null
@@ -5705,6 +5826,10 @@ export type Database = {
         Args: { p_challan_id: string }
         Returns: Json
       }
+      build_collection_report_payload: {
+        Args: { p_campus_id: string; p_from: string; p_to: string }
+        Returns: Json
+      }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
       collect_cash_payment: {
@@ -5958,6 +6083,15 @@ export type Database = {
         }
       }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      daily_collection_report: {
+        Args: { p_campus_id: string; p_from: string; p_to: string }
+        Returns: {
+          amount_paisa: number
+          mode: Database["public"]["Enums"]["fee_payment_mode"]
+          payment_count: number
+          value_date: string
+        }[]
+      }
       decide_concession_award: {
         Args: {
           p_approve: boolean
@@ -6015,6 +6149,26 @@ export type Database = {
         Returns: string
       }
       expire_due_concessions: { Args: { p_as_of?: string }; Returns: number }
+      finalise_cash_book_day: {
+        Args: { p_book_date: string; p_campus_id: string }
+        Returns: {
+          book_date: string
+          campus_id: string
+          closing_paisa: number
+          disbursements_paisa: number
+          finalised_at: string
+          finalised_by: string | null
+          opening_paisa: number
+          receipts_paisa: number
+          tenant_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cash_book_day"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       fn_assign_next_roll_no: {
         Args: { p_enrolment_id: string }
         Returns: number

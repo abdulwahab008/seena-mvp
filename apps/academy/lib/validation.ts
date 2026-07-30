@@ -469,3 +469,20 @@ export type CollectCashPaymentInput = z.infer<typeof collectCashPaymentSchema>;
 
 export const printReceiptSchema = z.object({ receiptId: z.string().uuid() });
 export type PrintReceiptInput = z.infer<typeof printReceiptSchema>;
+
+// Mirrors build_collection_report_payload()'s own signature in
+// supabase/migrations/20260731280000_daily_collection_report.sql.
+export const collectionReportSchema = z
+  .object({
+    campusId: z.string().uuid(),
+    from: z.string().min(1, 'Required'),
+    to: z.string().min(1, 'Required'),
+  })
+  .refine((v) => v.to >= v.from, { message: 'End date must be on or after the start date', path: ['to'] });
+export type CollectionReportInput = z.infer<typeof collectionReportSchema>;
+
+export const finaliseCashBookDaySchema = z.object({
+  campusId: z.string().uuid(),
+  bookDate: z.string().min(1, 'Required'),
+});
+export type FinaliseCashBookDayInput = z.infer<typeof finaliseCashBookDaySchema>;

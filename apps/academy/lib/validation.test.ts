@@ -29,6 +29,8 @@ import {
   lookupChallanSchema,
   collectCashPaymentSchema,
   printReceiptSchema,
+  collectionReportSchema,
+  finaliseCashBookDaySchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -536,5 +538,35 @@ describe('printReceiptSchema', () => {
 
   it('rejects a non-uuid receipt id', () => {
     expect(printReceiptSchema.safeParse({ receiptId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('collectionReportSchema', () => {
+  const base = { campusId: '11111111-1111-1111-1111-111111111111', from: '2026-08-01', to: '2026-08-31' };
+
+  it('accepts a valid date range', () => {
+    expect(collectionReportSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a single-day range (from equals to)', () => {
+    expect(collectionReportSchema.safeParse({ ...base, to: base.from }).success).toBe(true);
+  });
+
+  it('rejects an end date before the start date', () => {
+    expect(collectionReportSchema.safeParse({ ...base, from: '2026-08-31', to: '2026-08-01' }).success).toBe(false);
+  });
+});
+
+describe('finaliseCashBookDaySchema', () => {
+  it('accepts a valid campus id and date', () => {
+    expect(
+      finaliseCashBookDaySchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111', bookDate: '2026-08-12' }).success
+    ).toBe(true);
+  });
+
+  it('rejects a missing book date', () => {
+    expect(finaliseCashBookDaySchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111', bookDate: '' }).success).toBe(
+      false
+    );
   });
 });
