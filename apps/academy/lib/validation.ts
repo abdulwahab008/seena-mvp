@@ -398,3 +398,26 @@ export const detectSiblingGroupsSchema = z.object({
   sessionId: z.string().uuid(),
 });
 export type DetectSiblingGroupsInput = z.infer<typeof detectSiblingGroupsSchema>;
+
+// Mirrors create_next_structure_version()'s own signature in
+// supabase/migrations/20260731190000_fee_structure_versioning.sql.
+export const createNextStructureVersionSchema = z.object({
+  priorStructureId: z.string().uuid(),
+  effectiveFrom: z.string().min(1, 'Required'),
+});
+export type CreateNextStructureVersionInput = z.infer<typeof createNextStructureVersionSchema>;
+
+export const updateStructureLineAmountSchema = z.object({
+  lineId: z.string().uuid(),
+  amountRupees: z.coerce.number().nonnegative('Enter an amount'),
+});
+export type UpdateStructureLineAmountInput = z.infer<typeof updateStructureLineAmountSchema>;
+
+// Mirrors publish_fee_structure()'s own REGULATOR_REFERENCE_REQUIRED
+// check — required only when the DB rejects a publish for exceeding the
+// tenant's configured increase cap, so this stays optional here too.
+export const publishStructureSchema = z.object({
+  structureId: z.string().uuid(),
+  regulatorReference: z.string().max(200).optional(),
+});
+export type PublishStructureInput = z.infer<typeof publishStructureSchema>;

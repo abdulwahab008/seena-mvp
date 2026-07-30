@@ -2101,6 +2101,48 @@ export type Database = {
           },
         ]
       }
+      fee_increase_approval: {
+        Row: {
+          approved_at: string
+          approver_id: string | null
+          avg_increase_pct: number
+          id: string
+          regulator_reference: string
+          structure_id: string
+        }
+        Insert: {
+          approved_at?: string
+          approver_id?: string | null
+          avg_increase_pct: number
+          id?: string
+          regulator_reference: string
+          structure_id: string
+        }
+        Update: {
+          approved_at?: string
+          approver_id?: string | null
+          avg_increase_pct?: number
+          id?: string
+          regulator_reference?: string
+          structure_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_increase_approval_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_increase_approval_structure_id_fkey"
+            columns: ["structure_id"]
+            isOneToOne: false
+            referencedRelation: "fee_structure"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_job_run: {
         Row: {
           completed_at: string | null
@@ -2409,6 +2451,7 @@ export type Database = {
       fee_policy: {
         Row: {
           allow_negative_net: boolean
+          max_fee_increase_pct: number | null
           max_stacked_concession_pct: number | null
           tenant_id: string
           updated_at: string
@@ -2416,6 +2459,7 @@ export type Database = {
         }
         Insert: {
           allow_negative_net?: boolean
+          max_fee_increase_pct?: number | null
           max_stacked_concession_pct?: number | null
           tenant_id: string
           updated_at?: string
@@ -2423,6 +2467,7 @@ export type Database = {
         }
         Update: {
           allow_negative_net?: boolean
+          max_fee_increase_pct?: number | null
           max_stacked_concession_pct?: number | null
           tenant_id?: string
           updated_at?: string
@@ -2447,6 +2492,7 @@ export type Database = {
       }
       fee_structure: {
         Row: {
+          approved_by: string | null
           campus_id: string
           created_at: string
           created_by: string | null
@@ -2454,12 +2500,15 @@ export type Database = {
           id: string
           published_at: string | null
           published_by: string | null
+          regulator_reference: string | null
           session_id: string
           status: Database["public"]["Enums"]["fee_structure_status"]
+          supersedes_id: string | null
           tenant_id: string
           version_no: number
         }
         Insert: {
+          approved_by?: string | null
           campus_id: string
           created_at?: string
           created_by?: string | null
@@ -2467,12 +2516,15 @@ export type Database = {
           id?: string
           published_at?: string | null
           published_by?: string | null
+          regulator_reference?: string | null
           session_id: string
           status?: Database["public"]["Enums"]["fee_structure_status"]
+          supersedes_id?: string | null
           tenant_id: string
           version_no?: number
         }
         Update: {
+          approved_by?: string | null
           campus_id?: string
           created_at?: string
           created_by?: string | null
@@ -2480,12 +2532,21 @@ export type Database = {
           id?: string
           published_at?: string | null
           published_by?: string | null
+          regulator_reference?: string | null
           session_id?: string
           status?: Database["public"]["Enums"]["fee_structure_status"]
+          supersedes_id?: string | null
           tenant_id?: string
           version_no?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fee_structure_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "fee_structure_campus_id_fkey"
             columns: ["campus_id"]
@@ -2512,6 +2573,13 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_structure_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "fee_structure"
             referencedColumns: ["id"]
           },
           {
@@ -5235,6 +5303,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_next_structure_version: {
+        Args: { p_effective_from: string; p_prior_structure_id: string }
+        Returns: string
+      }
       create_section: {
         Args: {
           p_campus_id: string
@@ -5753,7 +5825,7 @@ export type Database = {
         Returns: string
       }
       publish_fee_structure: {
-        Args: { p_structure_id: string }
+        Args: { p_regulator_reference?: string; p_structure_id: string }
         Returns: undefined
       }
       register_login_attempt: {
@@ -5776,6 +5848,14 @@ export type Database = {
           p_enrolment_id: string
           p_scheme_id: string
           p_value: number
+        }
+        Returns: string
+      }
+      resolve_fee_structure: {
+        Args: {
+          p_campus_id: string
+          p_period_start: string
+          p_session_id: string
         }
         Returns: string
       }
@@ -5871,6 +5951,10 @@ export type Database = {
       }
       unlink_guardian: {
         Args: { p_guardian_id: string; p_student_id: string }
+        Returns: undefined
+      }
+      update_structure_line_amount: {
+        Args: { p_amount_paisa: number; p_line_id: string }
         Returns: undefined
       }
       upsert_class_subject: {

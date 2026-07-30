@@ -1,7 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { addStructureLineSchema, createDraftStructureSchema } from '@/lib/validation';
+import {
+  addStructureLineSchema,
+  createDraftStructureSchema,
+  createNextStructureVersionSchema,
+  updateStructureLineAmountSchema,
+  publishStructureSchema,
+} from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type ActionState = { error: string | null };
@@ -64,14 +70,75 @@ export async function addStructureLine(_prev: ActionState, formData: FormData): 
   return { error: null };
 }
 
-export async function publishStructure(structureId: string, _prev: ActionState, _formData: FormData): Promise<ActionState> {
+export async function publishStructure(structureId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = publishStructureSchema.safeParse({
+    structureId,
+    regulatorReference: formData.get('regulatorReference') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
   const supabase = await supabaseServer();
-  const { error } = await supabase.rpc('publish_fee_structure', { p_structure_id: structureId });
+  const { error } = await supabase.rpc('publish_fee_structure', {
+    p_structure_id: parsed.data.structureId,
+    p_regulator_reference: parsed.data.regulatorReference,
+  });
   if (error) {
     if (error.message.includes('MANDATORY_HEAD_COVERAGE_GAP'))
       return { error: 'Every active class needs a line for each mandatory fee head before this structure can publish.' };
-    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to publish fee structures.' };
+    if (error.message.includes('REGULATOR_REFERENCE_REQUIRED'))
+      return { error: 'This revision exceeds the allowed average increase — enter a regulator reference (4+ characters) to proceed.' };
+    if (error.message.includes('FORBIDDEN'))
+      return { error: 'You do not have permission to publish fee structures, or this above-cap increase needs an Owner/Super Admin.' };
     return { error: 'Could not publish the structure.' };
+  }
+
+  revalidatePath('/fees/structure');
+  return { error: null };
+}
+
+// FR-K03: clone a published structure into a new draft version, effective
+// from a future date — the prior version stays intact and, once this one
+// publishes, becomes 'superseded' rather than edited or deleted.
+export async function createNextStructureVersion(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = createNextStructureVersionSchema.safeParse({
+    priorStructureId: formData.get('priorStructureId'),
+    effectiveFrom: formData.get('effectiveFrom'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('create_next_structure_version', {
+    p_prior_structure_id: parsed.data.priorStructureId,
+    p_effective_from: parsed.data.effectiveFrom,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to create a new structure version.' };
+    if (error.message.includes('PRIOR_STRUCTURE_NOT_PUBLISHED')) return { error: 'Only a published structure can be revised.' };
+    return { error: 'Could not create the new version.' };
+  }
+
+  revalidatePath('/fees/structure');
+  return { error: null };
+}
+
+// FR-K03: revise a single draft line's price — amountRupees is converted
+// to paisa at this boundary, same discipline as every other rupee input.
+export async function updateStructureLineAmount(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = updateStructureLineAmountSchema.safeParse({
+    lineId: formData.get('lineId'),
+    amountRupees: formData.get('amountRupees'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('update_structure_line_amount', {
+    p_line_id: parsed.data.lineId,
+    p_amount_paisa: Math.round(parsed.data.amountRupees * 100),
+  });
+  if (error) {
+    if (error.message.includes('STRUCTURE_NOT_DRAFT')) return { error: "Only a draft structure's lines can be revised." };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit fee structures.' };
+    return { error: 'Could not update the amount.' };
   }
 
   revalidatePath('/fees/structure');

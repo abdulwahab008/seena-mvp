@@ -1,5 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
-import { StructureView, type StructureRow, type StructureLineRow } from './structure-view';
+import { StructureView, type StructureRow, type StructureLineRow, type StructureHistoryRow } from './structure-view';
 
 function one<T>(v: T | T[] | null): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
@@ -20,16 +20,18 @@ export default async function FeeStructurePage() {
 
   let structure: StructureRow = null;
   let lines: StructureLineRow[] = [];
+  let history: StructureHistoryRow[] = [];
 
   if (campus && session) {
     const { data: structures } = await supabase
       .from('fee_structure')
-      .select('id, status, version_no')
+      .select('id, status, version_no, effective_from, regulator_reference')
       .eq('campus_id', campus.id)
       .eq('session_id', session.id)
-      .order('created_at', { ascending: false });
+      .order('version_no', { ascending: false });
 
     structure = (structures ?? []).find((s) => s.status === 'draft') ?? (structures ?? []).find((s) => s.status === 'published') ?? null;
+    history = (structures ?? []).filter((s) => s.id !== structure?.id);
 
     if (structure) {
       const { data: lineRows } = await supabase
@@ -60,6 +62,7 @@ export default async function FeeStructurePage() {
           sessionId={session.id}
           structure={structure}
           lines={lines}
+          history={history}
           classLevels={classLevels ?? []}
           feeHeads={feeHeads ?? []}
         />

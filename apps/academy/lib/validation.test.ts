@@ -22,6 +22,8 @@ import {
   previewLateFeeSchema,
   setFeePolicySchema,
   setSiblingDiscountSchemeSchema,
+  createNextStructureVersionSchema,
+  updateStructureLineAmountSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -426,5 +428,30 @@ describe('setSiblingDiscountSchemeSchema', () => {
 
   it('rejects rank 1 — the eldest never gets a sibling discount', () => {
     expect(setSiblingDiscountSchemeSchema.safeParse({ ...base, siblingRank: 1 }).success).toBe(false);
+  });
+});
+
+describe('createNextStructureVersionSchema', () => {
+  it('accepts a valid prior structure id and effective date', () => {
+    expect(
+      createNextStructureVersionSchema.safeParse({
+        priorStructureId: '11111111-1111-1111-1111-111111111111',
+        effectiveFrom: '2027-01-01',
+      }).success
+    ).toBe(true);
+  });
+});
+
+describe('updateStructureLineAmountSchema', () => {
+  it('accepts a non-negative amount', () => {
+    expect(
+      updateStructureLineAmountSchema.safeParse({ lineId: '11111111-1111-1111-1111-111111111111', amountRupees: 5500 }).success
+    ).toBe(true);
+  });
+
+  it('rejects a negative amount', () => {
+    expect(
+      updateStructureLineAmountSchema.safeParse({ lineId: '11111111-1111-1111-1111-111111111111', amountRupees: -1 }).success
+    ).toBe(false);
   });
 });
