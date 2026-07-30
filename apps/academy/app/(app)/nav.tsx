@@ -12,6 +12,7 @@ const LINKS = [
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },
   { href: '/fees/concessions', label: 'Concessions' },
+  { href: '/fees/challans', label: 'Challans' },
 ];
 
 export function AppNav() {

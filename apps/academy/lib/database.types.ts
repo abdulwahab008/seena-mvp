@@ -1787,6 +1787,254 @@ export type Database = {
           },
         ]
       }
+      fee_challan: {
+        Row: {
+          arrears_paisa: number
+          batch_id: string | null
+          billing_period: string
+          campus_id: string
+          challan_no: string
+          concession_paisa: number
+          created_at: string
+          due_date: string
+          enrolment_id: string
+          gross_paisa: number
+          id: string
+          issue_date: string
+          net_paisa: number
+          session_id: string
+          status: Database["public"]["Enums"]["fee_challan_status"]
+          tenant_id: string
+        }
+        Insert: {
+          arrears_paisa?: number
+          batch_id?: string | null
+          billing_period: string
+          campus_id: string
+          challan_no: string
+          concession_paisa?: number
+          created_at?: string
+          due_date: string
+          enrolment_id: string
+          gross_paisa: number
+          id?: string
+          issue_date?: string
+          net_paisa: number
+          session_id: string
+          status?: Database["public"]["Enums"]["fee_challan_status"]
+          tenant_id: string
+        }
+        Update: {
+          arrears_paisa?: number
+          batch_id?: string | null
+          billing_period?: string
+          campus_id?: string
+          challan_no?: string
+          concession_paisa?: number
+          created_at?: string
+          due_date?: string
+          enrolment_id?: string
+          gross_paisa?: number
+          id?: string
+          issue_date?: string
+          net_paisa?: number
+          session_id?: string
+          status?: Database["public"]["Enums"]["fee_challan_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_challan_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan_batch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_challan_batch: {
+        Row: {
+          billing_period: string
+          campus_id: string
+          completed_at: string | null
+          failed_count: number
+          generated_count: number
+          id: string
+          requested_by: string | null
+          session_id: string
+          skipped_count: number
+          started_at: string
+          tenant_id: string
+        }
+        Insert: {
+          billing_period: string
+          campus_id: string
+          completed_at?: string | null
+          failed_count?: number
+          generated_count?: number
+          id?: string
+          requested_by?: string | null
+          session_id: string
+          skipped_count?: number
+          started_at?: string
+          tenant_id: string
+        }
+        Update: {
+          billing_period?: string
+          campus_id?: string
+          completed_at?: string | null
+          failed_count?: number
+          generated_count?: number
+          id?: string
+          requested_by?: string | null
+          session_id?: string
+          skipped_count?: number
+          started_at?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_challan_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_batch_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_batch_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_batch_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_challan_batch_error: {
+        Row: {
+          batch_id: string
+          created_at: string
+          enrolment_id: string
+          id: string
+          reason: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          enrolment_id: string
+          id?: string
+          reason: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          enrolment_id?: string
+          id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_challan_batch_error_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan_batch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_batch_error_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_challan_line: {
+        Row: {
+          amount_paisa: number
+          challan_id: string
+          concession_paisa: number
+          fee_head_id: string
+          id: string
+          line_type: Database["public"]["Enums"]["fee_challan_line_type"]
+          net_paisa: number
+        }
+        Insert: {
+          amount_paisa: number
+          challan_id: string
+          concession_paisa?: number
+          fee_head_id: string
+          id?: string
+          line_type: Database["public"]["Enums"]["fee_challan_line_type"]
+          net_paisa: number
+        }
+        Update: {
+          amount_paisa?: number
+          challan_id?: string
+          concession_paisa?: number
+          fee_head_id?: string
+          id?: string
+          line_type?: Database["public"]["Enums"]["fee_challan_line_type"]
+          net_paisa?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_challan_line_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_line_fee_head_id_fkey"
+            columns: ["fee_head_id"]
+            isOneToOne: false
+            referencedRelation: "fee_head"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_head: {
         Row: {
           carry_forward_on_arrears: boolean
@@ -1914,6 +2162,13 @@ export type Database = {
             columns: ["campus_id"]
             isOneToOne: false
             referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
             referencedColumns: ["id"]
           },
           {
@@ -5118,6 +5373,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      generate_challans: {
+        Args: {
+          p_campus_id: string
+          p_dry_run?: boolean
+          p_period: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
       get_invitation_preview: {
         Args: { p_token: string }
         Returns: {
@@ -5415,6 +5679,8 @@ export type Database = {
       enquiry_source: "walk_in" | "phone" | "web" | "referral" | "other"
       enquiry_status: "open" | "converted" | "lost"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
+      fee_challan_line_type: "charge" | "concession" | "arrears" | "late_fee"
+      fee_challan_status: "unpaid" | "part_paid" | "paid" | "cancelled"
       fee_frequency: "monthly" | "quarterly" | "annual" | "one_time"
       fee_ledger_direction: "debit" | "credit"
       fee_ledger_entry_type:
@@ -5705,6 +5971,8 @@ export const Constants = {
       enquiry_source: ["walk_in", "phone", "web", "referral", "other"],
       enquiry_status: ["open", "converted", "lost"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
+      fee_challan_line_type: ["charge", "concession", "arrears", "late_fee"],
+      fee_challan_status: ["unpaid", "part_paid", "paid", "cancelled"],
       fee_frequency: ["monthly", "quarterly", "annual", "one_time"],
       fee_ledger_direction: ["debit", "credit"],
       fee_ledger_entry_type: [

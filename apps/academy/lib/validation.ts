@@ -329,3 +329,15 @@ export const respondToOfferSchema = z
     path: ['declineReason'],
   });
 export type RespondToOfferInput = z.infer<typeof respondToOfferSchema>;
+
+// Mirrors generate_challans()'s own checks in
+// supabase/migrations/20260731120000_bulk_challan_generation.sql. period is
+// a plain "YYYY-MM" month picker value — the '-01' day is appended at the
+// server-action boundary before it reaches the p_period date parameter.
+export const generateChallansSchema = z.object({
+  campusId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+  period: z.string().regex(/^\d{4}-\d{2}$/, 'Use YYYY-MM'),
+  dryRun: z.boolean(),
+});
+export type GenerateChallansInput = z.infer<typeof generateChallansSchema>;

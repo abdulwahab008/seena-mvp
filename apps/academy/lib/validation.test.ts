@@ -17,6 +17,7 @@ import {
   decideConcessionAwardSchema,
   postLedgerEntrySchema,
   reverseLedgerEntrySchema,
+  generateChallansSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -333,5 +334,26 @@ describe('reverseLedgerEntrySchema', () => {
 
   it('rejects a reason under 15 characters', () => {
     expect(reverseLedgerEntrySchema.safeParse({ ...base, reason: 'too short' }).success).toBe(false);
+  });
+});
+
+describe('generateChallansSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    period: '2026-08',
+    dryRun: false,
+  };
+
+  it('accepts a valid YYYY-MM period', () => {
+    expect(generateChallansSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a period with a day component', () => {
+    expect(generateChallansSchema.safeParse({ ...base, period: '2026-08-01' }).success).toBe(false);
+  });
+
+  it('rejects a malformed period', () => {
+    expect(generateChallansSchema.safeParse({ ...base, period: 'August 2026' }).success).toBe(false);
   });
 });
