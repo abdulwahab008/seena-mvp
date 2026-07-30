@@ -1807,6 +1807,116 @@ export type Database = {
           },
         ]
       }
+      fee_ledger: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          challan_id: string | null
+          created_by: string | null
+          direction: Database["public"]["Enums"]["fee_ledger_direction"]
+          enrolment_id: string
+          entry_type: Database["public"]["Enums"]["fee_ledger_entry_type"]
+          fee_head_id: string | null
+          id: string
+          posted_at: string
+          reason: string | null
+          reversal_of_id: string | null
+          session_id: string
+          source_id: string | null
+          source_type: string | null
+          tenant_id: string
+          value_date: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          challan_id?: string | null
+          created_by?: string | null
+          direction: Database["public"]["Enums"]["fee_ledger_direction"]
+          enrolment_id: string
+          entry_type: Database["public"]["Enums"]["fee_ledger_entry_type"]
+          fee_head_id?: string | null
+          id?: string
+          posted_at?: string
+          reason?: string | null
+          reversal_of_id?: string | null
+          session_id: string
+          source_id?: string | null
+          source_type?: string | null
+          tenant_id: string
+          value_date?: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          challan_id?: string | null
+          created_by?: string | null
+          direction?: Database["public"]["Enums"]["fee_ledger_direction"]
+          enrolment_id?: string
+          entry_type?: Database["public"]["Enums"]["fee_ledger_entry_type"]
+          fee_head_id?: string | null
+          id?: string
+          posted_at?: string
+          reason?: string | null
+          reversal_of_id?: string | null
+          session_id?: string
+          source_id?: string | null
+          source_type?: string | null
+          tenant_id?: string
+          value_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_ledger_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_fee_head_id_fkey"
+            columns: ["fee_head_id"]
+            isOneToOne: false
+            referencedRelation: "fee_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_reversal_of_id_fkey"
+            columns: ["reversal_of_id"]
+            isOneToOne: false
+            referencedRelation: "fee_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_plan: {
         Row: {
           campus_id: string
@@ -5033,6 +5143,19 @@ export type Database = {
         }
       }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
+      post_ledger_entry: {
+        Args: {
+          p_amount_paisa: number
+          p_direction: Database["public"]["Enums"]["fee_ledger_direction"]
+          p_enrolment_id: string
+          p_entry_type: Database["public"]["Enums"]["fee_ledger_entry_type"]
+          p_fee_head_id?: string
+          p_source_id?: string
+          p_source_type?: string
+          p_value_date?: string
+        }
+        Returns: string
+      }
       propose_fee_plan_override: {
         Args: {
           p_line_id: string
@@ -5070,6 +5193,10 @@ export type Database = {
           p_scheme_id: string
           p_value: number
         }
+        Returns: string
+      }
+      reverse_ledger_entry: {
+        Args: { p_ledger_id: string; p_reason: string }
         Returns: string
       }
       seed_default_class_levels: {
@@ -5142,6 +5269,7 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      student_balance: { Args: { p_enrolment_id: string }; Returns: number }
       swap_class_level_ordinals: {
         Args: { p_id_a: string; p_id_b: string }
         Returns: undefined
@@ -5240,6 +5368,16 @@ export type Database = {
       enquiry_status: "open" | "converted" | "lost"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
       fee_frequency: "monthly" | "quarterly" | "annual" | "one_time"
+      fee_ledger_direction: "debit" | "credit"
+      fee_ledger_entry_type:
+        | "charge"
+        | "concession"
+        | "late_fee"
+        | "payment"
+        | "refund"
+        | "adjustment"
+        | "write_off"
+        | "reversal"
       fee_plan_override_status:
         | "none"
         | "pending_approval"
@@ -5520,6 +5658,17 @@ export const Constants = {
       enquiry_status: ["open", "converted", "lost"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
       fee_frequency: ["monthly", "quarterly", "annual", "one_time"],
+      fee_ledger_direction: ["debit", "credit"],
+      fee_ledger_entry_type: [
+        "charge",
+        "concession",
+        "late_fee",
+        "payment",
+        "refund",
+        "adjustment",
+        "write_off",
+        "reversal",
+      ],
       fee_plan_override_status: [
         "none",
         "pending_approval",

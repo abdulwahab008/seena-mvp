@@ -15,6 +15,8 @@ import {
   createConcessionSchemeSchema,
   requestConcessionAwardSchema,
   decideConcessionAwardSchema,
+  postLedgerEntrySchema,
+  reverseLedgerEntrySchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -307,5 +309,29 @@ describe('decideConcessionAwardSchema', () => {
     expect(
       decideConcessionAwardSchema.safeParse({ ...base, approve: false, rejectionReason: 'insufficient supporting evidence' }).success
     ).toBe(true);
+  });
+});
+
+describe('postLedgerEntrySchema', () => {
+  const base = { entryType: 'charge' as const, amountRupees: 5000, direction: 'debit' as const };
+
+  it('accepts a valid entry', () => {
+    expect(postLedgerEntrySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a zero amount — amount_paisa must be positive, direction carries the sign', () => {
+    expect(postLedgerEntrySchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(false);
+  });
+});
+
+describe('reverseLedgerEntrySchema', () => {
+  const base = { ledgerId: '11111111-1111-1111-1111-111111111111', reason: 'cheque returned unpaid by MCB 12-08' };
+
+  it('accepts a reason of 15+ characters', () => {
+    expect(reverseLedgerEntrySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a reason under 15 characters', () => {
+    expect(reverseLedgerEntrySchema.safeParse({ ...base, reason: 'too short' }).success).toBe(false);
   });
 });

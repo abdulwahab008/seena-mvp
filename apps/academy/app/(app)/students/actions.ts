@@ -8,6 +8,8 @@ import {
   proposeFeePlanOverrideSchema,
   requestConcessionAwardSchema,
   decideConcessionAwardSchema,
+  postLedgerEntrySchema,
+  reverseLedgerEntrySchema,
 } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
@@ -240,6 +242,57 @@ export async function decideConcessionAward(
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to decide this award.' };
     if (error.message.includes('AWARD_NOT_PENDING')) return { error: 'This award was already decided.' };
     return { error: 'Could not record the decision.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+// FR-K14: post a ledger entry. amountRupees converts to paisa only here —
+// amount_paisa is bigint end to end, direction carries the sign.
+export async function postLedgerEntry(studentId: string, enrolmentId: string, _prev: FeePlanActionState, formData: FormData): Promise<FeePlanActionState> {
+  const parsed = postLedgerEntrySchema.safeParse({
+    entryType: formData.get('entryType'),
+    amountRupees: formData.get('amountRupees'),
+    direction: formData.get('direction'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('post_ledger_entry', {
+    p_enrolment_id: enrolmentId,
+    p_entry_type: parsed.data.entryType,
+    p_amount_paisa: Math.round(parsed.data.amountRupees * 100),
+    p_direction: parsed.data.direction,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to post ledger entries.' };
+    return { error: 'Could not post the entry.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+// FR-K15: reverse a ledger entry — the only correction path for an
+// append-only ledger. Owner-only, gated inside reverse_ledger_entry().
+export async function reverseLedgerEntry(studentId: string, _prev: FeePlanActionState, formData: FormData): Promise<FeePlanActionState> {
+  const parsed = reverseLedgerEntrySchema.safeParse({
+    ledgerId: formData.get('ledgerId'),
+    reason: formData.get('reason'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('reverse_ledger_entry', {
+    p_ledger_id: parsed.data.ledgerId,
+    p_reason: parsed.data.reason,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to reverse ledger entries — Owner only.' };
+    if (error.message.includes('CANNOT_REVERSE_A_REVERSAL')) return { error: 'A reversal entry cannot itself be reversed.' };
+    if (error.message.includes('duplicate key')) return { error: 'This entry was already reversed.' };
+    return { error: 'Could not reverse the entry.' };
   }
 
   revalidatePath(`/students/${studentId}`);

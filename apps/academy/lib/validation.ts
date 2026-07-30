@@ -241,6 +241,25 @@ export const decideConcessionAwardSchema = z
   });
 export type DecideConcessionAwardInput = z.infer<typeof decideConcessionAwardSchema>;
 
+export const LEDGER_ENTRY_TYPES = ['charge', 'concession', 'late_fee', 'payment', 'refund', 'adjustment', 'write_off'] as const;
+export const LEDGER_DIRECTIONS = ['debit', 'credit'] as const;
+
+// Mirrors post_ledger_entry()'s own checks in
+// supabase/migrations/20260731100000_fee_ledger.sql.
+export const postLedgerEntrySchema = z.object({
+  entryType: z.enum(LEDGER_ENTRY_TYPES),
+  amountRupees: z.coerce.number().positive('Enter an amount'),
+  direction: z.enum(LEDGER_DIRECTIONS),
+});
+export type PostLedgerEntryInput = z.infer<typeof postLedgerEntrySchema>;
+
+// Mirrors reverse_ledger_entry()'s REASON_TOO_SHORT check.
+export const reverseLedgerEntrySchema = z.object({
+  ledgerId: z.string().uuid(),
+  reason: z.string().min(15, 'Reason must be at least 15 characters').max(500),
+});
+export type ReverseLedgerEntryInput = z.infer<typeof reverseLedgerEntrySchema>;
+
 // Mirrors apply_for_leave()'s own checks in
 // supabase/migrations/20260730220544_leave_ledger_and_application.sql — the
 // RPC (balance, dates) is the real gate, this is the earlier UX floor.

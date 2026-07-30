@@ -5,6 +5,7 @@ import { GuardianList } from './guardian-list';
 import { EnrolForm } from './enrol-form';
 import { FeePlanView, type FeePlanLineRow } from './fee-plan-view';
 import { ConcessionAwardView, type AwardRow } from './concession-award-view';
+import { LedgerView, type LedgerEntryRow } from './ledger-view';
 
 // supabase-js types every embedded to-one relation as a possible array —
 // the FK is unique per enrolment/section row, so it's really ever 0 or 1.
@@ -71,6 +72,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const canAdjust = role === 'super_admin' || role === 'owner' || role === 'accountant';
   const canApprove = role === 'super_admin' || role === 'owner' || role === 'principal';
   const canRequestAward = role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'accountant';
+  const canPostLedger = role === 'super_admin' || role === 'owner' || role === 'accountant';
+  const canReverseLedger = role === 'super_admin' || role === 'owner';
 
   const { data: schemes } = await supabase
     .from('concession_scheme')
@@ -101,6 +104,30 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         canApprove: role === 'super_admin' || role === 'owner' || role === scheme?.approver_role,
       };
     });
+  }
+
+  let ledgerEntries: LedgerEntryRow[] = [];
+  let balancePaisa = 0;
+  if (enrolment) {
+    const [{ data: ledgerRows }, { data: balance }] = await Promise.all([
+      supabase
+        .from('fee_ledger')
+        .select('id, entry_type, amount_paisa, direction, value_date, reversal_of_id')
+        .eq('enrolment_id', enrolment.id)
+        .order('posted_at', { ascending: false }),
+      supabase.rpc('student_balance', { p_enrolment_id: enrolment.id }),
+    ]);
+    const reversedIds = new Set((ledgerRows ?? []).map((r) => r.reversal_of_id).filter(Boolean));
+    ledgerEntries = (ledgerRows ?? []).map((r) => ({
+      id: r.id,
+      entryType: r.entry_type,
+      amountPaisa: r.amount_paisa,
+      direction: r.direction,
+      valueDate: r.value_date,
+      reversalOfId: r.reversal_of_id,
+      isReversed: reversedIds.has(r.id),
+    }));
+    balancePaisa = balance ?? 0;
   }
 
   return (
@@ -147,6 +174,20 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             awards={awards}
             schemes={schemes ?? []}
             canRequest={canRequestAward}
+          />
+        </section>
+      )}
+
+      {enrolment && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-medium">Ledger</h2>
+          <LedgerView
+            studentId={student.id}
+            enrolmentId={enrolment.id}
+            balancePaisa={balancePaisa}
+            entries={ledgerEntries}
+            canPost={canPostLedger}
+            canReverse={canReverseLedger}
           />
         </section>
       )}
