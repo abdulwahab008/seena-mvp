@@ -7,6 +7,7 @@ import { bookProcessQueue } from '@/lib/queue';
 import { BookMetadata } from '@seena/shared';
 import { getSignedReadUrl } from '@/lib/storage';
 import { rateLimit } from '@/lib/ratelimit';
+import { assertExamQuota } from '@/lib/quota';
 import { apiError } from '@/lib/http';
 
 const CreateBody = BookMetadata.extend({
@@ -27,6 +28,9 @@ export async function POST(req: Request) {
   try {
     const { userId, orgId } = await requireSession();
     await rateLimit(`book-create:${orgId}`, 10, 60);
+    // Book ingest (OCR + embedding) is the most expensive operation in the
+    // product — it must be gated by the same cap as exam generation.
+    await assertExamQuota(orgId);
     const body = CreateBody.parse(await req.json());
     // Prevent cross-org file access: the key must live under this org's prefix.
     if (!body.storageKey.startsWith(`org_${orgId}/`)) {

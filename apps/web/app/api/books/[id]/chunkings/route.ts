@@ -5,6 +5,7 @@ import { db, schema } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { bookRechunkQueue } from '@/lib/queue';
 import { rateLimit } from '@/lib/ratelimit';
+import { assertExamQuota } from '@/lib/quota';
 import { apiError } from '@/lib/http';
 import {
   CHUNK_STRATEGIES,
@@ -74,6 +75,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   try {
     const { orgId } = await requireSession();
     await rateLimit(`rechunk:${orgId}`, 10, 60);
+    // Re-embedding is billed the same as initial ingest — gate it too.
+    await assertExamQuota(orgId);
     const { id: bookId } = await params;
 
     const [book] = await db

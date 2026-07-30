@@ -84,6 +84,7 @@ export async function POST(req: Request) {
 
     const result = await generateExam({
       orgId,
+      userId,
       bookId: book.id,
       bookTitle: book.title,
       bookSubject: book.subject,

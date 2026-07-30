@@ -10,7 +10,14 @@ export type ExtractResult = {
   ocrMethod: 'pdf-parse' | 'vision-llm' | 'document-ai';
   ocrModel: string | null;
   needsOcr: boolean;
+  /** OpenRouter token usage for the vision OCR call, when that path ran. Document AI is billed separately by Google and not tracked here. */
+  visionUsage: { inputTokens: number; outputTokens: number } | null;
 };
+
+/** True if the buffer starts with the PDF magic bytes. Used to route non-PDF (image) uploads away from pdf-parse instead of letting it throw. */
+export function looksLikePdf(buffer: Buffer): boolean {
+  return buffer.subarray(0, 5).toString('latin1') === '%PDF-';
+}
 
 export type ExtractOptions = {
   /** Optional logging tag — typically a bookId — included in console messages. */
@@ -46,7 +53,7 @@ export async function extractPagesWithOcr(
 
   const charsPerPage = totalChars / Math.max(numPages, 1);
   if (charsPerPage >= 100) {
-    return { pages, numPages, ocrMethod, ocrModel, needsOcr };
+    return { pages, numPages, ocrMethod, ocrModel, needsOcr, visionUsage: null };
   }
 
   needsOcr = true;
@@ -62,12 +69,14 @@ export async function extractPagesWithOcr(
     numPages = ocrPages.length;
     ocrMethod = 'document-ai';
     ocrModel = 'google-document-ai';
-    return { pages, numPages, ocrMethod, ocrModel, needsOcr };
+    return { pages, numPages, ocrMethod, ocrModel, needsOcr, visionUsage: null };
   }
 
   console.log(`[extract] ${tag} text density low, running vision OCR via OpenRouter`);
   const visionModel = env().OPENROUTER_VISION_MODEL ?? 'google/gemini-3.5-flash';
-  const visionPages = await ocrPdfWithVisionLlm(buffer, numPages, opts.vision ?? {});
+  const visionResult = await ocrPdfWithVisionLlm(buffer, numPages, opts.vision ?? {});
+  const visionPages = visionResult.pages;
+  const visionUsage = { inputTokens: visionResult.inputTokens, outputTokens: visionResult.outputTokens };
   if (visionPages.length > 0) {
     pages = visionPages;
     numPages = visionPages.length;
@@ -83,5 +92,5 @@ export async function extractPagesWithOcr(
     );
   }
 
-  return { pages, numPages, ocrMethod, ocrModel, needsOcr };
+  return { pages, numPages, ocrMethod, ocrModel, needsOcr, visionUsage };
 }

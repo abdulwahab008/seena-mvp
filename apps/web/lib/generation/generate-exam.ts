@@ -7,6 +7,7 @@ import {
 } from '@seena/shared';
 import { llm, estimateCostUsd } from '../llm';
 import { env } from '../env';
+import { db, schema } from '../db';
 import { GENERATION_SYSTEM_PROMPT, buildGenerationUserPrompt } from '../rag/prompts';
 import {
   formatContext,
@@ -18,6 +19,8 @@ import { findCopyrightViolations, dropViolations } from './copyright-guard';
 
 export type GenerateExamInput = {
   orgId: string;
+  /** Only used to attribute a `generations` row if the LLM call is billed but generation then fails. */
+  userId: string;
   bookId: string;
   bookTitle: string;
   bookSubject: string;
@@ -97,6 +100,7 @@ export type GenerateExamResult = {
 };
 
 export async function generateExam(input: GenerateExamInput): Promise<GenerateExamResult> {
+  const startedAt = Date.now();
   let pattern: PatternSpec | undefined;
   if (input.customSections && input.customSections.length > 0) {
     pattern = buildCustomPattern(input.customSections, input.bookSubject, input.bookGrade);
@@ -175,36 +179,11 @@ export async function generateExam(input: GenerateExamInput): Promise<GenerateEx
     tool_choice: { type: 'function', function: { name: EXAM_TOOL_NAME } },
   });
 
-  const toolCall = completion.choices[0]?.message?.tool_calls?.[0];
-  if (!toolCall || toolCall.type !== 'function') {
-    throw new Error('exam generator did not return a tool call');
-  }
-
-  let examRaw: Record<string, unknown>;
-  try {
-    examRaw = JSON.parse(toolCall.function.arguments);
-  } catch (e) {
-    throw new Error(`tool arguments not valid JSON: ${(e as Error).message}`);
-  }
-
-  // Inject `type` on each question if the model omitted it (it sometimes mirrors section type).
-  if (Array.isArray(examRaw.sections)) {
-    for (const section of examRaw.sections as Array<Record<string, unknown>>) {
-      if (Array.isArray(section.questions)) {
-        for (const q of section.questions as Array<Record<string, unknown>>) {
-          if (!q.type && typeof section.type === 'string') q.type = section.type;
-        }
-      }
-    }
-  }
-
-  const exam = Exam.parse(examRaw);
-  const violations = findCopyrightViolations(exam, context);
-  const cleanExam = dropViolations(exam, violations);
-
+  // Capture billable usage the moment the (already-billed) completion comes
+  // back — before any parsing/validation below that can throw. Whatever
+  // happens next, this org was charged for these tokens.
   const inputTokens = completion.usage?.prompt_tokens ?? 0;
   const outputTokens = completion.usage?.completion_tokens ?? 0;
-
   const llmCost = estimateCostUsd(model, inputTokens, outputTokens);
   const rerankCost = retrieval.rerank
     ? estimateCostUsd(
@@ -213,14 +192,87 @@ export async function generateExam(input: GenerateExamInput): Promise<GenerateEx
         retrieval.rerank.outputTokens,
       )
     : 0;
-  return {
-    exam: cleanExam,
-    pattern,
-    retrievedChunkIds: chunks.map((c) => c.id),
-    inputTokens,
-    outputTokens,
-    costUsd: llmCost + rerankCost,
-    model,
-    copyrightViolationsDropped: violations.length,
-  };
+  const costUsd = llmCost + rerankCost;
+
+  try {
+    const toolCall = completion.choices[0]?.message?.tool_calls?.[0];
+    if (!toolCall || toolCall.type !== 'function') {
+      throw new Error('exam generator did not return a tool call');
+    }
+
+    let examRaw: Record<string, unknown>;
+    try {
+      examRaw = JSON.parse(toolCall.function.arguments);
+    } catch (e) {
+      throw new Error(`tool arguments not valid JSON: ${(e as Error).message}`);
+    }
+
+    // Inject `type` on each question if the model omitted it (it sometimes mirrors section type).
+    if (Array.isArray(examRaw.sections)) {
+      for (const section of examRaw.sections as Array<Record<string, unknown>>) {
+        if (Array.isArray(section.questions)) {
+          for (const q of section.questions as Array<Record<string, unknown>>) {
+            if (!q.type && typeof section.type === 'string') q.type = section.type;
+          }
+        }
+      }
+    }
+
+    const exam = Exam.parse(examRaw);
+    const violations = findCopyrightViolations(exam, context);
+    const droppedExam = dropViolations(exam, violations);
+
+    // The copyright guard can remove a whole section (if every question in
+    // it was a violation) or thin a section below what the pattern asked
+    // for. Either way the payload no longer matches the paper the teacher
+    // requested — fail before persisting anything, rather than silently
+    // shipping (or storing) a shorter/invalid exam.
+    if (droppedExam.sections.length !== exam.sections.length) {
+      throw new Error(
+        `copyright guard removed an entire section (${exam.sections.length} → ${droppedExam.sections.length} sections); please retry generation`,
+      );
+    }
+    let cleanExam: Exam;
+    try {
+      cleanExam = Exam.parse(droppedExam);
+    } catch (e) {
+      throw new Error(
+        `exam is invalid after dropping ${violations.length} copyrighted question(s): ${(e as Error).message}`,
+      );
+    }
+    cleanExam.sections.forEach((s, i) => {
+      const expected = pattern!.sections[i]?.questionCount;
+      if (expected && s.questions.length < expected) {
+        throw new Error(
+          `section ${i + 1} ("${s.title}") has only ${s.questions.length}/${expected} questions after the copyright guard; please retry generation`,
+        );
+      }
+    });
+
+    return {
+      exam: cleanExam,
+      pattern,
+      retrievedChunkIds: chunks.map((c) => c.id),
+      inputTokens,
+      outputTokens,
+      costUsd,
+      model,
+      copyrightViolationsDropped: violations.length,
+    };
+  } catch (e) {
+    // The completion above was already billed by OpenRouter even though
+    // generation failed here — record it so the org's cost cap can see it.
+    // No examId: nothing was persisted to `exams`.
+    await db.insert(schema.generations).values({
+      orgId: input.orgId,
+      userId: input.userId,
+      kind: 'generate-exam-failed',
+      model,
+      inputTokens,
+      outputTokens,
+      latencyMs: Date.now() - startedAt,
+      costUsd: costUsd.toFixed(6),
+    });
+    throw e;
+  }
 }

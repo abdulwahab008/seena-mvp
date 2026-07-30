@@ -30,9 +30,15 @@ export function ExamView({ examId, initialPayload, title }: Props) {
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
-      const next = structuredClone(exam);
-      next.sections[sectionIndex]!.questions[questionIndex] = data.question;
-      setExam(next);
+      // Functional updater: apply against whatever the exam looks like when
+      // this resolves, not the snapshot from when the request was fired —
+      // otherwise any edit made while this LLM call was in flight (which can
+      // take several seconds) gets silently overwritten.
+      setExam((prev) => {
+        const next = structuredClone(prev);
+        next.sections[sectionIndex]!.questions[questionIndex] = data.question;
+        return next;
+      });
       toast.success('Question regenerated.');
     } catch (e) {
       toast.error((e as Error).message);
@@ -147,9 +153,12 @@ export function ExamView({ examId, initialPayload, title }: Props) {
                       <Textarea
                         value={q.prompt}
                         onChange={(e) => {
-                          const next = structuredClone(exam);
-                          next.sections[si]!.questions[qi]!.prompt = e.target.value;
-                          setExam(next);
+                          const value = e.target.value;
+                          setExam((prev) => {
+                            const next = structuredClone(prev);
+                            next.sections[si]!.questions[qi]!.prompt = value;
+                            return next;
+                          });
                         }}
                         className="text-sm"
                       />

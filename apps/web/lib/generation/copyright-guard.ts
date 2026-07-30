@@ -55,9 +55,15 @@ export function dropViolations(exam: Exam, violations: CopyrightViolation[]): Ex
   const drop = new Set(violations.map((v) => `${v.sectionIndex}:${v.questionIndex}`));
   return {
     ...exam,
-    sections: exam.sections.map((s, si) => ({
-      ...s,
-      questions: s.questions.filter((_, qi) => !drop.has(`${si}:${qi}`)),
-    })),
+    // A section with every question dropped is not a valid ExamSection
+    // (schema requires questions.length >= 1) — drop the whole section
+    // rather than persist one with zero questions. The caller is
+    // responsible for treating a changed section count as a failure.
+    sections: exam.sections
+      .map((s, si) => ({
+        ...s,
+        questions: s.questions.filter((_, qi) => !drop.has(`${si}:${qi}`)),
+      }))
+      .filter((s) => s.questions.length > 0),
   };
 }

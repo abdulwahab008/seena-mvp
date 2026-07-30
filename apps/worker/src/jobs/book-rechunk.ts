@@ -4,9 +4,10 @@ import type { ChunkConfig, PageText } from '@seena/shared/rag/chunk';
 import { chunkPages } from '@seena/shared/rag/chunk';
 import { db, schema } from '../db.js';
 import { extractPagesWithOcr } from '../extract-pipeline.js';
-import { embedTexts } from '../openai.js';
+import { embedTexts, estimateChatCostUsd, estimateEmbedCostUsd } from '../openai.js';
 import { pineconeIndex } from '../pinecone.js';
 import { downloadObject } from '../storage.js';
+import { env } from '../env.js';
 
 const MAX_CHUNKS_PER_BOOK = 1500;
 const PINECONE_BATCH = 100;
@@ -77,13 +78,23 @@ export async function rechunkBook(job: BookRechunkJob): Promise<void> {
     }
 
     // 5. Embed using the chunking's chosen model.
-    const vectors = await embedTexts(
+    const embedStartedAt = Date.now();
+    const { vectors, totalTokens: embedTokens } = await embedTexts(
       chunks.map((c) => c.text),
       chunking.embeddingModel,
     );
     if (vectors.length !== chunks.length) {
       throw new Error(`embedding count mismatch: ${vectors.length} vs ${chunks.length}`);
     }
+    await db.insert(schema.generations).values({
+      orgId,
+      kind: 'book-embed',
+      model: chunking.embeddingModel,
+      inputTokens: embedTokens,
+      outputTokens: 0,
+      latencyMs: Date.now() - embedStartedAt,
+      costUsd: estimateEmbedCostUsd(chunking.embeddingModel, embedTokens).toFixed(6),
+    });
 
     // 6. Upsert into Pinecone in this chunking's namespace, batched.
     const [book] = await db.select().from(schema.books).where(eq(schema.books.id, bookId));
@@ -199,7 +210,8 @@ async function backfillLegacyBookPages(bookId: string, orgId: string): Promise<P
   const visionModel = process.env.OPENROUTER_VISION_MODEL ?? null;
   const visionMethodLabel = visionModel ? `vision-llm-${visionModel}` : 'vision-llm';
 
-  await extractPagesWithOcr(buffer, {
+  const extractStartedAt = Date.now();
+  const { visionUsage } = await extractPagesWithOcr(buffer, {
     tag: bookId,
     vision: {
       skipPageNumbersBeforeOrEqual: skipUntil,
@@ -219,6 +231,19 @@ async function backfillLegacyBookPages(bookId: string, orgId: string): Promise<P
       },
     },
   });
+  if (visionUsage) {
+    const model = visionModel ?? env().OPENROUTER_VISION_MODEL;
+    await db.insert(schema.generations).values({
+      orgId,
+      userId: book.uploadedBy,
+      kind: 'book-ocr',
+      model,
+      inputTokens: visionUsage.inputTokens,
+      outputTokens: visionUsage.outputTokens,
+      latencyMs: Date.now() - extractStartedAt,
+      costUsd: estimateChatCostUsd(model, visionUsage.inputTokens, visionUsage.outputTokens).toFixed(6),
+    });
+  }
 
   // Re-load whatever ended up persisted (incremental writes from above plus
   // anything from prior attempts).
