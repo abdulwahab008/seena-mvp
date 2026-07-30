@@ -71,7 +71,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const role = appUser?.app_role;
   const canAdjust = role === 'super_admin' || role === 'owner' || role === 'accountant';
   const canApprove = role === 'super_admin' || role === 'owner' || role === 'principal';
-  const canRequestAward = role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'accountant';
+  const canRequestAward =
+    role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'accountant' || role === 'admissions_officer';
   const canPostLedger = role === 'super_admin' || role === 'owner' || role === 'accountant';
   const canReverseLedger = role === 'super_admin' || role === 'owner';
 

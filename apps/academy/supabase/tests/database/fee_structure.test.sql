@@ -88,10 +88,22 @@ select throws_ok(
   'a published structure can no longer have lines added'
 );
 
--- Publishing a second structure for the same campus+session supersedes the first.
-select public.create_draft_structure(:'campus_id'::uuid, :'session_id'::uuid) as structure2_id \gset
-select public.add_structure_line(:'structure2_id'::uuid, :'class1_id'::uuid, :'tuition_id'::uuid, 550000, 'monthly');
-select public.add_structure_line(:'structure2_id'::uuid, :'class6_id'::uuid, :'tuition_id'::uuid, 450000, 'monthly');
+-- Publishing a second structure for the same campus+session supersedes the
+-- first. create_draft_structure() itself now refuses a second draft once
+-- one is already published for this campus+session (closing a regulator-
+-- cap bypass — see the module_k_review_fixes migration) — a revision goes
+-- through create_next_structure_version() instead, same as FR-K03.
+-- create_next_structure_version() clones every line from structure_id
+-- (TUITION/class1, TUITION/class6, LAB/class6/pre_medical) — revise the
+-- two TUITION amounts on the clones via update_structure_line_amount(),
+-- not add_structure_line(), which would now collide with fee_structure_line_uq.
+select public.create_next_structure_version(:'structure_id'::uuid, current_date + 30) as structure2_id \gset
+select id as structure2_tuition1_id from public.fee_structure_line
+  where structure_id = :'structure2_id' and class_id = :'class1_id' and fee_head_id = :'tuition_id' \gset
+select id as structure2_tuition6_id from public.fee_structure_line
+  where structure_id = :'structure2_id' and class_id = :'class6_id' and fee_head_id = :'tuition_id' \gset
+select public.update_structure_line_amount(:'structure2_tuition1_id'::uuid, 550000::bigint);
+select public.update_structure_line_amount(:'structure2_tuition6_id'::uuid, 450000::bigint);
 select public.publish_fee_structure(:'structure2_id'::uuid);
 select is(
   (select status::text from public.fee_structure where id = :'structure_id'),
