@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createConcessionSchemeSchema } from '@/lib/validation';
+import { createConcessionSchemeSchema, setFeePolicySchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type ActionState = { error: string | null };
@@ -38,6 +38,30 @@ export async function createConcessionScheme(_prev: ActionState, formData: FormD
     if (error.message.includes('FEE_HEAD_NOT_FOUND')) return { error: 'One of the selected fee heads was not found.' };
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to create concession schemes.' };
     return { error: 'Could not create the scheme.' };
+  }
+
+  revalidatePath('/fees/concessions');
+  return { error: null };
+}
+
+// FR-K08: the tenant-wide stacking cap that generate_challans() (FR-K09)
+// applies via app.fn_plan_line_period_charges — this is policy, not a
+// per-scheme setting, so it lives on its own tenant-scoped row.
+export async function setFeePolicy(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = setFeePolicySchema.safeParse({
+    maxStackedConcessionPct: formData.get('maxStackedConcessionPct') || undefined,
+    allowNegativeNet: formData.get('allowNegativeNet') === 'on',
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_fee_policy', {
+    p_max_stacked_concession_pct: parsed.data.maxStackedConcessionPct,
+    p_allow_negative_net: parsed.data.allowNegativeNet,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to change fee policy.' };
+    return { error: 'Could not update the policy.' };
   }
 
   revalidatePath('/fees/concessions');

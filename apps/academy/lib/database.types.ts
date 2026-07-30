@@ -1993,6 +1993,7 @@ export type Database = {
       fee_challan_line: {
         Row: {
           amount_paisa: number
+          applied_award_ids: string[] | null
           challan_id: string
           concession_paisa: number
           fee_head_id: string
@@ -2002,6 +2003,7 @@ export type Database = {
         }
         Insert: {
           amount_paisa: number
+          applied_award_ids?: string[] | null
           challan_id: string
           concession_paisa?: number
           fee_head_id: string
@@ -2011,6 +2013,7 @@ export type Database = {
         }
         Update: {
           amount_paisa?: number
+          applied_award_ids?: string[] | null
           challan_id?: string
           concession_paisa?: number
           fee_head_id?: string
@@ -2400,6 +2403,45 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_structure_line"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_policy: {
+        Row: {
+          allow_negative_net: boolean
+          max_stacked_concession_pct: number | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allow_negative_net?: boolean
+          max_stacked_concession_pct?: number | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allow_negative_net?: boolean
+          max_stacked_concession_pct?: number | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_policy_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -5265,6 +5307,7 @@ export type Database = {
         }
         Returns: string
       }
+      expire_due_concessions: { Args: { p_as_of?: string }; Returns: number }
       fn_assign_next_roll_no: {
         Args: { p_enrolment_id: string }
         Returns: number
@@ -5680,6 +5723,13 @@ export type Database = {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
       }
+      set_fee_policy: {
+        Args: {
+          p_allow_negative_net?: boolean
+          p_max_stacked_concession_pct?: number
+        }
+        Returns: undefined
+      }
       set_gr_sequence: {
         Args: {
           p_campus_id: string
@@ -5798,7 +5848,7 @@ export type Database = {
         | "AKU_EB"
         | "CAMBRIDGE"
       campus_status: "active" | "archived"
-      concession_award_status: "pending" | "approved" | "rejected"
+      concession_award_status: "pending" | "approved" | "rejected" | "expired"
       concession_calc_type: "percentage" | "fixed_amount"
       contract_type:
         | "permanent"
@@ -6089,7 +6139,7 @@ export const Constants = {
         "CAMBRIDGE",
       ],
       campus_status: ["active", "archived"],
-      concession_award_status: ["pending", "approved", "rejected"],
+      concession_award_status: ["pending", "approved", "rejected", "expired"],
       concession_calc_type: ["percentage", "fixed_amount"],
       contract_type: [
         "permanent",

@@ -20,6 +20,7 @@ import {
   generateChallansSchema,
   createLateFeeRuleSchema,
   previewLateFeeSchema,
+  setFeePolicySchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -397,5 +398,19 @@ describe('previewLateFeeSchema', () => {
 
   it('rejects a missing challan id', () => {
     expect(previewLateFeeSchema.safeParse({ challanId: '', asOf: '2026-08-20' }).success).toBe(false);
+  });
+});
+
+describe('setFeePolicySchema', () => {
+  it('accepts a cap within range', () => {
+    expect(setFeePolicySchema.safeParse({ maxStackedConcessionPct: 50, allowNegativeNet: false }).success).toBe(true);
+  });
+
+  it('accepts no cap at all (uncapped, subject only to the per-line clamp)', () => {
+    expect(setFeePolicySchema.safeParse({ allowNegativeNet: false }).success).toBe(true);
+  });
+
+  it('rejects a cap over 100', () => {
+    expect(setFeePolicySchema.safeParse({ maxStackedConcessionPct: 140, allowNegativeNet: false }).success).toBe(false);
   });
 });

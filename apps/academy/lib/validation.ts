@@ -375,3 +375,11 @@ export const previewLateFeeSchema = z.object({
   asOf: z.string().min(1, 'Required'),
 });
 export type PreviewLateFeeInput = z.infer<typeof previewLateFeeSchema>;
+
+// Mirrors set_fee_policy()'s own signature in
+// supabase/migrations/20260731170000_concession_stacking_cap.sql.
+export const setFeePolicySchema = z.object({
+  maxStackedConcessionPct: z.coerce.number().min(0).max(100).optional(),
+  allowNegativeNet: z.boolean(),
+});
+export type SetFeePolicyInput = z.infer<typeof setFeePolicySchema>;
