@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { generateChallans, type GenerateResult } from './actions';
+import { generateChallans, buildChallanRenderPayload, type GenerateResult } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,34 @@ function ResultSummary({ result }: { result: GenerateResult }) {
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+function PayloadPreview({ challanId }: { challanId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [payload, setPayload] = useState<unknown>(null);
+
+  const onPreview = () => {
+    const fd = new FormData();
+    fd.set('challanId', challanId);
+    startTransition(async () => {
+      const result = await buildChallanRenderPayload({ error: null }, fd);
+      if (result.error) toast.error(result.error);
+      else setPayload(result.payload);
+    });
+  };
+
+  return (
+    <div className="mt-2 space-y-1">
+      <Button type="button" size="sm" variant="outline" disabled={pending} onClick={onPreview} data-testid={`preview-payload-${challanId}`}>
+        {pending ? 'Loading…' : 'Preview PDF payload'}
+      </Button>
+      {payload !== null && (
+        <pre data-testid={`payload-json-${challanId}`} className="max-h-64 overflow-auto rounded-md bg-muted p-2 text-xs">
+          {JSON.stringify(payload, null, 2)}
+        </pre>
       )}
     </div>
   );
@@ -132,13 +160,16 @@ export function ChallanGenerator({
         ) : (
           challans.map((c) => (
             <Card key={c.id} data-testid={`challan-row-${c.challanNo}`}>
-              <CardContent className="flex items-center justify-between p-3 text-sm">
-                <span>
-                  {c.challanNo} · {c.billingPeriod}
-                </span>
-                <span className="text-muted-foreground">
-                  Net PKR {(c.netPaisa / 100).toLocaleString()} · {c.status}
-                </span>
+              <CardContent className="p-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span>
+                    {c.challanNo} · {c.billingPeriod}
+                  </span>
+                  <span className="text-muted-foreground">
+                    Net PKR {(c.netPaisa / 100).toLocaleString()} · {c.status}
+                  </span>
+                </div>
+                <PayloadPreview challanId={c.id} />
               </CardContent>
             </Card>
           ))

@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { ChallanGenerator, type ChallanRow, type BatchErrorRow, type BatchRow } from './challan-generator';
+import { ChallanTemplateForm, type ChallanTemplateData } from './challan-template-form';
 
 export default async function ChallansPage() {
   const supabase = await supabaseServer();
@@ -15,6 +16,8 @@ export default async function ChallansPage() {
   let batch: BatchRow = null;
   let batchErrors: BatchErrorRow[] = [];
   let challans: ChallanRow[] = [];
+  let template: ChallanTemplateData = null;
+  let canConfigureTemplate = false;
 
   if (campus && session) {
     const { data: batchRow } = await supabase
@@ -56,6 +59,26 @@ export default async function ChallansPage() {
       netPaisa: c.net_paisa,
       status: c.status,
     }));
+
+    const { data: templateRow } = await supabase
+      .from('challan_template')
+      .select('bank_name, bank_account_title, bank_account_no, footer_note_en')
+      .eq('campus_id', campus.id)
+      .maybeSingle();
+    template = templateRow
+      ? {
+          bankName: templateRow.bank_name,
+          bankAccountTitle: templateRow.bank_account_title,
+          bankAccountNo: templateRow.bank_account_no,
+          footerNoteEn: templateRow.footer_note_en,
+        }
+      : null;
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data: appUser } = await supabase.from('app_user').select('app_role').eq('user_id', user!.id).single();
+    canConfigureTemplate = appUser?.app_role === 'super_admin' || appUser?.app_role === 'owner';
   }
 
   return (
@@ -67,7 +90,19 @@ export default async function ChallansPage() {
         </p>
       </div>
       {campus && session ? (
-        <ChallanGenerator campusId={campus.id} sessionId={session.id} batch={batch} batchErrors={batchErrors} challans={challans} />
+        <>
+          {canConfigureTemplate && (
+            <div className="space-y-2">
+              <h2 className="text-lg font-medium">Challan template (FR-K11)</h2>
+              <p className="text-sm text-muted-foreground">
+                Bank details for this campus&apos;s challan copies. No PDF renderer exists yet — see &quot;Preview PDF payload&quot; below
+                for the data a future renderer would consume.
+              </p>
+              <ChallanTemplateForm campusId={campus.id} template={template} />
+            </div>
+          )}
+          <ChallanGenerator campusId={campus.id} sessionId={session.id} batch={batch} batchErrors={batchErrors} challans={challans} />
+        </>
       ) : (
         <p className="text-sm text-muted-foreground">No active campus or current session found.</p>
       )}

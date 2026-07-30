@@ -421,3 +421,18 @@ export const publishStructureSchema = z.object({
   regulatorReference: z.string().max(200).optional(),
 });
 export type PublishStructureInput = z.infer<typeof publishStructureSchema>;
+
+// Mirrors set_challan_template()'s own signature in
+// supabase/migrations/20260731200000_challan_pdf_data_layer.sql.
+export const setChallanTemplateSchema = z.object({
+  campusId: z.string().uuid(),
+  bankName: z.string().min(1, 'Required').max(200),
+  bankAccountTitle: z.string().min(1, 'Required').max(200),
+  bankAccountNo: z.string().min(1, 'Required').max(50),
+  footerNoteEn: z.string().max(500).optional(),
+  footerNoteUr: z.string().max(500).optional(),
+});
+export type SetChallanTemplateInput = z.infer<typeof setChallanTemplateSchema>;
+
+export const buildChallanRenderPayloadSchema = z.object({ challanId: z.string().uuid() });
+export type BuildChallanRenderPayloadInput = z.infer<typeof buildChallanRenderPayloadSchema>;

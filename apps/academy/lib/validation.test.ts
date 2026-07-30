@@ -24,6 +24,7 @@ import {
   setSiblingDiscountSchemeSchema,
   createNextStructureVersionSchema,
   updateStructureLineAmountSchema,
+  setChallanTemplateSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -453,5 +454,22 @@ describe('updateStructureLineAmountSchema', () => {
     expect(
       updateStructureLineAmountSchema.safeParse({ lineId: '11111111-1111-1111-1111-111111111111', amountRupees: -1 }).success
     ).toBe(false);
+  });
+});
+
+describe('setChallanTemplateSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    bankName: 'MCB Bank',
+    bankAccountTitle: 'ABC School Trust',
+    bankAccountNo: '1234567890',
+  };
+
+  it('accepts a valid template', () => {
+    expect(setChallanTemplateSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing bank name', () => {
+    expect(setChallanTemplateSchema.safeParse({ ...base, bankName: '' }).success).toBe(false);
   });
 });

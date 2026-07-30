@@ -1050,6 +1050,67 @@ export type Database = {
           },
         ]
       }
+      challan_template: {
+        Row: {
+          bank_account_no: string
+          bank_account_title: string
+          bank_name: string
+          campus_id: string
+          footer_note_en: string | null
+          footer_note_ur: string | null
+          logo_path: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          bank_account_no: string
+          bank_account_title: string
+          bank_name: string
+          campus_id: string
+          footer_note_en?: string | null
+          footer_note_ur?: string | null
+          logo_path?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          bank_account_no?: string
+          bank_account_title?: string
+          bank_name?: string
+          campus_id?: string
+          footer_note_en?: string | null
+          footer_note_ur?: string | null
+          logo_path?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challan_template_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challan_template_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challan_template_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       class_level: {
         Row: {
           board_stage: string | null
@@ -2034,6 +2095,41 @@ export type Database = {
             columns: ["fee_head_id"]
             isOneToOne: false
             referencedRelation: "fee_head"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_challan_pdf: {
+        Row: {
+          challan_id: string
+          id: string
+          rendered_at: string
+          sha256: string
+          storage_path: string
+          template_version: number
+        }
+        Insert: {
+          challan_id: string
+          id?: string
+          rendered_at?: string
+          sha256: string
+          storage_path: string
+          template_version?: number
+        }
+        Update: {
+          challan_id?: string
+          id?: string
+          rendered_at?: string
+          sha256?: string
+          storage_path?: string
+          template_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_challan_pdf_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
             referencedColumns: ["id"]
           },
         ]
@@ -5169,6 +5265,10 @@ export type Database = {
         }
         Returns: number
       }
+      build_challan_render_payload: {
+        Args: { p_challan_id: string }
+        Returns: Json
+      }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
       compute_late_fee: {
@@ -5874,6 +5974,18 @@ export type Database = {
       seed_tenant_roles: { Args: { p_tenant_id: string }; Returns: undefined }
       set_academic_terms: {
         Args: { p_session_id: string; p_terms: Json }
+        Returns: undefined
+      }
+      set_challan_template: {
+        Args: {
+          p_bank_account_no: string
+          p_bank_account_title: string
+          p_bank_name: string
+          p_campus_id: string
+          p_footer_note_en?: string
+          p_footer_note_ur?: string
+          p_logo_path?: string
+        }
         Returns: undefined
       }
       set_class_level_active: {
