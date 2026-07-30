@@ -44,7 +44,7 @@ export default async function ChallansPage() {
 
     const { data: challanRows } = await supabase
       .from('fee_challan')
-      .select('id, challan_no, billing_period, gross_paisa, concession_paisa, net_paisa, status')
+      .select('id, challan_no, billing_period, gross_paisa, concession_paisa, arrears_paisa, net_paisa, status')
       .eq('campus_id', campus.id)
       .eq('session_id', session.id)
       .order('created_at', { ascending: false })
@@ -56,6 +56,7 @@ export default async function ChallansPage() {
       billingPeriod: c.billing_period,
       grossPaisa: c.gross_paisa,
       concessionPaisa: c.concession_paisa,
+      arrearsPaisa: c.arrears_paisa,
       netPaisa: c.net_paisa,
       status: c.status,
     }));

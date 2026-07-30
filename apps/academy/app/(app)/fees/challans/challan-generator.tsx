@@ -14,6 +14,7 @@ export type ChallanRow = {
   billingPeriod: string;
   grossPaisa: number;
   concessionPaisa: number;
+  arrearsPaisa: number;
   netPaisa: number;
   status: string;
 };
@@ -165,10 +166,16 @@ export function ChallanGenerator({
                   <span>
                     {c.challanNo} · {c.billingPeriod}
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground" data-testid={`challan-net-${c.challanNo}`}>
                     Net PKR {(c.netPaisa / 100).toLocaleString()} · {c.status}
                   </span>
                 </div>
+                {c.arrearsPaisa > 0 && (
+                  <p className="text-xs text-muted-foreground" data-testid={`challan-arrears-${c.challanNo}`}>
+                    Current PKR {((c.grossPaisa - c.concessionPaisa) / 100).toLocaleString()} + Arrears PKR{' '}
+                    {(c.arrearsPaisa / 100).toLocaleString()}
+                  </p>
+                )}
                 <PayloadPreview challanId={c.id} />
               </CardContent>
             </Card>
