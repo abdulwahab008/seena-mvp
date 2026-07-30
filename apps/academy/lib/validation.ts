@@ -383,3 +383,18 @@ export const setFeePolicySchema = z.object({
   allowNegativeNet: z.boolean(),
 });
 export type SetFeePolicyInput = z.infer<typeof setFeePolicySchema>;
+
+// Mirrors set_sibling_discount_scheme()'s own check constraint
+// (sibling_rank >= 2 — rank 1 is the eldest, who never gets a discount)
+// in supabase/migrations/20260731180000_sibling_discount_detection.sql.
+export const setSiblingDiscountSchemeSchema = z.object({
+  siblingRank: z.coerce.number().int().min(2, 'Rank 1 is the eldest — they never get a sibling discount'),
+  schemeId: z.string().uuid('Choose a scheme'),
+});
+export type SetSiblingDiscountSchemeInput = z.infer<typeof setSiblingDiscountSchemeSchema>;
+
+export const detectSiblingGroupsSchema = z.object({
+  campusId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+});
+export type DetectSiblingGroupsInput = z.infer<typeof detectSiblingGroupsSchema>;

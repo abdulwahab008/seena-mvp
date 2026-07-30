@@ -21,6 +21,7 @@ import {
   createLateFeeRuleSchema,
   previewLateFeeSchema,
   setFeePolicySchema,
+  setSiblingDiscountSchemeSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -412,5 +413,18 @@ describe('setFeePolicySchema', () => {
 
   it('rejects a cap over 100', () => {
     expect(setFeePolicySchema.safeParse({ maxStackedConcessionPct: 140, allowNegativeNet: false }).success).toBe(false);
+  });
+});
+
+describe('setSiblingDiscountSchemeSchema', () => {
+  const base = { schemeId: '11111111-1111-1111-1111-111111111111' };
+
+  it('accepts rank 2 and above', () => {
+    expect(setSiblingDiscountSchemeSchema.safeParse({ ...base, siblingRank: 2 }).success).toBe(true);
+    expect(setSiblingDiscountSchemeSchema.safeParse({ ...base, siblingRank: 3 }).success).toBe(true);
+  });
+
+  it('rejects rank 1 — the eldest never gets a sibling discount', () => {
+    expect(setSiblingDiscountSchemeSchema.safeParse({ ...base, siblingRank: 1 }).success).toBe(false);
   });
 });

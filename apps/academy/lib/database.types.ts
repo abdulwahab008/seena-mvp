@@ -3680,6 +3680,91 @@ export type Database = {
           },
         ]
       }
+      sibling_discount_scheme_rank: {
+        Row: {
+          scheme_id: string
+          sibling_rank: number
+          tenant_id: string
+        }
+        Insert: {
+          scheme_id: string
+          sibling_rank: number
+          tenant_id: string
+        }
+        Update: {
+          scheme_id?: string
+          sibling_rank?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sibling_discount_scheme_rank_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "concession_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sibling_discount_scheme_rank_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sibling_group: {
+        Row: {
+          campus_id: string
+          guardian_cnic_norm: string
+          id: string
+          last_scanned_at: string
+          member_enrolment_ids: string[]
+          session_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          guardian_cnic_norm: string
+          id?: string
+          last_scanned_at?: string
+          member_enrolment_ids: string[]
+          session_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          guardian_cnic_norm?: string
+          id?: string
+          last_scanned_at?: string
+          member_enrolment_ids?: string[]
+          session_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sibling_group_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sibling_group_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sibling_group_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff: {
         Row: {
           campus_id: string
@@ -5269,6 +5354,10 @@ export type Database = {
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
       delete_stream: { Args: { p_id: string }; Returns: undefined }
+      detect_sibling_groups: {
+        Args: { p_campus_id: string; p_session_id: string }
+        Returns: Json
+      }
       edit_concession_award: {
         Args: { p_award_id: string; p_new_value: number }
         Returns: undefined
@@ -5751,6 +5840,10 @@ export type Database = {
       }
       set_section_stream: {
         Args: { p_section_id: string; p_stream_id: string }
+        Returns: undefined
+      }
+      set_sibling_discount_scheme: {
+        Args: { p_scheme_id: string; p_sibling_rank: number }
         Returns: undefined
       }
       set_stream_active: {
