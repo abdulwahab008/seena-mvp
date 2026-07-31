@@ -609,3 +609,21 @@ export const setDocumentSubmissionSchema = z
     path: ['promisedDeadline'],
   });
 export type SetDocumentSubmissionInput = z.infer<typeof setDocumentSubmissionSchema>;
+
+// Mirrors create_test_sitting()'s own checks in
+// supabase/migrations/20260731380000_admission_test_sitting.sql.
+export const createTestSittingSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  sessionId: z.string().uuid('Choose a session'),
+  classLevelId: z.string().uuid('Choose a class'),
+  startsAt: z.string().min(1, 'Choose a date and time'),
+  capacity: z.coerce.number().int().positive('Must be at least 1'),
+  venue: z.string().max(200).optional(),
+});
+export type CreateTestSittingInput = z.infer<typeof createTestSittingSchema>;
+
+export const allocateTestSeatSchema = z.object({
+  sittingId: z.string().uuid(),
+  applicationId: z.string().uuid('Choose an application'),
+});
+export type AllocateTestSeatInput = z.infer<typeof allocateTestSeatSchema>;

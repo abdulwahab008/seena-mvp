@@ -768,6 +768,129 @@ export type Database = {
           },
         ]
       }
+      admission_test_candidate: {
+        Row: {
+          allocated_at: string
+          application_id: string
+          attendance: Database["public"]["Enums"]["test_attendance"]
+          cancelled_at: string | null
+          cancelled_reason: string | null
+          id: string
+          seat_no: number
+          sitting_id: string
+          tenant_id: string
+        }
+        Insert: {
+          allocated_at?: string
+          application_id: string
+          attendance?: Database["public"]["Enums"]["test_attendance"]
+          cancelled_at?: string | null
+          cancelled_reason?: string | null
+          id?: string
+          seat_no: number
+          sitting_id: string
+          tenant_id: string
+        }
+        Update: {
+          allocated_at?: string
+          application_id?: string
+          attendance?: Database["public"]["Enums"]["test_attendance"]
+          cancelled_at?: string | null
+          cancelled_reason?: string | null
+          id?: string
+          seat_no?: number
+          sitting_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_test_candidate_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "admission_application"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_test_candidate_sitting_id_fkey"
+            columns: ["sitting_id"]
+            isOneToOne: false
+            referencedRelation: "admission_test_sitting"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_test_candidate_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_test_sitting: {
+        Row: {
+          campus_id: string
+          capacity: number
+          class_level_id: string
+          created_at: string
+          id: string
+          session_id: string
+          starts_at: string
+          tenant_id: string
+          venue: string | null
+        }
+        Insert: {
+          campus_id: string
+          capacity: number
+          class_level_id: string
+          created_at?: string
+          id?: string
+          session_id: string
+          starts_at: string
+          tenant_id: string
+          venue?: string | null
+        }
+        Update: {
+          campus_id?: string
+          capacity?: number
+          class_level_id?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+          starts_at?: string
+          tenant_id?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_test_sitting_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_test_sitting_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_test_sitting_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_test_sitting_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admission_waitlist: {
         Row: {
           added_at: string
@@ -6568,6 +6691,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_test_sitting: {
+        Args: {
+          p_campus_id: string
+          p_capacity: number
+          p_class_level_id: string
+          p_session_id: string
+          p_starts_at: string
+          p_venue?: string
+        }
+        Returns: string
+      }
       current_contract: {
         Args: { p_on?: string; p_staff_id: string }
         Returns: {
@@ -6687,6 +6821,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      fn_allocate_test_seat: {
+        Args: { p_application_id: string; p_sitting_id: string }
+        Returns: number
+      }
       fn_assign_next_roll_no: {
         Args: { p_enrolment_id: string }
         Returns: number
@@ -6706,6 +6844,10 @@ export type Database = {
           p_session_id: string
           p_student_ids: string[]
         }
+        Returns: Json
+      }
+      fn_build_roll_slip_payload: {
+        Args: { p_sitting_id: string }
         Returns: Json
       }
       fn_change_student_status: {
@@ -7558,6 +7700,7 @@ export type Database = {
         | "on_leave"
       subject_type: "CORE" | "ELECTIVE" | "ADDITIONAL" | "NON_EXAMINABLE"
       tenant_status: "provisioning" | "active" | "suspended" | "closed"
+      test_attendance: "pending" | "present" | "absent"
       transport_direction: "pickup" | "drop" | "both"
       user_status: "active" | "suspended" | "terminated"
       waitlist_status: "waiting" | "offer_pending" | "withdrawn"
@@ -7887,6 +8030,7 @@ export const Constants = {
       ],
       subject_type: ["CORE", "ELECTIVE", "ADDITIONAL", "NON_EXAMINABLE"],
       tenant_status: ["provisioning", "active", "suspended", "closed"],
+      test_attendance: ["pending", "present", "absent"],
       transport_direction: ["pickup", "drop", "both"],
       user_status: ["active", "suspended", "terminated"],
       waitlist_status: ["waiting", "offer_pending", "withdrawn"],

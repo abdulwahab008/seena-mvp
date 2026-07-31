@@ -38,6 +38,8 @@ import {
   cloneAcademicStructureSchema,
   setDocumentRequirementSchema,
   setDocumentSubmissionSchema,
+  createTestSittingSchema,
+  allocateTestSeatSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -757,5 +759,46 @@ describe('setDocumentSubmissionSchema', () => {
     expect(
       setDocumentSubmissionSchema.safeParse({ ...base, status: 'promised', promisedDeadline: '2026-09-01' }).success
     ).toBe(true);
+  });
+});
+
+describe('createTestSittingSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    classLevelId: '33333333-3333-3333-3333-333333333333',
+    startsAt: '2026-08-10T09:00',
+    capacity: 30,
+  };
+
+  it('accepts a valid sitting', () => {
+    expect(createTestSittingSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a zero capacity', () => {
+    expect(createTestSittingSchema.safeParse({ ...base, capacity: 0 }).success).toBe(false);
+  });
+
+  it('rejects a missing start time', () => {
+    expect(createTestSittingSchema.safeParse({ ...base, startsAt: '' }).success).toBe(false);
+  });
+
+  it('rejects a missing class', () => {
+    expect(createTestSittingSchema.safeParse({ ...base, classLevelId: '' }).success).toBe(false);
+  });
+});
+
+describe('allocateTestSeatSchema', () => {
+  const base = {
+    sittingId: '11111111-1111-1111-1111-111111111111',
+    applicationId: '22222222-2222-2222-2222-222222222222',
+  };
+
+  it('accepts a valid allocation', () => {
+    expect(allocateTestSeatSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing application', () => {
+    expect(allocateTestSeatSchema.safeParse({ ...base, applicationId: '' }).success).toBe(false);
   });
 });
