@@ -1809,6 +1809,73 @@ export type Database = {
         }
         Relationships: []
       }
+      branding_asset: {
+        Row: {
+          asset_type: Database["public"]["Enums"]["branding_asset_type"]
+          bytes: number
+          campus_id: string | null
+          created_at: string
+          height_px: number
+          id: string
+          is_current: boolean
+          storage_path: string
+          tenant_id: string
+          uploaded_by: string | null
+          version: number
+          width_px: number
+        }
+        Insert: {
+          asset_type: Database["public"]["Enums"]["branding_asset_type"]
+          bytes: number
+          campus_id?: string | null
+          created_at?: string
+          height_px: number
+          id?: string
+          is_current?: boolean
+          storage_path: string
+          tenant_id: string
+          uploaded_by?: string | null
+          version: number
+          width_px: number
+        }
+        Update: {
+          asset_type?: Database["public"]["Enums"]["branding_asset_type"]
+          bytes?: number
+          campus_id?: string | null
+          created_at?: string
+          height_px?: number
+          id?: string
+          is_current?: boolean
+          storage_path?: string
+          tenant_id?: string
+          uploaded_by?: string | null
+          version?: number
+          width_px?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branding_asset_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branding_asset_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branding_asset_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       campus: {
         Row: {
           address_line: string | null
@@ -2967,6 +3034,7 @@ export type Database = {
           gross_paisa: number
           id: string
           issue_date: string
+          logo_asset_id: string | null
           net_paisa: number
           session_id: string
           status: Database["public"]["Enums"]["fee_challan_status"]
@@ -2985,6 +3053,7 @@ export type Database = {
           gross_paisa: number
           id?: string
           issue_date?: string
+          logo_asset_id?: string | null
           net_paisa: number
           session_id: string
           status?: Database["public"]["Enums"]["fee_challan_status"]
@@ -3003,6 +3072,7 @@ export type Database = {
           gross_paisa?: number
           id?: string
           issue_date?: string
+          logo_asset_id?: string | null
           net_paisa?: number
           session_id?: string
           status?: Database["public"]["Enums"]["fee_challan_status"]
@@ -3036,6 +3106,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_logo_asset_id_fkey"
+            columns: ["logo_asset_id"]
+            isOneToOne: false
+            referencedRelation: "branding_asset"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "fee_challan_session_id_fkey"
@@ -6714,6 +6791,45 @@ export type Database = {
           },
         ]
       }
+      tenant_theme: {
+        Row: {
+          primary_hex: string | null
+          secondary_hex: string | null
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          primary_hex?: string | null
+          secondary_hex?: string | null
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          primary_hex?: string | null
+          secondary_hex?: string | null
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_theme_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_theme_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       user_campus: {
         Row: {
           campus_id: string
@@ -7228,6 +7344,10 @@ export type Database = {
         Args: { p_as_of?: string; p_challan_id: string }
         Returns: number
       }
+      confirm_branding_asset: {
+        Args: { p_asset_id: string }
+        Returns: undefined
+      }
       confirm_family_group: { Args: { p_group_id: string }; Returns: undefined }
       confirm_probation: { Args: { p_contract_id: string }; Returns: undefined }
       copy_class_subject_map: {
@@ -7260,6 +7380,18 @@ export type Database = {
         Returns: Json
       }
       create_audit_partition: { Args: { p_month?: string }; Returns: undefined }
+      create_branding_asset: {
+        Args: {
+          p_asset_type: Database["public"]["Enums"]["branding_asset_type"]
+          p_bytes: number
+          p_campus_id?: string
+          p_file_ext: string
+          p_height_px: number
+          p_mime_type: string
+          p_width_px: number
+        }
+        Returns: Json
+      }
       create_campus: {
         Args: { p_city?: string; p_code: string; p_name: string }
         Returns: string
@@ -7530,6 +7662,10 @@ export type Database = {
       }
       delete_admission_document: {
         Args: { p_document_id: string }
+        Returns: undefined
+      }
+      delete_branding_asset: {
+        Args: { p_asset_id: string }
         Returns: undefined
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
@@ -8139,6 +8275,13 @@ export type Database = {
         }
         Returns: string
       }
+      resolve_branding: {
+        Args: {
+          p_asset_type: Database["public"]["Enums"]["branding_asset_type"]
+          p_campus_id: string
+        }
+        Returns: Json
+      }
       resolve_fee_structure: {
         Args: {
           p_campus_id: string
@@ -8275,6 +8418,10 @@ export type Database = {
           p_board_code: string
           p_subject_id: string
         }
+        Returns: undefined
+      }
+      set_tenant_theme: {
+        Args: { p_primary_hex?: string; p_secondary_hex?: string }
         Returns: undefined
       }
       set_test_attendance: {
@@ -8457,6 +8604,7 @@ export type Database = {
         | "BALOCHISTAN"
         | "AKU_EB"
         | "CAMBRIDGE"
+      branding_asset_type: "logo" | "letterhead" | "signature" | "stamp"
       campus_status: "active" | "archived"
       competency_source_enum: "DECLARED" | "INFERRED" | "VERIFIED"
       concession_award_status: "pending" | "approved" | "rejected" | "expired"
@@ -8785,6 +8933,7 @@ export const Constants = {
         "AKU_EB",
         "CAMBRIDGE",
       ],
+      branding_asset_type: ["logo", "letterhead", "signature", "stamp"],
       campus_status: ["active", "archived"],
       competency_source_enum: ["DECLARED", "INFERRED", "VERIFIED"],
       concession_award_status: ["pending", "approved", "rejected", "expired"],

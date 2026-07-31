@@ -758,3 +758,32 @@ export const enrolFromOfferSchema = z
     path: ['paymentId'],
   });
 export type EnrolFromOfferInput = z.infer<typeof enrolFromOfferSchema>;
+
+// Mirrors create_branding_asset()'s own checks in
+// supabase/migrations/20260731470000_tenant_branding_assets.sql.
+export const BRANDING_ASSET_TYPES = ['logo', 'letterhead', 'signature', 'stamp'] as const;
+export const MAX_BRANDING_FILE_SIZE = 3 * 1024 * 1024;
+export const ALLOWED_BRANDING_MIME_TYPES = ['image/jpeg', 'image/png'] as const;
+
+// Mirrors create_branding_asset()'s v_min_width case exactly.
+export const BRANDING_MIN_WIDTH_PX: Record<(typeof BRANDING_ASSET_TYPES)[number], number> = {
+  logo: 600,
+  letterhead: 1000,
+  signature: 200,
+  stamp: 200,
+};
+
+export const uploadBrandingAssetSchema = z.object({
+  assetType: z.enum(BRANDING_ASSET_TYPES),
+  campusId: z.string().uuid().optional(),
+  widthPx: z.coerce.number().int().positive(),
+  heightPx: z.coerce.number().int().positive(),
+});
+export type UploadBrandingAssetInput = z.infer<typeof uploadBrandingAssetSchema>;
+
+const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
+export const setTenantThemeSchema = z.object({
+  primaryHex: z.string().regex(HEX_COLOR_REGEX, 'Use a 6-digit hex colour, e.g. #112233').optional().or(z.literal('')),
+  secondaryHex: z.string().regex(HEX_COLOR_REGEX, 'Use a 6-digit hex colour, e.g. #112233').optional().or(z.literal('')),
+});
+export type SetTenantThemeInput = z.infer<typeof setTenantThemeSchema>;

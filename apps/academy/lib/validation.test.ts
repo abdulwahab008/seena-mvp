@@ -51,6 +51,8 @@ import {
   recordAdmissionFeePaymentSchema,
   waiveAdmissionFeeSchema,
   enrolFromOfferSchema,
+  uploadBrandingAssetSchema,
+  setTenantThemeSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1029,5 +1031,39 @@ describe('enrolFromOfferSchema', () => {
 
   it('rejects a missing section', () => {
     expect(enrolFromOfferSchema.safeParse({ ...base, sectionId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('uploadBrandingAssetSchema', () => {
+  const base = { assetType: 'logo' as const, widthPx: 800, heightPx: 600 };
+
+  it('accepts a tenant-wide upload with no campus', () => {
+    expect(uploadBrandingAssetSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a campus-scoped upload', () => {
+    expect(uploadBrandingAssetSchema.safeParse({ ...base, campusId: '11111111-1111-1111-1111-111111111111' }).success).toBe(true);
+  });
+
+  it('rejects an unknown asset type', () => {
+    expect(uploadBrandingAssetSchema.safeParse({ ...base, assetType: 'banner' }).success).toBe(false);
+  });
+
+  it('rejects a non-positive width', () => {
+    expect(uploadBrandingAssetSchema.safeParse({ ...base, widthPx: 0 }).success).toBe(false);
+  });
+});
+
+describe('setTenantThemeSchema', () => {
+  it('accepts valid hex colours', () => {
+    expect(setTenantThemeSchema.safeParse({ primaryHex: '#112233', secondaryHex: '#445566' }).success).toBe(true);
+  });
+
+  it('accepts empty strings (clearing the theme)', () => {
+    expect(setTenantThemeSchema.safeParse({ primaryHex: '', secondaryHex: '' }).success).toBe(true);
+  });
+
+  it('rejects an invalid hex colour', () => {
+    expect(setTenantThemeSchema.safeParse({ primaryHex: 'not-a-hex' }).success).toBe(false);
   });
 });
