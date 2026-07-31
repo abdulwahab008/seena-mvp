@@ -23,7 +23,7 @@ export default async function InterviewsPage() {
     supabase.from('app_user').select('user_id, full_name, app_role').order('full_name'),
     supabase
       .from('admission_interview')
-      .select('id, starts_at, ends_at, venue, status, panel_user_id, admission_application(application_no, admission_enquiry(child_name))')
+      .select('id, application_id, starts_at, ends_at, venue, status, panel_user_id, admission_application(application_no, admission_enquiry(child_name))')
       .order('starts_at', { ascending: false }),
   ]);
 
@@ -41,6 +41,7 @@ export default async function InterviewsPage() {
     const app = one(i.admission_application);
     return {
       id: i.id,
+      applicationId: i.application_id,
       applicationNo: app?.application_no ?? null,
       childName: one(app?.admission_enquiry ?? null)?.child_name ?? 'Unknown',
       panelName: panelNameByUserId.get(i.panel_user_id) ?? 'Unknown',

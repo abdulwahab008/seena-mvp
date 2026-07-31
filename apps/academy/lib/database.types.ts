@@ -712,6 +712,97 @@ export type Database = {
           },
         ]
       }
+      admission_interview_outcome: {
+        Row: {
+          id: string
+          interview_id: string
+          justification: string | null
+          recommendation: Database["public"]["Enums"]["interview_recommendation"]
+          submitted_at: string
+          submitted_by: string | null
+          tenant_id: string
+        }
+        Insert: {
+          id?: string
+          interview_id: string
+          justification?: string | null
+          recommendation: Database["public"]["Enums"]["interview_recommendation"]
+          submitted_at?: string
+          submitted_by?: string | null
+          tenant_id: string
+        }
+        Update: {
+          id?: string
+          interview_id?: string
+          justification?: string | null
+          recommendation?: Database["public"]["Enums"]["interview_recommendation"]
+          submitted_at?: string
+          submitted_by?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_interview_outcome_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: true
+            referencedRelation: "admission_interview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_interview_outcome_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_interview_outcome_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_interview_score: {
+        Row: {
+          criterion: Database["public"]["Enums"]["interview_criterion"]
+          id: string
+          interview_id: string
+          score: number
+          tenant_id: string
+        }
+        Insert: {
+          criterion: Database["public"]["Enums"]["interview_criterion"]
+          id?: string
+          interview_id: string
+          score: number
+          tenant_id: string
+        }
+        Update: {
+          criterion?: Database["public"]["Enums"]["interview_criterion"]
+          id?: string
+          interview_id?: string
+          score?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_interview_score_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "admission_interview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_interview_score_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admission_merit_snapshot: {
         Row: {
           application_id: string
@@ -7299,6 +7390,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      fn_scorecard_summary: {
+        Args: { p_application_id: string }
+        Returns: Json
+      }
       fn_set_roll_no: {
         Args: { p_enrolment_id: string; p_roll_no: number }
         Returns: undefined
@@ -7670,6 +7765,15 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       student_balance: { Args: { p_enrolment_id: string }; Returns: number }
+      submit_interview_scorecard: {
+        Args: {
+          p_interview_id: string
+          p_justification?: string
+          p_recommendation: Database["public"]["Enums"]["interview_recommendation"]
+          p_scores: Json
+        }
+        Returns: string
+      }
       suggest_rooms_for_type: {
         Args: {
           p_campus_id: string
@@ -7874,6 +7978,13 @@ export type Database = {
         | "legal_guardian"
         | "other"
       id_document_type: "cnic" | "passport"
+      interview_criterion:
+        | "communication"
+        | "confidence"
+        | "academic_readiness"
+        | "parental_engagement"
+        | "overall_impression"
+      interview_recommendation: "accept" | "waitlist" | "reject"
       interview_status: "scheduled" | "cancelled"
       late_fee_basis: "flat" | "per_day" | "percentage"
       leave_accrual_method: "annual_grant" | "monthly_accrual" | "none"
@@ -8200,6 +8311,14 @@ export const Constants = {
         "other",
       ],
       id_document_type: ["cnic", "passport"],
+      interview_criterion: [
+        "communication",
+        "confidence",
+        "academic_readiness",
+        "parental_engagement",
+        "overall_impression",
+      ],
+      interview_recommendation: ["accept", "waitlist", "reject"],
       interview_status: ["scheduled", "cancelled"],
       late_fee_basis: ["flat", "per_day", "percentage"],
       leave_accrual_method: ["annual_grant", "monthly_accrual", "none"],

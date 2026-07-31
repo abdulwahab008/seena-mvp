@@ -666,3 +666,32 @@ export type BookInterviewInput = z.infer<typeof bookInterviewSchema>;
 
 export const cancelInterviewSchema = z.object({ interviewId: z.string().uuid() });
 export type CancelInterviewInput = z.infer<typeof cancelInterviewSchema>;
+
+export const INTERVIEW_CRITERIA = [
+  'communication',
+  'confidence',
+  'academic_readiness',
+  'parental_engagement',
+  'overall_impression',
+] as const;
+export const INTERVIEW_RECOMMENDATIONS = ['accept', 'waitlist', 'reject'] as const;
+
+// Mirrors submit_interview_scorecard()'s own MISSING_CRITERIA check —
+// whether a justification is mandatory depends on the applicant's merit
+// rank (server-side only, see fn_is_merit_override in
+// supabase/migrations/20260731420000_admission_interview_scorecard.sql),
+// so this schema can't pre-validate that part; the server error surfaces it.
+const criterionScore = z.coerce.number().int().min(1).max(5);
+export const submitScorecardSchema = z.object({
+  interviewId: z.string().uuid(),
+  scores: z.object({
+    communication: criterionScore,
+    confidence: criterionScore,
+    academic_readiness: criterionScore,
+    parental_engagement: criterionScore,
+    overall_impression: criterionScore,
+  }),
+  recommendation: z.enum(INTERVIEW_RECOMMENDATIONS),
+  justification: z.string().max(2000).optional(),
+});
+export type SubmitScorecardInput = z.infer<typeof submitScorecardSchema>;

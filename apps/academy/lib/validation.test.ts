@@ -44,6 +44,7 @@ import {
   setTestAttendanceSchema,
   bookInterviewSchema,
   cancelInterviewSchema,
+  submitScorecardSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -871,5 +872,34 @@ describe('cancelInterviewSchema', () => {
 
   it('rejects a non-uuid id', () => {
     expect(cancelInterviewSchema.safeParse({ interviewId: 'nope' }).success).toBe(false);
+  });
+});
+
+describe('submitScorecardSchema', () => {
+  const base = {
+    interviewId: '11111111-1111-1111-1111-111111111111',
+    scores: { communication: 4, confidence: 4, academic_readiness: 3, parental_engagement: 4, overall_impression: 3 },
+    recommendation: 'accept',
+  };
+
+  it('accepts a fully scored card', () => {
+    expect(submitScorecardSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing criterion', () => {
+    const { overall_impression: _drop, ...rest } = base.scores;
+    expect(submitScorecardSchema.safeParse({ ...base, scores: rest }).success).toBe(false);
+  });
+
+  it('rejects a score outside 1-5', () => {
+    expect(submitScorecardSchema.safeParse({ ...base, scores: { ...base.scores, confidence: 6 } }).success).toBe(false);
+  });
+
+  it('rejects an unrecognized recommendation', () => {
+    expect(submitScorecardSchema.safeParse({ ...base, recommendation: 'maybe' }).success).toBe(false);
+  });
+
+  it('accepts an optional justification', () => {
+    expect(submitScorecardSchema.safeParse({ ...base, justification: 'Clear override rationale here.' }).success).toBe(true);
   });
 });

@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { bookInterviewSchema } from '@/lib/validation';
+import { bookInterviewSchema, submitScorecardSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type BookState = { error: string | null; needsConfirmation: boolean };
@@ -75,4 +75,63 @@ export async function fetchInterviewNotificationPayload(
   const { data, error } = await supabase.rpc('fn_build_interview_notification_payload', { p_interview_id: interviewId });
   if (error) return { error: 'Could not load the notification preview.', payload: null };
   return { error: null, payload: data as NotificationPayload };
+}
+
+// FR-B14: submit (or, for a Principal, correct) a structured interview
+// scorecard. All the business rules — every criterion scored,
+// justification required only when the recommendation overrides the
+// applicant's merit rank, read-only once submitted except to a Principal
+// — are enforced inside submit_interview_scorecard() itself.
+export async function submitScorecard(_prev: { error: string | null }, formData: FormData): Promise<{ error: string | null }> {
+  const scoresRaw = formData.get('scores');
+  let scores: unknown;
+  try {
+    scores = JSON.parse(typeof scoresRaw === 'string' ? scoresRaw : '{}');
+  } catch {
+    return { error: 'Invalid scores.' };
+  }
+
+  const parsed = submitScorecardSchema.safeParse({
+    interviewId: formData.get('interviewId'),
+    scores,
+    recommendation: formData.get('recommendation'),
+    justification: formData.get('justification') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('submit_interview_scorecard', {
+    p_interview_id: parsed.data.interviewId,
+    p_scores: Object.entries(parsed.data.scores).map(([criterion, score]) => ({ criterion, score })),
+    p_recommendation: parsed.data.recommendation,
+    p_justification: parsed.data.justification,
+  });
+  if (error) {
+    if (error.message.includes('JUSTIFICATION_REQUIRED')) {
+      return { error: 'This recommendation overrides the merit rank — a justification of at least 20 characters is required.' };
+    }
+    if (error.message.includes('MISSING_CRITERIA')) return { error: 'Every criterion must be scored.' };
+    if (error.message.includes('SCORECARD_LOCKED')) return { error: 'This scorecard is already submitted — only a Principal can edit it.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to submit a scorecard.' };
+    return { error: 'Could not submit the scorecard.' };
+  }
+
+  revalidatePath('/admissions/interviews');
+  return { error: null };
+}
+
+export type Scorecard = {
+  interview_id: string;
+  panel_name: string;
+  recommendation: string;
+  justification: string | null;
+  scores: Record<string, number>;
+};
+export type ScorecardSummary = { application_id: string; scorecards: Scorecard[]; mean_by_criterion: Record<string, number> };
+
+export async function fetchScorecardSummary(applicationId: string): Promise<{ error: string | null; summary: ScorecardSummary | null }> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_scorecard_summary', { p_application_id: applicationId });
+  if (error) return { error: 'Could not load the scorecards.', summary: null };
+  return { error: null, summary: data as ScorecardSummary };
 }
