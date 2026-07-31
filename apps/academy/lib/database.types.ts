@@ -34,6 +34,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_clone_run: {
+        Row: {
+          campus_id: string
+          from_session_id: string
+          id: string
+          is_dry_run: boolean
+          run_at: string
+          run_by: string | null
+          summary: Json
+          tenant_id: string
+          to_session_id: string
+        }
+        Insert: {
+          campus_id: string
+          from_session_id: string
+          id?: string
+          is_dry_run: boolean
+          run_at?: string
+          run_by?: string | null
+          summary: Json
+          tenant_id: string
+          to_session_id: string
+        }
+        Update: {
+          campus_id?: string
+          from_session_id?: string
+          id?: string
+          is_dry_run?: boolean
+          run_at?: string
+          run_by?: string | null
+          summary?: Json
+          tenant_id?: string
+          to_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_clone_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_clone_run_from_session_id_fkey"
+            columns: ["from_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_clone_run_run_by_fkey"
+            columns: ["run_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "academic_clone_run_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_clone_run_to_session_id_fkey"
+            columns: ["to_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       academic_session: {
         Row: {
           admission_opens_on: string | null
@@ -4082,7 +4154,7 @@ export type Database = {
           id: string
           section_id: string
           session_id: string
-          staff_id: string
+          staff_id: string | null
           tenant_id: string
           validity: unknown
         }
@@ -4094,7 +4166,7 @@ export type Database = {
           id?: string
           section_id: string
           session_id: string
-          staff_id: string
+          staff_id?: string | null
           tenant_id: string
           validity?: unknown
         }
@@ -4106,7 +4178,7 @@ export type Database = {
           id?: string
           section_id?: string
           session_id?: string
-          staff_id?: string
+          staff_id?: string | null
           tenant_id?: string
           validity?: unknown
         }
@@ -4248,7 +4320,7 @@ export type Database = {
           role: Database["public"]["Enums"]["allocation_role"]
           section_id: string
           session_id: string
-          staff_id: string
+          staff_id: string | null
           subject_id: string
           tenant_id: string
           validity: unknown
@@ -4262,7 +4334,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["allocation_role"]
           section_id: string
           session_id: string
-          staff_id: string
+          staff_id?: string | null
           subject_id: string
           tenant_id: string
           validity?: unknown
@@ -4276,7 +4348,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["allocation_role"]
           section_id?: string
           session_id?: string
-          staff_id?: string
+          staff_id?: string | null
           subject_id?: string
           tenant_id?: string
           validity?: unknown
@@ -5965,6 +6037,15 @@ export type Database = {
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
       check_room_capacity: {
         Args: { p_room_id: string; p_section_id: string }
+        Returns: Json
+      }
+      clone_academic_structure: {
+        Args: {
+          p_campus_id: string
+          p_dry_run?: boolean
+          p_from_session_id: string
+          p_to_session_id: string
+        }
         Returns: Json
       }
       collect_cash_payment: {

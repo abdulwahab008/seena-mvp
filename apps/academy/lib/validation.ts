@@ -552,3 +552,17 @@ export const suggestSubstitutesSchema = z.object({
   classLevelId: z.string().uuid('Choose a class'),
 });
 export type SuggestSubstitutesInput = z.infer<typeof suggestSubstitutesSchema>;
+
+// Mirrors clone_academic_structure()'s own SAME_SESSION check in
+// supabase/migrations/20260731340000_academic_structure_rollover.sql.
+export const cloneAcademicStructureSchema = z
+  .object({
+    campusId: z.string().uuid('Choose a campus'),
+    fromSessionId: z.string().uuid('Choose the source session'),
+    toSessionId: z.string().uuid('Choose the target session'),
+  })
+  .refine((v) => v.fromSessionId !== v.toSessionId, {
+    message: 'The source and target sessions must be different',
+    path: ['toSessionId'],
+  });
+export type CloneAcademicStructureInput = z.infer<typeof cloneAcademicStructureSchema>;

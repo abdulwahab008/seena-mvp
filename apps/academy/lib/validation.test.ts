@@ -35,6 +35,7 @@ import {
   createRoomSchema,
   declareCompetencySchema,
   suggestSubstitutesSchema,
+  cloneAcademicStructureSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -684,5 +685,25 @@ describe('suggestSubstitutesSchema', () => {
     expect(suggestSubstitutesSchema.safeParse({ subjectId: '11111111-1111-1111-1111-111111111111', classLevelId: '' }).success).toBe(
       false
     );
+  });
+});
+
+describe('cloneAcademicStructureSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    fromSessionId: '22222222-2222-2222-2222-222222222222',
+    toSessionId: '33333333-3333-3333-3333-333333333333',
+  };
+
+  it('accepts distinct source and target sessions', () => {
+    expect(cloneAcademicStructureSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects cloning a session into itself', () => {
+    expect(cloneAcademicStructureSchema.safeParse({ ...base, toSessionId: base.fromSessionId }).success).toBe(false);
+  });
+
+  it('rejects a missing campus', () => {
+    expect(cloneAcademicStructureSchema.safeParse({ ...base, campusId: '' }).success).toBe(false);
   });
 });

@@ -10,6 +10,7 @@ const LINKS = [
   { href: '/academic-setup/curriculum', label: 'Curriculum' },
   { href: '/academic-setup/rooms', label: 'Rooms' },
   { href: '/academic-setup/competency', label: 'Teacher Competency' },
+  { href: '/academic-setup/rollover', label: 'Session Rollover' },
   { href: '/students', label: 'Students' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },
