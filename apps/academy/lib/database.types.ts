@@ -1569,6 +1569,112 @@ export type Database = {
           },
         ]
       }
+      attendance_day: {
+        Row: {
+          attendance_date: string
+          campus_id: string
+          enrolment_id: string
+          id: string
+          marked_at: string
+          marked_by: string | null
+          section_id: string
+          session_id: string
+          source: Database["public"]["Enums"]["student_attendance_source"]
+          status: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id: string
+        }
+        Insert: {
+          attendance_date: string
+          campus_id: string
+          enrolment_id: string
+          id?: string
+          marked_at?: string
+          marked_by?: string | null
+          section_id: string
+          session_id: string
+          source?: Database["public"]["Enums"]["student_attendance_source"]
+          status: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id: string
+        }
+        Update: {
+          attendance_date?: string
+          campus_id?: string
+          enrolment_id?: string
+          id?: string
+          marked_at?: string
+          marked_by?: string | null
+          section_id?: string
+          session_id?: string
+          source?: Database["public"]["Enums"]["student_attendance_source"]
+          status?: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_day_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_day_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_day_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "attendance_day_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_day_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_day_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_day_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_day_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_policy: {
         Row: {
           campus_id: string
@@ -8355,6 +8461,10 @@ export type Database = {
         }
         Returns: string
       }
+      resolve_attendance_holiday: {
+        Args: { p_campus_id: string; p_date: string }
+        Returns: string
+      }
       resolve_attendance_policy: {
         Args: { p_as_of?: string; p_campus_id: string; p_session_id: string }
         Returns: Json
@@ -8386,6 +8496,10 @@ export type Database = {
       reverse_ledger_entry: {
         Args: { p_ledger_id: string; p_reason: string }
         Returns: string
+      }
+      save_attendance_register: {
+        Args: { p_attendance_date: string; p_marks: Json; p_section_id: string }
+        Returns: Json
       }
       seed_default_class_levels: {
         Args: { p_tenant_id: string }
@@ -8843,6 +8957,13 @@ export type Database = {
         | "medical"
         | "relocation"
         | "other"
+      student_attendance_source: "web" | "mobile" | "offline_sync" | "biometric"
+      student_attendance_status:
+        | "present"
+        | "absent"
+        | "late"
+        | "half_day"
+        | "excused"
       student_status:
         | "active"
         | "inactive"
@@ -9185,6 +9306,14 @@ export const Constants = {
         "medical",
         "relocation",
         "other",
+      ],
+      student_attendance_source: ["web", "mobile", "offline_sync", "biometric"],
+      student_attendance_status: [
+        "present",
+        "absent",
+        "late",
+        "half_day",
+        "excused",
       ],
       student_status: [
         "active",

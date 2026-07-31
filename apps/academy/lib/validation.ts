@@ -805,3 +805,16 @@ export const setAttendancePolicySchema = z.object({
   saturdayWorking: z.boolean().default(false),
 });
 export type SetAttendancePolicyInput = z.infer<typeof setAttendancePolicySchema>;
+
+// Mirrors save_attendance_register()'s own checks in
+// supabase/migrations/20260731490000_daily_attendance_register.sql.
+export const STUDENT_ATTENDANCE_STATUSES = ['present', 'absent', 'late', 'half_day', 'excused'] as const;
+
+export const saveAttendanceRegisterSchema = z.object({
+  sectionId: z.string().uuid(),
+  attendanceDate: z.string().min(1, 'Choose a date'),
+  marks: z
+    .array(z.object({ enrolmentId: z.string().uuid(), status: z.enum(STUDENT_ATTENDANCE_STATUSES) }))
+    .min(1, 'No students to mark'),
+});
+export type SaveAttendanceRegisterInput = z.infer<typeof saveAttendanceRegisterSchema>;

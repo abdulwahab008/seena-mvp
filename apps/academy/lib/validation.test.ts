@@ -54,6 +54,7 @@ import {
   uploadBrandingAssetSchema,
   setTenantThemeSchema,
   setAttendancePolicySchema,
+  saveAttendanceRegisterSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1098,5 +1099,26 @@ describe('setAttendancePolicySchema', () => {
 
   it('rejects an out-of-range minimum attendance percentage', () => {
     expect(setAttendancePolicySchema.safeParse({ ...base, minAttendancePct: 150 }).success).toBe(false);
+  });
+});
+
+describe('saveAttendanceRegisterSchema', () => {
+  const base = {
+    sectionId: '11111111-1111-1111-1111-111111111111',
+    attendanceDate: '2026-08-01',
+    marks: [{ enrolmentId: '22222222-2222-2222-2222-222222222222', status: 'present' as const }],
+  };
+
+  it('accepts a valid register save', () => {
+    expect(saveAttendanceRegisterSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an empty marks array', () => {
+    expect(saveAttendanceRegisterSchema.safeParse({ ...base, marks: [] }).success).toBe(false);
+  });
+
+  it('rejects an unknown status', () => {
+    const enrolmentId = base.marks[0]!.enrolmentId;
+    expect(saveAttendanceRegisterSchema.safeParse({ ...base, marks: [{ enrolmentId, status: 'tardy' }] }).success).toBe(false);
   });
 });
