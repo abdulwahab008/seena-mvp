@@ -651,6 +651,45 @@ export type Database = {
           },
         ]
       }
+      admission_merit_snapshot: {
+        Row: {
+          application_id: string
+          pct: number
+          published_at: string
+          rank: number
+          sitting_id: string
+        }
+        Insert: {
+          application_id: string
+          pct: number
+          published_at?: string
+          rank: number
+          sitting_id: string
+        }
+        Update: {
+          application_id?: string
+          pct?: number
+          published_at?: string
+          rank?: number
+          sitting_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_merit_snapshot_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "admission_application"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_merit_snapshot_sitting_id_fkey"
+            columns: ["sitting_id"]
+            isOneToOne: false
+            referencedRelation: "admission_test_sitting"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admission_offer: {
         Row: {
           admission_fee_amount: number
@@ -826,6 +865,68 @@ export type Database = {
           },
         ]
       }
+      admission_test_score: {
+        Row: {
+          candidate_id: string
+          entered_at: string
+          entered_by: string | null
+          id: string
+          obtained: number
+          subject_code: string
+          tenant_id: string
+          total: number
+        }
+        Insert: {
+          candidate_id: string
+          entered_at?: string
+          entered_by?: string | null
+          id?: string
+          obtained: number
+          subject_code: string
+          tenant_id: string
+          total: number
+        }
+        Update: {
+          candidate_id?: string
+          entered_at?: string
+          entered_by?: string | null
+          id?: string
+          obtained?: number
+          subject_code?: string
+          tenant_id?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_test_score_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "admission_test_candidate"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_test_score_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "v_admission_merit_rank"
+            referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "admission_test_score_entered_by_fkey"
+            columns: ["entered_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_test_score_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admission_test_sitting: {
         Row: {
           campus_id: string
@@ -833,6 +934,7 @@ export type Database = {
           class_level_id: string
           created_at: string
           id: string
+          locked_at: string | null
           session_id: string
           starts_at: string
           tenant_id: string
@@ -844,6 +946,7 @@ export type Database = {
           class_level_id: string
           created_at?: string
           id?: string
+          locked_at?: string | null
           session_id: string
           starts_at: string
           tenant_id: string
@@ -855,6 +958,7 @@ export type Database = {
           class_level_id?: string
           created_at?: string
           id?: string
+          locked_at?: string | null
           session_id?: string
           starts_at?: string
           tenant_id?: string
@@ -6030,6 +6134,33 @@ export type Database = {
       }
     }
     Views: {
+      v_admission_merit_rank: {
+        Row: {
+          application_id: string | null
+          candidate_id: string | null
+          dob: string | null
+          pct: number | null
+          rnk: number | null
+          sitting_id: string | null
+          tie_break_basis: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_test_candidate_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "admission_application"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_test_candidate_sitting_id_fkey"
+            columns: ["sitting_id"]
+            isOneToOne: false
+            referencedRelation: "admission_test_sitting"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_class_weekly_period_load: {
         Row: {
           campus_id: string | null
@@ -7061,6 +7192,7 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_publish_merit_list: { Args: { p_sitting_id: string }; Returns: Json }
       fn_readmit_student: {
         Args: {
           p_override_reason?: string
@@ -7127,6 +7259,10 @@ export type Database = {
           name_en: string
           student_id: string
         }[]
+      }
+      fn_unlock_test_scores: {
+        Args: { p_sitting_id: string }
+        Returns: undefined
       }
       fn_upsert_student_medical: {
         Args: {
@@ -7438,6 +7574,22 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_test_attendance: {
+        Args: {
+          p_attendance: Database["public"]["Enums"]["test_attendance"]
+          p_candidate_id: string
+        }
+        Returns: undefined
+      }
+      set_test_score: {
+        Args: {
+          p_candidate_id: string
+          p_obtained: number
+          p_subject_code: string
+          p_total: number
+        }
+        Returns: string
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       student_balance: { Args: { p_enrolment_id: string }; Returns: number }
@@ -7556,6 +7708,7 @@ export type Database = {
         | "lapsed"
         | "enrolled"
         | "rejected"
+        | "test_absent"
       approval_decision: "pending" | "approved" | "rejected" | "escalated"
       attendance_source: "manual" | "biometric" | "leave"
       attendance_status: "present" | "absent" | "on_leave" | "half_day" | "late"
@@ -7870,6 +8023,7 @@ export const Constants = {
         "lapsed",
         "enrolled",
         "rejected",
+        "test_absent",
       ],
       approval_decision: ["pending", "approved", "rejected", "escalated"],
       attendance_source: ["manual", "biometric", "leave"],

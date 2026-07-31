@@ -627,3 +627,23 @@ export const allocateTestSeatSchema = z.object({
   applicationId: z.string().uuid('Choose an application'),
 });
 export type AllocateTestSeatInput = z.infer<typeof allocateTestSeatSchema>;
+
+export const TEST_ATTENDANCES = ['pending', 'present', 'absent'] as const;
+
+// Mirrors set_test_score()'s own chk_score_range check constraint in
+// supabase/migrations/20260731400000_admission_test_scores_merit.sql.
+export const setTestScoreSchema = z
+  .object({
+    candidateId: z.string().uuid(),
+    subjectCode: z.string().min(1, 'Required').max(50),
+    obtained: z.coerce.number().min(0, 'Cannot be negative'),
+    total: z.coerce.number().positive('Must be more than 0'),
+  })
+  .refine((v) => v.obtained <= v.total, { message: 'Obtained cannot exceed total', path: ['obtained'] });
+export type SetTestScoreInput = z.infer<typeof setTestScoreSchema>;
+
+export const setTestAttendanceSchema = z.object({
+  candidateId: z.string().uuid(),
+  attendance: z.enum(TEST_ATTENDANCES),
+});
+export type SetTestAttendanceInput = z.infer<typeof setTestAttendanceSchema>;

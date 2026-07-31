@@ -40,6 +40,8 @@ import {
   setDocumentSubmissionSchema,
   createTestSittingSchema,
   allocateTestSeatSchema,
+  setTestScoreSchema,
+  setTestAttendanceSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -800,5 +802,41 @@ describe('allocateTestSeatSchema', () => {
 
   it('rejects a missing application', () => {
     expect(allocateTestSeatSchema.safeParse({ ...base, applicationId: '' }).success).toBe(false);
+  });
+});
+
+describe('setTestScoreSchema', () => {
+  const base = { candidateId: '11111111-1111-1111-1111-111111111111', subjectCode: 'math', obtained: 40, total: 50 };
+
+  it('accepts a valid score', () => {
+    expect(setTestScoreSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects obtained greater than total', () => {
+    expect(setTestScoreSchema.safeParse({ ...base, obtained: 51 }).success).toBe(false);
+  });
+
+  it('rejects a zero total', () => {
+    expect(setTestScoreSchema.safeParse({ ...base, total: 0 }).success).toBe(false);
+  });
+
+  it('rejects a negative obtained', () => {
+    expect(setTestScoreSchema.safeParse({ ...base, obtained: -1 }).success).toBe(false);
+  });
+
+  it('rejects a missing subject code', () => {
+    expect(setTestScoreSchema.safeParse({ ...base, subjectCode: '' }).success).toBe(false);
+  });
+});
+
+describe('setTestAttendanceSchema', () => {
+  const base = { candidateId: '11111111-1111-1111-1111-111111111111', attendance: 'absent' };
+
+  it('accepts a valid attendance value', () => {
+    expect(setTestAttendanceSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an unrecognized attendance value', () => {
+    expect(setTestAttendanceSchema.safeParse({ ...base, attendance: 'late' }).success).toBe(false);
   });
 });

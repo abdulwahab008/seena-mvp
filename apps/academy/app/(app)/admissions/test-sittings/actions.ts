@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createTestSittingSchema, allocateTestSeatSchema } from '@/lib/validation';
+import { createTestSittingSchema, allocateTestSeatSchema, setTestScoreSchema, setTestAttendanceSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type ActionState = { error: string | null };
@@ -73,4 +73,78 @@ export async function fetchRollSlip(sittingId: string): Promise<{ error: string 
   const { data, error } = await supabase.rpc('fn_build_roll_slip_payload', { p_sitting_id: sittingId });
   if (error) return { error: 'Could not load the roll slip.', payload: null };
   return { error: null, payload: data as RollSlipPayload };
+}
+
+// FR-B12: record a subject-wise test score. Obtained-cannot-exceed-total
+// is enforced by set_test_score()'s own check constraint; the sitting-lock
+// check is enforced inside the function too.
+export async function setTestScore(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = setTestScoreSchema.safeParse({
+    candidateId: formData.get('candidateId'),
+    subjectCode: formData.get('subjectCode'),
+    obtained: formData.get('obtained'),
+    total: formData.get('total'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_test_score', {
+    p_candidate_id: parsed.data.candidateId,
+    p_subject_code: parsed.data.subjectCode,
+    p_obtained: parsed.data.obtained,
+    p_total: parsed.data.total,
+  });
+  if (error) {
+    if (error.message.includes('chk_score_range')) return { error: 'Obtained cannot exceed total.' };
+    if (error.message.includes('SITTING_LOCKED')) return { error: 'The merit list is published — ask a Principal to unlock the sitting.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to record a test score.' };
+    return { error: 'Could not save the score.' };
+  }
+
+  revalidatePath('/admissions/test-sittings');
+  return { error: null };
+}
+
+export async function setTestAttendance(candidateId: string, attendance: string): Promise<ActionState> {
+  const parsed = setTestAttendanceSchema.safeParse({ candidateId, attendance });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_test_attendance', {
+    p_candidate_id: parsed.data.candidateId,
+    p_attendance: parsed.data.attendance,
+  });
+  if (error) {
+    if (error.message.includes('SITTING_LOCKED')) return { error: 'The merit list is published — ask a Principal to unlock the sitting.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to mark attendance.' };
+    return { error: 'Could not update attendance.' };
+  }
+
+  revalidatePath('/admissions/test-sittings');
+  return { error: null };
+}
+
+export async function publishMeritList(sittingId: string): Promise<ActionState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_publish_merit_list', { p_sitting_id: sittingId });
+  if (error) {
+    if (error.message.includes('ALREADY_PUBLISHED')) return { error: 'This sitting is already published.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to publish the merit list.' };
+    return { error: 'Could not publish the merit list.' };
+  }
+
+  revalidatePath('/admissions/test-sittings');
+  return { error: null };
+}
+
+export async function unlockTestScores(sittingId: string): Promise<ActionState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_unlock_test_scores', { p_sitting_id: sittingId });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only a Principal can unlock a published sitting.' };
+    return { error: 'Could not unlock the sitting.' };
+  }
+
+  revalidatePath('/admissions/test-sittings');
+  return { error: null };
 }
