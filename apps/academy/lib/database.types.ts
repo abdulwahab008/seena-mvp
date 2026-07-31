@@ -637,6 +637,94 @@ export type Database = {
           },
         ]
       }
+      admission_waitlist: {
+        Row: {
+          added_at: string
+          application_id: string
+          campus_id: string
+          class_level_id: string
+          id: string
+          position: number | null
+          removal_reason: string | null
+          removed_at: string | null
+          removed_by: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["waitlist_status"]
+          tenant_id: string
+        }
+        Insert: {
+          added_at?: string
+          application_id: string
+          campus_id: string
+          class_level_id: string
+          id?: string
+          position?: number | null
+          removal_reason?: string | null
+          removed_at?: string | null
+          removed_by?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["waitlist_status"]
+          tenant_id: string
+        }
+        Update: {
+          added_at?: string
+          application_id?: string
+          campus_id?: string
+          class_level_id?: string
+          id?: string
+          position?: number | null
+          removal_reason?: string | null
+          removed_at?: string | null
+          removed_by?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["waitlist_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_waitlist_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "admission_application"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_waitlist_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_waitlist_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_waitlist_removed_by_fkey"
+            columns: ["removed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_waitlist_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_waitlist_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_user: {
         Row: {
           app_role: Database["public"]["Enums"]["app_role"]
@@ -6661,6 +6749,14 @@ export type Database = {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: string
       }
+      fn_promote_waitlist: {
+        Args: {
+          p_campus_id: string
+          p_class_level_id: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
       fn_readmit_student: {
         Args: {
           p_override_reason?: string
@@ -6771,6 +6867,7 @@ export type Database = {
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       issue_otp: { Args: { p_phone: string }; Returns: Json }
+      join_waitlist: { Args: { p_application_id: string }; Returns: string }
       link_enrolment_promotion: {
         Args: { p_new_enrolment_id: string; p_old_enrolment_id: string }
         Returns: undefined
@@ -6886,6 +6983,10 @@ export type Database = {
       }
       remove_fee_plan_line: {
         Args: { p_line_id: string; p_reason?: string }
+        Returns: undefined
+      }
+      remove_from_waitlist: {
+        Args: { p_reason: string; p_waitlist_id: string }
         Returns: undefined
       }
       request_concession_award: {
@@ -7265,6 +7366,7 @@ export type Database = {
       tenant_status: "provisioning" | "active" | "suspended" | "closed"
       transport_direction: "pickup" | "drop" | "both"
       user_status: "active" | "suspended" | "terminated"
+      waitlist_status: "waiting" | "offer_pending" | "withdrawn"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -7583,6 +7685,7 @@ export const Constants = {
       tenant_status: ["provisioning", "active", "suspended", "closed"],
       transport_direction: ["pickup", "drop", "both"],
       user_status: ["active", "suspended", "terminated"],
+      waitlist_status: ["waiting", "offer_pending", "withdrawn"],
     },
   },
 } as const

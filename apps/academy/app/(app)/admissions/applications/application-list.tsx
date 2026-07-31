@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { issueOffer, respondToOffer } from './actions';
+import { issueOffer, respondToOffer, joinWaitlist, removeFromWaitlist } from './actions';
 import { OFFER_DECLINE_REASONS } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,7 +18,69 @@ export type ApplicationRow = {
   className: string;
   offer: { id: string; status: string; expires_at: string } | null;
   availableSeats: number | null;
+  waitlist: { id: string; position: number | null; status: string } | null;
 };
+
+function JoinWaitlistButton({ applicationId }: { applicationId: string }) {
+  const [pending, startTransition] = useTransition();
+
+  const onClick = () => {
+    startTransition(async () => {
+      const result = await joinWaitlist(applicationId);
+      if (result.error) toast.error(result.error);
+      else toast.success('Added to the waitlist.');
+    });
+  };
+
+  return (
+    <Button type="button" size="sm" variant="outline" disabled={pending} onClick={onClick}>
+      {pending ? 'Adding…' : 'Join waitlist'}
+    </Button>
+  );
+}
+
+function WaitlistBadge({ waitlist }: { waitlist: { id: string; position: number | null; status: string } }) {
+  const [pending, startTransition] = useTransition();
+  const [reason, setReason] = useState('');
+
+  const onRemove = () => {
+    if (!reason.trim()) {
+      toast.error('Enter a reason for removing this applicant.');
+      return;
+    }
+    startTransition(async () => {
+      const result = await removeFromWaitlist(waitlist.id, reason);
+      if (result.error) toast.error(result.error);
+      else {
+        toast.success('Removed from the waitlist.');
+        setReason('');
+      }
+    });
+  };
+
+  if (waitlist.status === 'offer_pending') {
+    return (
+      <span className="text-xs text-muted-foreground" data-testid={`waitlist-status-${waitlist.id}`}>
+        Promoted — ready for an offer
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2" data-testid={`waitlist-status-${waitlist.id}`}>
+      <span className="text-xs text-muted-foreground">Waitlist position {waitlist.position}</span>
+      <Input
+        placeholder="Removal reason"
+        className="h-8 w-40"
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+      />
+      <Button type="button" size="sm" variant="outline" disabled={pending} onClick={onRemove}>
+        Remove
+      </Button>
+    </div>
+  );
+}
 
 function IssueOfferForm({ applicationId, availableSeats }: { applicationId: string; availableSeats: number }) {
   const [pending, startTransition] = useTransition();
@@ -149,6 +211,8 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
                 <AcceptButton offerId={a.offer.id} />
                 <DeclineControl offerId={a.offer.id} />
               </div>
+            ) : a.waitlist ? (
+              <WaitlistBadge waitlist={a.waitlist} />
             ) : (
               !a.offer &&
               a.availableSeats !== null && (
@@ -156,7 +220,11 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
                   <span className="text-xs text-muted-foreground" data-testid={`available-seats-${a.applicationNo}`}>
                     {a.availableSeats} seat(s) left
                   </span>
-                  <IssueOfferForm applicationId={a.id} availableSeats={a.availableSeats} />
+                  {a.availableSeats > 0 ? (
+                    <IssueOfferForm applicationId={a.id} availableSeats={a.availableSeats} />
+                  ) : (
+                    <JoinWaitlistButton applicationId={a.id} />
+                  )}
                 </div>
               )
             )}

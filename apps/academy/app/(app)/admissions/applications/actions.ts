@@ -60,3 +60,38 @@ export async function respondToOffer(_prev: RespondToOfferState, formData: FormD
   revalidatePath('/admissions/applications');
   return { error: null };
 }
+
+export type JoinWaitlistState = { error: string | null };
+
+// FR-B07: queue an applicant for the next seat that opens up.
+export async function joinWaitlist(applicationId: string): Promise<JoinWaitlistState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('join_waitlist', { p_application_id: applicationId });
+  if (error) {
+    if (error.message.includes('ALREADY_WAITLISTED')) return { error: 'This application is already on the waitlist.' };
+    if (error.message.includes('APPLICATION_NOT_WAITLISTABLE')) return { error: 'This application can no longer join the waitlist.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to manage the waitlist.' };
+    return { error: 'Could not add to the waitlist.' };
+  }
+
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export type RemoveFromWaitlistState = { error: string | null };
+
+// FR-B07: a family withdraws, or the officer removes them manually — the
+// reason is recorded on the audit trail.
+export async function removeFromWaitlist(waitlistId: string, reason: string): Promise<RemoveFromWaitlistState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('remove_from_waitlist', { p_waitlist_id: waitlistId, p_reason: reason });
+  if (error) {
+    if (error.message.includes('REMOVAL_REASON_REQUIRED')) return { error: 'Enter a reason for removing this applicant.' };
+    if (error.message.includes('NOT_WAITING')) return { error: 'This applicant is no longer waiting.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to manage the waitlist.' };
+    return { error: 'Could not remove this applicant from the waitlist.' };
+  }
+
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}

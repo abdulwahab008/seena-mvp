@@ -8,7 +8,7 @@ function one<T>(v: T | T[] | null): T | null {
 export default async function ApplicationsPage() {
   const supabase = await supabaseServer();
 
-  const [{ data: apps }, { data: offers }] = await Promise.all([
+  const [{ data: apps }, { data: offers }, { data: waitlistRows }] = await Promise.all([
     supabase
       .from('admission_application')
       .select(
@@ -19,12 +19,15 @@ export default async function ApplicationsPage() {
       .from('admission_offer')
       .select('id, application_id, status, expires_at')
       .order('issued_at', { ascending: false }),
+    supabase.from('admission_waitlist').select('id, application_id, position, status').neq('status', 'withdrawn'),
   ]);
 
   const latestOfferByApp = new Map<string, { id: string; status: string; expires_at: string }>();
   for (const o of offers ?? []) {
     if (!latestOfferByApp.has(o.application_id)) latestOfferByApp.set(o.application_id, o);
   }
+  const waitlistByApp = new Map<string, { id: string; position: number | null; status: string }>();
+  for (const w of waitlistRows ?? []) waitlistByApp.set(w.application_id, w);
 
   const rows: ApplicationRow[] = await Promise.all(
     (apps ?? []).map(async (a) => {
@@ -46,6 +49,7 @@ export default async function ApplicationsPage() {
         className: one(a.class_level)?.name_en ?? 'Unknown',
         offer,
         availableSeats,
+        waitlist: waitlistByApp.get(a.id) ?? null,
       };
     })
   );
