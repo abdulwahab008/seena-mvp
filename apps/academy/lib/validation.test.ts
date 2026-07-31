@@ -42,6 +42,8 @@ import {
   allocateTestSeatSchema,
   setTestScoreSchema,
   setTestAttendanceSchema,
+  bookInterviewSchema,
+  cancelInterviewSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -838,5 +840,36 @@ describe('setTestAttendanceSchema', () => {
 
   it('rejects an unrecognized attendance value', () => {
     expect(setTestAttendanceSchema.safeParse({ ...base, attendance: 'late' }).success).toBe(false);
+  });
+});
+
+describe('bookInterviewSchema', () => {
+  const base = {
+    applicationId: '11111111-1111-1111-1111-111111111111',
+    panelUserId: '22222222-2222-2222-2222-222222222222',
+    startsAt: '2026-08-10T11:00',
+    endsAt: '2026-08-10T11:20',
+  };
+
+  it('accepts a valid booking', () => {
+    expect(bookInterviewSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an end time at or before the start time', () => {
+    expect(bookInterviewSchema.safeParse({ ...base, endsAt: '2026-08-10T10:00' }).success).toBe(false);
+  });
+
+  it('rejects a missing panel member', () => {
+    expect(bookInterviewSchema.safeParse({ ...base, panelUserId: '' }).success).toBe(false);
+  });
+});
+
+describe('cancelInterviewSchema', () => {
+  it('accepts a valid id', () => {
+    expect(cancelInterviewSchema.safeParse({ interviewId: '11111111-1111-1111-1111-111111111111' }).success).toBe(true);
+  });
+
+  it('rejects a non-uuid id', () => {
+    expect(cancelInterviewSchema.safeParse({ interviewId: 'nope' }).success).toBe(false);
   });
 });

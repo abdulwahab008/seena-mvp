@@ -651,6 +651,67 @@ export type Database = {
           },
         ]
       }
+      admission_interview: {
+        Row: {
+          application_id: string
+          created_at: string
+          during: unknown
+          ends_at: string
+          id: string
+          panel_user_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["interview_status"]
+          tenant_id: string
+          venue: string | null
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          during?: unknown
+          ends_at: string
+          id?: string
+          panel_user_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["interview_status"]
+          tenant_id: string
+          venue?: string | null
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          during?: unknown
+          ends_at?: string
+          id?: string
+          panel_user_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["interview_status"]
+          tenant_id?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_interview_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "admission_application"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_interview_panel_user_id_fkey"
+            columns: ["panel_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_interview_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admission_merit_snapshot: {
         Row: {
           application_id: string
@@ -6561,6 +6622,17 @@ export type Database = {
         }
         Returns: number
       }
+      book_interview: {
+        Args: {
+          p_application_id: string
+          p_confirm_despite_leave?: boolean
+          p_ends_at: string
+          p_panel_user_id: string
+          p_starts_at: string
+          p_venue?: string
+        }
+        Returns: string
+      }
       build_challan_render_payload: {
         Args: { p_challan_id: string }
         Returns: Json
@@ -6570,6 +6642,7 @@ export type Database = {
         Returns: Json
       }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
+      cancel_interview: { Args: { p_interview_id: string }; Returns: undefined }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
       check_room_capacity: {
         Args: { p_room_id: string; p_section_id: string }
@@ -6975,6 +7048,10 @@ export type Database = {
           p_session_id: string
           p_student_ids: string[]
         }
+        Returns: Json
+      }
+      fn_build_interview_notification_payload: {
+        Args: { p_interview_id: string }
         Returns: Json
       }
       fn_build_roll_slip_payload: {
@@ -7797,6 +7874,7 @@ export type Database = {
         | "legal_guardian"
         | "other"
       id_document_type: "cnic" | "passport"
+      interview_status: "scheduled" | "cancelled"
       late_fee_basis: "flat" | "per_day" | "percentage"
       leave_accrual_method: "annual_grant" | "monthly_accrual" | "none"
       leave_application_status:
@@ -8122,6 +8200,7 @@ export const Constants = {
         "other",
       ],
       id_document_type: ["cnic", "passport"],
+      interview_status: ["scheduled", "cancelled"],
       late_fee_basis: ["flat", "per_day", "percentage"],
       leave_accrual_method: ["annual_grant", "monthly_accrual", "none"],
       leave_application_status: [

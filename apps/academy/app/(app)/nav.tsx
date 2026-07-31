@@ -9,6 +9,7 @@ const LINKS = [
   { href: '/admissions/applications', label: 'Applications' },
   { href: '/admissions/checklist', label: 'Document Checklist' },
   { href: '/admissions/test-sittings', label: 'Test Sittings' },
+  { href: '/admissions/interviews', label: 'Interviews' },
   { href: '/academic-setup/curriculum', label: 'Curriculum' },
   { href: '/academic-setup/rooms', label: 'Rooms' },
   { href: '/academic-setup/competency', label: 'Teacher Competency' },

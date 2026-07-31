@@ -647,3 +647,22 @@ export const setTestAttendanceSchema = z.object({
   attendance: z.enum(TEST_ATTENDANCES),
 });
 export type SetTestAttendanceInput = z.infer<typeof setTestAttendanceSchema>;
+
+// Mirrors book_interview()'s own END_MUST_BE_AFTER_START check in
+// supabase/migrations/20260731410000_admission_interview_booking.sql.
+export const bookInterviewSchema = z
+  .object({
+    applicationId: z.string().uuid('Choose an application'),
+    panelUserId: z.string().uuid('Choose a panel member'),
+    startsAt: z.string().min(1, 'Choose a start time'),
+    endsAt: z.string().min(1, 'Choose an end time'),
+    venue: z.string().max(200).optional(),
+  })
+  .refine((v) => !v.startsAt || !v.endsAt || v.endsAt > v.startsAt, {
+    message: 'End time must be after the start time',
+    path: ['endsAt'],
+  });
+export type BookInterviewInput = z.infer<typeof bookInterviewSchema>;
+
+export const cancelInterviewSchema = z.object({ interviewId: z.string().uuid() });
+export type CancelInterviewInput = z.infer<typeof cancelInterviewSchema>;
