@@ -1,7 +1,15 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { issueOfferSchema, respondToOfferSchema, setDocumentSubmissionSchema } from '@/lib/validation';
+import {
+  issueOfferSchema,
+  respondToOfferSchema,
+  setDocumentSubmissionSchema,
+  uploadDocumentSchema,
+  rejectDocumentSchema,
+  MAX_DOCUMENT_FILE_SIZE,
+  ALLOWED_DOCUMENT_MIME_TYPES,
+} from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type IssueOfferState = { error: string | null };
@@ -143,4 +151,121 @@ export async function setDocumentSubmission(_prev: SetDocumentSubmissionState, f
 
   revalidatePath('/admissions/applications');
   return { error: null };
+}
+
+export type UploadDocumentState = { error: string | null };
+
+// FR-B10: create_admission_document() reserves the metadata row (and
+// therefore the exact storage_path) first; only then is the file itself
+// uploaded to that path, so the admission_docs_insert_officer storage
+// policy has a row to match against. If the upload itself fails,
+// delete_admission_document() is the compensating rollback.
+export async function uploadAdmissionDocument(_prev: UploadDocumentState, formData: FormData): Promise<UploadDocumentState> {
+  const file = formData.get('file');
+  if (!(file instanceof File) || file.size === 0) return { error: 'Choose a file to upload.' };
+
+  const parsed = uploadDocumentSchema.safeParse({
+    applicationId: formData.get('applicationId'),
+    docType: formData.get('docType'),
+    bFormNo: formData.get('bFormNo') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  // AC: rejected both client-side (the form checks this too) and
+  // server-side — no object is stored either way.
+  if (file.size > MAX_DOCUMENT_FILE_SIZE) return { error: 'Maximum file size 5 MB' };
+  if (!ALLOWED_DOCUMENT_MIME_TYPES.includes(file.type as (typeof ALLOWED_DOCUMENT_MIME_TYPES)[number])) {
+    return { error: 'Only JPEG, PNG, and PDF files are accepted.' };
+  }
+
+  const ext = file.name.includes('.') ? file.name.split('.').pop()! : 'bin';
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('create_admission_document', {
+    p_application_id: parsed.data.applicationId,
+    p_doc_type: parsed.data.docType,
+    p_file_size: file.size,
+    p_mime_type: file.type,
+    p_file_ext: ext,
+    p_b_form_no: parsed.data.bFormNo || undefined,
+  });
+  if (error) {
+    if (error.message.includes('chk_admission_document_bform')) return { error: 'B-Form number must be 13 digits, e.g. 42101-1234567-8.' };
+    if (error.message.includes('FILE_TOO_LARGE')) return { error: 'Maximum file size 5 MB' };
+    if (error.message.includes('UNSUPPORTED_FILE_TYPE')) return { error: 'Only JPEG, PNG, and PDF files are accepted.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to upload documents.' };
+    return { error: 'Could not start the upload.' };
+  }
+
+  const { document_id: documentId, storage_path: storagePath } = data as { document_id: string; storage_path: string };
+
+  const { error: uploadError } = await supabase.storage
+    .from('admission-docs')
+    .upload(storagePath, file, { contentType: file.type, upsert: false });
+  if (uploadError) {
+    await supabase.rpc('delete_admission_document', { p_document_id: documentId });
+    return { error: 'The file failed to upload. Please try again.' };
+  }
+
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export async function verifyDocument(documentId: string): Promise<{ error: string | null }> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('verify_admission_document', { p_document_id: documentId });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to verify documents.' };
+    return { error: 'Could not verify the document.' };
+  }
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export type RejectDocumentState = { error: string | null };
+
+export async function rejectDocument(_prev: RejectDocumentState, formData: FormData): Promise<RejectDocumentState> {
+  const parsed = rejectDocumentSchema.safeParse({
+    documentId: formData.get('documentId'),
+    reason: formData.get('reason'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('reject_admission_document', {
+    p_document_id: parsed.data.documentId,
+    p_reason: parsed.data.reason,
+  });
+  if (error) {
+    if (error.message.includes('REASON_REQUIRED')) return { error: 'Enter a reason for rejecting this document.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to reject documents.' };
+    return { error: 'Could not reject the document.' };
+  }
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export async function deleteDocument(documentId: string): Promise<{ error: string | null }> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('delete_admission_document', { p_document_id: documentId });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only a Principal can delete a verified document.' };
+    return { error: 'Could not delete the document.' };
+  }
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+// AC: a signed URL is valid for 60 minutes, regardless of role.
+export async function getDocumentSignedUrl(documentId: string): Promise<{ error: string | null; url: string | null }> {
+  const supabase = await supabaseServer();
+  const { data: doc, error: fetchError } = await supabase
+    .from('admission_document')
+    .select('storage_path')
+    .eq('id', documentId)
+    .single();
+  if (fetchError || !doc) return { error: 'Document not found.', url: null };
+
+  const { data, error } = await supabase.storage.from('admission-docs').createSignedUrl(doc.storage_path, 3600);
+  if (error || !data) return { error: 'Could not generate a preview link.', url: null };
+  return { error: null, url: data.signedUrl };
 }

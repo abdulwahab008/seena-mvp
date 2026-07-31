@@ -45,6 +45,8 @@ import {
   bookInterviewSchema,
   cancelInterviewSchema,
   submitScorecardSchema,
+  uploadDocumentSchema,
+  rejectDocumentSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -901,5 +903,37 @@ describe('submitScorecardSchema', () => {
 
   it('accepts an optional justification', () => {
     expect(submitScorecardSchema.safeParse({ ...base, justification: 'Clear override rationale here.' }).success).toBe(true);
+  });
+});
+
+describe('uploadDocumentSchema', () => {
+  const base = { applicationId: '11111111-1111-1111-1111-111111111111', docType: 'b_form' };
+
+  it('accepts a valid upload with no B-Form number', () => {
+    expect(uploadDocumentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a valid B-Form number', () => {
+    expect(uploadDocumentSchema.safeParse({ ...base, bFormNo: '42101-1234567-8' }).success).toBe(true);
+  });
+
+  it('rejects a malformed B-Form number', () => {
+    expect(uploadDocumentSchema.safeParse({ ...base, bFormNo: '12345' }).success).toBe(false);
+  });
+
+  it('rejects an unrecognized document type', () => {
+    expect(uploadDocumentSchema.safeParse({ ...base, docType: 'passport' }).success).toBe(false);
+  });
+});
+
+describe('rejectDocumentSchema', () => {
+  const base = { documentId: '11111111-1111-1111-1111-111111111111', reason: 'Blurred scan' };
+
+  it('accepts a valid rejection', () => {
+    expect(rejectDocumentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an empty reason', () => {
+    expect(rejectDocumentSchema.safeParse({ ...base, reason: '' }).success).toBe(false);
   });
 });

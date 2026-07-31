@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import {
   issueOffer,
@@ -9,14 +9,27 @@ import {
   removeFromWaitlist,
   checkChecklistCompleteness,
   setDocumentSubmission,
+  uploadAdmissionDocument,
+  verifyDocument,
+  rejectDocument,
+  deleteDocument,
+  getDocumentSignedUrl,
   type MissingItem,
 } from './actions';
-import { OFFER_DECLINE_REASONS, DOC_STATUSES } from '@/lib/validation';
+import { OFFER_DECLINE_REASONS, DOC_STATUSES, DOCUMENT_TYPES } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+export type DocumentRow = {
+  id: string;
+  docType: string;
+  status: string;
+  rejectReason: string | null;
+  bFormNo: string | null;
+};
 
 export type ApplicationRow = {
   id: string;
@@ -28,6 +41,7 @@ export type ApplicationRow = {
   availableSeats: number | null;
   waitlist: { id: string; position: number | null; status: string } | null;
   checklistSnapshot: { doc_type: string; is_mandatory: boolean; min_count: number }[];
+  documents: DocumentRow[];
 };
 
 function ChecklistPanel({ applicationId, docTypes }: { applicationId: string; docTypes: string[] }) {
@@ -114,6 +128,181 @@ function ChecklistPanel({ applicationId, docTypes }: { applicationId: string; do
           Save
         </Button>
       </div>
+    </div>
+  );
+}
+
+function DocumentUploadForm({ applicationId }: { applicationId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [docType, setDocType] = useState<string>(DOCUMENT_TYPES[0]);
+  const [bFormNo, setBFormNo] = useState('');
+  const [fileError, setFileError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const onSubmit = (formData: FormData) => {
+    const file = formData.get('file') as File | null;
+    if (file && file.size > 5 * 1024 * 1024) {
+      setFileError('Maximum file size 5 MB');
+      return;
+    }
+    setFileError(null);
+    formData.set('applicationId', applicationId);
+    formData.set('docType', docType);
+    if (bFormNo) formData.set('bFormNo', bFormNo);
+
+    startTransition(async () => {
+      const result = await uploadAdmissionDocument({ error: null }, formData);
+      if (result.error) toast.error(result.error);
+      else {
+        toast.success('Document uploaded.');
+        setBFormNo('');
+        if (inputRef.current) inputRef.current.value = '';
+      }
+    });
+  };
+
+  return (
+    <form action={onSubmit} className="flex flex-wrap items-end gap-2" data-testid={`document-upload-form-${applicationId}`}>
+      <Select value={docType} onValueChange={setDocType}>
+        <SelectTrigger className="h-8 w-40" data-testid={`document-doctype-trigger-${applicationId}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {DOCUMENT_TYPES.map((d) => (
+            <SelectItem key={d} value={d}>
+              {d.replace(/_/g, ' ')}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {docType === 'b_form' && (
+        <Input
+          placeholder="42101-1234567-8"
+          className="h-8 w-40"
+          value={bFormNo}
+          onChange={(e) => setBFormNo(e.target.value)}
+          data-testid={`document-bform-no-${applicationId}`}
+        />
+      )}
+      <input
+        ref={inputRef}
+        name="file"
+        type="file"
+        accept="image/jpeg,image/png,application/pdf"
+        className="h-8 text-xs"
+        data-testid={`document-file-input-${applicationId}`}
+      />
+      <Button type="submit" size="sm" disabled={pending} data-testid={`document-upload-submit-${applicationId}`}>
+        {pending ? 'Uploading…' : 'Upload'}
+      </Button>
+      {fileError && <p className="w-full text-xs text-destructive">{fileError}</p>}
+    </form>
+  );
+}
+
+function DocumentRejectControl({ documentId }: { documentId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [reason, setReason] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const onReject = () => {
+    const fd = new FormData();
+    fd.set('documentId', documentId);
+    fd.set('reason', reason);
+    startTransition(async () => {
+      const result = await rejectDocument({ error: null }, fd);
+      if (result.error) toast.error(result.error);
+      else {
+        toast.success('Document rejected.');
+        setOpen(false);
+        setReason('');
+      }
+    });
+  };
+
+  if (!open) {
+    return (
+      <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>
+        Reject
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <Input
+        placeholder="Reason"
+        className="h-7 w-32"
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        data-testid={`document-reject-reason-${documentId}`}
+      />
+      <Button type="button" size="sm" variant="destructive" disabled={pending} onClick={onReject} data-testid={`document-reject-submit-${documentId}`}>
+        Confirm
+      </Button>
+    </div>
+  );
+}
+
+function DocumentsPanel({ applicationId, documents }: { applicationId: string; documents: DocumentRow[] }) {
+  const [pending, startTransition] = useTransition();
+  const [previewUrl, setPreviewUrl] = useState<Record<string, string>>({});
+
+  const onVerify = (documentId: string) => {
+    startTransition(async () => {
+      const result = await verifyDocument(documentId);
+      if (result.error) toast.error(result.error);
+      else toast.success('Document verified.');
+    });
+  };
+
+  const onDelete = (documentId: string) => {
+    startTransition(async () => {
+      const result = await deleteDocument(documentId);
+      if (result.error) toast.error(result.error);
+      else toast.success('Document deleted.');
+    });
+  };
+
+  const onPreview = (documentId: string) => {
+    startTransition(async () => {
+      const result = await getDocumentSignedUrl(documentId);
+      if (result.error) toast.error(result.error);
+      else if (result.url) setPreviewUrl((p) => ({ ...p, [documentId]: result.url! }));
+    });
+  };
+
+  return (
+    <div className="mt-2 space-y-2 border-t pt-2" data-testid={`documents-panel-${applicationId}`}>
+      <DocumentUploadForm applicationId={applicationId} />
+      {documents.length > 0 && (
+        <ul className="space-y-1 text-xs">
+          {documents.map((d) => (
+            <li key={d.id} className="flex flex-wrap items-center gap-2" data-testid={`document-row-${d.id}`}>
+              <span className="w-32 shrink-0">{d.docType.replace(/_/g, ' ')}</span>
+              <span data-testid={`document-status-${d.id}`}>{d.status}</span>
+              {d.status === 'rejected' && d.rejectReason && <span className="text-muted-foreground">({d.rejectReason})</span>}
+              <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => onPreview(d.id)}>
+                Preview
+              </Button>
+              {previewUrl[d.id] && (
+                <a href={previewUrl[d.id]} target="_blank" rel="noreferrer" className="text-blue-600 underline" data-testid={`document-preview-link-${d.id}`}>
+                  Open
+                </a>
+              )}
+              {d.status !== 'verified' && (
+                <Button type="button" size="sm" disabled={pending} onClick={() => onVerify(d.id)}>
+                  Verify
+                </Button>
+              )}
+              {d.status !== 'rejected' && <DocumentRejectControl documentId={d.id} />}
+              <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => onDelete(d.id)} data-testid={`document-delete-${d.id}`}>
+                Delete
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -328,6 +517,7 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
               )}
             </div>
             <ChecklistPanel applicationId={a.id} docTypes={a.checklistSnapshot.map((d) => d.doc_type)} />
+            <DocumentsPanel applicationId={a.id} documents={a.documents} />
           </CardContent>
         </Card>
       ))}

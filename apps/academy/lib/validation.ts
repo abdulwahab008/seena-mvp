@@ -695,3 +695,23 @@ export const submitScorecardSchema = z.object({
   justification: z.string().max(2000).optional(),
 });
 export type SubmitScorecardInput = z.infer<typeof submitScorecardSchema>;
+
+// Mirrors create_admission_document()'s own checks in
+// supabase/migrations/20260731430000_admission_document_upload.sql, and
+// the admission-docs bucket's own file_size_limit/allowed_mime_types.
+export const MAX_DOCUMENT_FILE_SIZE = 5 * 1024 * 1024;
+export const ALLOWED_DOCUMENT_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'] as const;
+export const B_FORM_NO_REGEX = /^[0-9]{5}-[0-9]{7}-[0-9]$/;
+
+export const uploadDocumentSchema = z.object({
+  applicationId: z.string().uuid(),
+  docType: z.enum(DOCUMENT_TYPES),
+  bFormNo: z.string().regex(B_FORM_NO_REGEX, 'Must be 13 digits, e.g. 42101-1234567-8').optional().or(z.literal('')),
+});
+export type UploadDocumentInput = z.infer<typeof uploadDocumentSchema>;
+
+export const rejectDocumentSchema = z.object({
+  documentId: z.string().uuid(),
+  reason: z.string().min(1, 'A reason is required'),
+});
+export type RejectDocumentInput = z.infer<typeof rejectDocumentSchema>;

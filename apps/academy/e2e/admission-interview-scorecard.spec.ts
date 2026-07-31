@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
 
@@ -149,7 +149,7 @@ test('an owner scores an interview, a merit-overriding recommendation needs a ju
   const row1 = rows.filter({ hasText: 'Panel One' });
   const row2 = rows.filter({ hasText: 'Panel Two' });
 
-  async function fillScores(row: ReturnType<typeof row1>, communication: string, confidence: string, academic: string, parental: string, overall: string) {
+  async function fillScores(row: Locator, communication: string, confidence: string, academic: string, parental: string, overall: string) {
     await row.locator('[data-testid^="scorecard-communication-"]').fill(communication);
     await row.locator('[data-testid^="scorecard-confidence-"]').fill(confidence);
     await row.locator('[data-testid^="scorecard-academic_readiness-"]').fill(academic);

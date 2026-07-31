@@ -317,6 +317,86 @@ export type Database = {
           },
         ]
       }
+      admission_document: {
+        Row: {
+          application_id: string
+          b_form_no: string | null
+          created_at: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          file_size: number
+          id: string
+          mime_type: string
+          reject_reason: string | null
+          status: Database["public"]["Enums"]["doc_status"]
+          storage_path: string
+          tenant_id: string
+          uploaded_by: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          application_id: string
+          b_form_no?: string | null
+          created_at?: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          file_size: number
+          id?: string
+          mime_type: string
+          reject_reason?: string | null
+          status?: Database["public"]["Enums"]["doc_status"]
+          storage_path: string
+          tenant_id: string
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          application_id?: string
+          b_form_no?: string | null
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["document_type"]
+          file_size?: number
+          id?: string
+          mime_type?: string
+          reject_reason?: string | null
+          status?: Database["public"]["Enums"]["doc_status"]
+          storage_path?: string
+          tenant_id?: string
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_document_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "admission_application"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_document_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_document_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_document_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       admission_document_requirement: {
         Row: {
           board: Database["public"]["Enums"]["board"] | null
@@ -6782,6 +6862,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_admission_document: {
+        Args: {
+          p_application_id: string
+          p_b_form_no?: string
+          p_doc_type: Database["public"]["Enums"]["document_type"]
+          p_file_ext: string
+          p_file_size: number
+          p_mime_type: string
+        }
+        Returns: Json
+      }
       create_audit_partition: { Args: { p_month?: string }; Returns: undefined }
       create_campus: {
         Args: { p_city?: string; p_code: string; p_name: string }
@@ -7051,6 +7142,10 @@ export type Database = {
         }
         Returns: string
       }
+      delete_admission_document: {
+        Args: { p_document_id: string }
+        Returns: undefined
+      }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
       delete_stream: { Args: { p_id: string }; Returns: undefined }
       detect_sibling_groups: {
@@ -7119,6 +7214,10 @@ export type Database = {
       fn_allocate_test_seat: {
         Args: { p_application_id: string; p_sitting_id: string }
         Returns: number
+      }
+      fn_application_docs_complete: {
+        Args: { p_application_id: string }
+        Returns: boolean
       }
       fn_assign_next_roll_no: {
         Args: { p_enrolment_id: string }
@@ -7593,6 +7692,10 @@ export type Database = {
         Args: { p_kind: string; p_phone: string }
         Returns: undefined
       }
+      reject_admission_document: {
+        Args: { p_document_id: string; p_reason: string }
+        Returns: undefined
+      }
       remove_fee_plan_line: {
         Args: { p_line_id: string; p_reason?: string }
         Returns: undefined
@@ -7840,6 +7943,10 @@ export type Database = {
           p_weekly_periods: number
         }
         Returns: string
+      }
+      verify_admission_document: {
+        Args: { p_document_id: string }
+        Returns: undefined
       }
       verify_competency: {
         Args: {

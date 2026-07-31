@@ -8,7 +8,7 @@ function one<T>(v: T | T[] | null): T | null {
 export default async function ApplicationsPage() {
   const supabase = await supabaseServer();
 
-  const [{ data: apps }, { data: offers }, { data: waitlistRows }] = await Promise.all([
+  const [{ data: apps }, { data: offers }, { data: waitlistRows }, { data: documentRows }] = await Promise.all([
     supabase
       .from('admission_application')
       .select(
@@ -20,6 +20,10 @@ export default async function ApplicationsPage() {
       .select('id, application_id, status, expires_at')
       .order('issued_at', { ascending: false }),
     supabase.from('admission_waitlist').select('id, application_id, position, status').neq('status', 'withdrawn'),
+    supabase
+      .from('admission_document')
+      .select('id, application_id, doc_type, status, reject_reason, b_form_no, created_at')
+      .order('created_at', { ascending: false }),
   ]);
 
   const latestOfferByApp = new Map<string, { id: string; status: string; expires_at: string }>();
@@ -28,6 +32,12 @@ export default async function ApplicationsPage() {
   }
   const waitlistByApp = new Map<string, { id: string; position: number | null; status: string }>();
   for (const w of waitlistRows ?? []) waitlistByApp.set(w.application_id, w);
+  const documentsByApp = new Map<string, ApplicationRow['documents']>();
+  for (const d of documentRows ?? []) {
+    const list = documentsByApp.get(d.application_id) ?? [];
+    list.push({ id: d.id, docType: d.doc_type, status: d.status, rejectReason: d.reject_reason, bFormNo: d.b_form_no });
+    documentsByApp.set(d.application_id, list);
+  }
 
   const rows: ApplicationRow[] = await Promise.all(
     (apps ?? []).map(async (a) => {
@@ -51,6 +61,7 @@ export default async function ApplicationsPage() {
         availableSeats,
         waitlist: waitlistByApp.get(a.id) ?? null,
         checklistSnapshot: (a.checklist_snapshot ?? []) as { doc_type: string; is_mandatory: boolean; min_count: number }[],
+        documents: documentsByApp.get(a.id) ?? [],
       };
     })
   );
