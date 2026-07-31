@@ -43,8 +43,13 @@ export async function upsertClassSubject(_prev: UpsertClassSubjectState, formDat
 
   if (error) {
     if (error.message.includes('WEEKLY_PERIODS_REQUIRED')) return { error: 'Weekly periods must be at least 1.' };
+    if (error.message.includes('WEEKLY_PERIODS_OUT_OF_RANGE')) return { error: 'Weekly periods cannot exceed 12.' };
     if (error.message.includes('ELECTIVE_BUCKET_REQUIRED')) return { error: 'Elective subjects need a bucket number.' };
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit the curriculum for this campus.' };
+    if (error.message.includes('SESSION_NOT_FOUND')) return { error: 'This session could not be found.' };
+    if (error.message.includes('CLASS_LEVEL_NOT_FOUND')) return { error: 'This class could not be found.' };
+    if (error.message.includes('SUBJECT_NOT_FOUND')) return { error: 'This subject could not be found.' };
+    if (error.message.includes('STREAM_NOT_FOUND')) return { error: 'This stream could not be found.' };
     return { error: 'Could not save the subject mapping.' };
   }
 

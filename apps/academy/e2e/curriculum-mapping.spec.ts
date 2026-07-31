@@ -63,3 +63,57 @@ test('an owner maps a subject onto class 9 and sees the weekly-period total upda
   await expect(row).toContainText('Compulsory');
   await expect(page.getByTestId('curriculum-total')).toHaveText('Total weekly periods: 6 / 40');
 });
+
+test('submitting with no subject chosen shows a field error instead of silently doing nothing', async ({ page }) => {
+  const { email, password } = await seedOwnerWithSubject();
+
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/campuses$/);
+
+  await page.goto('/academic-setup/curriculum');
+  await page.waitForLoadState('networkidle');
+
+  await page.getByTestId('curriculum-class-trigger').click();
+  await page.getByRole('option', { name: 'Class 9', exact: true }).click();
+
+  // No subject chosen, but weekly periods filled — previously this
+  // silently failed react-hook-form's internal validation with no visible
+  // feedback at all (AC: curriculum-mapper-silent-required-field-failure).
+  await page.getByLabel('Weekly periods').fill('6');
+  await page.getByRole('button', { name: 'Map subject' }).click();
+
+  await expect(page.getByText('Choose a subject')).toBeVisible();
+  await expect(page.getByTestId('curriculum-row-Mathematics')).not.toBeVisible();
+});
+
+test('weekly periods over 12 is rejected with a visible error, not silently saved', async ({ page }) => {
+  const { email, password } = await seedOwnerWithSubject();
+
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/campuses$/);
+
+  await page.goto('/academic-setup/curriculum');
+  await page.waitForLoadState('networkidle');
+
+  await page.getByTestId('curriculum-class-trigger').click();
+  await page.getByRole('option', { name: 'Class 9', exact: true }).click();
+
+  await page.getByTestId('curriculum-subject-trigger').click();
+  await page.getByRole('option', { name: 'Mathematics', exact: true }).click();
+  // The old HTML max=12 was silently unenforceable (the form has
+  // noValidate), and the server only rejected 0/negative — 15 used to
+  // save successfully with no feedback at all.
+  await page.getByLabel('Weekly periods').fill('15');
+  await page.getByRole('button', { name: 'Map subject' }).click();
+
+  await expect(page.getByText('Must be at most 12')).toBeVisible();
+  await expect(page.getByTestId('curriculum-row-Mathematics')).not.toBeVisible();
+});

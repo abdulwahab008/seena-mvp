@@ -4,9 +4,27 @@ import { CurriculumMapper } from './curriculum-mapper';
 export default async function CurriculumPage() {
   const supabase = await supabaseServer();
 
+  // Picks the alphabetically-first active campus, same as every other
+  // campus-selecting page in this app (fees/challans, fees/reports, ...) —
+  // deriving the acting user's OWN campus assignment instead is a real,
+  // cross-cutting gap affecting all of those pages equally, not something
+  // to solve one-off here. What IS specific and fixable here: the session
+  // query used to ignore is_current AND the chosen campus entirely,
+  // picking whichever session anywhere in the tenant happened to start
+  // most recently — a genuinely wrong session for a multi-campus tenant,
+  // not just a UX nicety. Tied to campus_id (or the shared campus_id IS
+  // NULL sessions) and is_current, matching the fees pages' own pattern.
   const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const { data: sessions } = await supabase.from('academic_session').select('id').order('starts_on', { ascending: false }).limit(1);
   const campusId = campuses?.[0]?.id;
+  const { data: sessions } = campusId
+    ? await supabase
+        .from('academic_session')
+        .select('id')
+        .or(`campus_id.eq.${campusId},campus_id.is.null`)
+        .eq('is_current', true)
+        .order('starts_on', { ascending: false })
+        .limit(1)
+    : { data: null };
   const sessionId = sessions?.[0]?.id;
 
   const [{ data: classLevels }, { data: subjects }, { data: mappings }, { data: weeklyLoad }] = await Promise.all([

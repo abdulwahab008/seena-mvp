@@ -31,6 +31,7 @@ import {
   printReceiptSchema,
   collectionReportSchema,
   finaliseCashBookDaySchema,
+  upsertClassSubjectSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -568,5 +569,47 @@ describe('finaliseCashBookDaySchema', () => {
     expect(finaliseCashBookDaySchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111', bookDate: '' }).success).toBe(
       false
     );
+  });
+});
+
+describe('upsertClassSubjectSchema', () => {
+  const base = { subjectId: '11111111-1111-1111-1111-111111111111', weeklyPeriods: 6, isCompulsory: true };
+
+  it('accepts a valid compulsory mapping with no elective fields', () => {
+    expect(upsertClassSubjectSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing subject', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, subjectId: '' }).success).toBe(false);
+  });
+
+  it('rejects zero weekly periods', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, weeklyPeriods: 0 }).success).toBe(false);
+  });
+
+  it('rejects weekly periods over 12', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, weeklyPeriods: 13 }).success).toBe(false);
+  });
+
+  it('accepts weekly periods at the 12-period ceiling', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, weeklyPeriods: 12 }).success).toBe(true);
+  });
+
+  it('rejects an elective subject with no bucket', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, isCompulsory: false }).success).toBe(false);
+  });
+
+  it('rejects an elective subject with an empty-string bucket (matches an untouched form field)', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, isCompulsory: false, electiveBucket: '' }).success).toBe(false);
+  });
+
+  it('accepts an elective subject with a bucket and choose-N', () => {
+    expect(
+      upsertClassSubjectSchema.safeParse({ ...base, isCompulsory: false, electiveBucket: 1, chooseN: 1 }).success
+    ).toBe(true);
+  });
+
+  it('accepts a compulsory subject even with an empty-string elective bucket (field is hidden, not filled)', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, electiveBucket: '', chooseN: '' }).success).toBe(true);
   });
 });

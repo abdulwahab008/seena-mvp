@@ -2,8 +2,10 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { upsertClassSubject, copyClassSubjectMap } from './actions';
+import { upsertClassSubjectSchema, type UpsertClassSubjectInput } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,14 +25,6 @@ type Mapping = {
 };
 type WeeklyLoad = { class_level_id: string | null; total_weekly_periods: number | null };
 
-type FormValues = {
-  subjectId: string;
-  weeklyPeriods: string;
-  isCompulsory: boolean;
-  electiveBucket: string;
-  chooseN: string;
-};
-
 export function CurriculumMapper({
   campusId,
   sessionId,
@@ -48,8 +42,16 @@ export function CurriculumMapper({
 }) {
   const [pending, startTransition] = useTransition();
   const [classLevelId, setClassLevelId] = useState(classLevels[0]?.id ?? '');
-  const { register, handleSubmit, control, reset, watch } = useForm<FormValues>({
-    defaultValues: { isCompulsory: true, electiveBucket: '', chooseN: '' },
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<UpsertClassSubjectInput>({
+    resolver: zodResolver(upsertClassSubjectSchema),
+    defaultValues: { subjectId: '', isCompulsory: true },
   });
   const isCompulsory = watch('isCompulsory');
 
@@ -69,17 +71,17 @@ export function CurriculumMapper({
     fd.set('sessionId', sessionId);
     fd.set('classLevelId', classLevelId);
     fd.set('subjectId', values.subjectId);
-    fd.set('weeklyPeriods', values.weeklyPeriods);
+    fd.set('weeklyPeriods', String(values.weeklyPeriods));
     if (values.isCompulsory) fd.set('isCompulsory', 'on');
-    if (values.electiveBucket) fd.set('electiveBucket', values.electiveBucket);
-    if (values.chooseN) fd.set('chooseN', values.chooseN);
+    if (values.electiveBucket !== undefined) fd.set('electiveBucket', String(values.electiveBucket));
+    if (values.chooseN !== undefined) fd.set('chooseN', String(values.chooseN));
 
     startTransition(async () => {
       const result = await upsertClassSubject({ error: null }, fd);
       if (result.error) toast.error(result.error);
       else {
         toast.success(`${subjectName(values.subjectId)} mapped.`);
-        reset({ isCompulsory: true, electiveBucket: '', chooseN: '' });
+        reset({ subjectId: '', isCompulsory: true });
       }
     });
   });
@@ -159,7 +161,6 @@ export function CurriculumMapper({
           <Controller
             control={control}
             name="subjectId"
-            rules={{ required: true }}
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger data-testid="curriculum-subject-trigger">
@@ -175,10 +176,12 @@ export function CurriculumMapper({
               </Select>
             )}
           />
+          {errors.subjectId && <p className="text-xs text-destructive">{errors.subjectId.message}</p>}
         </div>
         <div className="space-y-1">
           <Label htmlFor="weeklyPeriods">Weekly periods</Label>
-          <Input id="weeklyPeriods" type="number" min={1} max={12} {...register('weeklyPeriods', { required: true })} />
+          <Input id="weeklyPeriods" type="number" min={1} max={12} {...register('weeklyPeriods')} />
+          {errors.weeklyPeriods && <p className="text-xs text-destructive">{errors.weeklyPeriods.message}</p>}
         </div>
         <label className="flex items-center gap-2 self-end pb-2 text-sm">
           <input type="checkbox" {...register('isCompulsory')} />
@@ -189,10 +192,12 @@ export function CurriculumMapper({
             <div className="space-y-1">
               <Label htmlFor="electiveBucket">Elective bucket</Label>
               <Input id="electiveBucket" type="number" min={1} {...register('electiveBucket')} />
+              {errors.electiveBucket && <p className="text-xs text-destructive">{errors.electiveBucket.message}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="chooseN">Choose N</Label>
               <Input id="chooseN" type="number" min={1} {...register('chooseN')} />
+              {errors.chooseN && <p className="text-xs text-destructive">{errors.chooseN.message}</p>}
             </div>
           </>
         )}

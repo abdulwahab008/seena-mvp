@@ -486,3 +486,27 @@ export const finaliseCashBookDaySchema = z.object({
   bookDate: z.string().min(1, 'Required'),
 });
 export type FinaliseCashBookDayInput = z.infer<typeof finaliseCashBookDaySchema>;
+
+// Mirrors upsert_class_subject()'s own checks in
+// supabase/migrations/20260730103544_class_subject_map.sql /
+// 20260731310000_module_e_review_fixes.sql (weekly periods 1-12,
+// elective subjects need a bucket). An empty text input arrives as '',
+// which Number() coerces to 0 rather than undefined — preprocessed to
+// undefined first so an unset optional field doesn't fail .positive().
+const optionalPositiveInt = z.preprocess(
+  (v) => (v === '' || v === undefined || v === null ? undefined : Number(v)),
+  z.number().int().positive().optional(),
+);
+export const upsertClassSubjectSchema = z
+  .object({
+    subjectId: z.string().uuid('Choose a subject'),
+    weeklyPeriods: z.coerce.number().int().min(1, 'Must be at least 1').max(12, 'Must be at most 12'),
+    isCompulsory: z.boolean(),
+    electiveBucket: optionalPositiveInt,
+    chooseN: optionalPositiveInt,
+  })
+  .refine((v) => v.isCompulsory || v.electiveBucket !== undefined, {
+    message: 'Elective subjects need a bucket number',
+    path: ['electiveBucket'],
+  });
+export type UpsertClassSubjectInput = z.infer<typeof upsertClassSubjectSchema>;
