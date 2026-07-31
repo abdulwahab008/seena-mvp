@@ -524,3 +524,31 @@ export const createRoomSchema = z.object({
   blockLabel: z.string().max(100).optional(),
 });
 export type CreateRoomInput = z.infer<typeof createRoomSchema>;
+
+// Mirrors declare_competency()'s own INVALID_ORDINAL_RANGE check in
+// supabase/migrations/20260731330000_teacher_competency_registry.sql.
+export const declareCompetencySchema = z
+  .object({
+    staffId: z.string().uuid('Choose a teacher'),
+    subjectId: z.string().uuid('Choose a subject'),
+    minClassOrdinal: z.coerce.number().int(),
+    maxClassOrdinal: z.coerce.number().int(),
+  })
+  .refine((v) => v.minClassOrdinal <= v.maxClassOrdinal, {
+    message: 'The starting class must be at or before the ending class',
+    path: ['maxClassOrdinal'],
+  });
+export type DeclareCompetencyInput = z.infer<typeof declareCompetencySchema>;
+
+export const verifyCompetencySchema = z.object({
+  staffId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  documentPath: z.string().max(500).optional(),
+});
+export type VerifyCompetencyInput = z.infer<typeof verifyCompetencySchema>;
+
+export const suggestSubstitutesSchema = z.object({
+  subjectId: z.string().uuid('Choose a subject'),
+  classLevelId: z.string().uuid('Choose a class'),
+});
+export type SuggestSubstitutesInput = z.infer<typeof suggestSubstitutesSchema>;

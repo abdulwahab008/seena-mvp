@@ -212,8 +212,11 @@ select lives_ok(
   ),
   'AC: re-assigning the same staff as assistant from a LATER date succeeds — this is a legitimate re-assignment, not a duplicate'
 );
+-- FR-E07 widened assign_subject_teacher's return from a bare uuid to
+-- jsonb {id, warning} (to surface NO_COMPETENCY_ON_RECORD) — extract the
+-- id the same way that FR's own tests do.
 select is(
-  (select effective_to from public.section_subject_teacher where id = (:'assistant_alloc_1')::uuid),
+  (select effective_to from public.section_subject_teacher where id = ((:'assistant_alloc_1')::jsonb ->> 'id')::uuid),
   '2026-08-31'::date,
   'the later re-assignment auto-closed the first assistant row the day before, mirroring the primary role''s own behavior'
 );

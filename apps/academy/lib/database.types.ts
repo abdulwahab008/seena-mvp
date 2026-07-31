@@ -4437,6 +4437,7 @@ export type Database = {
           doj: string
           employee_code: string
           employment_status: Database["public"]["Enums"]["employment_status"]
+          employment_status_changed_at: string | null
           full_name: string
           full_name_ur: string | null
           gender: Database["public"]["Enums"]["gender"]
@@ -4457,6 +4458,7 @@ export type Database = {
           doj?: string
           employee_code: string
           employment_status?: Database["public"]["Enums"]["employment_status"]
+          employment_status_changed_at?: string | null
           full_name: string
           full_name_ur?: string | null
           gender: Database["public"]["Enums"]["gender"]
@@ -4477,6 +4479,7 @@ export type Database = {
           doj?: string
           employee_code?: string
           employment_status?: Database["public"]["Enums"]["employment_status"]
+          employment_status_changed_at?: string | null
           full_name?: string
           full_name_ur?: string | null
           gender?: Database["public"]["Enums"]["gender"]
@@ -5300,6 +5303,77 @@ export type Database = {
           },
         ]
       }
+      teacher_subject_competency: {
+        Row: {
+          created_at: string
+          document_path: string | null
+          id: string
+          max_class_ordinal: number
+          min_class_ordinal: number
+          source: Database["public"]["Enums"]["competency_source_enum"]
+          staff_id: string
+          subject_id: string
+          tenant_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_path?: string | null
+          id?: string
+          max_class_ordinal: number
+          min_class_ordinal: number
+          source?: Database["public"]["Enums"]["competency_source_enum"]
+          staff_id: string
+          subject_id: string
+          tenant_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_path?: string | null
+          id?: string
+          max_class_ordinal?: number
+          min_class_ordinal?: number
+          source?: Database["public"]["Enums"]["competency_source_enum"]
+          staff_id?: string
+          subject_id?: string
+          tenant_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_subject_competency_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_subject_competency_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_subject_competency_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_subject_competency_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       tenant: {
         Row: {
           country_code: string
@@ -5865,7 +5939,7 @@ export type Database = {
           p_staff_id: string
           p_subject_id: string
         }
-        Returns: string
+        Returns: Json
       }
       attach_staff_campus: {
         Args: { p_campus_id: string; p_staff_id: string }
@@ -6175,6 +6249,15 @@ export type Database = {
       decide_fee_plan_override: {
         Args: { p_approve: boolean; p_line_id: string }
         Returns: undefined
+      }
+      declare_competency: {
+        Args: {
+          p_max_class_ordinal: number
+          p_min_class_ordinal: number
+          p_staff_id: string
+          p_subject_id: string
+        }
+        Returns: string
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
       delete_stream: { Args: { p_id: string }; Returns: undefined }
@@ -6785,6 +6868,21 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      suggest_substitute_teachers: {
+        Args: {
+          p_as_of_date?: string
+          p_class_level_id: string
+          p_subject_id: string
+        }
+        Returns: {
+          full_name: string
+          max_class_ordinal: number
+          min_class_ordinal: number
+          out_of_range: boolean
+          source: Database["public"]["Enums"]["competency_source_enum"]
+          staff_id: string
+        }[]
+      }
       swap_class_level_ordinals: {
         Args: { p_id_a: string; p_id_b: string }
         Returns: undefined
@@ -6809,6 +6907,14 @@ export type Database = {
           p_stream_id?: string
           p_subject_id: string
           p_weekly_periods: number
+        }
+        Returns: string
+      }
+      verify_competency: {
+        Args: {
+          p_document_path?: string
+          p_staff_id: string
+          p_subject_id: string
         }
         Returns: string
       }
@@ -6865,6 +6971,7 @@ export type Database = {
         | "AKU_EB"
         | "CAMBRIDGE"
       campus_status: "active" | "archived"
+      competency_source_enum: "DECLARED" | "INFERRED" | "VERIFIED"
       concession_award_status: "pending" | "approved" | "rejected" | "expired"
       concession_calc_type: "percentage" | "fixed_amount"
       contract_type:
@@ -7169,6 +7276,7 @@ export const Constants = {
         "CAMBRIDGE",
       ],
       campus_status: ["active", "archived"],
+      competency_source_enum: ["DECLARED", "INFERRED", "VERIFIED"],
       concession_award_status: ["pending", "approved", "rejected", "expired"],
       concession_calc_type: ["percentage", "fixed_amount"],
       contract_type: [

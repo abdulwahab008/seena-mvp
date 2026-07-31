@@ -33,6 +33,8 @@ import {
   finaliseCashBookDaySchema,
   upsertClassSubjectSchema,
   createRoomSchema,
+  declareCompetencySchema,
+  suggestSubstitutesSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -640,5 +642,47 @@ describe('createRoomSchema', () => {
 
   it('accepts an optional block label', () => {
     expect(createRoomSchema.safeParse({ ...base, blockLabel: 'Block C' }).success).toBe(true);
+  });
+});
+
+describe('declareCompetencySchema', () => {
+  const base = {
+    staffId: '11111111-1111-1111-1111-111111111111',
+    subjectId: '22222222-2222-2222-2222-222222222222',
+    minClassOrdinal: 9,
+    maxClassOrdinal: 12,
+  };
+
+  it('accepts a valid ordinal range', () => {
+    expect(declareCompetencySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts an equal min and max (a single-class competency)', () => {
+    expect(declareCompetencySchema.safeParse({ ...base, minClassOrdinal: 9, maxClassOrdinal: 9 }).success).toBe(true);
+  });
+
+  it('rejects a min ordinal greater than the max', () => {
+    expect(declareCompetencySchema.safeParse({ ...base, minClassOrdinal: 12, maxClassOrdinal: 9 }).success).toBe(false);
+  });
+
+  it('rejects a missing staff', () => {
+    expect(declareCompetencySchema.safeParse({ ...base, staffId: '' }).success).toBe(false);
+  });
+});
+
+describe('suggestSubstitutesSchema', () => {
+  it('accepts a valid subject and class', () => {
+    expect(
+      suggestSubstitutesSchema.safeParse({
+        subjectId: '11111111-1111-1111-1111-111111111111',
+        classLevelId: '22222222-2222-2222-2222-222222222222',
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects a missing class', () => {
+    expect(suggestSubstitutesSchema.safeParse({ subjectId: '11111111-1111-1111-1111-111111111111', classLevelId: '' }).success).toBe(
+      false
+    );
   });
 });
