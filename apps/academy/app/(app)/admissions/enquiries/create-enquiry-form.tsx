@@ -1,10 +1,10 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { createEnquiry } from './actions';
+import { createEnquiry, mergeEnquiry, dismissDuplicateEnquiry, type DuplicateCandidate } from './actions';
 import { createEnquirySchema, ENQUIRY_SOURCES, type CreateEnquiryInput } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,8 @@ export function CreateEnquiryForm({
     },
   });
   const source = watch('source');
+  const [newEnquiryId, setNewEnquiryId] = useState<string | null>(null);
+  const [duplicates, setDuplicates] = useState<DuplicateCandidate[] | null>(null);
 
   const onSubmit = handleSubmit((values) => {
     const fd = new FormData();
@@ -60,17 +62,41 @@ export function CreateEnquiryForm({
     if (values.ageOverrideReason) fd.set('ageOverrideReason', values.ageOverrideReason);
 
     startTransition(async () => {
-      const result = await createEnquiry({ error: null }, fd);
+      const result = await createEnquiry({ error: null, newEnquiryId: null, duplicates: null }, fd);
       if (result.error) toast.error(result.error);
       else {
         toast.success(`Enquiry recorded for ${values.childName}.`);
         reset({ campusId: values.campusId, sessionId: values.sessionId, whatsappOptIn: false, source: 'walk_in' });
+        setNewEnquiryId(result.newEnquiryId);
+        setDuplicates(result.duplicates && result.duplicates.length > 0 ? result.duplicates : null);
       }
     });
   });
 
+  const onMerge = (candidateId: string) => {
+    if (!newEnquiryId) return;
+    startTransition(async () => {
+      const result = await mergeEnquiry(candidateId, newEnquiryId);
+      if (result.error) toast.error(result.error);
+      else {
+        toast.success('Enquiries merged.');
+        setDuplicates((prev) => prev?.filter((d) => d.id !== candidateId) ?? null);
+      }
+    });
+  };
+
+  const onDismiss = (candidateId: string) => {
+    if (!newEnquiryId) return;
+    startTransition(async () => {
+      const result = await dismissDuplicateEnquiry(newEnquiryId, candidateId);
+      if (result.error) toast.error(result.error);
+      else setDuplicates((prev) => prev?.filter((d) => d.id !== candidateId) ?? null);
+    });
+  };
+
   return (
-    <form onSubmit={onSubmit} className="grid grid-cols-2 gap-3 rounded-lg border p-4 md:grid-cols-3" noValidate>
+    <div className="space-y-4">
+      <form onSubmit={onSubmit} className="grid grid-cols-2 gap-3 rounded-lg border p-4 md:grid-cols-3" noValidate>
       <div className="space-y-1">
         <Label htmlFor="campusId">Campus</Label>
         <Controller
@@ -198,6 +224,35 @@ export function CreateEnquiryForm({
       <Button type="submit" disabled={pending} className="col-span-full w-fit">
         {pending ? 'Saving…' : 'Record enquiry'}
       </Button>
-    </form>
+      </form>
+
+      {duplicates && duplicates.length > 0 && (
+        <div className="space-y-2 rounded-lg border border-destructive/50 p-4" data-testid="duplicate-enquiry-panel">
+          <p className="text-sm font-medium">Possible duplicate enquiries</p>
+          <ul className="space-y-2">
+            {duplicates.map((d) => (
+              <li
+                key={d.id}
+                data-testid={`duplicate-candidate-${d.enquiry_no}`}
+                className="flex items-center justify-between rounded border p-2 text-sm"
+              >
+                <span>
+                  {d.child_name} — {d.enquiry_no}
+                  {d.last_followup_at && ` · last follow-up ${new Date(d.last_followup_at).toLocaleDateString()}`}
+                </span>
+                <span className="flex gap-2">
+                  <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => onDismiss(d.id)}>
+                    Not a duplicate
+                  </Button>
+                  <Button type="button" size="sm" disabled={pending} onClick={() => onMerge(d.id)}>
+                    Merge
+                  </Button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }

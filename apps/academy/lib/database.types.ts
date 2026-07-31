@@ -326,6 +326,7 @@ export type Database = {
           dob: string
           enquiry_no: string | null
           id: string
+          merged_into_id: string | null
           parent_cnic: string | null
           parent_name: string
           phone_e164: string
@@ -348,6 +349,7 @@ export type Database = {
           dob: string
           enquiry_no?: string | null
           id?: string
+          merged_into_id?: string | null
           parent_cnic?: string | null
           parent_name: string
           phone_e164: string
@@ -370,6 +372,7 @@ export type Database = {
           dob?: string
           enquiry_no?: string | null
           id?: string
+          merged_into_id?: string | null
           parent_cnic?: string | null
           parent_name?: string
           phone_e164?: string
@@ -401,6 +404,13 @@ export type Database = {
             columns: ["class_applied_id"]
             isOneToOne: false
             referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_enquiry_merged_into_id_fkey"
+            columns: ["merged_into_id"]
+            isOneToOne: false
+            referencedRelation: "admission_enquiry"
             referencedColumns: ["id"]
           },
           {
@@ -1761,6 +1771,59 @@ export type Database = {
             columns: ["campus_id"]
             isOneToOne: true
             referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enquiry_duplicate_dismissed: {
+        Row: {
+          dismissed_at: string
+          dismissed_by: string | null
+          enquiry_a: string
+          enquiry_b: string
+          tenant_id: string
+        }
+        Insert: {
+          dismissed_at?: string
+          dismissed_by?: string | null
+          enquiry_a: string
+          enquiry_b: string
+          tenant_id: string
+        }
+        Update: {
+          dismissed_at?: string
+          dismissed_by?: string | null
+          enquiry_a?: string
+          enquiry_b?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enquiry_duplicate_dismissed_dismissed_by_fkey"
+            columns: ["dismissed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "enquiry_duplicate_dismissed_enquiry_a_fkey"
+            columns: ["enquiry_a"]
+            isOneToOne: false
+            referencedRelation: "admission_enquiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enquiry_duplicate_dismissed_enquiry_b_fkey"
+            columns: ["enquiry_b"]
+            isOneToOne: false
+            referencedRelation: "admission_enquiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enquiry_duplicate_dismissed_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
         ]
@@ -6460,11 +6523,33 @@ export type Database = {
         }
         Returns: undefined
       }
+      fn_dismiss_duplicate_enquiry: {
+        Args: { p_enquiry_a: string; p_enquiry_b: string }
+        Returns: undefined
+      }
       fn_escalate_overdue_steps: { Args: never; Returns: number }
       fn_expire_offers: { Args: never; Returns: number }
       fn_extend_offer: {
         Args: { p_new_expires_at: string; p_offer_id: string; p_reason: string }
         Returns: undefined
+      }
+      fn_find_duplicate_enquiries: {
+        Args: {
+          p_cnic?: string
+          p_dob?: string
+          p_exclude_enquiry_id?: string
+          p_name?: string
+          p_phone?: string
+        }
+        Returns: {
+          campus_id: string
+          child_name: string
+          enquiry_no: string
+          id: string
+          last_followup_at: string
+          phone_e164: string
+          status: Database["public"]["Enums"]["enquiry_status"]
+        }[]
       }
       fn_find_guardian_by_cnic: { Args: { p_cnic: string }; Returns: string }
       fn_find_or_create_guardian: {
@@ -6563,6 +6648,10 @@ export type Database = {
       fn_leave_balance: {
         Args: { p_leave_type_id: string; p_staff_id: string }
         Returns: number
+      }
+      fn_merge_enquiry: {
+        Args: { p_loser_id: string; p_survivor_id: string }
+        Returns: undefined
       }
       fn_merge_family_groups: {
         Args: { p_keep_id: string; p_merge_id: string }
@@ -7072,7 +7161,7 @@ export type Database = {
         | "other"
       employment_status: "active" | "on_leave" | "suspended" | "exited"
       enquiry_source: "walk_in" | "phone" | "web" | "referral" | "other"
-      enquiry_status: "open" | "converted" | "lost"
+      enquiry_status: "open" | "converted" | "lost" | "merged"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
       fee_challan_line_type: "charge" | "concession" | "arrears" | "late_fee"
       fee_challan_status: "unpaid" | "part_paid" | "paid" | "cancelled"
@@ -7379,7 +7468,7 @@ export const Constants = {
       ],
       employment_status: ["active", "on_leave", "suspended", "exited"],
       enquiry_source: ["walk_in", "phone", "web", "referral", "other"],
-      enquiry_status: ["open", "converted", "lost"],
+      enquiry_status: ["open", "converted", "lost", "merged"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
       fee_challan_line_type: ["charge", "concession", "arrears", "late_fee"],
       fee_challan_status: ["unpaid", "part_paid", "paid", "cancelled"],
