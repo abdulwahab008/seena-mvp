@@ -728,3 +728,33 @@ export const publicEnquirySchema = z.object({
   whatsappOptIn: z.boolean().default(false),
 });
 export type PublicEnquiryInput = z.infer<typeof publicEnquirySchema>;
+
+// Mirrors record_admission_fee_payment()'s own checks in
+// supabase/migrations/20260731460000_gate_enrolment_on_admission_fee.sql.
+export const recordAdmissionFeePaymentSchema = z.object({
+  offerId: z.string().uuid(),
+  amountRupees: z.coerce.number().positive('Enter an amount'),
+  mode: z.enum(FEE_PAYMENT_MODES),
+  referenceNo: z.string().max(100).optional(),
+});
+export type RecordAdmissionFeePaymentInput = z.infer<typeof recordAdmissionFeePaymentSchema>;
+
+export const waiveAdmissionFeeSchema = z.object({
+  offerId: z.string().uuid(),
+  reason: z.string().min(10, 'Explain the waiver in at least 10 characters'),
+});
+export type WaiveAdmissionFeeInput = z.infer<typeof waiveAdmissionFeeSchema>;
+
+export const enrolFromOfferSchema = z
+  .object({
+    offerId: z.string().uuid(),
+    sectionId: z.string().uuid('Choose a section'),
+    gender: z.enum(['male', 'female', 'other']),
+    paymentId: z.string().uuid().optional(),
+    waiverId: z.string().uuid().optional(),
+  })
+  .refine((v) => Boolean(v.paymentId) !== Boolean(v.waiverId), {
+    message: 'Choose exactly one payment or waiver to enrol with',
+    path: ['paymentId'],
+  });
+export type EnrolFromOfferInput = z.infer<typeof enrolFromOfferSchema>;

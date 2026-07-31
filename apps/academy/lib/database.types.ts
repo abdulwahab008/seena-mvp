@@ -640,6 +640,180 @@ export type Database = {
           },
         ]
       }
+      admission_fee_payment: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          consumed_by_enrolment_id: string | null
+          id: string
+          mode: Database["public"]["Enums"]["fee_payment_mode"]
+          offer_id: string
+          reconciled_at: string | null
+          reconciled_by: string | null
+          recorded_at: string
+          recorded_by: string | null
+          reference_no: string | null
+          status: Database["public"]["Enums"]["admission_fee_payment_status"]
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          consumed_by_enrolment_id?: string | null
+          id?: string
+          mode: Database["public"]["Enums"]["fee_payment_mode"]
+          offer_id: string
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          recorded_at?: string
+          recorded_by?: string | null
+          reference_no?: string | null
+          status: Database["public"]["Enums"]["admission_fee_payment_status"]
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          consumed_by_enrolment_id?: string | null
+          id?: string
+          mode?: Database["public"]["Enums"]["fee_payment_mode"]
+          offer_id?: string
+          reconciled_at?: string | null
+          reconciled_by?: string | null
+          recorded_at?: string
+          recorded_by?: string | null
+          reference_no?: string | null
+          status?: Database["public"]["Enums"]["admission_fee_payment_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_fee_payment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
+            columns: ["consumed_by_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
+            columns: ["consumed_by_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "admission_fee_payment_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "admission_offer"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_fee_payment_reconciled_by_fkey"
+            columns: ["reconciled_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_fee_payment_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_fee_payment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_fee_waiver: {
+        Row: {
+          approved_at: string
+          approved_by: string | null
+          campus_id: string
+          consumed_by_enrolment_id: string | null
+          id: string
+          offer_id: string
+          reason: string
+          tenant_id: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by?: string | null
+          campus_id: string
+          consumed_by_enrolment_id?: string | null
+          id?: string
+          offer_id: string
+          reason: string
+          tenant_id: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string | null
+          campus_id?: string
+          consumed_by_enrolment_id?: string | null
+          id?: string
+          offer_id?: string
+          reason?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_fee_waiver_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admission_fee_waiver_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_fee_waiver_consumed_by_enrolment_id_fkey"
+            columns: ["consumed_by_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_fee_waiver_consumed_by_enrolment_id_fkey"
+            columns: ["consumed_by_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "admission_fee_waiver_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "admission_offer"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_fee_waiver_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admission_followup: {
         Row: {
           assigned_to: string | null
@@ -932,6 +1106,8 @@ export type Database = {
             | Database["public"]["Enums"]["offer_decline_reason"]
             | null
           expires_at: string
+          expiry_pause_reason: string | null
+          expiry_paused_at: string | null
           extended_by: string | null
           extension_reason: string | null
           id: string
@@ -951,6 +1127,8 @@ export type Database = {
             | Database["public"]["Enums"]["offer_decline_reason"]
             | null
           expires_at: string
+          expiry_pause_reason?: string | null
+          expiry_paused_at?: string | null
           extended_by?: string | null
           extension_reason?: string | null
           id?: string
@@ -970,6 +1148,8 @@ export type Database = {
             | Database["public"]["Enums"]["offer_decline_reason"]
             | null
           expires_at?: string
+          expiry_pause_reason?: string | null
+          expiry_paused_at?: string | null
           extended_by?: string | null
           extension_reason?: string | null
           id?: string
@@ -2541,6 +2721,9 @@ export type Database = {
       }
       enrolment: {
         Row: {
+          admission_fee_payment_id: string | null
+          admission_fee_waiver_id: string | null
+          admission_offer_id: string | null
           campus_id: string
           class_level_id: string
           created_at: string
@@ -2560,6 +2743,9 @@ export type Database = {
           tenant_id: string
         }
         Insert: {
+          admission_fee_payment_id?: string | null
+          admission_fee_waiver_id?: string | null
+          admission_offer_id?: string | null
           campus_id: string
           class_level_id: string
           created_at?: string
@@ -2579,6 +2765,9 @@ export type Database = {
           tenant_id: string
         }
         Update: {
+          admission_fee_payment_id?: string | null
+          admission_fee_waiver_id?: string | null
+          admission_offer_id?: string | null
           campus_id?: string
           class_level_id?: string
           created_at?: string
@@ -2598,6 +2787,27 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "enrolment_admission_fee_payment_id_fkey"
+            columns: ["admission_fee_payment_id"]
+            isOneToOne: false
+            referencedRelation: "admission_fee_payment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_admission_fee_waiver_id_fkey"
+            columns: ["admission_fee_waiver_id"]
+            isOneToOne: false
+            referencedRelation: "admission_fee_waiver"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_admission_offer_id_fkey"
+            columns: ["admission_offer_id"]
+            isOneToOne: false
+            referencedRelation: "admission_offer"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "enrolment_campus_id_fkey"
             columns: ["campus_id"]
@@ -7466,6 +7676,23 @@ export type Database = {
         Args: { p_enquiry_a: string; p_enquiry_b: string }
         Returns: undefined
       }
+      fn_enrol_from_offer: {
+        Args: {
+          p_b_form_no?: string
+          p_blood_group?: string
+          p_father_name_en?: string
+          p_father_name_ur?: string
+          p_gender: Database["public"]["Enums"]["gender"]
+          p_name_ur?: string
+          p_nationality?: string
+          p_offer_id: string
+          p_payment_id?: string
+          p_religion?: string
+          p_section_id?: string
+          p_waiver_id?: string
+        }
+        Returns: Json
+      }
       fn_escalate_overdue_steps: { Args: never; Returns: number }
       fn_expire_offers: { Args: never; Returns: number }
       fn_extend_offer: {
@@ -7858,6 +8085,19 @@ export type Database = {
         Args: { p_regulator_reference?: string; p_structure_id: string }
         Returns: undefined
       }
+      reconcile_admission_fee_payment: {
+        Args: { p_payment_id: string }
+        Returns: undefined
+      }
+      record_admission_fee_payment: {
+        Args: {
+          p_amount_paisa: number
+          p_mode: Database["public"]["Enums"]["fee_payment_mode"]
+          p_offer_id: string
+          p_reference_no?: string
+        }
+        Returns: string
+      }
       record_payment: {
         Args: {
           p_amount_paisa: number
@@ -8159,6 +8399,10 @@ export type Database = {
         }
         Returns: string
       }
+      waive_admission_fee: {
+        Args: { p_offer_id: string; p_reason: string }
+        Returns: string
+      }
       working_days_between: {
         Args: { p_campus_id: string; p_from: string; p_to: string }
         Returns: number
@@ -8171,6 +8415,7 @@ export type Database = {
         | "computer_science"
         | "commerce"
         | "arts"
+      admission_fee_payment_status: "provisional" | "reconciled"
       allocation_role: "primary" | "assistant"
       app_role:
         | "super_admin"
@@ -8495,6 +8740,7 @@ export const Constants = {
         "commerce",
         "arts",
       ],
+      admission_fee_payment_status: ["provisional", "reconciled"],
       allocation_role: ["primary", "assistant"],
       app_role: [
         "super_admin",

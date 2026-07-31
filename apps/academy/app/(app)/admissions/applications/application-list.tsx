@@ -14,9 +14,13 @@ import {
   rejectDocument,
   deleteDocument,
   getDocumentSignedUrl,
+  recordAdmissionFeePayment,
+  reconcileAdmissionFeePayment,
+  waiveAdmissionFee,
+  enrolFromOffer,
   type MissingItem,
 } from './actions';
-import { OFFER_DECLINE_REASONS, DOC_STATUSES, DOCUMENT_TYPES } from '@/lib/validation';
+import { OFFER_DECLINE_REASONS, DOC_STATUSES, DOCUMENT_TYPES, FEE_PAYMENT_MODES } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -31,17 +35,31 @@ export type DocumentRow = {
   bFormNo: string | null;
 };
 
+export type PaymentRow = { id: string; amountPaisa: number; mode: string; status: string; consumed: boolean };
+export type WaiverRow = { id: string; reason: string; consumed: boolean };
+export type SectionOption = { id: string; name: string };
+
 export type ApplicationRow = {
   id: string;
   applicationNo: string | null;
   status: string;
   childName: string;
   className: string;
-  offer: { id: string; status: string; expires_at: string } | null;
+  offer: {
+    id: string;
+    status: string;
+    expires_at: string;
+    admission_fee_amount: number;
+    expiry_paused_at: string | null;
+    expiry_pause_reason: string | null;
+  } | null;
   availableSeats: number | null;
   waitlist: { id: string; position: number | null; status: string } | null;
   checklistSnapshot: { doc_type: string; is_mandatory: boolean; min_count: number }[];
   documents: DocumentRow[];
+  payments: PaymentRow[];
+  waivers: WaiverRow[];
+  sections: SectionOption[];
 };
 
 function ChecklistPanel({ applicationId, docTypes }: { applicationId: string; docTypes: string[] }) {
@@ -473,6 +491,259 @@ function DeclineControl({ offerId }: { offerId: string }) {
   );
 }
 
+function RecordPaymentForm({ offerId }: { offerId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [amount, setAmount] = useState('');
+  const [mode, setMode] = useState<(typeof FEE_PAYMENT_MODES)[number]>('cash');
+  const [referenceNo, setReferenceNo] = useState('');
+
+  const onSubmit = () => {
+    const fd = new FormData();
+    fd.set('offerId', offerId);
+    fd.set('amountRupees', amount);
+    fd.set('mode', mode);
+    if (referenceNo) fd.set('referenceNo', referenceNo);
+    startTransition(async () => {
+      const result = await recordAdmissionFeePayment({ error: null }, fd);
+      if (result.error) toast.error(result.error);
+      else {
+        toast.success('Payment recorded.');
+        setAmount('');
+        setReferenceNo('');
+      }
+    });
+  };
+
+  return (
+    <div className="flex flex-wrap items-end gap-2" data-testid={`record-payment-form-${offerId}`}>
+      <div className="space-y-1">
+        <Label htmlFor={`payment-amount-${offerId}`}>Amount (PKR)</Label>
+        <Input
+          id={`payment-amount-${offerId}`}
+          type="number"
+          step="0.01"
+          className="h-8 w-28"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          data-testid={`payment-amount-${offerId}`}
+        />
+      </div>
+      <Select value={mode} onValueChange={(v) => setMode(v as (typeof FEE_PAYMENT_MODES)[number])}>
+        <SelectTrigger className="h-8 w-32" data-testid={`payment-mode-trigger-${offerId}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {FEE_PAYMENT_MODES.map((m) => (
+            <SelectItem key={m} value={m}>
+              {m.replace(/_/g, ' ')}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Input
+        placeholder="Reference no."
+        className="h-8 w-32"
+        value={referenceNo}
+        onChange={(e) => setReferenceNo(e.target.value)}
+      />
+      <Button type="button" size="sm" disabled={pending} onClick={onSubmit} data-testid={`record-payment-submit-${offerId}`}>
+        Record payment
+      </Button>
+    </div>
+  );
+}
+
+function ReconcileButton({ paymentId }: { paymentId: string }) {
+  const [pending, startTransition] = useTransition();
+
+  const onClick = () => {
+    startTransition(async () => {
+      const result = await reconcileAdmissionFeePayment(paymentId);
+      if (result.error) toast.error(result.error);
+      else toast.success('Payment reconciled.');
+    });
+  };
+
+  return (
+    <Button type="button" size="sm" variant="outline" disabled={pending} onClick={onClick} data-testid={`reconcile-payment-${paymentId}`}>
+      Reconcile
+    </Button>
+  );
+}
+
+function WaiveFeeForm({ offerId }: { offerId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [reason, setReason] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const onSubmit = () => {
+    const fd = new FormData();
+    fd.set('offerId', offerId);
+    fd.set('reason', reason);
+    startTransition(async () => {
+      const result = await waiveAdmissionFee({ error: null }, fd);
+      if (result.error) toast.error(result.error);
+      else {
+        toast.success('Fee waived.');
+        setOpen(false);
+        setReason('');
+      }
+    });
+  };
+
+  if (!open) {
+    return (
+      <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} data-testid={`waive-fee-open-${offerId}`}>
+        Waive fee
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <Input
+        placeholder="Waiver reason (min 10 chars)"
+        className="h-8 w-56"
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        data-testid={`waive-fee-reason-${offerId}`}
+      />
+      <Button type="button" size="sm" disabled={pending} onClick={onSubmit} data-testid={`waive-fee-submit-${offerId}`}>
+        Confirm waiver
+      </Button>
+    </div>
+  );
+}
+
+function EnrolForm({
+  offerId,
+  sections,
+  fundingOptions,
+}: {
+  offerId: string;
+  sections: SectionOption[];
+  fundingOptions: { value: string; label: string }[];
+}) {
+  const [pending, startTransition] = useTransition();
+  const [sectionId, setSectionId] = useState(sections[0]?.id ?? '');
+  const [gender, setGender] = useState<'male' | 'female' | 'other'>('male');
+  const [funding, setFunding] = useState(fundingOptions[0]?.value ?? '');
+
+  const onSubmit = () => {
+    if (!funding) {
+      toast.error('Record a payment or waive the fee before enrolling.');
+      return;
+    }
+    const [kind, ...idParts] = funding.split(':');
+    const id = idParts.join(':');
+    const fd = new FormData();
+    fd.set('offerId', offerId);
+    fd.set('sectionId', sectionId);
+    fd.set('gender', gender);
+    if (kind === 'payment') fd.set('paymentId', id);
+    else fd.set('waiverId', id);
+    startTransition(async () => {
+      const result = await enrolFromOffer({ error: null, grNumber: null }, fd);
+      if (result.error) toast.error(result.error);
+      else toast.success(`Enrolled — GR ${result.grNumber}.`);
+    });
+  };
+
+  return (
+    <div className="flex flex-wrap items-end gap-2 border-t pt-2" data-testid={`enrol-form-${offerId}`}>
+      <Select value={sectionId} onValueChange={setSectionId}>
+        <SelectTrigger className="h-8 w-32" data-testid={`enrol-section-trigger-${offerId}`}>
+          <SelectValue placeholder="Section" />
+        </SelectTrigger>
+        <SelectContent>
+          {sections.map((s) => (
+            <SelectItem key={s.id} value={s.id}>
+              {s.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={gender} onValueChange={(v) => setGender(v as 'male' | 'female' | 'other')}>
+        <SelectTrigger className="h-8 w-24" data-testid={`enrol-gender-trigger-${offerId}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="male">Male</SelectItem>
+          <SelectItem value="female">Female</SelectItem>
+          <SelectItem value="other">Other</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select value={funding} onValueChange={setFunding}>
+        <SelectTrigger className="h-8 w-56" data-testid={`enrol-funding-trigger-${offerId}`}>
+          <SelectValue placeholder="Fund with…" />
+        </SelectTrigger>
+        <SelectContent>
+          {fundingOptions.map((f) => (
+            <SelectItem key={f.value} value={f.value}>
+              {f.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button type="button" size="sm" disabled={pending || !sectionId} onClick={onSubmit} data-testid={`enrol-submit-${offerId}`}>
+        {pending ? 'Enrolling…' : 'Enrol'}
+      </Button>
+    </div>
+  );
+}
+
+function EnrolmentPanel({
+  applicationId,
+  offer,
+  payments,
+  waivers,
+  sections,
+}: {
+  applicationId: string;
+  offer: NonNullable<ApplicationRow['offer']>;
+  payments: PaymentRow[];
+  waivers: WaiverRow[];
+  sections: SectionOption[];
+}) {
+  const feeRupees = (offer.admission_fee_amount).toLocaleString();
+  const fundingOptions = [
+    ...payments
+      .filter((p) => !p.consumed)
+      .map((p) => ({ value: `payment:${p.id}`, label: `Payment PKR ${(p.amountPaisa / 100).toLocaleString()} (${p.mode}, ${p.status})` })),
+    ...waivers.filter((w) => !w.consumed).map((w) => ({ value: `waiver:${w.id}`, label: `Waiver — ${w.reason}` })),
+  ];
+
+  return (
+    <div className="mt-2 space-y-2 border-t pt-2" data-testid={`enrolment-panel-${applicationId}`}>
+      <p className="text-xs text-muted-foreground">Admission fee: PKR {feeRupees}</p>
+      {offer.expiry_paused_at && (
+        <p className="text-xs text-amber-600" data-testid={`offer-paused-${offer.id}`}>
+          Expiry paused — {offer.expiry_pause_reason}
+        </p>
+      )}
+      {payments.length > 0 && (
+        <ul className="space-y-1 text-xs">
+          {payments.map((p) => (
+            <li key={p.id} className="flex items-center gap-2" data-testid={`payment-row-${p.id}`}>
+              <span>
+                PKR {(p.amountPaisa / 100).toLocaleString()} · {p.mode} ·{' '}
+                <span data-testid={`payment-status-${p.id}`}>{p.status}</span>
+                {p.consumed && ' · used'}
+              </span>
+              {p.status === 'provisional' && !p.consumed && <ReconcileButton paymentId={p.id} />}
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex flex-wrap items-center gap-2">
+        <RecordPaymentForm offerId={offer.id} />
+        <WaiveFeeForm offerId={offer.id} />
+      </div>
+      <EnrolForm offerId={offer.id} sections={sections} fundingOptions={fundingOptions} />
+    </div>
+  );
+}
+
 export function ApplicationList({ applications }: { applications: ApplicationRow[] }) {
   if (applications.length === 0) {
     return <p className="text-sm text-muted-foreground">No applications yet.</p>;
@@ -518,6 +789,9 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
             </div>
             <ChecklistPanel applicationId={a.id} docTypes={a.checklistSnapshot.map((d) => d.doc_type)} />
             <DocumentsPanel applicationId={a.id} documents={a.documents} />
+            {a.offer && a.offer.status === 'accepted' && (
+              <EnrolmentPanel applicationId={a.id} offer={a.offer} payments={a.payments} waivers={a.waivers} sections={a.sections} />
+            )}
           </CardContent>
         </Card>
       ))}

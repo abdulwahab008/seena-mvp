@@ -48,6 +48,9 @@ import {
   uploadDocumentSchema,
   rejectDocumentSchema,
   publicEnquirySchema,
+  recordAdmissionFeePaymentSchema,
+  waiveAdmissionFeeSchema,
+  enrolFromOfferSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -966,5 +969,65 @@ describe('publicEnquirySchema', () => {
 
   it('rejects a missing class', () => {
     expect(publicEnquirySchema.safeParse({ ...base, classCode: '' }).success).toBe(false);
+  });
+});
+
+describe('recordAdmissionFeePaymentSchema', () => {
+  const base = { offerId: '11111111-1111-1111-1111-111111111111', amountRupees: 25000, mode: 'cash' as const };
+
+  it('accepts a valid payment', () => {
+    expect(recordAdmissionFeePaymentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a zero or negative amount', () => {
+    expect(recordAdmissionFeePaymentSchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(false);
+    expect(recordAdmissionFeePaymentSchema.safeParse({ ...base, amountRupees: -5 }).success).toBe(false);
+  });
+
+  it('rejects an unknown payment mode', () => {
+    expect(recordAdmissionFeePaymentSchema.safeParse({ ...base, mode: 'crypto' }).success).toBe(false);
+  });
+});
+
+describe('waiveAdmissionFeeSchema', () => {
+  const base = { offerId: '11111111-1111-1111-1111-111111111111', reason: 'Approved staff-child hardship waiver' };
+
+  it('accepts a valid waiver reason', () => {
+    expect(waiveAdmissionFeeSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a too-short reason', () => {
+    expect(waiveAdmissionFeeSchema.safeParse({ ...base, reason: 'staff' }).success).toBe(false);
+  });
+});
+
+describe('enrolFromOfferSchema', () => {
+  const base = {
+    offerId: '11111111-1111-1111-1111-111111111111',
+    sectionId: '22222222-2222-2222-2222-222222222222',
+    gender: 'male' as const,
+    paymentId: '33333333-3333-3333-3333-333333333333',
+  };
+
+  it('accepts a payment-funded enrolment', () => {
+    expect(enrolFromOfferSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a waiver-funded enrolment', () => {
+    const { paymentId: _paymentId, ...rest } = base;
+    expect(enrolFromOfferSchema.safeParse({ ...rest, waiverId: '44444444-4444-4444-4444-444444444444' }).success).toBe(true);
+  });
+
+  it('rejects neither a payment nor a waiver', () => {
+    const { paymentId: _paymentId, ...rest } = base;
+    expect(enrolFromOfferSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it('rejects both a payment and a waiver at once', () => {
+    expect(enrolFromOfferSchema.safeParse({ ...base, waiverId: '44444444-4444-4444-4444-444444444444' }).success).toBe(false);
+  });
+
+  it('rejects a missing section', () => {
+    expect(enrolFromOfferSchema.safeParse({ ...base, sectionId: 'not-a-uuid' }).success).toBe(false);
   });
 });

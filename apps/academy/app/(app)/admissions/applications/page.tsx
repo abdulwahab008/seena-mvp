@@ -17,7 +17,7 @@ export default async function ApplicationsPage() {
       .order('submitted_at', { ascending: false }),
     supabase
       .from('admission_offer')
-      .select('id, application_id, status, expires_at')
+      .select('id, application_id, status, expires_at, admission_fee_amount, expiry_paused_at, expiry_pause_reason')
       .order('issued_at', { ascending: false }),
     supabase.from('admission_waitlist').select('id, application_id, position, status').neq('status', 'withdrawn'),
     supabase
@@ -26,9 +26,44 @@ export default async function ApplicationsPage() {
       .order('created_at', { ascending: false }),
   ]);
 
-  const latestOfferByApp = new Map<string, { id: string; status: string; expires_at: string }>();
+  const latestOfferByApp = new Map<
+    string,
+    { id: string; status: string; expires_at: string; admission_fee_amount: number; expiry_paused_at: string | null; expiry_pause_reason: string | null }
+  >();
   for (const o of offers ?? []) {
     if (!latestOfferByApp.has(o.application_id)) latestOfferByApp.set(o.application_id, o);
+  }
+
+  const acceptedOfferIds = (offers ?? []).filter((o) => o.status === 'accepted').map((o) => o.id);
+  const [{ data: paymentRows }, { data: waiverRows }, { data: sectionRows }] = await Promise.all([
+    acceptedOfferIds.length
+      ? supabase
+          .from('admission_fee_payment')
+          .select('id, offer_id, amount_paisa, mode, status, consumed_by_enrolment_id')
+          .in('offer_id', acceptedOfferIds)
+          .order('recorded_at', { ascending: false })
+      : Promise.resolve({ data: [] }),
+    acceptedOfferIds.length
+      ? supabase
+          .from('admission_fee_waiver')
+          .select('id, offer_id, reason, consumed_by_enrolment_id')
+          .in('offer_id', acceptedOfferIds)
+          .order('approved_at', { ascending: false })
+      : Promise.resolve({ data: [] }),
+    supabase.from('class_section').select('id, campus_id, session_id, class_level_id, name').eq('is_active', true),
+  ]);
+
+  const paymentsByOffer = new Map<string, ApplicationRow['payments']>();
+  for (const p of paymentRows ?? []) {
+    const list = paymentsByOffer.get(p.offer_id) ?? [];
+    list.push({ id: p.id, amountPaisa: p.amount_paisa, mode: p.mode, status: p.status, consumed: p.consumed_by_enrolment_id !== null });
+    paymentsByOffer.set(p.offer_id, list);
+  }
+  const waiversByOffer = new Map<string, ApplicationRow['waivers']>();
+  for (const w of waiverRows ?? []) {
+    const list = waiversByOffer.get(w.offer_id) ?? [];
+    list.push({ id: w.id, reason: w.reason, consumed: w.consumed_by_enrolment_id !== null });
+    waiversByOffer.set(w.offer_id, list);
   }
   const waitlistByApp = new Map<string, { id: string; position: number | null; status: string }>();
   for (const w of waitlistRows ?? []) waitlistByApp.set(w.application_id, w);
@@ -51,6 +86,10 @@ export default async function ApplicationsPage() {
         });
         availableSeats = data ?? 0;
       }
+      const sections = (sectionRows ?? [])
+        .filter((s) => s.campus_id === a.campus_id && s.session_id === a.session_id && s.class_level_id === a.class_applied_id)
+        .map((s) => ({ id: s.id, name: s.name }));
+
       return {
         id: a.id,
         applicationNo: a.application_no,
@@ -62,6 +101,9 @@ export default async function ApplicationsPage() {
         waitlist: waitlistByApp.get(a.id) ?? null,
         checklistSnapshot: (a.checklist_snapshot ?? []) as { doc_type: string; is_mandatory: boolean; min_count: number }[],
         documents: documentsByApp.get(a.id) ?? [],
+        payments: offer ? (paymentsByOffer.get(offer.id) ?? []) : [],
+        waivers: offer ? (waiversByOffer.get(offer.id) ?? []) : [],
+        sections,
       };
     })
   );

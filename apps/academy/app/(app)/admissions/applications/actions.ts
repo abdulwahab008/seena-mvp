@@ -9,6 +9,9 @@ import {
   rejectDocumentSchema,
   MAX_DOCUMENT_FILE_SIZE,
   ALLOWED_DOCUMENT_MIME_TYPES,
+  recordAdmissionFeePaymentSchema,
+  waiveAdmissionFeeSchema,
+  enrolFromOfferSchema,
 } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
@@ -268,4 +271,113 @@ export async function getDocumentSignedUrl(documentId: string): Promise<{ error:
   const { data, error } = await supabase.storage.from('admission-docs').createSignedUrl(doc.storage_path, 3600);
   if (error || !data) return { error: 'Could not generate a preview link.', url: null };
   return { error: null, url: data.signedUrl };
+}
+
+export type RecordAdmissionFeePaymentState = { error: string | null };
+
+// FR-B17: record money against an accepted offer's admission fee.
+// amountRupees converts to paisa only here, at the server-action
+// boundary — record_admission_fee_payment() is bigint-paisa end to end.
+export async function recordAdmissionFeePayment(
+  _prev: RecordAdmissionFeePaymentState,
+  formData: FormData
+): Promise<RecordAdmissionFeePaymentState> {
+  const parsed = recordAdmissionFeePaymentSchema.safeParse({
+    offerId: formData.get('offerId'),
+    amountRupees: formData.get('amountRupees'),
+    mode: formData.get('mode'),
+    referenceNo: formData.get('referenceNo') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('record_admission_fee_payment', {
+    p_offer_id: parsed.data.offerId,
+    p_amount_paisa: Math.round(parsed.data.amountRupees * 100),
+    p_mode: parsed.data.mode,
+    p_reference_no: parsed.data.referenceNo,
+  });
+  if (error) {
+    if (error.message.includes('OFFER_NOT_ACCEPTED')) return { error: 'The offer must be accepted before recording a payment.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to record admission fee payments.' };
+    return { error: 'Could not record the payment.' };
+  }
+
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export async function reconcileAdmissionFeePayment(paymentId: string): Promise<{ error: string | null }> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('reconcile_admission_fee_payment', { p_payment_id: paymentId });
+  if (error) {
+    if (error.message.includes('PAYMENT_NOT_RECONCILABLE')) return { error: 'This payment is already reconciled.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to reconcile payments.' };
+    return { error: 'Could not reconcile the payment.' };
+  }
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export type WaiveAdmissionFeeState = { error: string | null };
+
+export async function waiveAdmissionFee(_prev: WaiveAdmissionFeeState, formData: FormData): Promise<WaiveAdmissionFeeState> {
+  const parsed = waiveAdmissionFeeSchema.safeParse({
+    offerId: formData.get('offerId'),
+    reason: formData.get('reason'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('waive_admission_fee', {
+    p_offer_id: parsed.data.offerId,
+    p_reason: parsed.data.reason,
+  });
+  if (error) {
+    if (error.message.includes('OFFER_NOT_ACCEPTED')) return { error: 'The offer must be accepted before waiving its fee.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only an Owner or Principal can waive the admission fee.' };
+    return { error: 'Could not record the waiver.' };
+  }
+
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export type EnrolFromOfferState = { error: string | null; grNumber: string | null };
+
+// FR-B17: the gate itself. fn_enrol_from_offer() checks the fee is fully
+// covered (or waived) and creates the student/GR/enrolment/ledger rows
+// atomically — this action only shapes the client-facing error.
+export async function enrolFromOffer(_prev: EnrolFromOfferState, formData: FormData): Promise<EnrolFromOfferState> {
+  const parsed = enrolFromOfferSchema.safeParse({
+    offerId: formData.get('offerId'),
+    sectionId: formData.get('sectionId'),
+    gender: formData.get('gender'),
+    paymentId: formData.get('paymentId') || undefined,
+    waiverId: formData.get('waiverId') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.', grNumber: null };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_enrol_from_offer', {
+    p_offer_id: parsed.data.offerId,
+    p_gender: parsed.data.gender,
+    p_section_id: parsed.data.sectionId,
+    p_payment_id: parsed.data.paymentId,
+    p_waiver_id: parsed.data.waiverId,
+  });
+  if (error) {
+    if (error.message.startsWith('OUTSTANDING_BALANCE:')) return { error: `Outstanding PKR ${error.message.split(':')[1]}.`, grNumber: null };
+    if (error.message.includes('PAYMENT_NOT_RECONCILED'))
+      return { error: 'This payment has not been reconciled against the bank statement yet.', grNumber: null };
+    if (error.message.includes('PAYMENT_ALREADY_CONSUMED') || error.message.includes('WAIVER_ALREADY_CONSUMED'))
+      return { error: 'This payment or waiver has already been used to enrol a student.', grNumber: null };
+    if (error.message.includes('SECTION_REQUIRED')) return { error: 'Choose a section.', grNumber: null };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to enrol students.', grNumber: null };
+    return { error: 'Could not enrol the student.', grNumber: null };
+  }
+
+  revalidatePath('/admissions/applications');
+  revalidatePath('/students');
+  return { error: null, grNumber: (data as { gr_number: string } | null)?.gr_number ?? null };
 }
