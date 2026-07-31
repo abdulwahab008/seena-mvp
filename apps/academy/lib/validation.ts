@@ -510,3 +510,17 @@ export const upsertClassSubjectSchema = z
     path: ['electiveBucket'],
   });
 export type UpsertClassSubjectInput = z.infer<typeof upsertClassSubjectSchema>;
+
+export const ROOM_TYPES = ['CLASSROOM', 'SCIENCE_LAB', 'COMPUTER_LAB', 'HALL', 'LIBRARY', 'PRAYER_AREA'] as const;
+
+// Mirrors create_room()'s own checks in
+// supabase/migrations/20260731320000_room_registry.sql — room codes are
+// only unique per campus (the DB's uq_room_campus_code), not checked here.
+export const createRoomSchema = z.object({
+  code: z.string().min(1, 'Required').max(50),
+  name: z.string().min(1, 'Required').max(200),
+  roomType: z.enum(ROOM_TYPES),
+  capacity: z.coerce.number().int().positive('Must be at least 1'),
+  blockLabel: z.string().max(100).optional(),
+});
+export type CreateRoomInput = z.infer<typeof createRoomSchema>;

@@ -32,6 +32,7 @@ import {
   collectionReportSchema,
   finaliseCashBookDaySchema,
   upsertClassSubjectSchema,
+  createRoomSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -611,5 +612,33 @@ describe('upsertClassSubjectSchema', () => {
 
   it('accepts a compulsory subject even with an empty-string elective bucket (field is hidden, not filled)', () => {
     expect(upsertClassSubjectSchema.safeParse({ ...base, electiveBucket: '', chooseN: '' }).success).toBe(true);
+  });
+});
+
+describe('createRoomSchema', () => {
+  const base = { code: 'SL-1', name: 'Science Lab 1', roomType: 'SCIENCE_LAB', capacity: 30 };
+
+  it('accepts a valid room', () => {
+    expect(createRoomSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing code', () => {
+    expect(createRoomSchema.safeParse({ ...base, code: '' }).success).toBe(false);
+  });
+
+  it('rejects zero capacity', () => {
+    expect(createRoomSchema.safeParse({ ...base, capacity: 0 }).success).toBe(false);
+  });
+
+  it('rejects a negative capacity', () => {
+    expect(createRoomSchema.safeParse({ ...base, capacity: -5 }).success).toBe(false);
+  });
+
+  it('rejects an unrecognized room type', () => {
+    expect(createRoomSchema.safeParse({ ...base, roomType: 'GYM' }).success).toBe(false);
+  });
+
+  it('accepts an optional block label', () => {
+    expect(createRoomSchema.safeParse({ ...base, blockLabel: 'Block C' }).success).toBe(true);
   });
 });

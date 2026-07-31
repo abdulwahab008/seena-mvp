@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/admissions/enquiries', label: 'Admissions' },
   { href: '/admissions/applications', label: 'Applications' },
   { href: '/academic-setup/curriculum', label: 'Curriculum' },
+  { href: '/academic-setup/rooms', label: 'Rooms' },
   { href: '/students', label: 'Students' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },

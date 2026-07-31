@@ -4016,6 +4016,63 @@ export type Database = {
           },
         ]
       }
+      room: {
+        Row: {
+          block_label: string | null
+          campus_id: string
+          capacity: number
+          code: string
+          created_at: string
+          id: string
+          inactive_from: string | null
+          is_active: boolean
+          name: string
+          room_type: Database["public"]["Enums"]["room_type_enum"]
+          tenant_id: string
+        }
+        Insert: {
+          block_label?: string | null
+          campus_id: string
+          capacity: number
+          code: string
+          created_at?: string
+          id?: string
+          inactive_from?: string | null
+          is_active?: boolean
+          name: string
+          room_type?: Database["public"]["Enums"]["room_type_enum"]
+          tenant_id: string
+        }
+        Update: {
+          block_label?: string | null
+          campus_id?: string
+          capacity?: number
+          code?: string
+          created_at?: string
+          id?: string
+          inactive_from?: string | null
+          is_active?: boolean
+          name?: string
+          room_type?: Database["public"]["Enums"]["room_type_enum"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       section_class_teacher: {
         Row: {
           campus_id: string
@@ -5832,6 +5889,10 @@ export type Database = {
       }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
+      check_room_capacity: {
+        Args: { p_room_id: string; p_section_id: string }
+        Returns: Json
+      }
       collect_cash_payment: {
         Args: {
           p_amount_paisa: number
@@ -5976,6 +6037,17 @@ export type Database = {
       }
       create_next_structure_version: {
         Args: { p_effective_from: string; p_prior_structure_id: string }
+        Returns: string
+      }
+      create_room: {
+        Args: {
+          p_block_label?: string
+          p_campus_id: string
+          p_capacity: number
+          p_code: string
+          p_name: string
+          p_room_type: Database["public"]["Enums"]["room_type_enum"]
+        }
         Returns: string
       }
       create_section: {
@@ -6657,6 +6729,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_room_active: {
+        Args: { p_id: string; p_inactive_from?: string; p_is_active: boolean }
+        Returns: undefined
+      }
       set_section_stream: {
         Args: { p_section_id: string; p_stream_id: string }
         Returns: undefined
@@ -6684,6 +6760,31 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       student_balance: { Args: { p_enrolment_id: string }; Returns: number }
+      suggest_rooms_for_type: {
+        Args: {
+          p_campus_id: string
+          p_preferred_room_type: Database["public"]["Enums"]["room_type_enum"]
+        }
+        Returns: {
+          block_label: string | null
+          campus_id: string
+          capacity: number
+          code: string
+          created_at: string
+          id: string
+          inactive_from: string | null
+          is_active: boolean
+          name: string
+          room_type: Database["public"]["Enums"]["room_type_enum"]
+          tenant_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "room"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       swap_class_level_ordinals: {
         Args: { p_id_a: string; p_id_b: string }
         Returns: undefined
@@ -6851,6 +6952,13 @@ export type Database = {
         | "distance"
         | "other"
       offer_status: "issued" | "accepted" | "declined" | "lapsed"
+      room_type_enum:
+        | "CLASSROOM"
+        | "SCIENCE_LAB"
+        | "COMPUTER_LAB"
+        | "HALL"
+        | "LIBRARY"
+        | "PRAYER_AREA"
       section_medium: "ENGLISH" | "URDU"
       section_shift: "MORNING" | "AFTERNOON"
       session_status: "planned" | "active" | "closed" | "archived"
@@ -7158,6 +7266,14 @@ export const Constants = {
         "other",
       ],
       offer_status: ["issued", "accepted", "declined", "lapsed"],
+      room_type_enum: [
+        "CLASSROOM",
+        "SCIENCE_LAB",
+        "COMPUTER_LAB",
+        "HALL",
+        "LIBRARY",
+        "PRAYER_AREA",
+      ],
       section_medium: ["ENGLISH", "URDU"],
       section_shift: ["MORNING", "AFTERNOON"],
       session_status: ["planned", "active", "closed", "archived"],
