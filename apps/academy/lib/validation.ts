@@ -715,3 +715,16 @@ export const rejectDocumentSchema = z.object({
   reason: z.string().min(1, 'A reason is required'),
 });
 export type RejectDocumentInput = z.infer<typeof rejectDocumentSchema>;
+
+// Mirrors submit_public_enquiry()'s own checks in
+// supabase/migrations/20260731440000_public_enquiry_form.sql.
+export const publicEnquirySchema = z.object({
+  childName: z.string().min(1, "Child's name is required").max(200),
+  childNameUr: z.string().max(200).optional(),
+  dob: z.string().min(1, 'Date of birth is required'),
+  classCode: z.string().min(1, 'Choose a class'),
+  parentName: z.string().min(1, "Parent/guardian's name is required").max(200),
+  phone: z.string().min(1, 'Phone number is required'),
+  whatsappOptIn: z.boolean().default(false),
+});
+export type PublicEnquiryInput = z.infer<typeof publicEnquirySchema>;

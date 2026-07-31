@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { CreateEnquiryForm } from './create-enquiry-form';
 import { EnquiryList } from './enquiry-list';
+import { RealtimeEnquiryRefresher } from './realtime-refresher';
 
 export default async function EnquiriesPage() {
   const supabase = await supabaseServer();
@@ -21,6 +22,7 @@ export default async function EnquiriesPage() {
         <h1 className="text-2xl font-semibold">Admissions enquiries</h1>
         <p className="text-sm text-muted-foreground">FR-B01 — capture every walk-in, phone, web and referral enquiry.</p>
       </div>
+      <RealtimeEnquiryRefresher />
       <CreateEnquiryForm campuses={campuses ?? []} sessions={sessions ?? []} classLevels={classLevels ?? []} />
       <EnquiryList enquiries={enquiries ?? []} />
     </div>

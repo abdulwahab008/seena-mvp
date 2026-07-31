@@ -47,6 +47,7 @@ import {
   submitScorecardSchema,
   uploadDocumentSchema,
   rejectDocumentSchema,
+  publicEnquirySchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -935,5 +936,35 @@ describe('rejectDocumentSchema', () => {
 
   it('rejects an empty reason', () => {
     expect(rejectDocumentSchema.safeParse({ ...base, reason: '' }).success).toBe(false);
+  });
+});
+
+describe('publicEnquirySchema', () => {
+  const base = {
+    childName: 'Web Child',
+    dob: '2020-01-01',
+    classCode: '1',
+    parentName: 'Web Parent',
+    phone: '03001234567',
+  };
+
+  it('accepts a valid public enquiry', () => {
+    expect(publicEnquirySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts an optional Urdu child name', () => {
+    expect(publicEnquirySchema.safeParse({ ...base, childNameUr: 'ویب چائلڈ' }).success).toBe(true);
+  });
+
+  it('rejects a missing child name', () => {
+    expect(publicEnquirySchema.safeParse({ ...base, childName: '' }).success).toBe(false);
+  });
+
+  it('rejects a missing phone number', () => {
+    expect(publicEnquirySchema.safeParse({ ...base, phone: '' }).success).toBe(false);
+  });
+
+  it('rejects a missing class', () => {
+    expect(publicEnquirySchema.safeParse({ ...base, classCode: '' }).success).toBe(false);
   });
 });

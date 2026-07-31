@@ -4706,6 +4706,38 @@ export type Database = {
           },
         ]
       }
+      public_enquiry_attempt: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+          phone_e164: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+          phone_e164: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+          phone_e164?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_enquiry_attempt_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role: {
         Row: {
           code: string
@@ -7459,6 +7491,7 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_public_school_info: { Args: { p_tenant_slug: string }; Returns: Json }
       fn_publish_merit_list: { Args: { p_sitting_id: string }; Returns: Json }
       fn_readmit_student: {
         Args: {
@@ -7876,6 +7909,21 @@ export type Database = {
           p_scores: Json
         }
         Returns: string
+      }
+      submit_public_enquiry: {
+        Args: {
+          p_campus_code?: string
+          p_child_name: string
+          p_child_name_ur?: string
+          p_class_code: string
+          p_dob: string
+          p_ip_hash: string
+          p_parent_name: string
+          p_phone: string
+          p_tenant_slug: string
+          p_whatsapp_opt_in?: boolean
+        }
+        Returns: Json
       }
       suggest_rooms_for_type: {
         Args: {
