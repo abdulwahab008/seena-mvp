@@ -2,16 +2,38 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { loadRegisterRoster, saveAttendanceRegister, type RosterStudent } from './actions';
-import { STUDENT_ATTENDANCE_STATUSES } from '@/lib/validation';
+import { loadRegisterRoster, bulkMarkAttendance, type RosterStudent } from './actions';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+// FR-G04: present -> absent -> late -> excused -> present, one tap, no
+// dialog, no dropdown. The AC's own cycle names the 4th state "leave" —
+// this schema's enum (FR-G02) calls the same concept 'excused'.
+const CYCLE = ['present', 'absent', 'late', 'excused'] as const;
+
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function StatusButton({ status, onTap }: { status: string; onTap: () => void }) {
+  const colors: Record<string, string> = {
+    present: 'bg-green-100 text-green-800 border-green-300',
+    absent: 'bg-red-100 text-red-800 border-red-300',
+    late: 'bg-amber-100 text-amber-800 border-amber-300',
+    excused: 'bg-blue-100 text-blue-800 border-blue-300',
+  };
+  return (
+    <button
+      type="button"
+      onClick={onTap}
+      className={`min-h-11 min-w-11 rounded-md border px-3 py-2 text-sm font-medium capitalize ${colors[status] ?? ''}`}
+      data-testid="register-status-tap"
+    >
+      {status.replace(/_/g, ' ')}
+    </button>
+  );
 }
 
 export function RegisterForm({ campusId, sections }: { campusId: string; sections: { id: string; label: string }[] }) {
@@ -38,13 +60,27 @@ export function RegisterForm({ campusId, sections }: { campusId: string; section
     });
   };
 
+  const onTap = (enrolmentId: string) => {
+    setMarks((m) => {
+      const current = m[enrolmentId] ?? 'present';
+      const next = CYCLE[(CYCLE.indexOf(current as (typeof CYCLE)[number]) + 1) % CYCLE.length] ?? 'present';
+      return { ...m, [enrolmentId]: next };
+    });
+  };
+
   const onSave = () => {
+    // AC1: only the exceptions travel — every un-touched student stays
+    // present server-side, so a zero-touch submit is a tiny fixed payload.
+    const exceptions = students
+      .map((s) => ({ enrolmentId: s.enrolmentId, status: marks[s.enrolmentId] ?? 'present' }))
+      .filter((m) => m.status !== 'present');
+
     const fd = new FormData();
     fd.set('sectionId', sectionId);
     fd.set('attendanceDate', attendanceDate);
-    fd.set('marks', JSON.stringify(students.map((s) => ({ enrolmentId: s.enrolmentId, status: marks[s.enrolmentId] ?? 'present' }))));
+    fd.set('exceptions', JSON.stringify(exceptions));
     startTransition(async () => {
-      const result = await saveAttendanceRegister({ error: null, saved: null }, fd);
+      const result = await bulkMarkAttendance({ error: null, saved: null }, fd);
       if (result.error) toast.error(result.error);
       else toast.success(`Register saved — ${result.saved} student(s).`);
     });
@@ -94,27 +130,20 @@ export function RegisterForm({ campusId, sections }: { campusId: string; section
           {students.length === 0 ? (
             <p className="text-sm text-muted-foreground">No active students in this section.</p>
           ) : (
-            students.map((s) => (
-              <Card key={s.enrolmentId} data-testid={`register-row-${s.enrolmentId}`}>
-                <CardContent className="flex items-center justify-between p-3 text-sm">
+            <ul className="divide-y rounded-lg border">
+              {students.map((s) => (
+                <li
+                  key={s.enrolmentId}
+                  className="flex min-h-12 items-center justify-between gap-2 p-3 text-sm"
+                  data-testid={`register-row-${s.enrolmentId}`}
+                >
                   <span>
                     {s.name} <span className="text-muted-foreground">({s.grNumber})</span>
                   </span>
-                  <Select value={marks[s.enrolmentId] ?? 'present'} onValueChange={(v) => setMarks((m) => ({ ...m, [s.enrolmentId]: v }))}>
-                    <SelectTrigger className="w-32" data-testid={`register-status-trigger-${s.enrolmentId}`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STUDENT_ATTENDANCE_STATUSES.map((st) => (
-                        <SelectItem key={st} value={st}>
-                          {st.replace(/_/g, ' ')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </CardContent>
-              </Card>
-            ))
+                  <StatusButton status={marks[s.enrolmentId] ?? 'present'} onTap={() => onTap(s.enrolmentId)} />
+                </li>
+              ))}
+            </ul>
           )}
           {students.length > 0 && (
             <Button type="button" disabled={pending} onClick={onSave} data-testid="register-save">

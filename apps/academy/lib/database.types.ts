@@ -8497,6 +8497,10 @@ export type Database = {
         Args: { p_ledger_id: string; p_reason: string }
         Returns: string
       }
+      rpc_bulk_mark_attendance: {
+        Args: { p_date: string; p_exceptions?: Json; p_section_id: string }
+        Returns: Json
+      }
       save_attendance_register: {
         Args: { p_attendance_date: string; p_marks: Json; p_section_id: string }
         Returns: Json

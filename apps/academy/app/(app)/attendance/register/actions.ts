@@ -1,6 +1,6 @@
 'use server';
 
-import { saveAttendanceRegisterSchema } from '@/lib/validation';
+import { bulkMarkAttendanceSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type RosterStudent = { enrolmentId: string; name: string; grNumber: string; currentStatus: string | null };
@@ -51,27 +51,30 @@ export async function loadRegisterRoster(
 
 export type SaveRegisterState = { error: string | null; saved: number | null };
 
-export async function saveAttendanceRegister(_prev: SaveRegisterState, formData: FormData): Promise<SaveRegisterState> {
-  const marksRaw = formData.get('marks');
-  let marks: unknown;
+// FR-G04: everyone active defaults to present server-side — only
+// exceptions are ever sent over the wire, so a zero-touch submit (the
+// common case) is a small, fixed-size payload regardless of section size.
+export async function bulkMarkAttendance(_prev: SaveRegisterState, formData: FormData): Promise<SaveRegisterState> {
+  const exceptionsRaw = formData.get('exceptions');
+  let exceptions: unknown;
   try {
-    marks = JSON.parse(String(marksRaw));
+    exceptions = JSON.parse(String(exceptionsRaw));
   } catch {
     return { error: 'Invalid input.', saved: null };
   }
 
-  const parsed = saveAttendanceRegisterSchema.safeParse({
+  const parsed = bulkMarkAttendanceSchema.safeParse({
     sectionId: formData.get('sectionId'),
     attendanceDate: formData.get('attendanceDate'),
-    marks,
+    exceptions,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.', saved: null };
 
   const supabase = await supabaseServer();
-  const { data, error } = await supabase.rpc('save_attendance_register', {
+  const { data, error } = await supabase.rpc('rpc_bulk_mark_attendance', {
     p_section_id: parsed.data.sectionId,
-    p_attendance_date: parsed.data.attendanceDate,
-    p_marks: parsed.data.marks.map((m) => ({ enrolment_id: m.enrolmentId, status: m.status })),
+    p_date: parsed.data.attendanceDate,
+    p_exceptions: parsed.data.exceptions.map((m) => ({ enrolment_id: m.enrolmentId, status: m.status })),
   });
   if (error) {
     if (error.message.startsWith('HOLIDAY:')) return { error: `This is a declared holiday (${error.message.split(':')[1]}).`, saved: null };

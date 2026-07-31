@@ -810,11 +810,12 @@ export type SetAttendancePolicyInput = z.infer<typeof setAttendancePolicySchema>
 // supabase/migrations/20260731490000_daily_attendance_register.sql.
 export const STUDENT_ATTENDANCE_STATUSES = ['present', 'absent', 'late', 'half_day', 'excused'] as const;
 
-export const saveAttendanceRegisterSchema = z.object({
+// Mirrors rpc_bulk_mark_attendance()'s own signature in
+// supabase/migrations/20260731500000_bulk_mark_attendance.sql —
+// exceptions only; every un-listed active enrolment defaults to present.
+export const bulkMarkAttendanceSchema = z.object({
   sectionId: z.string().uuid(),
   attendanceDate: z.string().min(1, 'Choose a date'),
-  marks: z
-    .array(z.object({ enrolmentId: z.string().uuid(), status: z.enum(STUDENT_ATTENDANCE_STATUSES) }))
-    .min(1, 'No students to mark'),
+  exceptions: z.array(z.object({ enrolmentId: z.string().uuid(), status: z.enum(STUDENT_ATTENDANCE_STATUSES) })),
 });
-export type SaveAttendanceRegisterInput = z.infer<typeof saveAttendanceRegisterSchema>;
+export type BulkMarkAttendanceInput = z.infer<typeof bulkMarkAttendanceSchema>;

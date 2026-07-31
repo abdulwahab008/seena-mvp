@@ -135,16 +135,20 @@ test('a class teacher marks the daily register for their assigned section', asyn
   await teacherPage.getByTestId('register-load').click();
   await expect(teacherPage.locator('[data-testid^="register-row-"]')).toHaveCount(2);
 
+  // FR-G04's tap-to-cycle control: present -> absent -> late -> excused.
+  // Two taps lands on "late".
   const lateRow = teacherPage.locator('[data-testid^="register-row-"]').filter({ hasText: 'Late Kid' });
-  await lateRow.getByRole('combobox').click();
-  await teacherPage.getByRole('option', { name: 'late', exact: true }).click();
+  const lateTap = lateRow.getByTestId('register-status-tap');
+  await lateTap.click();
+  await lateTap.click();
+  await expect(lateTap).toHaveText('late');
 
   await teacherPage.getByTestId('register-save').click();
   await expect(teacherPage.getByText('Register saved — 2 student(s).')).toBeVisible();
 
   // Reloading the same date pre-fills the just-saved statuses.
   await teacherPage.getByTestId('register-load').click();
-  await expect(lateRow.getByRole('combobox')).toContainText('late');
+  await expect(lateRow.getByTestId('register-status-tap')).toHaveText('late');
 
   await teacherContext.close();
 });

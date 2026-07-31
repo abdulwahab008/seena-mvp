@@ -54,7 +54,7 @@ import {
   uploadBrandingAssetSchema,
   setTenantThemeSchema,
   setAttendancePolicySchema,
-  saveAttendanceRegisterSchema,
+  bulkMarkAttendanceSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1102,23 +1102,28 @@ describe('setAttendancePolicySchema', () => {
   });
 });
 
-describe('saveAttendanceRegisterSchema', () => {
-  const base = {
-    sectionId: '11111111-1111-1111-1111-111111111111',
-    attendanceDate: '2026-08-01',
-    marks: [{ enrolmentId: '22222222-2222-2222-2222-222222222222', status: 'present' as const }],
-  };
+describe('bulkMarkAttendanceSchema', () => {
+  const base = { sectionId: '11111111-1111-1111-1111-111111111111', attendanceDate: '2026-08-01', exceptions: [] as unknown[] };
 
-  it('accepts a valid register save', () => {
-    expect(saveAttendanceRegisterSchema.safeParse(base).success).toBe(true);
+  it('accepts zero exceptions', () => {
+    expect(bulkMarkAttendanceSchema.safeParse(base).success).toBe(true);
   });
 
-  it('rejects an empty marks array', () => {
-    expect(saveAttendanceRegisterSchema.safeParse({ ...base, marks: [] }).success).toBe(false);
+  it('accepts one exception', () => {
+    expect(
+      bulkMarkAttendanceSchema.safeParse({
+        ...base,
+        exceptions: [{ enrolmentId: '22222222-2222-2222-2222-222222222222', status: 'absent' }],
+      }).success
+    ).toBe(true);
   });
 
-  it('rejects an unknown status', () => {
-    const enrolmentId = base.marks[0]!.enrolmentId;
-    expect(saveAttendanceRegisterSchema.safeParse({ ...base, marks: [{ enrolmentId, status: 'tardy' }] }).success).toBe(false);
+  it('rejects an unknown status in an exception', () => {
+    expect(
+      bulkMarkAttendanceSchema.safeParse({
+        ...base,
+        exceptions: [{ enrolmentId: '22222222-2222-2222-2222-222222222222', status: 'tardy' }],
+      }).success
+    ).toBe(false);
   });
 });
