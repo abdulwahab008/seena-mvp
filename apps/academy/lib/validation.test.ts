@@ -53,6 +53,7 @@ import {
   enrolFromOfferSchema,
   uploadBrandingAssetSchema,
   setTenantThemeSchema,
+  setAttendancePolicySchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1065,5 +1066,37 @@ describe('setTenantThemeSchema', () => {
 
   it('rejects an invalid hex colour', () => {
     expect(setTenantThemeSchema.safeParse({ primaryHex: 'not-a-hex' }).success).toBe(false);
+  });
+});
+
+describe('setAttendancePolicySchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    mode: 'daily' as const,
+    startTime: '08:00',
+    lateThresholdMinutes: 15,
+    lockWindowHours: 24,
+    saturdayWorking: false,
+  };
+
+  it('accepts a valid policy', () => {
+    expect(setAttendancePolicySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a malformed start time', () => {
+    expect(setAttendancePolicySchema.safeParse({ ...base, startTime: '8am' }).success).toBe(false);
+  });
+
+  it('rejects a negative late threshold', () => {
+    expect(setAttendancePolicySchema.safeParse({ ...base, lateThresholdMinutes: -1 }).success).toBe(false);
+  });
+
+  it('rejects a zero lock window', () => {
+    expect(setAttendancePolicySchema.safeParse({ ...base, lockWindowHours: 0 }).success).toBe(false);
+  });
+
+  it('rejects an out-of-range minimum attendance percentage', () => {
+    expect(setAttendancePolicySchema.safeParse({ ...base, minAttendancePct: 150 }).success).toBe(false);
   });
 });

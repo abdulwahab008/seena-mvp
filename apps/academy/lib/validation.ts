@@ -787,3 +787,21 @@ export const setTenantThemeSchema = z.object({
   secondaryHex: z.string().regex(HEX_COLOR_REGEX, 'Use a 6-digit hex colour, e.g. #112233').optional().or(z.literal('')),
 });
 export type SetTenantThemeInput = z.infer<typeof setTenantThemeSchema>;
+
+// Mirrors set_attendance_policy()'s own checks in
+// supabase/migrations/20260731480000_attendance_policy.sql.
+export const ATTENDANCE_MODES = ['daily', 'period'] as const;
+const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+export const setAttendancePolicySchema = z.object({
+  campusId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+  mode: z.enum(ATTENDANCE_MODES),
+  startTime: z.string().regex(TIME_REGEX, 'Use HH:MM, e.g. 08:00'),
+  lateThresholdMinutes: z.coerce.number().int().min(0, 'Cannot be negative'),
+  halfDayCutoffTime: z.string().regex(TIME_REGEX, 'Use HH:MM, e.g. 12:30').optional().or(z.literal('')),
+  lockWindowHours: z.coerce.number().int().positive('Must be at least 1 hour'),
+  minAttendancePct: z.coerce.number().min(0).max(100).optional(),
+  saturdayWorking: z.boolean().default(false),
+});
+export type SetAttendancePolicyInput = z.infer<typeof setAttendancePolicySchema>;

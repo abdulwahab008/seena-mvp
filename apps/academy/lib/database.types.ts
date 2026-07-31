@@ -1569,6 +1569,86 @@ export type Database = {
           },
         ]
       }
+      attendance_policy: {
+        Row: {
+          campus_id: string
+          created_at: string
+          effective_from: string
+          half_day_cutoff_time: string | null
+          id: string
+          late_threshold_minutes: number
+          lock_window_hours: number
+          min_attendance_pct: number | null
+          mode: string
+          saturday_working: boolean
+          session_id: string
+          start_time: string
+          tenant_id: string
+          updated_by: string | null
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          effective_from?: string
+          half_day_cutoff_time?: string | null
+          id?: string
+          late_threshold_minutes?: number
+          lock_window_hours?: number
+          min_attendance_pct?: number | null
+          mode?: string
+          saturday_working?: boolean
+          session_id: string
+          start_time?: string
+          tenant_id: string
+          updated_by?: string | null
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          effective_from?: string
+          half_day_cutoff_time?: string | null
+          id?: string
+          late_threshold_minutes?: number
+          lock_window_hours?: number
+          min_attendance_pct?: number | null
+          mode?: string
+          saturday_working?: boolean
+          session_id?: string
+          start_time?: string
+          tenant_id?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_policy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_policy_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_policy_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -8275,6 +8355,19 @@ export type Database = {
         }
         Returns: string
       }
+      resolve_attendance_policy: {
+        Args: { p_as_of?: string; p_campus_id: string; p_session_id: string }
+        Returns: Json
+      }
+      resolve_attendance_status: {
+        Args: {
+          p_as_of?: string
+          p_campus_id: string
+          p_marked_time: string
+          p_session_id: string
+        }
+        Returns: string
+      }
       resolve_branding: {
         Args: {
           p_asset_type: Database["public"]["Enums"]["branding_asset_type"]
@@ -8310,6 +8403,20 @@ export type Database = {
       set_academic_terms: {
         Args: { p_session_id: string; p_terms: Json }
         Returns: undefined
+      }
+      set_attendance_policy: {
+        Args: {
+          p_campus_id: string
+          p_half_day_cutoff_time?: string
+          p_late_threshold_minutes?: number
+          p_lock_window_hours?: number
+          p_min_attendance_pct?: number
+          p_mode?: string
+          p_saturday_working?: boolean
+          p_session_id: string
+          p_start_time?: string
+        }
+        Returns: string
       }
       set_challan_template: {
         Args: {

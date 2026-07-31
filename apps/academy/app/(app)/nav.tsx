@@ -16,6 +16,7 @@ const LINKS = [
   { href: '/academic-setup/rooms', label: 'Rooms' },
   { href: '/academic-setup/competency', label: 'Teacher Competency' },
   { href: '/academic-setup/rollover', label: 'Session Rollover' },
+  { href: '/academic-setup/attendance-policy', label: 'Attendance Policy' },
   { href: '/students', label: 'Students' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },
