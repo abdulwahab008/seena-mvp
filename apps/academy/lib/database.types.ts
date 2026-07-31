@@ -224,6 +224,7 @@ export type Database = {
         Row: {
           application_no: string | null
           campus_id: string
+          checklist_snapshot: Json
           class_applied_id: string
           created_at: string
           enquiry_id: string
@@ -240,6 +241,7 @@ export type Database = {
         Insert: {
           application_no?: string | null
           campus_id: string
+          checklist_snapshot?: Json
           class_applied_id: string
           created_at?: string
           enquiry_id: string
@@ -256,6 +258,7 @@ export type Database = {
         Update: {
           application_no?: string | null
           campus_id?: string
+          checklist_snapshot?: Json
           class_applied_id?: string
           created_at?: string
           enquiry_id?: string
@@ -311,6 +314,134 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenant"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_document_requirement: {
+        Row: {
+          board: Database["public"]["Enums"]["board"] | null
+          campus_id: string
+          created_at: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_mandatory: boolean
+          max_class_ordinal: number
+          min_class_ordinal: number
+          min_count: number
+          tenant_id: string
+        }
+        Insert: {
+          board?: Database["public"]["Enums"]["board"] | null
+          campus_id: string
+          created_at?: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_mandatory?: boolean
+          max_class_ordinal: number
+          min_class_ordinal: number
+          min_count?: number
+          tenant_id: string
+        }
+        Update: {
+          board?: Database["public"]["Enums"]["board"] | null
+          campus_id?: string
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["document_type"]
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_mandatory?: boolean
+          max_class_ordinal?: number
+          min_class_ordinal?: number
+          min_count?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_document_requirement_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_document_requirement_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_document_submission: {
+        Row: {
+          application_id: string
+          campus_id: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          id: string
+          promised_deadline: string | null
+          status: Database["public"]["Enums"]["doc_status"]
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+          uploaded_count: number
+        }
+        Insert: {
+          application_id: string
+          campus_id: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          id?: string
+          promised_deadline?: string | null
+          status?: Database["public"]["Enums"]["doc_status"]
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+          uploaded_count?: number
+        }
+        Update: {
+          application_id?: string
+          campus_id?: string
+          doc_type?: Database["public"]["Enums"]["document_type"]
+          id?: string
+          promised_deadline?: string | null
+          status?: Database["public"]["Enums"]["doc_status"]
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          uploaded_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_document_submission_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "admission_application"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_document_submission_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_document_submission_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_document_submission_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -6588,6 +6719,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      fn_checklist_completeness: {
+        Args: { p_application_id: string }
+        Returns: Json
+      }
       fn_close_enquiry: {
         Args: {
           p_enquiry_id: string
@@ -6748,6 +6883,33 @@ export type Database = {
       fn_next_enquiry_no: {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: string
+      }
+      fn_preview_checklist: {
+        Args: {
+          p_board?: Database["public"]["Enums"]["board"]
+          p_campus_id: string
+          p_class_level_id: string
+        }
+        Returns: {
+          board: Database["public"]["Enums"]["board"] | null
+          campus_id: string
+          created_at: string
+          doc_type: Database["public"]["Enums"]["document_type"]
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_mandatory: boolean
+          max_class_ordinal: number
+          min_class_ordinal: number
+          min_count: number
+          tenant_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "admission_document_requirement"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       fn_promote_waitlist: {
         Args: {
@@ -7049,6 +7211,29 @@ export type Database = {
         Args: { p_session_id: string }
         Returns: undefined
       }
+      set_document_requirement: {
+        Args: {
+          p_board?: Database["public"]["Enums"]["board"]
+          p_campus_id: string
+          p_doc_type: Database["public"]["Enums"]["document_type"]
+          p_effective_from?: string
+          p_is_mandatory?: boolean
+          p_max_class_ordinal: number
+          p_min_class_ordinal: number
+          p_min_count?: number
+        }
+        Returns: string
+      }
+      set_document_submission: {
+        Args: {
+          p_application_id: string
+          p_doc_type: Database["public"]["Enums"]["document_type"]
+          p_promised_deadline?: string
+          p_status: Database["public"]["Enums"]["doc_status"]
+          p_uploaded_count?: number
+        }
+        Returns: string
+      }
       set_fee_head_active: {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
@@ -7259,6 +7444,15 @@ export type Database = {
         | "learning_disability"
         | "speech_impairment"
         | "autism_spectrum"
+        | "other"
+      doc_status: "pending" | "uploaded" | "verified" | "rejected" | "promised"
+      document_type:
+        | "birth_certificate"
+        | "transfer_certificate"
+        | "passport_photo"
+        | "b_form"
+        | "previous_report_card"
+        | "medical_certificate"
         | "other"
       employment_status: "active" | "on_leave" | "suspended" | "exited"
       enquiry_source: "walk_in" | "phone" | "web" | "referral" | "other"
@@ -7566,6 +7760,16 @@ export const Constants = {
         "learning_disability",
         "speech_impairment",
         "autism_spectrum",
+        "other",
+      ],
+      doc_status: ["pending", "uploaded", "verified", "rejected", "promised"],
+      document_type: [
+        "birth_certificate",
+        "transfer_certificate",
+        "passport_photo",
+        "b_form",
+        "previous_report_card",
+        "medical_certificate",
         "other",
       ],
       employment_status: ["active", "on_leave", "suspended", "exited"],

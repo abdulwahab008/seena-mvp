@@ -7,6 +7,7 @@ const LINKS = [
   { href: '/leave', label: 'Leave' },
   { href: '/admissions/enquiries', label: 'Admissions' },
   { href: '/admissions/applications', label: 'Applications' },
+  { href: '/admissions/checklist', label: 'Document Checklist' },
   { href: '/academic-setup/curriculum', label: 'Curriculum' },
   { href: '/academic-setup/rooms', label: 'Rooms' },
   { href: '/academic-setup/competency', label: 'Teacher Competency' },

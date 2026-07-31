@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { issueOfferSchema, respondToOfferSchema } from '@/lib/validation';
+import { issueOfferSchema, respondToOfferSchema, setDocumentSubmissionSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type IssueOfferState = { error: string | null };
@@ -90,6 +90,55 @@ export async function removeFromWaitlist(waitlistId: string, reason: string): Pr
     if (error.message.includes('NOT_WAITING')) return { error: 'This applicant is no longer waiting.' };
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to manage the waitlist.' };
     return { error: 'Could not remove this applicant from the waitlist.' };
+  }
+
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export type ChecklistItem = { doc_type: string; is_mandatory: boolean; min_count: number };
+export type MissingItem = { doc_type: string; required: number; have: number; missing: number };
+export type ChecklistState = { error: string | null; complete: boolean | null; missing: MissingItem[] | null };
+
+// FR-B09: the checklist an application was actually submitted under —
+// frozen at submission time, never re-evaluated against today's config.
+export async function checkChecklistCompleteness(applicationId: string): Promise<ChecklistState> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_checklist_completeness', { p_application_id: applicationId });
+  if (error) return { error: 'Could not check the checklist.', complete: null, missing: null };
+
+  const result = data as { complete: boolean; missing: MissingItem[] };
+  return { error: null, complete: result.complete, missing: result.missing };
+}
+
+export type SetDocumentSubmissionState = { error: string | null };
+
+// FR-B09: record a document's status against an application's frozen
+// checklist. 'promised' also creates a follow-up task for the deadline
+// (set_document_submission()'s own job, not this action's).
+export async function setDocumentSubmission(_prev: SetDocumentSubmissionState, formData: FormData): Promise<SetDocumentSubmissionState> {
+  const parsed = setDocumentSubmissionSchema.safeParse({
+    applicationId: formData.get('applicationId'),
+    docType: formData.get('docType'),
+    status: formData.get('status'),
+    uploadedCount: formData.get('uploadedCount') || undefined,
+    promisedDeadline: formData.get('promisedDeadline') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_document_submission', {
+    p_application_id: parsed.data.applicationId,
+    p_doc_type: parsed.data.docType,
+    p_status: parsed.data.status,
+    p_uploaded_count: parsed.data.uploadedCount,
+    p_promised_deadline: parsed.data.promisedDeadline,
+  });
+  if (error) {
+    if (error.message.includes('PROMISED_DEADLINE_REQUIRED')) return { error: 'Enter a deadline for the promised document.' };
+    if (error.message.includes('PROMISED_DEADLINE_TOO_FAR')) return { error: 'The deadline must be within 30 days.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to update this checklist.' };
+    return { error: 'Could not save the document status.' };
   }
 
   revalidatePath('/admissions/applications');

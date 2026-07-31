@@ -36,6 +36,8 @@ import {
   declareCompetencySchema,
   suggestSubstitutesSchema,
   cloneAcademicStructureSchema,
+  setDocumentRequirementSchema,
+  setDocumentSubmissionSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -705,5 +707,55 @@ describe('cloneAcademicStructureSchema', () => {
 
   it('rejects a missing campus', () => {
     expect(cloneAcademicStructureSchema.safeParse({ ...base, campusId: '' }).success).toBe(false);
+  });
+});
+
+describe('setDocumentRequirementSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    minClassOrdinal: 7,
+    maxClassOrdinal: 13,
+    docType: 'transfer_certificate',
+    isMandatory: true,
+    minCount: 1,
+  };
+
+  it('accepts a valid requirement', () => {
+    expect(setDocumentRequirementSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a min ordinal greater than the max', () => {
+    expect(setDocumentRequirementSchema.safeParse({ ...base, minClassOrdinal: 13, maxClassOrdinal: 7 }).success).toBe(false);
+  });
+
+  it('rejects a zero min count', () => {
+    expect(setDocumentRequirementSchema.safeParse({ ...base, minCount: 0 }).success).toBe(false);
+  });
+
+  it('rejects an unrecognized document type', () => {
+    expect(setDocumentRequirementSchema.safeParse({ ...base, docType: 'passport' }).success).toBe(false);
+  });
+});
+
+describe('setDocumentSubmissionSchema', () => {
+  const base = {
+    applicationId: '11111111-1111-1111-1111-111111111111',
+    docType: 'passport_photo',
+    status: 'uploaded',
+    uploadedCount: 2,
+  };
+
+  it('accepts a valid uploaded submission', () => {
+    expect(setDocumentSubmissionSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a promised status with no deadline', () => {
+    expect(setDocumentSubmissionSchema.safeParse({ ...base, status: 'promised', promisedDeadline: undefined }).success).toBe(false);
+  });
+
+  it('accepts a promised status with a deadline', () => {
+    expect(
+      setDocumentSubmissionSchema.safeParse({ ...base, status: 'promised', promisedDeadline: '2026-09-01' }).success
+    ).toBe(true);
   });
 });

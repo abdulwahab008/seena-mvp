@@ -566,3 +566,46 @@ export const cloneAcademicStructureSchema = z
     path: ['toSessionId'],
   });
 export type CloneAcademicStructureInput = z.infer<typeof cloneAcademicStructureSchema>;
+
+export const DOCUMENT_TYPES = [
+  'birth_certificate',
+  'transfer_certificate',
+  'passport_photo',
+  'b_form',
+  'previous_report_card',
+  'medical_certificate',
+  'other',
+] as const;
+export const DOC_STATUSES = ['pending', 'uploaded', 'verified', 'rejected', 'promised'] as const;
+
+// Mirrors set_document_requirement()'s own checks in
+// supabase/migrations/20260731370000_admission_document_checklist.sql.
+export const setDocumentRequirementSchema = z
+  .object({
+    campusId: z.string().uuid('Choose a campus'),
+    minClassOrdinal: z.coerce.number().int(),
+    maxClassOrdinal: z.coerce.number().int(),
+    docType: z.enum(DOCUMENT_TYPES),
+    isMandatory: z.boolean(),
+    minCount: z.coerce.number().int().positive('Must be at least 1'),
+  })
+  .refine((v) => v.minClassOrdinal <= v.maxClassOrdinal, {
+    message: 'The starting class must be at or before the ending class',
+    path: ['maxClassOrdinal'],
+  });
+export type SetDocumentRequirementInput = z.infer<typeof setDocumentRequirementSchema>;
+
+// Mirrors set_document_submission()'s own PROMISED_DEADLINE_* checks.
+export const setDocumentSubmissionSchema = z
+  .object({
+    applicationId: z.string().uuid(),
+    docType: z.enum(DOCUMENT_TYPES),
+    status: z.enum(DOC_STATUSES),
+    uploadedCount: z.coerce.number().int().nonnegative().optional(),
+    promisedDeadline: z.string().optional(),
+  })
+  .refine((v) => v.status !== 'promised' || !!v.promisedDeadline, {
+    message: 'A promised document needs a deadline',
+    path: ['promisedDeadline'],
+  });
+export type SetDocumentSubmissionInput = z.infer<typeof setDocumentSubmissionSchema>;

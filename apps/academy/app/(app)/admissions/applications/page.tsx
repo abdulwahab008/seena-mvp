@@ -12,7 +12,7 @@ export default async function ApplicationsPage() {
     supabase
       .from('admission_application')
       .select(
-        'id, application_no, status, campus_id, session_id, class_applied_id, admission_enquiry(child_name), class_level(name_en)'
+        'id, application_no, status, campus_id, session_id, class_applied_id, checklist_snapshot, admission_enquiry(child_name), class_level(name_en)'
       )
       .order('submitted_at', { ascending: false }),
     supabase
@@ -50,6 +50,7 @@ export default async function ApplicationsPage() {
         offer,
         availableSeats,
         waitlist: waitlistByApp.get(a.id) ?? null,
+        checklistSnapshot: (a.checklist_snapshot ?? []) as { doc_type: string; is_mandatory: boolean; min_count: number }[],
       };
     })
   );
