@@ -4608,6 +4608,44 @@ export type Database = {
         }
         Relationships: []
       }
+      message_template: {
+        Row: {
+          body_preview: string | null
+          channel: Database["public"]["Enums"]["followup_channel"]
+          code: string
+          id: string
+          locale: string
+          template_id: string
+          tenant_id: string
+        }
+        Insert: {
+          body_preview?: string | null
+          channel: Database["public"]["Enums"]["followup_channel"]
+          code: string
+          id?: string
+          locale: string
+          template_id: string
+          tenant_id: string
+        }
+        Update: {
+          body_preview?: string | null
+          channel?: Database["public"]["Enums"]["followup_channel"]
+          code?: string
+          id?: string
+          locale?: string
+          template_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_template_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       otp_attempt: {
         Row: {
           channel: string
@@ -4634,6 +4672,112 @@ export type Database = {
           seq?: number
         }
         Relationships: []
+      }
+      outbound_message: {
+        Row: {
+          campus_id: string
+          channel: Database["public"]["Enums"]["followup_channel"]
+          created_at: string
+          dedupe_key: string
+          enquiry_id: string
+          failure_code: string | null
+          followup_id: string | null
+          id: string
+          interview_id: string | null
+          locale: string
+          payload: Json
+          provider_msg_id: string | null
+          reminder_kind: Database["public"]["Enums"]["reminder_kind"]
+          status: Database["public"]["Enums"]["outbound_status"]
+          template_id: string | null
+          tenant_id: string
+          test_sitting_id: string | null
+          to_phone: string
+        }
+        Insert: {
+          campus_id: string
+          channel: Database["public"]["Enums"]["followup_channel"]
+          created_at?: string
+          dedupe_key: string
+          enquiry_id: string
+          failure_code?: string | null
+          followup_id?: string | null
+          id?: string
+          interview_id?: string | null
+          locale: string
+          payload?: Json
+          provider_msg_id?: string | null
+          reminder_kind: Database["public"]["Enums"]["reminder_kind"]
+          status?: Database["public"]["Enums"]["outbound_status"]
+          template_id?: string | null
+          tenant_id: string
+          test_sitting_id?: string | null
+          to_phone: string
+        }
+        Update: {
+          campus_id?: string
+          channel?: Database["public"]["Enums"]["followup_channel"]
+          created_at?: string
+          dedupe_key?: string
+          enquiry_id?: string
+          failure_code?: string | null
+          followup_id?: string | null
+          id?: string
+          interview_id?: string | null
+          locale?: string
+          payload?: Json
+          provider_msg_id?: string | null
+          reminder_kind?: Database["public"]["Enums"]["reminder_kind"]
+          status?: Database["public"]["Enums"]["outbound_status"]
+          template_id?: string | null
+          tenant_id?: string
+          test_sitting_id?: string | null
+          to_phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outbound_message_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_message_enquiry_id_fkey"
+            columns: ["enquiry_id"]
+            isOneToOne: false
+            referencedRelation: "admission_enquiry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_message_followup_id_fkey"
+            columns: ["followup_id"]
+            isOneToOne: false
+            referencedRelation: "admission_followup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_message_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "admission_interview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_message_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outbound_message_test_sitting_id_fkey"
+            columns: ["test_sitting_id"]
+            isOneToOne: false
+            referencedRelation: "admission_test_sitting"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permission: {
         Row: {
@@ -7483,6 +7627,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      fn_process_sms_fallbacks: { Args: never; Returns: number }
       fn_promote_waitlist: {
         Args: {
           p_campus_id: string
@@ -7493,6 +7638,8 @@ export type Database = {
       }
       fn_public_school_info: { Args: { p_tenant_slug: string }; Returns: Json }
       fn_publish_merit_list: { Args: { p_sitting_id: string }; Returns: Json }
+      fn_queue_appointment_reminders: { Args: never; Returns: number }
+      fn_queue_followup_reminders: { Args: never; Returns: number }
       fn_readmit_student: {
         Args: {
           p_override_reason?: string
@@ -7640,6 +7787,10 @@ export type Database = {
         Args: { p_challan_no: string }
         Returns: Json
       }
+      mark_outbound_message_failed: {
+        Args: { p_failure_code: string; p_message_id: string }
+        Returns: undefined
+      }
       mark_staff_attendance_bulk: {
         Args: { p_campus_id: string; p_date: string; p_rows: Json }
         Returns: Json
@@ -7765,6 +7916,10 @@ export type Database = {
         Returns: undefined
       }
       seed_default_fee_heads: {
+        Args: { p_tenant_id: string }
+        Returns: undefined
+      }
+      seed_default_message_templates: {
         Args: { p_tenant_id: string }
         Returns: undefined
       }
@@ -8163,6 +8318,8 @@ export type Database = {
         | "distance"
         | "other"
       offer_status: "issued" | "accepted" | "declined" | "lapsed"
+      outbound_status: "queued" | "sent" | "failed" | "rate_capped"
+      reminder_kind: "followup_officer" | "appointment_parent"
       room_type_enum:
         | "CLASSROOM"
         | "SCIENCE_LAB"
@@ -8500,6 +8657,8 @@ export const Constants = {
         "other",
       ],
       offer_status: ["issued", "accepted", "declined", "lapsed"],
+      outbound_status: ["queued", "sent", "failed", "rate_capped"],
+      reminder_kind: ["followup_officer", "appointment_parent"],
       room_type_enum: [
         "CLASSROOM",
         "SCIENCE_LAB",
