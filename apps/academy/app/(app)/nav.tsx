@@ -20,6 +20,7 @@ const LINKS = [
   { href: '/attendance/register', label: 'Attendance Register' },
   { href: '/attendance/corrections', label: 'Attendance Corrections' },
   { href: '/attendance/monthly-summary', label: 'Monthly Attendance Summary' },
+  { href: '/attendance/absentee-notifications', label: 'Absentee Notifications' },
   { href: '/students', label: 'Students' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },

@@ -844,3 +844,11 @@ export const recomputeMonthlyAttendanceSchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
 });
 export type RecomputeMonthlyAttendanceInput = z.infer<typeof recomputeMonthlyAttendanceSchema>;
+
+// Mirrors dispatch_absentee_notifications()'s own signature in
+// supabase/migrations/20260731540000_absentee_sms_notification.sql.
+export const dispatchAbsenteeNotificationsSchema = z.object({
+  campusId: z.string().uuid(),
+  date: z.string().min(1, 'Choose a date'),
+});
+export type DispatchAbsenteeNotificationsInput = z.infer<typeof dispatchAbsenteeNotificationsSchema>;

@@ -2068,6 +2068,83 @@ export type Database = {
           },
         ]
       }
+      attendance_notification: {
+        Row: {
+          campus_id: string
+          channel: Database["public"]["Enums"]["notification_channel"]
+          cost_paisa: number
+          created_at: string
+          enrolment_id: string
+          id: string
+          language: Database["public"]["Enums"]["notification_language"]
+          notification_date: string
+          provider_message_id: string | null
+          recipient_msisdn: string | null
+          status: Database["public"]["Enums"]["notification_status"]
+          template_code: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          cost_paisa?: number
+          created_at?: string
+          enrolment_id: string
+          id?: string
+          language: Database["public"]["Enums"]["notification_language"]
+          notification_date: string
+          provider_message_id?: string | null
+          recipient_msisdn?: string | null
+          status: Database["public"]["Enums"]["notification_status"]
+          template_code: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          cost_paisa?: number
+          created_at?: string
+          enrolment_id?: string
+          id?: string
+          language?: Database["public"]["Enums"]["notification_language"]
+          notification_date?: string
+          provider_message_id?: string | null
+          recipient_msisdn?: string | null
+          status?: Database["public"]["Enums"]["notification_status"]
+          template_code?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_notification_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_notification_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_notification_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_notification_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_policy: {
         Row: {
           campus_id: string
@@ -2461,6 +2538,7 @@ export type Database = {
           city: string | null
           code: string
           created_at: string
+          daily_sms_cap_paisa: number | null
           day_end: string
           day_start: string
           deleted_at: string | null
@@ -2479,6 +2557,7 @@ export type Database = {
           city?: string | null
           code: string
           created_at?: string
+          daily_sms_cap_paisa?: number | null
           day_end?: string
           day_start?: string
           deleted_at?: string | null
@@ -2497,6 +2576,7 @@ export type Database = {
           city?: string | null
           code?: string
           created_at?: string
+          daily_sms_cap_paisa?: number | null
           day_end?: string
           day_start?: string
           deleted_at?: string | null
@@ -7800,6 +7880,20 @@ export type Database = {
       }
     }
     Functions: {
+      absentees_for_date: {
+        Args: { p_campus_id: string; p_date: string }
+        Returns: {
+          enrolment_id: string
+          gr_number: string
+          guardian_id: string
+          language: Database["public"]["Enums"]["notification_language"]
+          phone_e164: string
+          section_id: string
+          section_label: string
+          student_name: string
+          student_name_ur: string
+        }[]
+      }
       accept_invitation: { Args: { p_token: string }; Returns: string }
       add_holiday: {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
@@ -8259,6 +8353,10 @@ export type Database = {
       delete_stream: { Args: { p_id: string }; Returns: undefined }
       detect_sibling_groups: {
         Args: { p_campus_id: string; p_session_id: string }
+        Returns: Json
+      }
+      dispatch_absentee_notifications: {
+        Args: { p_campus_id: string; p_date?: string }
         Returns: Json
       }
       edit_concession_award: {
@@ -8931,6 +9029,17 @@ export type Database = {
         Args: { p_attendance_date: string; p_marks: Json; p_section_id: string }
         Returns: Json
       }
+      section_register_submitted: {
+        Args: { p_date: string; p_section_id: string }
+        Returns: boolean
+      }
+      sections_not_marked: {
+        Args: { p_campus_id: string; p_date: string }
+        Returns: {
+          section_id: string
+          section_label: string
+        }[]
+      }
       seed_default_class_levels: {
         Args: { p_tenant_id: string }
         Returns: undefined
@@ -9358,6 +9467,14 @@ export type Database = {
         | "consumption"
         | "encashment"
         | "carry_forward"
+      notification_channel: "sms" | "whatsapp" | "push"
+      notification_language: "en" | "ur"
+      notification_status:
+        | "queued"
+        | "sent"
+        | "failed"
+        | "skipped_no_contact"
+        | "skipped_optout"
       offer_decline_reason:
         | "fee_too_high"
         | "chose_other_school"
@@ -9706,6 +9823,15 @@ export const Constants = {
         "consumption",
         "encashment",
         "carry_forward",
+      ],
+      notification_channel: ["sms", "whatsapp", "push"],
+      notification_language: ["en", "ur"],
+      notification_status: [
+        "queued",
+        "sent",
+        "failed",
+        "skipped_no_contact",
+        "skipped_optout",
       ],
       offer_decline_reason: [
         "fee_too_high",

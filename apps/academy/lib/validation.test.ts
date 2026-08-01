@@ -58,6 +58,7 @@ import {
   requestAttendanceCorrectionSchema,
   decideAttendanceCorrectionSchema,
   recomputeMonthlyAttendanceSchema,
+  dispatchAbsenteeNotificationsSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1177,5 +1178,17 @@ describe('recomputeMonthlyAttendanceSchema', () => {
 
   it('rejects a month outside 1-12', () => {
     expect(recomputeMonthlyAttendanceSchema.safeParse({ ...base, month: 13 }).success).toBe(false);
+  });
+});
+
+describe('dispatchAbsenteeNotificationsSchema', () => {
+  const base = { campusId: '11111111-1111-1111-1111-111111111111', date: '2026-08-01' };
+
+  it('accepts a valid campus/date', () => {
+    expect(dispatchAbsenteeNotificationsSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an empty date', () => {
+    expect(dispatchAbsenteeNotificationsSchema.safeParse({ ...base, date: '' }).success).toBe(false);
   });
 });
