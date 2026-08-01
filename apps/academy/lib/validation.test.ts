@@ -57,6 +57,7 @@ import {
   bulkMarkAttendanceSchema,
   requestAttendanceCorrectionSchema,
   decideAttendanceCorrectionSchema,
+  recomputeMonthlyAttendanceSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1160,5 +1161,21 @@ describe('decideAttendanceCorrectionSchema', () => {
 
   it('rejects a too-short note', () => {
     expect(decideAttendanceCorrectionSchema.safeParse({ ...base, note: 'no' }).success).toBe(false);
+  });
+});
+
+describe('recomputeMonthlyAttendanceSchema', () => {
+  const base = { campusId: '11111111-1111-1111-1111-111111111111', year: 2026, month: 8 };
+
+  it('accepts a valid campus/year/month', () => {
+    expect(recomputeMonthlyAttendanceSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('coerces string form-data values', () => {
+    expect(recomputeMonthlyAttendanceSchema.safeParse({ ...base, year: '2026', month: '8' }).success).toBe(true);
+  });
+
+  it('rejects a month outside 1-12', () => {
+    expect(recomputeMonthlyAttendanceSchema.safeParse({ ...base, month: 13 }).success).toBe(false);
   });
 });

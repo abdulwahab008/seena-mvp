@@ -138,8 +138,8 @@ select set_config(
 --    for a month with no finalized row) ──────────────────────────────
 
 reset role;
-insert into public.attendance_monthly_summary (tenant_id, campus_id, session_id, enrolment_id, year, month, present_days, absent_days, finalized_at, stale)
-values (:'tenant_id'::uuid, :'campus_id'::uuid, :'session_id'::uuid, :'enrol1_id'::uuid, extract(year from current_date - 40)::smallint, extract(month from current_date - 40)::smallint, 18, 2, clock_timestamp(), false);
+insert into public.attendance_month_summary (tenant_id, campus_id, session_id, enrolment_id, year, month, working_days, present_days, absent_days, computed_at, stale)
+values (:'tenant_id'::uuid, :'campus_id'::uuid, :'session_id'::uuid, :'enrol1_id'::uuid, extract(year from current_date - 40)::smallint, extract(month from current_date - 40)::smallint, 20, 18, 2, clock_timestamp(), false);
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
@@ -154,7 +154,7 @@ select set_config(
 );
 select public.approve_attendance_correction(:'correction2_id'::uuid);
 select ok(
-  (select stale from public.attendance_monthly_summary where enrolment_id = :'enrol1_id'::uuid and year = extract(year from current_date - 40)::smallint and month = extract(month from current_date - 40)::smallint),
+  (select stale from public.attendance_month_summary where enrolment_id = :'enrol1_id'::uuid and year = extract(year from current_date - 40)::smallint and month = extract(month from current_date - 40)::smallint),
   'AC3: a finalized monthly summary is flagged stale once a correction lands in its month'
 );
 

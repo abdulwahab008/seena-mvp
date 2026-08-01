@@ -19,6 +19,7 @@ const LINKS = [
   { href: '/academic-setup/attendance-policy', label: 'Attendance Policy' },
   { href: '/attendance/register', label: 'Attendance Register' },
   { href: '/attendance/corrections', label: 'Attendance Corrections' },
+  { href: '/attendance/monthly-summary', label: 'Monthly Attendance Summary' },
   { href: '/students', label: 'Students' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },

@@ -1975,47 +1975,59 @@ export type Database = {
           },
         ]
       }
-      attendance_monthly_summary: {
+      attendance_month_summary: {
         Row: {
           absent_days: number
+          attendance_pct: number | null
           campus_id: string
+          computed_at: string | null
           enrolment_id: string
-          finalized_at: string | null
-          half_days: number
-          late_days: number
+          half_day_count: number
+          late_count: number
+          leave_days: number
           month: number
           present_days: number
+          recomputed_at: string | null
           session_id: string
           stale: boolean
           tenant_id: string
+          working_days: number
           year: number
         }
         Insert: {
           absent_days?: number
+          attendance_pct?: number | null
           campus_id: string
+          computed_at?: string | null
           enrolment_id: string
-          finalized_at?: string | null
-          half_days?: number
-          late_days?: number
+          half_day_count?: number
+          late_count?: number
+          leave_days?: number
           month: number
           present_days?: number
+          recomputed_at?: string | null
           session_id: string
           stale?: boolean
           tenant_id: string
+          working_days?: number
           year: number
         }
         Update: {
           absent_days?: number
+          attendance_pct?: number | null
           campus_id?: string
+          computed_at?: string | null
           enrolment_id?: string
-          finalized_at?: string | null
-          half_days?: number
-          late_days?: number
+          half_day_count?: number
+          late_count?: number
+          leave_days?: number
           month?: number
           present_days?: number
+          recomputed_at?: string | null
           session_id?: string
           stale?: boolean
           tenant_id?: string
+          working_days?: number
           year?: number
         }
         Relationships: [
@@ -7913,6 +7925,10 @@ export type Database = {
       }
       compute_late_fee: {
         Args: { p_as_of?: string; p_challan_id: string }
+        Returns: number
+      }
+      compute_month_attendance: {
+        Args: { p_campus_id: string; p_month: number; p_year: number }
         Returns: number
       }
       confirm_branding_asset: {

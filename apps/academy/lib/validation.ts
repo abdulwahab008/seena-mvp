@@ -835,3 +835,12 @@ export const decideAttendanceCorrectionSchema = z.object({
   note: z.string().min(10, 'Explain the decision in at least 10 characters'),
 });
 export type DecideAttendanceCorrectionInput = z.infer<typeof decideAttendanceCorrectionSchema>;
+
+// Mirrors compute_month_attendance()'s own signature in
+// supabase/migrations/20260731530000_monthly_attendance_summary.sql.
+export const recomputeMonthlyAttendanceSchema = z.object({
+  campusId: z.string().uuid(),
+  year: z.coerce.number().int().min(2000).max(2100),
+  month: z.coerce.number().int().min(1).max(12),
+});
+export type RecomputeMonthlyAttendanceInput = z.infer<typeof recomputeMonthlyAttendanceSchema>;
