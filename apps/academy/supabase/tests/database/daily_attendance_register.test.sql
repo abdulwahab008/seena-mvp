@@ -114,7 +114,7 @@ select throws_ok(
     $$ select public.save_attendance_register(%L, %L, %L) $$,
     :'section_id', (current_date - 30)::date, jsonb_build_array(jsonb_build_object('enrolment_id', :'enrol1_id', 'status', 'present'))
   ),
-  'ATTENDANCE_LOCKED',
+  'ATT_LOCKED',
   'AC3: a date whose lock window has long since elapsed is refused'
 );
 select is(

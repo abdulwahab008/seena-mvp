@@ -53,7 +53,7 @@ export default async function AttendanceRegisterPage() {
       ) : sections.length === 0 ? (
         <p className="text-sm text-muted-foreground">No section is assigned to you as class teacher.</p>
       ) : (
-        <RegisterForm campusId={campusId} sections={sections} />
+        <RegisterForm campusId={campusId} sections={sections} isAdmin={isAdmin} />
       )}
     </div>
   );

@@ -1675,6 +1675,82 @@ export type Database = {
           },
         ]
       }
+      attendance_lock: {
+        Row: {
+          attendance_date: string
+          campus_id: string
+          id: string
+          locked_at: string
+          locked_by: Database["public"]["Enums"]["attendance_lock_source"]
+          locked_by_user: string | null
+          section_id: string
+          tenant_id: string
+        }
+        Insert: {
+          attendance_date: string
+          campus_id: string
+          id?: string
+          locked_at?: string
+          locked_by: Database["public"]["Enums"]["attendance_lock_source"]
+          locked_by_user?: string | null
+          section_id: string
+          tenant_id: string
+        }
+        Update: {
+          attendance_date?: string
+          campus_id?: string
+          id?: string
+          locked_at?: string
+          locked_by?: Database["public"]["Enums"]["attendance_lock_source"]
+          locked_by_user?: string | null
+          section_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_lock_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_locked_by_user_fkey"
+            columns: ["locked_by_user"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_policy: {
         Row: {
           campus_id: string
@@ -1800,51 +1876,6 @@ export type Database = {
         }
         Relationships: []
       }
-      audit_log_2026_07: {
-        Row: {
-          action: Database["public"]["Enums"]["audit_action"]
-          actor_role: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id: string | null
-          after: Json | null
-          before: Json | null
-          campus_id: string | null
-          changed_columns: string[] | null
-          id: string
-          occurred_at: string
-          row_id: string | null
-          table_name: string
-          tenant_id: string
-        }
-        Insert: {
-          action: Database["public"]["Enums"]["audit_action"]
-          actor_role?: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id?: string | null
-          after?: Json | null
-          before?: Json | null
-          campus_id?: string | null
-          changed_columns?: string[] | null
-          id?: string
-          occurred_at?: string
-          row_id?: string | null
-          table_name: string
-          tenant_id: string
-        }
-        Update: {
-          action?: Database["public"]["Enums"]["audit_action"]
-          actor_role?: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id?: string | null
-          after?: Json | null
-          before?: Json | null
-          campus_id?: string | null
-          changed_columns?: string[] | null
-          id?: string
-          occurred_at?: string
-          row_id?: string | null
-          table_name?: string
-          tenant_id?: string
-        }
-        Relationships: []
-      }
       audit_log_2026_08: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -1891,6 +1922,51 @@ export type Database = {
         Relationships: []
       }
       audit_log_2026_09: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          actor_role: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id: string | null
+          after: Json | null
+          before: Json | null
+          campus_id: string | null
+          changed_columns: string[] | null
+          id: string
+          occurred_at: string
+          row_id: string | null
+          table_name: string
+          tenant_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          actor_role?: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          campus_id?: string | null
+          changed_columns?: string[] | null
+          id?: string
+          occurred_at?: string
+          row_id?: string | null
+          table_name: string
+          tenant_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          actor_role?: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          campus_id?: string | null
+          changed_columns?: string[] | null
+          id?: string
+          occurred_at?: string
+          row_id?: string | null
+          table_name?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      audit_log_2026_10: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
           actor_role: Database["public"]["Enums"]["app_role"] | null
@@ -8304,6 +8380,10 @@ export type Database = {
         }
         Returns: string
       }
+      is_attendance_locked: {
+        Args: { p_date: string; p_section_id: string }
+        Returns: boolean
+      }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       issue_otp: { Args: { p_phone: string }; Returns: Json }
@@ -8330,6 +8410,10 @@ export type Database = {
       }
       link_staff_user_account: {
         Args: { p_staff_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      lock_attendance_now: {
+        Args: { p_date: string; p_section_id: string }
         Returns: undefined
       }
       lookup_challan_for_counter: {
@@ -8464,6 +8548,10 @@ export type Database = {
       resolve_attendance_holiday: {
         Args: { p_campus_id: string; p_date: string }
         Returns: string
+      }
+      resolve_attendance_lock_info: {
+        Args: { p_date: string; p_section_id: string }
+        Returns: Json
       }
       resolve_attendance_policy: {
         Args: { p_as_of?: string; p_campus_id: string; p_session_id: string }
@@ -8736,6 +8824,7 @@ export type Database = {
         Args: { p_id_a: string; p_id_b: string }
         Returns: undefined
       }
+      sweep_attendance_locks: { Args: never; Returns: number }
       unlink_guardian: {
         Args: { p_guardian_id: string; p_student_id: string }
         Returns: undefined
@@ -8818,6 +8907,7 @@ export type Database = {
         | "rejected"
         | "test_absent"
       approval_decision: "pending" | "approved" | "rejected" | "escalated"
+      attendance_lock_source: "cron" | "manual"
       attendance_source: "manual" | "biometric" | "leave"
       attendance_status: "present" | "absent" | "on_leave" | "half_day" | "late"
       audit_action: "insert" | "update" | "delete"
@@ -9153,6 +9243,7 @@ export const Constants = {
         "test_absent",
       ],
       approval_decision: ["pending", "approved", "rejected", "escalated"],
+      attendance_lock_source: ["cron", "manual"],
       attendance_source: ["manual", "biometric", "leave"],
       attendance_status: ["present", "absent", "on_leave", "half_day", "late"],
       audit_action: ["insert", "update", "delete"],

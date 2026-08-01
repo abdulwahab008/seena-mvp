@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { loadRegisterRoster, bulkMarkAttendance, type RosterStudent } from './actions';
+import { loadRegisterRoster, bulkMarkAttendance, lockAttendanceNow, type RosterStudent } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,7 +36,15 @@ function StatusButton({ status, onTap }: { status: string; onTap: () => void }) 
   );
 }
 
-export function RegisterForm({ campusId, sections }: { campusId: string; sections: { id: string; label: string }[] }) {
+export function RegisterForm({
+  campusId,
+  sections,
+  isAdmin,
+}: {
+  campusId: string;
+  sections: { id: string; label: string }[];
+  isAdmin: boolean;
+}) {
   const [pending, startTransition] = useTransition();
   const [sectionId, setSectionId] = useState(sections[0]?.id ?? '');
   const [attendanceDate, setAttendanceDate] = useState(todayIso());
@@ -44,6 +52,8 @@ export function RegisterForm({ campusId, sections }: { campusId: string; section
   const [students, setStudents] = useState<RosterStudent[]>([]);
   const [marks, setMarks] = useState<Record<string, string>>({});
   const [loaded, setLoaded] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [lockedAt, setLockedAt] = useState<string | null>(null);
 
   const onLoad = () => {
     if (!sectionId || !attendanceDate) return;
@@ -56,7 +66,20 @@ export function RegisterForm({ campusId, sections }: { campusId: string; section
       setHoliday(result.holiday);
       setStudents(result.students);
       setMarks(Object.fromEntries(result.students.map((s) => [s.enrolmentId, s.currentStatus ?? 'present'])));
+      setLocked(result.locked);
+      setLockedAt(result.lockedAt);
       setLoaded(true);
+    });
+  };
+
+  const onLockNow = () => {
+    startTransition(async () => {
+      const result = await lockAttendanceNow(sectionId, attendanceDate);
+      if (result.error) toast.error(result.error);
+      else {
+        toast.success('Locked.');
+        onLoad();
+      }
     });
   };
 
@@ -125,6 +148,12 @@ export function RegisterForm({ campusId, sections }: { campusId: string; section
         </p>
       )}
 
+      {loaded && !holiday && locked && (
+        <p className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800" data-testid="register-locked-banner">
+          Locked{lockedAt ? ` at ${new Date(lockedAt).toLocaleString()}` : ''} — this date can no longer be edited.
+        </p>
+      )}
+
       {loaded && !holiday && (
         <div className="space-y-2">
           {students.length === 0 ? (
@@ -140,14 +169,19 @@ export function RegisterForm({ campusId, sections }: { campusId: string; section
                   <span>
                     {s.name} <span className="text-muted-foreground">({s.grNumber})</span>
                   </span>
-                  <StatusButton status={marks[s.enrolmentId] ?? 'present'} onTap={() => onTap(s.enrolmentId)} />
+                  <StatusButton status={marks[s.enrolmentId] ?? 'present'} onTap={() => !locked && onTap(s.enrolmentId)} />
                 </li>
               ))}
             </ul>
           )}
-          {students.length > 0 && (
+          {students.length > 0 && !locked && (
             <Button type="button" disabled={pending} onClick={onSave} data-testid="register-save">
               {pending ? 'Saving…' : 'Save register'}
+            </Button>
+          )}
+          {isAdmin && !locked && (
+            <Button type="button" variant="outline" disabled={pending} onClick={onLockNow} data-testid="register-lock-now">
+              Lock now
             </Button>
           )}
         </div>

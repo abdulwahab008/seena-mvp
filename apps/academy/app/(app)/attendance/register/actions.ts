@@ -8,6 +8,8 @@ export type LoadRegisterState = {
   error: string | null;
   holiday: string | null;
   students: RosterStudent[];
+  locked: boolean;
+  lockedAt: string | null;
 };
 
 // FR-G02: loads the holiday state and the active roster (with any
@@ -16,6 +18,8 @@ export type LoadRegisterState = {
 // "Check checklist" on-demand pattern (FR-B09) rather than a client
 // cache that could drift from what save_attendance_register() would
 // actually see.
+// FR-G09: also resolves the lock state (AC3) — computed live even if
+// nothing has swept/manually locked this date yet.
 export async function loadRegisterRoster(
   campusId: string,
   sectionId: string,
@@ -23,7 +27,10 @@ export async function loadRegisterRoster(
 ): Promise<LoadRegisterState> {
   const supabase = await supabaseServer();
 
-  const { data: holiday } = await supabase.rpc('resolve_attendance_holiday', { p_campus_id: campusId, p_date: attendanceDate });
+  const [{ data: holiday }, { data: lockInfo }] = await Promise.all([
+    supabase.rpc('resolve_attendance_holiday', { p_campus_id: campusId, p_date: attendanceDate }),
+    supabase.rpc('resolve_attendance_lock_info', { p_section_id: sectionId, p_date: attendanceDate }),
+  ]);
 
   const [{ data: enrolments }, { data: marks }] = await Promise.all([
     supabase
@@ -46,7 +53,23 @@ export async function loadRegisterRoster(
       currentStatus: statusByEnrolment.get(e.id) ?? null,
     }));
 
-  return { error: null, holiday: holiday ?? null, students };
+  const lock = lockInfo as { locked: boolean; locked_at?: string | null } | null;
+  return { error: null, holiday: holiday ?? null, students, locked: lock?.locked ?? false, lockedAt: lock?.locked_at ?? null };
+}
+
+export type LockAttendanceNowState = { error: string | null };
+
+// FR-G09 AC3: a Principal can force an early lock ahead of the
+// window elapsing — lock_attendance_now() itself enforces the role.
+export async function lockAttendanceNow(sectionId: string, attendanceDate: string): Promise<LockAttendanceNowState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('lock_attendance_now', { p_section_id: sectionId, p_date: attendanceDate });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only an Owner or Principal can lock a register early.' };
+    if (error.message.includes('SECTION_NOT_FOUND')) return { error: 'Section not found.' };
+    return { error: 'Could not lock this date.' };
+  }
+  return { error: null };
 }
 
 export type SaveRegisterState = { error: string | null; saved: number | null };
@@ -78,7 +101,7 @@ export async function bulkMarkAttendance(_prev: SaveRegisterState, formData: For
   });
   if (error) {
     if (error.message.startsWith('HOLIDAY:')) return { error: `This is a declared holiday (${error.message.split(':')[1]}).`, saved: null };
-    if (error.message.includes('ATTENDANCE_LOCKED')) return { error: 'This date is locked and can no longer be edited.', saved: null };
+    if (error.message.includes('ATT_LOCKED')) return { error: 'This date is locked and can no longer be edited.', saved: null };
     if (error.message.includes('POLICY_NOT_CONFIGURED'))
       return { error: 'Attendance policy not configured for this session — contact your Principal.', saved: null };
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to mark this section.', saved: null };
