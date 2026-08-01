@@ -819,3 +819,19 @@ export const bulkMarkAttendanceSchema = z.object({
   exceptions: z.array(z.object({ enrolmentId: z.string().uuid(), status: z.enum(STUDENT_ATTENDANCE_STATUSES) })),
 });
 export type BulkMarkAttendanceInput = z.infer<typeof bulkMarkAttendanceSchema>;
+
+// Mirrors request_attendance_correction()'s own checks in
+// supabase/migrations/20260731520000_attendance_correction_approval.sql.
+export const requestAttendanceCorrectionSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  attendanceDate: z.string().min(1, 'Choose a date'),
+  newStatus: z.enum(STUDENT_ATTENDANCE_STATUSES),
+  reason: z.string().min(10, 'Explain the correction in at least 10 characters'),
+});
+export type RequestAttendanceCorrectionInput = z.infer<typeof requestAttendanceCorrectionSchema>;
+
+export const decideAttendanceCorrectionSchema = z.object({
+  correctionId: z.string().uuid(),
+  note: z.string().min(10, 'Explain the decision in at least 10 characters'),
+});
+export type DecideAttendanceCorrectionInput = z.infer<typeof decideAttendanceCorrectionSchema>;

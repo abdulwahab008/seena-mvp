@@ -18,6 +18,7 @@ const LINKS = [
   { href: '/academic-setup/rollover', label: 'Session Rollover' },
   { href: '/academic-setup/attendance-policy', label: 'Attendance Policy' },
   { href: '/attendance/register', label: 'Attendance Register' },
+  { href: '/attendance/corrections', label: 'Attendance Corrections' },
   { href: '/students', label: 'Students' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },

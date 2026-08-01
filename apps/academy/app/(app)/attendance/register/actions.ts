@@ -1,6 +1,6 @@
 'use server';
 
-import { bulkMarkAttendanceSchema } from '@/lib/validation';
+import { bulkMarkAttendanceSchema, requestAttendanceCorrectionSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type RosterStudent = { enrolmentId: string; name: string; grNumber: string; currentStatus: string | null };
@@ -110,4 +110,33 @@ export async function bulkMarkAttendance(_prev: SaveRegisterState, formData: For
   }
 
   return { error: null, saved: (data as { saved: number } | null)?.saved ?? null };
+}
+
+export type RequestCorrectionState = { error: string | null };
+
+// FR-G11: the only way to change a locked date — request_attendance_
+// correction() itself never checks is_attendance_locked().
+export async function requestAttendanceCorrection(_prev: RequestCorrectionState, formData: FormData): Promise<RequestCorrectionState> {
+  const parsed = requestAttendanceCorrectionSchema.safeParse({
+    enrolmentId: formData.get('enrolmentId'),
+    attendanceDate: formData.get('attendanceDate'),
+    newStatus: formData.get('newStatus'),
+    reason: formData.get('reason'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('request_attendance_correction', {
+    p_enrolment_id: parsed.data.enrolmentId,
+    p_attendance_date: parsed.data.attendanceDate,
+    p_new_status: parsed.data.newStatus,
+    p_reason: parsed.data.reason,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to request a correction for this section.' };
+    if (error.message.includes('ENROLMENT_NOT_FOUND')) return { error: 'Student not found.' };
+    return { error: 'Could not submit the correction request.' };
+  }
+
+  return { error: null };
 }

@@ -55,6 +55,8 @@ import {
   setTenantThemeSchema,
   setAttendancePolicySchema,
   bulkMarkAttendanceSchema,
+  requestAttendanceCorrectionSchema,
+  decideAttendanceCorrectionSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1125,5 +1127,38 @@ describe('bulkMarkAttendanceSchema', () => {
         exceptions: [{ enrolmentId: '22222222-2222-2222-2222-222222222222', status: 'tardy' }],
       }).success
     ).toBe(false);
+  });
+});
+
+describe('requestAttendanceCorrectionSchema', () => {
+  const base = {
+    enrolmentId: '11111111-1111-1111-1111-111111111111',
+    attendanceDate: '2026-08-01',
+    newStatus: 'present' as const,
+    reason: 'Was marked absent by mistake',
+  };
+
+  it('accepts a valid correction request', () => {
+    expect(requestAttendanceCorrectionSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a too-short reason', () => {
+    expect(requestAttendanceCorrectionSchema.safeParse({ ...base, reason: 'oops' }).success).toBe(false);
+  });
+
+  it('rejects an unknown status', () => {
+    expect(requestAttendanceCorrectionSchema.safeParse({ ...base, newStatus: 'tardy' }).success).toBe(false);
+  });
+});
+
+describe('decideAttendanceCorrectionSchema', () => {
+  const base = { correctionId: '11111111-1111-1111-1111-111111111111', note: 'Confirmed with the parent note on file' };
+
+  it('accepts a valid decision', () => {
+    expect(decideAttendanceCorrectionSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a too-short note', () => {
+    expect(decideAttendanceCorrectionSchema.safeParse({ ...base, note: 'no' }).success).toBe(false);
   });
 });

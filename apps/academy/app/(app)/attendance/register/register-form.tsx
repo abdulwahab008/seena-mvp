@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { loadRegisterRoster, bulkMarkAttendance, lockAttendanceNow, type RosterStudent } from './actions';
+import { loadRegisterRoster, bulkMarkAttendance, lockAttendanceNow, requestAttendanceCorrection, type RosterStudent } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,6 +33,65 @@ function StatusButton({ status, onTap }: { status: string; onTap: () => void }) 
     >
       {status.replace(/_/g, ' ')}
     </button>
+  );
+}
+
+function CorrectionRequestControl({ enrolmentId, attendanceDate }: { enrolmentId: string; attendanceDate: string }) {
+  const [pending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState<(typeof CYCLE)[number]>('present');
+  const [reason, setReason] = useState('');
+
+  const onSubmit = () => {
+    const fd = new FormData();
+    fd.set('enrolmentId', enrolmentId);
+    fd.set('attendanceDate', attendanceDate);
+    fd.set('newStatus', newStatus);
+    fd.set('reason', reason);
+    startTransition(async () => {
+      const result = await requestAttendanceCorrection({ error: null }, fd);
+      if (result.error) toast.error(result.error);
+      else {
+        toast.success('Correction requested.');
+        setOpen(false);
+        setReason('');
+      }
+    });
+  };
+
+  if (!open) {
+    return (
+      <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} data-testid={`request-correction-open-${enrolmentId}`}>
+        Request correction
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      <Select value={newStatus} onValueChange={(v) => setNewStatus(v as (typeof CYCLE)[number])}>
+        <SelectTrigger className="h-8 w-28" data-testid={`correction-status-trigger-${enrolmentId}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {CYCLE.map((s) => (
+            <SelectItem key={s} value={s}>
+              {s.replace(/_/g, ' ')}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Input
+        placeholder="Reason (min 10 chars)"
+        className="h-8 w-56"
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        data-testid={`correction-reason-${enrolmentId}`}
+      />
+      <Button type="button" size="sm" disabled={pending} onClick={onSubmit} data-testid={`correction-submit-${enrolmentId}`}>
+        Submit
+      </Button>
+    </div>
   );
 }
 
@@ -169,7 +228,16 @@ export function RegisterForm({
                   <span>
                     {s.name} <span className="text-muted-foreground">({s.grNumber})</span>
                   </span>
-                  <StatusButton status={marks[s.enrolmentId] ?? 'present'} onTap={() => !locked && onTap(s.enrolmentId)} />
+                  {locked ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs capitalize text-muted-foreground" data-testid={`register-current-status-${s.enrolmentId}`}>
+                        {(s.currentStatus ?? 'present').replace(/_/g, ' ')}
+                      </span>
+                      <CorrectionRequestControl enrolmentId={s.enrolmentId} attendanceDate={attendanceDate} />
+                    </div>
+                  ) : (
+                    <StatusButton status={marks[s.enrolmentId] ?? 'present'} onTap={() => onTap(s.enrolmentId)} />
+                  )}
                 </li>
               ))}
             </ul>

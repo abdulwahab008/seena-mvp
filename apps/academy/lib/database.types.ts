@@ -1569,10 +1569,232 @@ export type Database = {
           },
         ]
       }
+      attendance_audit: {
+        Row: {
+          approved_at: string
+          approved_by: string | null
+          attendance_date: string
+          campus_id: string
+          enrolment_id: string
+          id: number
+          new_status: Database["public"]["Enums"]["student_attendance_status"]
+          old_status:
+            | Database["public"]["Enums"]["student_attendance_status"]
+            | null
+          reason: string | null
+          requested_by: string | null
+          session_id: string
+          source_correction_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by?: string | null
+          attendance_date: string
+          campus_id: string
+          enrolment_id: string
+          id?: number
+          new_status: Database["public"]["Enums"]["student_attendance_status"]
+          old_status?:
+            | Database["public"]["Enums"]["student_attendance_status"]
+            | null
+          reason?: string | null
+          requested_by?: string | null
+          session_id: string
+          source_correction_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string | null
+          attendance_date?: string
+          campus_id?: string
+          enrolment_id?: string
+          id?: number
+          new_status?: Database["public"]["Enums"]["student_attendance_status"]
+          old_status?:
+            | Database["public"]["Enums"]["student_attendance_status"]
+            | null
+          reason?: string | null
+          requested_by?: string | null
+          session_id?: string
+          source_correction_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_audit_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_source_correction_id_fkey"
+            columns: ["source_correction_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_correction_request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_correction_request: {
+        Row: {
+          attendance_date: string
+          campus_id: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          enrolment_id: string
+          id: string
+          new_status: Database["public"]["Enums"]["student_attendance_status"]
+          old_status:
+            | Database["public"]["Enums"]["student_attendance_status"]
+            | null
+          reason: string
+          requested_at: string
+          requested_by: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["attendance_correction_status"]
+          tenant_id: string
+        }
+        Insert: {
+          attendance_date: string
+          campus_id: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          enrolment_id: string
+          id?: string
+          new_status: Database["public"]["Enums"]["student_attendance_status"]
+          old_status?:
+            | Database["public"]["Enums"]["student_attendance_status"]
+            | null
+          reason: string
+          requested_at?: string
+          requested_by?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["attendance_correction_status"]
+          tenant_id: string
+        }
+        Update: {
+          attendance_date?: string
+          campus_id?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          enrolment_id?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["student_attendance_status"]
+          old_status?:
+            | Database["public"]["Enums"]["student_attendance_status"]
+            | null
+          reason?: string
+          requested_at?: string
+          requested_by?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["attendance_correction_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_correction_request_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_correction_request_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "attendance_correction_request_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_correction_request_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_correction_request_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "attendance_correction_request_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_correction_request_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_day: {
         Row: {
           attendance_date: string
           campus_id: string
+          corrected: boolean
           enrolment_id: string
           id: string
           marked_at: string
@@ -1586,6 +1808,7 @@ export type Database = {
         Insert: {
           attendance_date: string
           campus_id: string
+          corrected?: boolean
           enrolment_id: string
           id?: string
           marked_at?: string
@@ -1599,6 +1822,7 @@ export type Database = {
         Update: {
           attendance_date?: string
           campus_id?: string
+          corrected?: boolean
           enrolment_id?: string
           id?: string
           marked_at?: string
@@ -1744,6 +1968,87 @@ export type Database = {
           },
           {
             foreignKeyName: "attendance_lock_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_monthly_summary: {
+        Row: {
+          absent_days: number
+          campus_id: string
+          enrolment_id: string
+          finalized_at: string | null
+          half_days: number
+          late_days: number
+          month: number
+          present_days: number
+          session_id: string
+          stale: boolean
+          tenant_id: string
+          year: number
+        }
+        Insert: {
+          absent_days?: number
+          campus_id: string
+          enrolment_id: string
+          finalized_at?: string | null
+          half_days?: number
+          late_days?: number
+          month: number
+          present_days?: number
+          session_id: string
+          stale?: boolean
+          tenant_id: string
+          year: number
+        }
+        Update: {
+          absent_days?: number
+          campus_id?: string
+          enrolment_id?: string
+          finalized_at?: string | null
+          half_days?: number
+          late_days?: number
+          month?: number
+          present_days?: number
+          session_id?: string
+          stale?: boolean
+          tenant_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_monthly_summary_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_monthly_summary_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_monthly_summary_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -7526,6 +7831,10 @@ export type Database = {
         Returns: string
       }
       apply_late_fees: { Args: { p_run_date?: string }; Returns: Json }
+      approve_attendance_correction: {
+        Args: { p_correction_id: string; p_note?: string }
+        Returns: undefined
+      }
       archive_campus: { Args: { p_campus_id: string }; Returns: undefined }
       assign_class_teacher: {
         Args: {
@@ -8526,6 +8835,10 @@ export type Database = {
         Args: { p_document_id: string; p_reason: string }
         Returns: undefined
       }
+      reject_attendance_correction: {
+        Args: { p_correction_id: string; p_note: string }
+        Returns: undefined
+      }
       remove_fee_plan_line: {
         Args: { p_line_id: string; p_reason?: string }
         Returns: undefined
@@ -8533,6 +8846,15 @@ export type Database = {
       remove_from_waitlist: {
         Args: { p_reason: string; p_waitlist_id: string }
         Returns: undefined
+      }
+      request_attendance_correction: {
+        Args: {
+          p_attendance_date: string
+          p_enrolment_id: string
+          p_new_status: Database["public"]["Enums"]["student_attendance_status"]
+          p_reason: string
+        }
+        Returns: string
       }
       request_concession_award: {
         Args: {
@@ -8907,6 +9229,7 @@ export type Database = {
         | "rejected"
         | "test_absent"
       approval_decision: "pending" | "approved" | "rejected" | "escalated"
+      attendance_correction_status: "pending" | "approved" | "rejected"
       attendance_lock_source: "cron" | "manual"
       attendance_source: "manual" | "biometric" | "leave"
       attendance_status: "present" | "absent" | "on_leave" | "half_day" | "late"
@@ -9243,6 +9566,7 @@ export const Constants = {
         "test_absent",
       ],
       approval_decision: ["pending", "approved", "rejected", "escalated"],
+      attendance_correction_status: ["pending", "approved", "rejected"],
       attendance_lock_source: ["cron", "manual"],
       attendance_source: ["manual", "biometric", "leave"],
       attendance_status: ["present", "absent", "on_leave", "half_day", "late"],
