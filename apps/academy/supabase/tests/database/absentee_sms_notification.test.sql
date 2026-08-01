@@ -1,6 +1,6 @@
 -- pgTAP tests for FR-G12: automated absentee SMS to parent.
 begin;
-select plan(32);
+select plan(33);
 
 select public.provision_tenant('test-absentee-sms-co', 'Absentee SMS Co', 'owner@absenteesmsco.test');
 select id as tenant_id from public.tenant where slug = 'test-absentee-sms-co' \gset
@@ -317,6 +317,16 @@ select throws_ok(
   format('select public.dispatch_absentee_notifications(%L, %L)', :'campus_id', :'att_date'),
   'FORBIDDEN',
   'a role with no attendance access cannot trigger dispatch'
+);
+
+-- notif_campus_read's own OR has two branches: super_admin/owner, or
+-- same-campus for anyone else. Every read assertion so far ran as
+-- 'owner', which only ever exercises the first branch — this librarian
+-- (same tenant, same campus_ids, forbidden from dispatch above) is what
+-- proves the second branch actually grants read access on its own.
+select ok(
+  (select count(*)::int from public.attendance_notification where campus_id = :'campus_id'::uuid and notification_date = :'att_date'::date) > 0,
+  'a non-admin, same-campus role can read attendance_notification via RLS even though it cannot dispatch'
 );
 
 reset role;
