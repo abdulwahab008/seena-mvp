@@ -15,6 +15,17 @@ select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
 select id as session_id from public.academic_session where tenant_id = :'tenant_id' \gset
 select id as class1_id from public.class_level where tenant_id = :'tenant_id' and code = '1' \gset
 
+-- Billing periods are relative to current_date, not hardcoded 2026-07/
+-- 08/09 — fee_plan.effective_from defaults to current_date and is set
+-- the moment enrol_student() fires, so a hardcoded period before
+-- "today" makes generate_challans() find zero applicable charges.
+-- month1/month2/month3 preserve the original's 3-consecutive-month
+-- relationship (month1 is always >= today, whatever today is).
+select
+  (date_trunc('month', current_date))::date as month1,
+  (date_trunc('month', current_date) + interval '1 month')::date as month2,
+  (date_trunc('month', current_date) + interval '2 months')::date as month3 \gset
+
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
@@ -46,7 +57,7 @@ select public.set_fee_head_priority(:'tuition_id'::uuid, 2);
 
 select public.create_student(:'campus_id'::uuid, 'Exact Payer', '2015-01-01'::date, 'male') as exact_student_id \gset
 select public.enrol_student(:'section_id'::uuid, :'exact_student_id'::uuid) as exact_enrol_id \gset
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-15'::date, false) as gen_a \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, :'month2'::date, false) as gen_a \gset
 select id as exact_challan_id from public.fee_challan where enrolment_id = :'exact_enrol_id' \gset
 
 select public.record_payment(:'exact_enrol_id'::uuid, 800000::bigint, 'cash'::public.fee_payment_mode) as exact_payment_id \gset
@@ -71,10 +82,10 @@ select is(
 
 select public.create_student(:'campus_id'::uuid, 'Waterfall Payer', '2015-01-01'::date, 'female') as wf_student_id \gset
 select public.enrol_student(:'section_id'::uuid, :'wf_student_id'::uuid) as wf_enrol_id \gset
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-07-15'::date, false);
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-15'::date, false);
-select id as wf_july_id from public.fee_challan where enrolment_id = :'wf_enrol_id' and billing_period = '2026-07-01' \gset
-select id as wf_august_id from public.fee_challan where enrolment_id = :'wf_enrol_id' and billing_period = '2026-08-01' \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, :'month1'::date, false);
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, :'month2'::date, false);
+select id as wf_july_id from public.fee_challan where enrolment_id = :'wf_enrol_id' and billing_period = :'month1'::date \gset
+select id as wf_august_id from public.fee_challan where enrolment_id = :'wf_enrol_id' and billing_period = :'month2'::date \gset
 
 -- 1,000,000 against 800,000 (July) + 800,000 (August): July fully clears
 -- (2 rows), then the 200,000 remainder goes to August's EXAM line only
@@ -116,7 +127,7 @@ select is(
 
 select public.create_student(:'campus_id'::uuid, 'Credit Payer', '2015-01-01'::date, 'male') as credit_student_id \gset
 select public.enrol_student(:'section_id'::uuid, :'credit_student_id'::uuid) as credit_enrol_id \gset
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-15'::date, false);
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, :'month2'::date, false);
 select id as credit_august_id from public.fee_challan where enrolment_id = :'credit_enrol_id' \gset
 
 select public.record_payment(:'credit_enrol_id'::uuid, 1200000::bigint, 'online'::public.fee_payment_mode) as credit_payment_id \gset
@@ -131,8 +142,8 @@ select is(
   'AC: the 400,000 excess shows as a negative (credit) balance — 1,200,000 paid against 800,000 owed'
 );
 
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-09-15'::date, false);
-select id as credit_september_id from public.fee_challan where enrolment_id = :'credit_enrol_id' and billing_period = '2026-09-01' \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, :'month3'::date, false);
+select id as credit_september_id from public.fee_challan where enrolment_id = :'credit_enrol_id' and billing_period = :'month3'::date \gset
 select is(
   (select status::text from public.fee_challan where id = :'credit_september_id'),
   'part_paid',
