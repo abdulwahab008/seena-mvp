@@ -1,3 +1,6 @@
+# Merged to main in PR #4 (2026-08-06). This copy on feat/seena-academy-app
+# is otherwise identical — kept in sync so the branch's own history matches
+# what actually ran against it.
 name: CI
 
 on:
