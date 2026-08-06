@@ -2963,6 +2963,27 @@ export type Database = {
           },
         ]
       }
+      class_structure_preset: {
+        Row: {
+          class_rows: Json
+          code: string
+          label: string
+          label_ur: string | null
+        }
+        Insert: {
+          class_rows: Json
+          code: string
+          label: string
+          label_ur?: string | null
+        }
+        Update: {
+          class_rows?: Json
+          code?: string
+          label?: string
+          label_ur?: string | null
+        }
+        Relationships: []
+      }
       class_subject: {
         Row: {
           campus_id: string
@@ -5592,6 +5613,38 @@ export type Database = {
           },
         ]
       }
+      onboarding_progress: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          status: Database["public"]["Enums"]["onboarding_step_status"]
+          step_key: Database["public"]["Enums"]["onboarding_step_key"]
+          tenant_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          status?: Database["public"]["Enums"]["onboarding_step_status"]
+          step_key: Database["public"]["Enums"]["onboarding_step_key"]
+          tenant_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          status?: Database["public"]["Enums"]["onboarding_step_status"]
+          step_key?: Database["public"]["Enums"]["onboarding_step_key"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_progress_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       otp_attempt: {
         Row: {
           channel: string
@@ -7668,6 +7721,26 @@ export type Database = {
           },
         ]
       }
+      v_onboarding_summary: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          status: Database["public"]["Enums"]["onboarding_step_status"] | null
+          step_key: Database["public"]["Enums"]["onboarding_step_key"] | null
+          steps_resolved: number | null
+          steps_total: number | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_progress_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_section_seat_availability: {
         Row: {
           active_count: number | null
@@ -7925,6 +7998,15 @@ export type Database = {
         Args: { p_challan_id: string; p_enrolment_id: string }
         Returns: number
       }
+      apply_class_preset: {
+        Args: {
+          p_campus_id: string
+          p_preset_code: string
+          p_session_id: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
       apply_for_leave: {
         Args: {
           p_from_date: string
@@ -8016,6 +8098,13 @@ export type Database = {
           p_reference_no?: string
         }
         Returns: Json
+      }
+      complete_onboarding_step: {
+        Args: {
+          p_status: Database["public"]["Enums"]["onboarding_step_status"]
+          p_step_key: Database["public"]["Enums"]["onboarding_step_key"]
+        }
+        Returns: undefined
       }
       compute_late_fee: {
         Args: { p_as_of?: string; p_challan_id: string }
@@ -9052,6 +9141,10 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: undefined
       }
+      seed_onboarding_progress: {
+        Args: { p_tenant_id: string }
+        Returns: undefined
+      }
       seed_tenant_roles: { Args: { p_tenant_id: string }; Returns: undefined }
       set_academic_terms: {
         Args: { p_session_id: string; p_terms: Json }
@@ -9482,6 +9575,15 @@ export type Database = {
         | "distance"
         | "other"
       offer_status: "issued" | "accepted" | "declined" | "lapsed"
+      onboarding_step_key:
+        | "campus_details"
+        | "branding"
+        | "academic_session"
+        | "class_structure"
+        | "fee_heads"
+        | "staff_invitations"
+        | "first_student"
+      onboarding_step_status: "pending" | "skipped" | "done"
       outbound_status: "queued" | "sent" | "failed" | "rate_capped"
       reminder_kind: "followup_officer" | "appointment_parent"
       room_type_enum:
@@ -9841,6 +9943,16 @@ export const Constants = {
         "other",
       ],
       offer_status: ["issued", "accepted", "declined", "lapsed"],
+      onboarding_step_key: [
+        "campus_details",
+        "branding",
+        "academic_session",
+        "class_structure",
+        "fee_heads",
+        "staff_invitations",
+        "first_student",
+      ],
+      onboarding_step_status: ["pending", "skipped", "done"],
       outbound_status: ["queued", "sent", "failed", "rate_capped"],
       reminder_kind: ["followup_officer", "appointment_parent"],
       room_type_enum: [

@@ -37,6 +37,18 @@ async function seedOwnerWithFeeHeads() {
   });
   if (e4) throw e4;
 
+  // FR-A03: /fees/structure is gated on the onboarding wizard's fee_heads
+  // step — this test's tenant has a fee head (seeded directly above, not
+  // through the wizard), so mark the step done the same way completing it
+  // via the wizard would, otherwise the page shows the blocking empty
+  // state instead of the structure UI this test exercises.
+  const { error: e5 } = await admin
+    .from('onboarding_progress')
+    .update({ status: 'done' })
+    .eq('tenant_id', tenantId as string)
+    .eq('step_key', 'fee_heads');
+  if (e5) throw e5;
+
   return { email, password };
 }
 

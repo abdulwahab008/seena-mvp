@@ -39,6 +39,16 @@ async function seedOwnerWithFeeHeadsClass1Only() {
   const { error: e5 } = await admin.from('class_level').update({ is_active: false }).eq('tenant_id', tenantId as string).neq('code', '1');
   if (e5) throw e5;
 
+  // FR-A03: /fees/structure is gated on the onboarding wizard's fee_heads
+  // step — see fee-structure.spec.ts's own seeding helper for why this is
+  // needed now that provision_tenant() seeds that step as pending.
+  const { error: e6 } = await admin
+    .from('onboarding_progress')
+    .update({ status: 'done' })
+    .eq('tenant_id', tenantId as string)
+    .eq('step_key', 'fee_heads');
+  if (e6) throw e6;
+
   return { email, password };
 }
 

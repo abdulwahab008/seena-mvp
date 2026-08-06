@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { StructureView, type StructureRow, type StructureLineRow, type StructureHistoryRow } from './structure-view';
 
@@ -7,6 +8,32 @@ function one<T>(v: T | T[] | null): T | null {
 
 export default async function FeeStructurePage() {
   const supabase = await supabaseServer();
+
+  // FR-A03 AC: the Fees module stays blocked until the onboarding
+  // wizard's fee_heads step is actually done — skipped still blocks,
+  // same as every other page reachable from the Fees module.
+  const { data: feeHeadsStep } = await supabase
+    .from('onboarding_progress')
+    .select('status')
+    .eq('step_key', 'fee_heads')
+    .maybeSingle();
+  if (feeHeadsStep && feeHeadsStep.status !== 'done') {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-semibold">Fee structure</h1>
+          <p className="text-sm text-muted-foreground">FR-K02 — per-class fee lines for the current session, draft until published.</p>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Set up your fee heads before building a fee structure.{' '}
+          <Link href="/onboarding" className="text-primary underline">
+            Finish the fee heads step
+          </Link>{' '}
+          in your setup checklist first.
+        </p>
+      </div>
+    );
+  }
 
   const [{ data: campuses }, { data: sessions }, { data: classLevels }, { data: feeHeads }] = await Promise.all([
     supabase.from('campus').select('id').eq('status', 'active').order('code'),
