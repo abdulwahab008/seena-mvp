@@ -103,6 +103,32 @@ export async function linkGuardianToStudent(studentId: string, _prev: LinkGuardi
   return { error: null };
 }
 
+export type SendGuardianInviteState = { error: string | null; result: { token: string; expiresAt: string } | null };
+
+// FR-C11: send (or re-send, superseding any outstanding one) a portal
+// activation link. The raw token only ever exists in this one response —
+// only its hash is stored — so a 'print' channel result is shown once here
+// for the officer to hand the guardian a slip, never persisted or re-
+// fetchable afterward.
+export async function sendGuardianPortalInvite(
+  guardianId: string,
+  channel: 'whatsapp' | 'sms' | 'print',
+  _prev: SendGuardianInviteState,
+  _formData: FormData,
+): Promise<SendGuardianInviteState> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('send_guardian_invite', { p_guardian_id: guardianId, p_channel: channel });
+  if (error) {
+    if (error.message.includes('GUARDIAN_PHONE_MISSING')) return { error: 'This guardian has no phone number on file.', result: null };
+    if (error.message.includes('GUARDIAN_ALREADY_ACTIVE')) return { error: 'This guardian already has a portal account.', result: null };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to send portal invites.', result: null };
+    return { error: 'Could not send the invite.', result: null };
+  }
+
+  const payload = data as { token: string; expires_at: string };
+  return { error: null, result: { token: payload.token, expiresAt: payload.expires_at } };
+}
+
 export type EnrolStudentState = { error: string | null };
 
 // FR-E03/C02: enrol into a section. Capacity, gender restriction and the

@@ -39,7 +39,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     supabase.from('class_section').select('id, name, class_level(name_en)').eq('campus_id', student.campus_id).eq('is_active', true),
     supabase
       .from('student_guardian')
-      .select('guardian_id, relationship, is_primary, receives_billing, may_collect_child, guardian(name_en, phone_e164, cnic)')
+      .select('guardian_id, relationship, is_primary, receives_billing, may_collect_child, guardian(name_en, phone_e164, cnic, auth_user_id)')
       .eq('student_id', id)
       .is('to_date', null),
     supabase.from('app_user').select('app_role').eq('user_id', user!.id).single(),

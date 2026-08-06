@@ -254,6 +254,11 @@ max_frequency = "5s"
 # app/login/otp/actions.ts where phones cross that boundary).
 [auth.sms.test_otp]
 923001234567 = "123456"
+# A second, distinct fixture for the guardian portal activation e2e spec
+# (FR-C11) — it needs its own signInWithOtp/verifyOtp cycle and must not
+# share a phone with otp-login.spec.ts's, or the two specs' concurrent
+# auth.users churn on the same number would race under --workers=2.
+923005551234 = "654321"
 
 # Configure logged in session timeouts.
 # [auth.sessions]

@@ -5099,6 +5099,89 @@ export type Database = {
           },
         ]
       }
+      guardian_invite: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          guardian_id: string
+          id: string
+          sent_channel: string
+          tenant_id: string
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          guardian_id: string
+          id?: string
+          sent_channel: string
+          tenant_id: string
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          guardian_id?: string
+          id?: string
+          sent_channel?: string
+          tenant_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_invite_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_invite_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_otp_attempt: {
+        Row: {
+          created_at: string
+          guardian_id: string
+          id: string
+          kind: string
+          seq: number
+        }
+        Insert: {
+          created_at?: string
+          guardian_id: string
+          id?: string
+          kind: string
+          seq?: number
+        }
+        Update: {
+          created_at?: string
+          guardian_id?: string
+          id?: string
+          kind?: string
+          seq?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_otp_attempt_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       holiday_calendar: {
         Row: {
           campus_id: string | null
@@ -7968,6 +8051,7 @@ export type Database = {
         }[]
       }
       accept_invitation: { Args: { p_token: string }; Returns: string }
+      activate_guardian_account: { Args: { p_token: string }; Returns: string }
       add_holiday: {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
         Returns: string
@@ -8875,6 +8959,16 @@ export type Database = {
         }
         Returns: Json
       }
+      get_guardian_invite_preview: {
+        Args: { p_token: string }
+        Returns: {
+          guardian_name: string
+          locked: boolean
+          phone_e164: string
+          tenant_name: string
+          valid: boolean
+        }[]
+      }
       get_invitation_preview: {
         Args: { p_token: string }
         Returns: {
@@ -8894,6 +8988,10 @@ export type Database = {
       }
       is_attendance_locked: {
         Args: { p_date: string; p_section_id: string }
+        Returns: boolean
+      }
+      is_guardian_otp_locked: {
+        Args: { p_guardian_id: string }
         Returns: boolean
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
@@ -9026,6 +9124,10 @@ export type Database = {
         }
         Returns: string
       }
+      register_guardian_otp_attempt: {
+        Args: { p_kind: string; p_token: string }
+        Returns: undefined
+      }
       register_login_attempt: {
         Args: { p_identifier: string; p_succeeded: boolean }
         Returns: undefined
@@ -9146,6 +9248,10 @@ export type Database = {
         Returns: undefined
       }
       seed_tenant_roles: { Args: { p_tenant_id: string }; Returns: undefined }
+      send_guardian_invite: {
+        Args: { p_channel: string; p_guardian_id: string }
+        Returns: Json
+      }
       set_academic_terms: {
         Args: { p_session_id: string; p_terms: Json }
         Returns: undefined
