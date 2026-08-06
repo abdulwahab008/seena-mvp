@@ -15,7 +15,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: 'list',
+  // CI additionally writes an HTML report so a failure is debuggable from
+  // the uploaded artifact, not just the log — 'list' alone (still used
+  // locally) prints nothing to disk.
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: 'http://127.0.0.1:3011',
     trace: 'on-first-retry',
