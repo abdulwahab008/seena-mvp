@@ -97,7 +97,7 @@ export async function bulkMarkAttendance(_prev: SaveRegisterState, formData: For
   const { data, error } = await supabase.rpc('rpc_bulk_mark_attendance', {
     p_section_id: parsed.data.sectionId,
     p_date: parsed.data.attendanceDate,
-    p_exceptions: parsed.data.exceptions.map((m) => ({ enrolment_id: m.enrolmentId, status: m.status })),
+    p_exceptions: parsed.data.exceptions.map((m) => ({ enrolment_id: m.enrolmentId, status: m.status, arrival_time: m.arrivalTime || null })),
   });
   if (error) {
     if (error.message.startsWith('HOLIDAY:')) return { error: `This is a declared holiday (${error.message.split(':')[1]}).`, saved: null };

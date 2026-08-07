@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { setAttendancePolicySchema } from '@/lib/validation';
+import { setAttendancePolicySchema, setAttendanceStatusWeightSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type ActionState = { error: string | null };
@@ -40,6 +40,35 @@ export async function setAttendancePolicy(_prev: ActionState, formData: FormData
     if (error.message.includes('CAMPUS_NOT_FOUND')) return { error: 'Campus not found.' };
     if (error.message.includes('SESSION_NOT_FOUND')) return { error: 'Session not found.' };
     return { error: 'Could not save the attendance policy.' };
+  }
+
+  revalidatePath('/academic-setup/attendance-policy');
+  return { error: null };
+}
+
+// FR-G06: an unconfigured status keeps attendance_weight()'s own
+// built-in default (present=1, late=1, half_day=0.5, else 0) — this
+// action only arms an explicit override.
+export async function setAttendanceStatusWeight(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = setAttendanceStatusWeightSchema.safeParse({
+    campusId: formData.get('campusId'),
+    sessionId: formData.get('sessionId'),
+    status: formData.get('status'),
+    weight: formData.get('weight'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_attendance_status_weight', {
+    p_campus_id: parsed.data.campusId,
+    p_session_id: parsed.data.sessionId,
+    p_status: parsed.data.status,
+    p_weight: parsed.data.weight,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to configure attendance status weights.' };
+    if (error.message.includes('WEIGHT_OUT_OF_RANGE')) return { error: 'Weight must be between 0 and 1.' };
+    return { error: 'Could not save the status weight.' };
   }
 
   revalidatePath('/academic-setup/attendance-policy');

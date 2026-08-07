@@ -816,7 +816,9 @@ export const STUDENT_ATTENDANCE_STATUSES = ['present', 'absent', 'late', 'half_d
 export const bulkMarkAttendanceSchema = z.object({
   sectionId: z.string().uuid(),
   attendanceDate: z.string().min(1, 'Choose a date'),
-  exceptions: z.array(z.object({ enrolmentId: z.string().uuid(), status: z.enum(STUDENT_ATTENDANCE_STATUSES) })),
+  exceptions: z.array(
+    z.object({ enrolmentId: z.string().uuid(), status: z.enum(STUDENT_ATTENDANCE_STATUSES), arrivalTime: z.string().optional() })
+  ),
 });
 export type BulkMarkAttendanceInput = z.infer<typeof bulkMarkAttendanceSchema>;
 
@@ -1029,3 +1031,13 @@ export const searchStaffSchema = z.object({
   includeFormer: z.boolean().optional(),
 });
 export type SearchStaffInput = z.infer<typeof searchStaffSchema>;
+
+// Mirrors set_attendance_status_weight()'s own signature in
+// supabase/migrations/20260731730000_attendance_status_weight.sql.
+export const setAttendanceStatusWeightSchema = z.object({
+  campusId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+  status: z.enum(STUDENT_ATTENDANCE_STATUSES),
+  weight: z.coerce.number().min(0, 'Weight must be between 0 and 1').max(1, 'Weight must be between 0 and 1'),
+});
+export type SetAttendanceStatusWeightInput = z.infer<typeof setAttendanceStatusWeightSchema>;

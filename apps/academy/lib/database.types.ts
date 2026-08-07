@@ -1799,9 +1799,11 @@ export type Database = {
       }
       attendance_day: {
         Row: {
+          arrival_time: string | null
           attendance_date: string
           campus_id: string
           corrected: boolean
+          departure_time: string | null
           enrolment_id: string
           id: string
           marked_at: string
@@ -1813,9 +1815,11 @@ export type Database = {
           tenant_id: string
         }
         Insert: {
+          arrival_time?: string | null
           attendance_date: string
           campus_id: string
           corrected?: boolean
+          departure_time?: string | null
           enrolment_id: string
           id?: string
           marked_at?: string
@@ -1827,9 +1831,11 @@ export type Database = {
           tenant_id: string
         }
         Update: {
+          arrival_time?: string | null
           attendance_date?: string
           campus_id?: string
           corrected?: boolean
+          departure_time?: string | null
           enrolment_id?: string
           id?: string
           marked_at?: string
@@ -2243,6 +2249,58 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      attendance_status_weight: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          session_id: string
+          status: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id: string
+          weight: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          session_id: string
+          status: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id: string
+          weight: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+          status?: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_status_weight_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_status_weight_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_status_weight_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -10038,6 +10096,14 @@ export type Database = {
         Args: { p_campus_id: string; p_staff_id: string }
         Returns: undefined
       }
+      attendance_weight: {
+        Args: {
+          p_campus_id: string
+          p_session_id: string
+          p_status: Database["public"]["Enums"]["student_attendance_status"]
+        }
+        Returns: number
+      }
       available_seats: {
         Args: {
           p_campus_id: string
@@ -11347,6 +11413,15 @@ export type Database = {
           p_start_time?: string
         }
         Returns: string
+      }
+      set_attendance_status_weight: {
+        Args: {
+          p_campus_id: string
+          p_session_id: string
+          p_status: Database["public"]["Enums"]["student_attendance_status"]
+          p_weight: number
+        }
+        Returns: undefined
       }
       set_bell_template_default: { Args: { p_id: string }; Returns: undefined }
       set_challan_template: {

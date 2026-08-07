@@ -110,6 +110,7 @@ export function RegisterForm({
   const [holiday, setHoliday] = useState<string | null>(null);
   const [students, setStudents] = useState<RosterStudent[]>([]);
   const [marks, setMarks] = useState<Record<string, string>>({});
+  const [arrivalTimes, setArrivalTimes] = useState<Record<string, string>>({});
   const [loaded, setLoaded] = useState(false);
   const [locked, setLocked] = useState(false);
   const [lockedAt, setLockedAt] = useState<string | null>(null);
@@ -153,8 +154,10 @@ export function RegisterForm({
   const onSave = () => {
     // AC1: only the exceptions travel — every un-touched student stays
     // present server-side, so a zero-touch submit is a tiny fixed payload.
+    // FR-G06 AC2: an unset arrival_time on a 'late' mark is left out
+    // entirely — save_attendance_register() defaults it server-side.
     const exceptions = students
-      .map((s) => ({ enrolmentId: s.enrolmentId, status: marks[s.enrolmentId] ?? 'present' }))
+      .map((s) => ({ enrolmentId: s.enrolmentId, status: marks[s.enrolmentId] ?? 'present', arrivalTime: arrivalTimes[s.enrolmentId] || undefined }))
       .filter((m) => m.status !== 'present');
 
     const fd = new FormData();
@@ -236,7 +239,19 @@ export function RegisterForm({
                       <CorrectionRequestControl enrolmentId={s.enrolmentId} attendanceDate={attendanceDate} />
                     </div>
                   ) : (
-                    <StatusButton status={marks[s.enrolmentId] ?? 'present'} onTap={() => onTap(s.enrolmentId)} />
+                    <div className="flex items-center gap-2">
+                      {marks[s.enrolmentId] === 'late' && (
+                        <Input
+                          type="time"
+                          className="h-9 w-28"
+                          placeholder="Arrival"
+                          value={arrivalTimes[s.enrolmentId] ?? ''}
+                          onChange={(e) => setArrivalTimes((m) => ({ ...m, [s.enrolmentId]: e.target.value }))}
+                          data-testid={`register-arrival-time-${s.enrolmentId}`}
+                        />
+                      )}
+                      <StatusButton status={marks[s.enrolmentId] ?? 'present'} onTap={() => onTap(s.enrolmentId)} />
+                    </div>
                   )}
                 </li>
               ))}
