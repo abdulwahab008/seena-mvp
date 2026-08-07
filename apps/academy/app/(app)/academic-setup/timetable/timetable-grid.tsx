@@ -109,6 +109,7 @@ function WriteSlotForm({
     control,
     handleSubmit,
     setValue,
+    getValues,
     reset,
     formState: { errors },
   } = useForm<UpsertTimetableSlotInput>({
@@ -119,9 +120,16 @@ function WriteSlotForm({
   const onSubjectChange = async (subjectId: string) => {
     setValue('subjectId', subjectId);
     if (!subjectId) return;
+    // Prefill is async — if the user manually picks a teacher/room while
+    // this fetch is still in flight, applying the fetched defaults
+    // unconditionally on resolution would silently overwrite their
+    // choice. Only apply a field if it's still untouched since this call
+    // started.
+    const staffBefore = getValues('staffId');
+    const roomBefore = getValues('roomId');
     const prefill = await getSlotPrefill(sectionId, subjectId);
-    setValue('staffId', prefill?.staffId ?? undefined);
-    setValue('roomId', prefill?.roomId ?? undefined);
+    if (getValues('staffId') === staffBefore) setValue('staffId', prefill?.staffId ?? undefined);
+    if (getValues('roomId') === roomBefore) setValue('roomId', prefill?.roomId ?? undefined);
   };
 
   const onSubmit = handleSubmit((values) => {

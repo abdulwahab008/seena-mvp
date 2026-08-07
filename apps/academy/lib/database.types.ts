@@ -8322,6 +8322,71 @@ export type Database = {
           },
         ]
       }
+      v_slot_clock_time: {
+        Row: {
+          campus_id: string | null
+          end_time: string | null
+          period_no: number | null
+          section_id: string | null
+          slot_id: string | null
+          staff_id: string | null
+          start_time: string | null
+          tenant_id: string | null
+          timetable_version_id: string | null
+          weekday: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_student_homework_feed: {
         Row: {
           assigned_date: string | null
@@ -9755,6 +9820,14 @@ export type Database = {
           p_campus_id: string
           p_date: string
           p_shift: Database["public"]["Enums"]["section_shift"]
+        }
+        Returns: string
+      }
+      resolve_bell_template_for_weekday: {
+        Args: {
+          p_campus_id: string
+          p_shift: Database["public"]["Enums"]["section_shift"]
+          p_weekday: number
         }
         Returns: string
       }
