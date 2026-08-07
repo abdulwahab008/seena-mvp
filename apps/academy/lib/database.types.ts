@@ -10944,6 +10944,25 @@ export type Database = {
         Returns: undefined
       }
       sweep_attendance_locks: { Args: never; Returns: number }
+      teacher_timetable: {
+        Args: { p_staff_id: string; p_week_start: string }
+        Returns: {
+          absent_teacher_name: string
+          campus_code: string
+          class_level_name: string
+          end_time: string
+          is_substitution: boolean
+          occurs_on: string
+          period_no: number
+          room_code: string
+          section_id: string
+          section_name: string
+          start_time: string
+          subject_code: string
+          subject_name_en: string
+          weekday: number
+        }[]
+      }
       timemultirange: { Args: never; Returns: unknown }
       unlink_guardian: {
         Args: { p_guardian_id: string; p_student_id: string }
