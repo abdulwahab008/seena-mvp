@@ -59,6 +59,7 @@ import {
   decideAttendanceCorrectionSchema,
   recomputeMonthlyAttendanceSchema,
   dispatchAbsenteeNotificationsSchema,
+  createHomeworkSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1190,5 +1191,52 @@ describe('dispatchAbsenteeNotificationsSchema', () => {
 
   it('rejects an empty date', () => {
     expect(dispatchAbsenteeNotificationsSchema.safeParse({ ...base, date: '' }).success).toBe(false);
+  });
+});
+
+describe('createHomeworkSchema', () => {
+  const base = {
+    sectionId: '11111111-1111-1111-1111-111111111111',
+    subjectId: '22222222-2222-2222-2222-222222222222',
+    title: 'Chapter 3 exercises',
+    assignedDate: '2026-08-01',
+    dueDate: '2026-08-08',
+  };
+
+  it('accepts a valid assignment with no optional fields', () => {
+    expect(createHomeworkSchema.safeParse(base).success).toBe(true);
+  });
+
+  // Regression: a blank number input reaches this schema as '', which
+  // z.coerce.number() alone turns into 0 — 0 then failed .positive(),
+  // silently blocking submission for anyone who left this genuinely
+  // optional field empty (found via e2e, not by inspection).
+  it('treats a blank estimatedMinutes as absent, not an invalid 0', () => {
+    const result = createHomeworkSchema.safeParse({ ...base, estimatedMinutes: '' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.estimatedMinutes).toBeUndefined();
+  });
+
+  it('coerces a numeric-string estimatedMinutes', () => {
+    const result = createHomeworkSchema.safeParse({ ...base, estimatedMinutes: '45' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.estimatedMinutes).toBe(45);
+  });
+
+  it('rejects a zero or negative estimatedMinutes', () => {
+    expect(createHomeworkSchema.safeParse({ ...base, estimatedMinutes: '0' }).success).toBe(false);
+    expect(createHomeworkSchema.safeParse({ ...base, estimatedMinutes: '-5' }).success).toBe(false);
+  });
+
+  it('rejects a title over 120 characters', () => {
+    expect(createHomeworkSchema.safeParse({ ...base, title: 'x'.repeat(121) }).success).toBe(false);
+  });
+
+  it('rejects a description over 4000 characters', () => {
+    expect(createHomeworkSchema.safeParse({ ...base, description: 'x'.repeat(4001) }).success).toBe(false);
+  });
+
+  it('rejects an empty due date', () => {
+    expect(createHomeworkSchema.safeParse({ ...base, dueDate: '' }).success).toBe(false);
   });
 });

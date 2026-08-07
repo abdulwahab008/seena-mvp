@@ -23,6 +23,7 @@ const LINKS = [
   { href: '/attendance/monthly-summary', label: 'Monthly Attendance Summary' },
   { href: '/attendance/absentee-notifications', label: 'Absentee Notifications' },
   { href: '/students', label: 'Students' },
+  { href: '/homework', label: 'Homework' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },
   { href: '/fees/concessions', label: 'Concessions' },

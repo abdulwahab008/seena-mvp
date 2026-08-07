@@ -5221,6 +5221,117 @@ export type Database = {
           },
         ]
       }
+      homework: {
+        Row: {
+          assigned_date: string
+          campus_id: string
+          created_at: string
+          description: string | null
+          due_date: string
+          estimated_minutes: number | null
+          id: string
+          published_at: string | null
+          section_id: string
+          session_id: string
+          status: Database["public"]["Enums"]["homework_status"]
+          subject_id: string
+          teacher_id: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          assigned_date?: string
+          campus_id: string
+          created_at?: string
+          description?: string | null
+          due_date: string
+          estimated_minutes?: number | null
+          id?: string
+          published_at?: string | null
+          section_id: string
+          session_id: string
+          status?: Database["public"]["Enums"]["homework_status"]
+          subject_id: string
+          teacher_id: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          assigned_date?: string
+          campus_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          estimated_minutes?: number | null
+          id?: string
+          published_at?: string | null
+          section_id?: string
+          session_id?: string
+          status?: Database["public"]["Enums"]["homework_status"]
+          subject_id?: string
+          teacher_id?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "homework_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       late_fee_rule: {
         Row: {
           amount_paisa: number | null
@@ -7875,6 +7986,52 @@ export type Database = {
           },
         ]
       }
+      v_student_homework_feed: {
+        Row: {
+          assigned_date: string | null
+          description: string | null
+          due_date: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_overdue: boolean | null
+          published_at: string | null
+          section_id: string | null
+          subject_id: string | null
+          subject_name_en: string | null
+          subject_name_ur: string | null
+          title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_student_outstanding: {
         Row: {
           campus_id: string | null
@@ -8317,6 +8474,19 @@ export type Database = {
           p_channel: Database["public"]["Enums"]["followup_channel"]
           p_due_at: string
           p_enquiry_id: string
+        }
+        Returns: string
+      }
+      create_homework: {
+        Args: {
+          p_assigned_date?: string
+          p_description?: string
+          p_due_date: string
+          p_estimated_minutes?: number
+          p_section_id: string
+          p_status?: Database["public"]["Enums"]["homework_status"]
+          p_subject_id: string
+          p_title: string
         }
         Returns: string
       }
@@ -9101,6 +9271,7 @@ export type Database = {
         Args: { p_regulator_reference?: string; p_structure_id: string }
         Returns: undefined
       }
+      publish_homework: { Args: { p_id: string }; Returns: undefined }
       reconcile_admission_fee_payment: {
         Args: { p_payment_id: string }
         Returns: undefined
@@ -9642,6 +9813,7 @@ export type Database = {
         | "sibling"
         | "legal_guardian"
         | "other"
+      homework_status: "draft" | "published" | "archived"
       id_document_type: "cnic" | "passport"
       interview_criterion:
         | "communication"
@@ -10005,6 +10177,7 @@ export const Constants = {
         "legal_guardian",
         "other",
       ],
+      homework_status: ["draft", "published", "archived"],
       id_document_type: ["cnic", "passport"],
       interview_criterion: [
         "communication",

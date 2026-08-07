@@ -852,3 +852,28 @@ export const dispatchAbsenteeNotificationsSchema = z.object({
   date: z.string().min(1, 'Choose a date'),
 });
 export type DispatchAbsenteeNotificationsInput = z.infer<typeof dispatchAbsenteeNotificationsSchema>;
+
+// Mirrors create_homework()'s own signature in
+// supabase/migrations/20260731570000_homework.sql. dueDate/assignedDate
+// stay as plain strings (native <input type="date">, same as this app's
+// other date fields) — the DB's own chk_hw_dates constraint plus
+// create_homework()'s DUE_BEFORE_ASSIGNED check are the real validation;
+// this schema only catches an empty field before it ever reaches the RPC.
+export const createHomeworkSchema = z.object({
+  sectionId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  title: z.string().min(1, 'Required').max(120),
+  description: z.string().max(4000, 'Must be 4000 characters or fewer').optional(),
+  assignedDate: z.string().min(1, 'Choose a date'),
+  dueDate: z.string().min(1, 'Choose a date'),
+  // preprocess first: a blank number input reaches RHF as '', which
+  // z.coerce.number() turns into 0 (Number('') === 0) — 0 then fails
+  // .positive() with no visible error (this field renders none), silently
+  // blocking submission for anyone who leaves this genuinely optional
+  // field empty. Blank out to undefined before coercion instead.
+  estimatedMinutes: z.preprocess(
+    (v) => (v === '' || v === null || v === undefined ? undefined : v),
+    z.coerce.number().int().positive().optional(),
+  ),
+});
+export type CreateHomeworkInput = z.infer<typeof createHomeworkSchema>;
