@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createTimetableVersionSchema, upsertTimetableSlotSchema, createTeachableSubjectSchema } from '@/lib/validation';
+import { createTimetableVersionSchema, upsertTimetableSlotSchema, publishTimetableSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type ActionState = { error: string | null };
@@ -11,6 +11,9 @@ function mapError(message: string): string {
   if (message.includes('TEACH_SCOPE_VIOLATION')) return 'TEACH_SCOPE_VIOLATION';
   if (message.includes('SUBJECT_NOT_OFFERED')) return 'This subject is not on the curriculum map for this class level/stream.';
   if (message.includes('VERSION_IMMUTABLE')) return 'This timetable version is no longer a draft and cannot be edited.';
+  if (message.startsWith('QUOTA_SHORTFALL')) return message;
+  if (message.includes('VERSION_NOT_DRAFT')) return 'This version has already been published.';
+  if (message.includes('VERSION_RANGE_OVERLAP')) return 'This effective date overlaps another published version for this campus/session.';
   if (message.includes('VERSION_NOT_FOUND')) return 'Timetable version not found.';
   if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
   if (message.includes('SESSION_NOT_FOUND')) return 'Session not found.';
@@ -84,6 +87,42 @@ export async function upsertTimetableSlot(
 
   revalidatePath('/academic-setup/timetable');
   return { error: null };
+}
+
+// FR-F09: publish_timetable() itself computes the shortfall/warning
+// report and enforces the override-reason length — this action only
+// shapes the client-facing error, returning the raw QUOTA_SHORTFALL
+// message so the client can show it and offer the override field.
+export async function publishTimetable(versionId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = publishTimetableSchema.safeParse({
+    effectiveFrom: formData.get('effectiveFrom'),
+    overrideReason: formData.get('overrideReason') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('publish_timetable', {
+    p_version_id: versionId,
+    p_effective_from: parsed.data.effectiveFrom,
+    p_override_reason: parsed.data.overrideReason,
+  });
+  if (error) return { error: mapError(error.message) };
+
+  revalidatePath('/academic-setup/timetable');
+  return { error: null };
+}
+
+export type CloneVersionState = { error: string | null; newVersionId: string | null };
+
+// FR-F10: clone_timetable_version() copies every slot from a Published
+// (or any) version into a fresh Draft — the starting point for a revision.
+export async function cloneTimetableVersion(versionId: string): Promise<CloneVersionState> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('clone_timetable_version', { p_version_id: versionId });
+  if (error) return { error: mapError(error.message), newVersionId: null };
+
+  revalidatePath('/academic-setup/timetable');
+  return { error: null, newVersionId: data };
 }
 
 export async function clearTimetableSlot(

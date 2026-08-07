@@ -1200,6 +1200,13 @@ export type Database = {
             foreignKeyName: "admission_offer_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "admission_offer_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -1873,6 +1880,13 @@ export type Database = {
             foreignKeyName: "attendance_day_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_day_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -1951,6 +1965,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "attendance_lock_section_id_fkey"
@@ -3764,6 +3785,13 @@ export type Database = {
             foreignKeyName: "enrolment_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "enrolment_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -5455,6 +5483,13 @@ export type Database = {
             foreignKeyName: "homework_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -6474,6 +6509,13 @@ export type Database = {
             foreignKeyName: "section_class_teacher_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "section_class_teacher_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -6571,6 +6613,13 @@ export type Database = {
             foreignKeyName: "section_membership_history_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "section_membership_history_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -6640,6 +6689,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "section_subject_teacher_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "section_subject_teacher_section_id_fkey"
@@ -8020,6 +8076,109 @@ export type Database = {
           },
         ]
       }
+      timetable_publish_exception: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          reason: string
+          required_periods: number
+          scheduled_periods: number
+          section_id: string
+          subject_id: string
+          tenant_id: string
+          timetable_version_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason: string
+          required_periods: number
+          scheduled_periods: number
+          section_id: string
+          subject_id: string
+          tenant_id: string
+          timetable_version_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: string
+          required_periods?: number
+          scheduled_periods?: number
+          section_id?: string
+          subject_id?: string
+          tenant_id?: string
+          timetable_version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_publish_exception_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
+          },
+        ]
+      }
       timetable_slot: {
         Row: {
           campus_id: string
@@ -8095,6 +8254,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -8132,6 +8298,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "timetable_version"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
           },
         ]
       }
@@ -8245,35 +8418,53 @@ export type Database = {
         Row: {
           campus_id: string
           created_at: string
+          effective_from: string | null
+          effective_to: string | null
           id: string
           name: string
           published_at: string | null
+          published_by: string | null
           session_id: string
           shift: Database["public"]["Enums"]["section_shift"]
           status: Database["public"]["Enums"]["timetable_version_status"]
           tenant_id: string
+          validity: unknown
+          version_no: number
+          warning_count: number
         }
         Insert: {
           campus_id: string
           created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
           id?: string
           name: string
           published_at?: string | null
+          published_by?: string | null
           session_id: string
           shift: Database["public"]["Enums"]["section_shift"]
           status?: Database["public"]["Enums"]["timetable_version_status"]
           tenant_id: string
+          validity?: unknown
+          version_no: number
+          warning_count?: number
         }
         Update: {
           campus_id?: string
           created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
           id?: string
           name?: string
           published_at?: string | null
+          published_by?: string | null
           session_id?: string
           shift?: Database["public"]["Enums"]["section_shift"]
           status?: Database["public"]["Enums"]["timetable_version_status"]
           tenant_id?: string
+          validity?: unknown
+          version_no?: number
+          warning_count?: number
         }
         Relationships: [
           {
@@ -8282,6 +8473,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_version_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "timetable_version_session_id_fkey"
@@ -8501,6 +8699,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -8538,6 +8743,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "timetable_version"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
           },
           {
             foreignKeyName: "timetable_substitution_substitute_staff_id_fkey"
@@ -8589,6 +8801,26 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_scheduled_vs_required_periods: {
+        Row: {
+          required_periods: number | null
+          scheduled_periods: number | null
+          section_id: string | null
+          section_name: string | null
+          subject_code: string | null
+          subject_id: string | null
+          timetable_version_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_subject_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
             referencedColumns: ["id"]
           },
         ]
@@ -8676,6 +8908,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -8707,6 +8946,13 @@ export type Database = {
             referencedRelation: "timetable_version"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
+          },
         ]
       }
       v_student_homework_feed: {
@@ -8731,6 +8977,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "homework_section_id_fkey"
@@ -8856,6 +9109,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_section_seat_availability"
             referencedColumns: ["section_id"]
           },
@@ -8893,6 +9153,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "timetable_version"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
           },
         ]
       }
@@ -9145,6 +9412,10 @@ export type Database = {
           p_to_session_id: string
         }
         Returns: Json
+      }
+      clone_timetable_version: {
+        Args: { p_version_id: string }
+        Returns: string
       }
       collect_cash_payment: {
         Args: {
@@ -10148,6 +10419,14 @@ export type Database = {
         Returns: undefined
       }
       publish_homework: { Args: { p_id: string }; Returns: undefined }
+      publish_timetable: {
+        Args: {
+          p_effective_from: string
+          p_override_reason?: string
+          p_version_id: string
+        }
+        Returns: string
+      }
       reconcile_admission_fee_payment: {
         Args: { p_payment_id: string }
         Returns: undefined
@@ -10269,6 +10548,10 @@ export type Database = {
           p_period_start: string
           p_session_id: string
         }
+        Returns: string
+      }
+      resolve_timetable_version: {
+        Args: { p_campus_id: string; p_date: string; p_session_id: string }
         Returns: string
       }
       reverse_ledger_entry: {
@@ -10837,7 +11120,7 @@ export type Database = {
       substitution_status: "active" | "review"
       tenant_status: "provisioning" | "active" | "suspended" | "closed"
       test_attendance: "pending" | "present" | "absent"
-      timetable_version_status: "DRAFT" | "PUBLISHED" | "ARCHIVED"
+      timetable_version_status: "DRAFT" | "PUBLISHED" | "SUPERSEDED"
       transport_direction: "pickup" | "drop" | "both"
       user_status: "active" | "suspended" | "terminated"
       waitlist_status: "waiting" | "offer_pending" | "withdrawn"
@@ -11215,7 +11498,7 @@ export const Constants = {
       substitution_status: ["active", "review"],
       tenant_status: ["provisioning", "active", "suspended", "closed"],
       test_attendance: ["pending", "present", "absent"],
-      timetable_version_status: ["DRAFT", "PUBLISHED", "ARCHIVED"],
+      timetable_version_status: ["DRAFT", "PUBLISHED", "SUPERSEDED"],
       transport_direction: ["pickup", "drop", "both"],
       user_status: ["active", "suspended", "terminated"],
       waitlist_status: ["waiting", "offer_pending", "withdrawn"],

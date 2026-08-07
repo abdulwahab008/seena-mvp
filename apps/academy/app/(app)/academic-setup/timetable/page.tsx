@@ -17,7 +17,7 @@ export default async function TimetablePage({ searchParams }: { searchParams: Pr
   const { data: versions } = campusId && sessionId
     ? await supabase
         .from('timetable_version')
-        .select('id, name, shift, status')
+        .select('id, name, shift, status, version_no, effective_from, effective_to, warning_count')
         .eq('campus_id', campusId)
         .eq('session_id', sessionId)
         .order('created_at', { ascending: false })

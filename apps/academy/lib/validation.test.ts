@@ -67,6 +67,7 @@ import {
   upsertTimetableSlotSchema,
   createTeachableSubjectSchema,
   assignSubstitutionSchema,
+  publishTimetableSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1400,5 +1401,17 @@ describe('assignSubstitutionSchema', () => {
 
   it('rejects a reason outside the enum', () => {
     expect(assignSubstitutionSchema.safeParse({ ...base, reason: 'sick' }).success).toBe(false);
+  });
+});
+
+describe('publishTimetableSchema', () => {
+  it('accepts a bare effective date with no override reason', () => {
+    const result = publishTimetableSchema.safeParse({ effectiveFrom: '2026-08-03' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.overrideReason).toBeUndefined();
+  });
+
+  it('rejects a missing effective date', () => {
+    expect(publishTimetableSchema.safeParse({ effectiveFrom: '' }).success).toBe(false);
   });
 });

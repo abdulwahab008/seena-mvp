@@ -68,7 +68,7 @@ async function seedTenant() {
 
   const { data: version, error: e11 } = await admin
     .from('timetable_version')
-    .insert({ tenant_id: tenantId as string, campus_id: campus!.id, session_id: session!.id, shift: 'MORNING', name: 'Draft v1' })
+    .insert({ tenant_id: tenantId as string, campus_id: campus!.id, session_id: session!.id, shift: 'MORNING', name: 'Draft v1', version_no: 1 })
     .select('id')
     .single();
   if (e11) throw e11;

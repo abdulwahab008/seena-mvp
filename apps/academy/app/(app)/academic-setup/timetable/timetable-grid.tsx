@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { upsertTimetableSlot, clearTimetableSlot, getSlotPrefill } from './actions';
-import { upsertTimetableSlotSchema, type UpsertTimetableSlotInput } from '@/lib/validation';
+import { upsertTimetableSlot, clearTimetableSlot, getSlotPrefill, publishTimetable, cloneTimetableVersion } from './actions';
+import { upsertTimetableSlotSchema, publishTimetableSchema, type UpsertTimetableSlotInput, type PublishTimetableInput } from '@/lib/validation';
 import { TimetableRealtimeRefresher } from './timetable-realtime-refresher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +23,16 @@ const WEEKDAYS = [
 ];
 const NONE = '__none__';
 
-type Version = { id: string; name: string; shift: string; status: string };
+type Version = {
+  id: string;
+  name: string;
+  shift: string;
+  status: string;
+  version_no: number;
+  effective_from: string | null;
+  effective_to: string | null;
+  warning_count: number;
+};
 type Section = { id: string; name: string; class_level: { name_en: string; code: string } | null };
 type Subject = { id: string; code: string; name_en: string };
 type Room = { id: string; code: string; name: string };
@@ -275,6 +284,90 @@ function WriteSlotForm({
   );
 }
 
+function PublishVersionForm({ versionId }: { versionId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [needsOverride, setNeedsOverride] = useState(false);
+  const [shortfallMessage, setShortfallMessage] = useState('');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<PublishTimetableInput>({
+    resolver: zodResolver(publishTimetableSchema),
+    defaultValues: { effectiveFrom: '', overrideReason: '' },
+  });
+
+  const onSubmit = handleSubmit((values) => {
+    const fd = new FormData();
+    fd.set('effectiveFrom', values.effectiveFrom);
+    if (needsOverride && values.overrideReason?.trim()) fd.set('overrideReason', values.overrideReason.trim());
+
+    startTransition(async () => {
+      const result = await publishTimetable(versionId, { error: null }, fd);
+      if (result.error?.startsWith('QUOTA_SHORTFALL')) {
+        setNeedsOverride(true);
+        setShortfallMessage(result.error.replace('QUOTA_SHORTFALL: ', ''));
+        toast.error("This timetable doesn't yet deliver every subject's required periods.");
+      } else if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success('Timetable published.');
+        setNeedsOverride(false);
+      }
+    });
+  });
+
+  return (
+    <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3 rounded-lg border border-blue-300 bg-blue-50 p-4" data-testid="publish-version-form">
+      <div className="space-y-1">
+        <Label htmlFor="publish-effective-from">Effective from</Label>
+        <Input id="publish-effective-from" type="date" data-testid="publish-effective-from-input" {...register('effectiveFrom')} />
+        {errors.effectiveFrom && <p className="text-xs text-destructive">{errors.effectiveFrom.message}</p>}
+      </div>
+      {needsOverride && (
+        <div className="w-full space-y-1 rounded-md border border-amber-400 bg-amber-50 p-3">
+          <p className="text-sm text-amber-900" data-testid="quota-shortfall-message">
+            Short: {shortfallMessage}
+          </p>
+          <Label htmlFor="publish-override-reason" className="text-amber-900">
+            Publish anyway — give a reason (at least 10 characters)
+          </Label>
+          <Input
+            id="publish-override-reason"
+            data-testid="publish-override-reason-input"
+            placeholder="e.g. vacancy being filled, opening term one period short"
+            {...register('overrideReason')}
+          />
+        </div>
+      )}
+      <Button type="submit" disabled={pending} data-testid="publish-button">
+        {pending ? 'Publishing…' : needsOverride ? 'Publish with override' : 'Publish'}
+      </Button>
+    </form>
+  );
+}
+
+function CloneVersionButton({ versionId, sectionId }: { versionId: string; sectionId: string | null }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const onClick = () => {
+    startTransition(async () => {
+      const result = await cloneTimetableVersion(versionId);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success('Cloned as a new draft.');
+      router.push(`/academic-setup/timetable?version=${result.newVersionId}${sectionId ? `&section=${sectionId}` : ''}`);
+    });
+  };
+  return (
+    <Button type="button" variant="outline" onClick={onClick} disabled={pending} data-testid="clone-version-button">
+      {pending ? 'Cloning…' : 'Clone as new draft'}
+    </Button>
+  );
+}
+
 function ClearSlotButton({ versionId, sectionId, weekday, periodNo }: { versionId: string; sectionId: string; weekday: number; periodNo: number }) {
   const [pending, startTransition] = useTransition();
   const onClick = () => {
@@ -320,11 +413,24 @@ export function TimetableGrid({
 }) {
   const periods = Array.from(new Set([...Array.from({ length: 8 }, (_, i) => i + 1), ...slots.map((s) => s.period_no)])).sort((a, b) => a - b);
   const slotAt = (weekday: number, periodNo: number) => slots.find((s) => s.weekday === weekday && s.period_no === periodNo);
+  const selectedVersion = versions.find((v) => v.id === selectedVersionId);
 
   return (
     <div className="space-y-4">
       <TimetableRealtimeRefresher versionId={selectedVersionId} />
       <VersionSectionPicker versions={versions} selectedVersionId={selectedVersionId} sections={sections} selectedSectionId={selectedSectionId} />
+
+      {selectedVersion && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4">
+          <p className="text-sm" data-testid="version-info">
+            Version {selectedVersion.version_no} · {selectedVersion.status}
+            {selectedVersion.effective_from && ` · effective ${selectedVersion.effective_from}${selectedVersion.effective_to ? ` to ${selectedVersion.effective_to}` : ' onward'}`}
+            {selectedVersion.status !== 'DRAFT' && ` · ${selectedVersion.warning_count} warning(s)`}
+          </p>
+          <CloneVersionButton versionId={selectedVersionId} sectionId={selectedSectionId} />
+        </div>
+      )}
+      {isDraft && <PublishVersionForm versionId={selectedVersionId} />}
 
       {!selectedSectionId ? (
         <p className="text-sm text-muted-foreground">No sections found for this campus/session.</p>

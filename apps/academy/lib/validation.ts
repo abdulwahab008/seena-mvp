@@ -970,3 +970,11 @@ export const assignSubstitutionSchema = z.object({
   reason: z.enum(SUBSTITUTION_REASONS),
 });
 export type AssignSubstitutionInput = z.infer<typeof assignSubstitutionSchema>;
+
+// Mirrors publish_timetable()'s own signature in
+// supabase/migrations/20260731640000_timetable_publish_and_version_lifecycle.sql.
+export const publishTimetableSchema = z.object({
+  effectiveFrom: z.string().min(1, 'Required'),
+  overrideReason: z.string().max(500).optional(),
+});
+export type PublishTimetableInput = z.infer<typeof publishTimetableSchema>;
