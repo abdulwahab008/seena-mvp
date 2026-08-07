@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +37,7 @@ type Section = { id: string; name: string; class_level: { name_en: string; code:
 type Subject = { id: string; code: string; name_en: string };
 type Room = { id: string; code: string; name: string };
 type Staff = { user_id: string; full_name: string };
+export type RoomWarning = { room_id: string; weekday: number; period_no: number; total_students: number; room_capacity: number };
 export type SlotRow = {
   id: string;
   weekday: number;
@@ -150,21 +151,27 @@ function WriteSlotForm({
     setElectiveBucket('');
   }, [weekday, periodNo]);
 
+  // Prefill is async — if the user manually picks a teacher/room while
+  // this fetch is still in flight, applying the fetched defaults
+  // unconditionally on resolution would silently overwrite their choice.
+  // Tracked as an explicit "did the user touch this field" flag rather
+  // than a before/after value comparison — comparing values breaks the
+  // moment the user's own pick happens to match whatever was already
+  // there (e.g. re-selecting the same room for a second section), which
+  // looks identical to "untouched" under a value diff.
+  const staffTouchedRef = useRef(false);
+  const roomTouchedRef = useRef(false);
+
   const onSubjectChange = async (subjectId: string) => {
     setValue('subjectId', subjectId);
     setNeedsOverride(false);
     setOverrideReason('');
     if (!subjectId) return;
-    // Prefill is async — if the user manually picks a teacher/room while
-    // this fetch is still in flight, applying the fetched defaults
-    // unconditionally on resolution would silently overwrite their
-    // choice. Only apply a field if it's still untouched since this call
-    // started.
-    const staffBefore = getValues('staffId');
-    const roomBefore = getValues('roomId');
+    staffTouchedRef.current = false;
+    roomTouchedRef.current = false;
     const prefill = await getSlotPrefill(sectionId, subjectId);
-    if (getValues('staffId') === staffBefore) setValue('staffId', prefill?.staffId ?? undefined);
-    if (getValues('roomId') === roomBefore) setValue('roomId', prefill?.roomId ?? undefined);
+    if (!staffTouchedRef.current) setValue('staffId', prefill?.staffId ?? undefined);
+    if (!roomTouchedRef.current) setValue('roomId', prefill?.roomId ?? undefined);
   };
 
   const onSubmit = handleSubmit((values) => {
@@ -265,7 +272,13 @@ function WriteSlotForm({
           control={control}
           name="staffId"
           render={({ field }) => (
-            <Select value={field.value || NONE} onValueChange={(v) => field.onChange(v === NONE ? undefined : v)}>
+            <Select
+              value={field.value || NONE}
+              onValueChange={(v) => {
+                staffTouchedRef.current = true;
+                field.onChange(v === NONE ? undefined : v);
+              }}
+            >
               <SelectTrigger data-testid="slot-staff-trigger">
                 <SelectValue placeholder="None" />
               </SelectTrigger>
@@ -287,7 +300,13 @@ function WriteSlotForm({
           control={control}
           name="roomId"
           render={({ field }) => (
-            <Select value={field.value || NONE} onValueChange={(v) => field.onChange(v === NONE ? undefined : v)}>
+            <Select
+              value={field.value || NONE}
+              onValueChange={(v) => {
+                roomTouchedRef.current = true;
+                field.onChange(v === NONE ? undefined : v);
+              }}
+            >
               <SelectTrigger data-testid="slot-room-trigger">
                 <SelectValue placeholder="None" />
               </SelectTrigger>
@@ -466,6 +485,7 @@ export function TimetableGrid({
   rooms,
   staff,
   slots,
+  roomWarnings,
   isDraft,
 }: {
   versions: Version[];
@@ -476,10 +496,13 @@ export function TimetableGrid({
   rooms: Room[];
   staff: Staff[];
   slots: SlotRow[];
+  roomWarnings: RoomWarning[];
   isDraft: boolean;
 }) {
   const periods = Array.from(new Set([...Array.from({ length: 8 }, (_, i) => i + 1), ...slots.map((s) => s.period_no)])).sort((a, b) => a - b);
   const slotsAt = (weekday: number, periodNo: number) => slots.filter((s) => s.weekday === weekday && s.period_no === periodNo);
+  const roomWarningFor = (roomId: string | null, weekday: number, periodNo: number) =>
+    roomId ? roomWarnings.find((w) => w.room_id === roomId && w.weekday === weekday && w.period_no === periodNo) : undefined;
   const selectedVersion = versions.find((v) => v.id === selectedVersionId);
 
   return (
@@ -532,17 +555,25 @@ export function TimetableGrid({
                       <td key={w.value} data-testid={`grid-cell-${w.value}-${periodNo}`} className="p-2 align-top">
                         {cellSlots.length > 0 ? (
                           <div className="space-y-1">
-                            {cellSlots.map((slot) => (
-                              <div key={slot.id} className="space-y-0.5" data-testid={`grid-slot-${slot.id}`}>
-                                <p className="font-medium">
-                                  {slot.subject?.code ?? '—'}
-                                  {slot.elective_bucket !== null && (
-                                    <span className="ml-1 text-xs text-blue-600">(bucket {slot.elective_bucket})</span>
+                            {cellSlots.map((slot) => {
+                              const warning = roomWarningFor(slot.room_id, w.value, periodNo);
+                              return (
+                                <div key={slot.id} className="space-y-0.5" data-testid={`grid-slot-${slot.id}`}>
+                                  <p className="font-medium">
+                                    {slot.subject?.code ?? '—'}
+                                    {slot.elective_bucket !== null && (
+                                      <span className="ml-1 text-xs text-blue-600">(bucket {slot.elective_bucket})</span>
+                                    )}
+                                  </p>
+                                  {slot.room && <p className="text-xs text-muted-foreground">{slot.room.code}</p>}
+                                  {warning && (
+                                    <p className="text-xs font-medium text-amber-700" data-testid={`room-capacity-warning-${w.value}-${periodNo}`}>
+                                      ⚠ over capacity ({warning.total_students}/{warning.room_capacity})
+                                    </p>
                                   )}
-                                </p>
-                                {slot.room && <p className="text-xs text-muted-foreground">{slot.room.code}</p>}
-                              </div>
-                            ))}
+                                </div>
+                              );
+                            })}
                             {isDraft && (
                               <ClearSlotButton versionId={selectedVersionId} sectionId={selectedSectionId} weekday={w.value} periodNo={periodNo} />
                             )}

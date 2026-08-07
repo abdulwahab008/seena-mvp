@@ -13,6 +13,7 @@ export type ActionState = { error: string | null };
 
 function mapError(message: string): string {
   if (message.startsWith('TEACHER_CLASH')) return `This teacher already has a clash — ${message.replace('TEACHER_CLASH: ', '')}.`;
+  if (message.startsWith('ROOM_CLASH')) return `This room is already booked — ${message.replace('ROOM_CLASH: ', '')}.`;
   if (message.includes('TEACH_SCOPE_VIOLATION')) return 'TEACH_SCOPE_VIOLATION';
   if (message.includes('SUBJECT_NOT_OFFERED')) return 'This subject is not on the curriculum map for this class level/stream.';
   if (message.includes('VERSION_IMMUTABLE')) return 'This timetable version is no longer a draft and cannot be edited.';

@@ -8365,6 +8365,81 @@ export type Database = {
           },
         ]
       }
+      timetable_room_capacity_warning: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          period_no: number
+          room_capacity: number
+          room_id: string
+          tenant_id: string
+          timetable_version_id: string
+          total_students: number
+          weekday: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          period_no: number
+          room_capacity: number
+          room_id: string
+          tenant_id: string
+          timetable_version_id: string
+          total_students: number
+          weekday: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          period_no?: number
+          room_capacity?: number
+          room_id?: string
+          tenant_id?: string
+          timetable_version_id?: string
+          total_students?: number
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_room_capacity_warning_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_room_capacity_warning_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "room"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_room_capacity_warning_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_room_capacity_warning_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_room_capacity_warning_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
+          },
+        ]
+      }
       timetable_slot: {
         Row: {
           campus_id: string
@@ -9193,6 +9268,7 @@ export type Database = {
           campus_id: string | null
           end_time: string | null
           period_no: number | null
+          room_id: string | null
           section_id: string | null
           slot_id: string | null
           staff_id: string | null
@@ -9207,6 +9283,13 @@ export type Database = {
             columns: ["campus_id"]
             isOneToOne: false
             referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "room"
             referencedColumns: ["id"]
           },
           {

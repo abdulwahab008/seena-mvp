@@ -55,6 +55,13 @@ export default async function TimetablePage({ searchParams }: { searchParams: Pr
           .eq('section_id', sectionId)
       : { data: [] as never[] };
 
+  // FR-F06: a warning is keyed by (version, room, weekday, period), not by
+  // section — it applies to whichever section's slot happens to be
+  // rendered in that room-cell.
+  const { data: roomWarnings } = versionId
+    ? await supabase.from('timetable_room_capacity_warning').select('room_id, weekday, period_no, total_students, room_capacity').eq('timetable_version_id', versionId)
+    : { data: [] as never[] };
+
   return (
     <div className="space-y-6">
       <div>
@@ -79,6 +86,7 @@ export default async function TimetablePage({ searchParams }: { searchParams: Pr
               rooms={rooms ?? []}
               staff={staff ?? []}
               slots={(slots ?? []) as unknown as SlotRow[]}
+              roomWarnings={roomWarnings ?? []}
               isDraft={selectedVersion?.status === 'DRAFT'}
             />
           )}
