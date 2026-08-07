@@ -7,6 +7,7 @@ import { FeePlanView, type FeePlanLineRow } from './fee-plan-view';
 import { ConcessionAwardView, type AwardRow } from './concession-award-view';
 import { LedgerView, type LedgerEntryRow } from './ledger-view';
 import { PaymentView, type PaymentRow } from './payment-view';
+import { ElectiveChoiceView, type ElectiveBucket } from './elective-choice-view';
 
 // supabase-js types every embedded to-one relation as a possible array —
 // the FK is unique per enrolment/section row, so it's really ever 0 or 1.
@@ -32,7 +33,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const [{ data: enrolment }, { data: sections }, { data: guardianLinks }, { data: appUser }] = await Promise.all([
     supabase
       .from('enrolment')
-      .select('id, roll_no, class_section(name, class_level(name_en))')
+      .select('id, roll_no, session_id, class_section(name, class_level_id, class_level(name_en))')
       .eq('student_id', id)
       .eq('status', 'active')
       .maybeSingle(),
@@ -164,6 +165,38 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     }));
   }
 
+  let electiveBuckets: ElectiveBucket[] = [];
+  const enrolledSection = enrolment ? one(enrolment.class_section) : null;
+  const enrolledClassLevelId = enrolledSection?.class_level_id ?? null;
+  if (enrolment && enrolledClassLevelId) {
+    const [{ data: classSubjects }, { data: choices }] = await Promise.all([
+      supabase
+        .from('class_subject')
+        .select('elective_bucket, subject(id, code, name_en)')
+        .eq('campus_id', student.campus_id)
+        .eq('session_id', enrolment.session_id)
+        .eq('class_level_id', enrolledClassLevelId)
+        .not('elective_bucket', 'is', null)
+        .order('elective_bucket'),
+      supabase
+        .from('student_elective_choice')
+        .select('elective_bucket, subject_id')
+        .eq('student_id', student.id)
+        .eq('session_id', enrolment.session_id)
+        .eq('class_level_id', enrolledClassLevelId),
+    ]);
+    const chosenByBucket = new Map((choices ?? []).map((c) => [c.elective_bucket, c.subject_id]));
+    const bucketMap = new Map<number, ElectiveBucket>();
+    for (const row of classSubjects ?? []) {
+      const subj = one(row.subject);
+      if (row.elective_bucket === null || !subj) continue;
+      const existing = bucketMap.get(row.elective_bucket) ?? { bucket: row.elective_bucket, options: [], chosenSubjectId: chosenByBucket.get(row.elective_bucket) ?? null };
+      existing.options.push({ subjectId: subj.id, code: subj.code, nameEn: subj.name_en });
+      bucketMap.set(row.elective_bucket, existing);
+    }
+    electiveBuckets = Array.from(bucketMap.values()).sort((a, b) => a.bucket - b.bucket);
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -187,6 +220,13 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           );
         })()}
       </section>
+
+      {enrolment && enrolledClassLevelId && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-medium">Elective choices</h2>
+          <ElectiveChoiceView studentId={student.id} sessionId={enrolment.session_id} classLevelId={enrolledClassLevelId} buckets={electiveBuckets} />
+        </section>
+      )}
 
       <section className="space-y-2">
         <h2 className="text-lg font-medium">Guardians</h2>

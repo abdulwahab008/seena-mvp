@@ -50,7 +50,7 @@ export default async function TimetablePage({ searchParams }: { searchParams: Pr
     versionId && sectionId
       ? await supabase
           .from('timetable_slot')
-          .select('id, weekday, period_no, subject_id, staff_id, room_id, subject:subject_id(code, name_en), room:room_id(code)')
+          .select('id, weekday, period_no, subject_id, staff_id, room_id, elective_bucket, parallel_group_id, subject:subject_id(code, name_en), room:room_id(code)')
           .eq('timetable_version_id', versionId)
           .eq('section_id', sectionId)
       : { data: [] as never[] };

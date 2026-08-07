@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { upsertTimetableSlot, clearTimetableSlot, getSlotPrefill, publishTimetable, cloneTimetableVersion } from './actions';
+import { upsertTimetableSlot, clearTimetableSlot, getSlotPrefill, publishTimetable, cloneTimetableVersion, createParallelGroup } from './actions';
 import { upsertTimetableSlotSchema, publishTimetableSchema, type UpsertTimetableSlotInput, type PublishTimetableInput } from '@/lib/validation';
 import { TimetableRealtimeRefresher } from './timetable-realtime-refresher';
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,8 @@ export type SlotRow = {
   subject_id: string;
   staff_id: string | null;
   room_id: string | null;
+  elective_bucket: number | null;
+  parallel_group_id: string | null;
   subject: { code: string; name_en: string } | null;
   room: { code: string } | null;
 };
@@ -105,28 +107,48 @@ function WriteSlotForm({
   subjects,
   rooms,
   staff,
+  slots,
 }: {
   versionId: string;
   sectionId: string;
   subjects: Subject[];
   rooms: Room[];
   staff: Staff[];
+  slots: SlotRow[];
 }) {
   const [pending, startTransition] = useTransition();
   const [needsOverride, setNeedsOverride] = useState(false);
   const [overrideReason, setOverrideReason] = useState('');
+  const [isElective, setIsElective] = useState(false);
+  const [electiveBucket, setElectiveBucket] = useState('');
   const {
     register,
     control,
     handleSubmit,
     setValue,
     getValues,
+    watch,
     reset,
     formState: { errors },
   } = useForm<UpsertTimetableSlotInput>({
     resolver: zodResolver(upsertTimetableSlotSchema),
     defaultValues: { weekday: 1, periodNo: 1, subjectId: '', staffId: undefined, roomId: undefined },
   });
+
+  const weekday = watch('weekday');
+  const periodNo = watch('periodNo');
+  // AC2: an elective block already started at this exact cell (by an
+  // earlier save) is joined automatically — its own bucket is reused, and
+  // a second "create" never happens for the same period.
+  const existingGroup = slots.find((s) => s.weekday === weekday && s.period_no === Number(periodNo) && s.parallel_group_id);
+  const effectiveIsElective = isElective || !!existingGroup;
+
+  // Moving to a different cell drops the manual elective toggle — the
+  // target cell's own existingGroup (if any) takes over from there.
+  useEffect(() => {
+    setIsElective(false);
+    setElectiveBucket('');
+  }, [weekday, periodNo]);
 
   const onSubjectChange = async (subjectId: string) => {
     setValue('subjectId', subjectId);
@@ -146,15 +168,31 @@ function WriteSlotForm({
   };
 
   const onSubmit = handleSubmit((values) => {
-    const fd = new FormData();
-    fd.set('weekday', String(values.weekday));
-    fd.set('periodNo', String(values.periodNo));
-    fd.set('subjectId', values.subjectId);
-    if (values.staffId) fd.set('staffId', values.staffId);
-    if (values.roomId) fd.set('roomId', values.roomId);
-    if (needsOverride && overrideReason.trim()) fd.set('overrideReason', overrideReason.trim());
+    const bucket = existingGroup?.elective_bucket ?? Number(electiveBucket);
 
     startTransition(async () => {
+      let groupId = existingGroup?.parallel_group_id ?? null;
+      if (effectiveIsElective && !groupId) {
+        const created = await createParallelGroup(versionId, sectionId, values.weekday, values.periodNo, bucket);
+        if (created.error) {
+          toast.error(created.error);
+          return;
+        }
+        groupId = created.groupId;
+      }
+
+      const fd = new FormData();
+      fd.set('weekday', String(values.weekday));
+      fd.set('periodNo', String(values.periodNo));
+      fd.set('subjectId', values.subjectId);
+      if (values.staffId) fd.set('staffId', values.staffId);
+      if (values.roomId) fd.set('roomId', values.roomId);
+      if (needsOverride && overrideReason.trim()) fd.set('overrideReason', overrideReason.trim());
+      if (effectiveIsElective && groupId) {
+        fd.set('electiveBucket', String(bucket));
+        fd.set('parallelGroupId', groupId);
+      }
+
       const result = await upsertTimetableSlot(versionId, sectionId, { error: null }, fd);
       if (result.error === 'TEACH_SCOPE_VIOLATION') {
         setNeedsOverride(true);
@@ -165,6 +203,8 @@ function WriteSlotForm({
         toast.success('Slot saved.');
         setNeedsOverride(false);
         setOverrideReason('');
+        setIsElective(false);
+        setElectiveBucket('');
         reset({ weekday: values.weekday, periodNo: values.periodNo, subjectId: '', staffId: undefined, roomId: undefined });
       }
     });
@@ -262,6 +302,33 @@ function WriteSlotForm({
             </Select>
           )}
         />
+      </div>
+      <div className="col-span-full flex flex-wrap items-end gap-3 rounded-md border p-3">
+        <div className="flex items-center gap-2">
+          <input
+            id="slot-is-elective"
+            type="checkbox"
+            data-testid="slot-elective-toggle"
+            checked={effectiveIsElective}
+            disabled={!!existingGroup}
+            onChange={(e) => setIsElective(e.target.checked)}
+          />
+          <Label htmlFor="slot-is-elective">Parallel elective block</Label>
+        </div>
+        {effectiveIsElective && (
+          <div className="space-y-1">
+            <Label htmlFor="slot-elective-bucket">Bucket</Label>
+            <Input
+              id="slot-elective-bucket"
+              type="number"
+              min={1}
+              data-testid="slot-elective-bucket-input"
+              value={existingGroup ? String(existingGroup.elective_bucket) : electiveBucket}
+              disabled={!!existingGroup}
+              onChange={(e) => setElectiveBucket(e.target.value)}
+            />
+          </div>
+        )}
       </div>
       {needsOverride && (
         <div className="col-span-full space-y-1 rounded-md border border-amber-400 bg-amber-50 p-3">
@@ -412,7 +479,7 @@ export function TimetableGrid({
   isDraft: boolean;
 }) {
   const periods = Array.from(new Set([...Array.from({ length: 8 }, (_, i) => i + 1), ...slots.map((s) => s.period_no)])).sort((a, b) => a - b);
-  const slotAt = (weekday: number, periodNo: number) => slots.find((s) => s.weekday === weekday && s.period_no === periodNo);
+  const slotsAt = (weekday: number, periodNo: number) => slots.filter((s) => s.weekday === weekday && s.period_no === periodNo);
   const selectedVersion = versions.find((v) => v.id === selectedVersionId);
 
   return (
@@ -439,7 +506,7 @@ export function TimetableGrid({
           This version is no longer a draft — the grid below is read-only.
         </p>
       ) : (
-        <WriteSlotForm versionId={selectedVersionId} sectionId={selectedSectionId} subjects={subjects} rooms={rooms} staff={staff} />
+        <WriteSlotForm versionId={selectedVersionId} sectionId={selectedSectionId} subjects={subjects} rooms={rooms} staff={staff} slots={slots} />
       )}
 
       {selectedSectionId && (
@@ -460,13 +527,22 @@ export function TimetableGrid({
                 <tr key={periodNo} className="border-b last:border-0">
                   <td className="p-2 font-medium text-muted-foreground">{periodNo}</td>
                   {WEEKDAYS.map((w) => {
-                    const slot = slotAt(w.value, periodNo);
+                    const cellSlots = slotsAt(w.value, periodNo);
                     return (
                       <td key={w.value} data-testid={`grid-cell-${w.value}-${periodNo}`} className="p-2 align-top">
-                        {slot ? (
-                          <div className="space-y-0.5">
-                            <p className="font-medium">{slot.subject?.code ?? '—'}</p>
-                            {slot.room && <p className="text-xs text-muted-foreground">{slot.room.code}</p>}
+                        {cellSlots.length > 0 ? (
+                          <div className="space-y-1">
+                            {cellSlots.map((slot) => (
+                              <div key={slot.id} className="space-y-0.5" data-testid={`grid-slot-${slot.id}`}>
+                                <p className="font-medium">
+                                  {slot.subject?.code ?? '—'}
+                                  {slot.elective_bucket !== null && (
+                                    <span className="ml-1 text-xs text-blue-600">(bucket {slot.elective_bucket})</span>
+                                  )}
+                                </p>
+                                {slot.room && <p className="text-xs text-muted-foreground">{slot.room.code}</p>}
+                              </div>
+                            ))}
                             {isDraft && (
                               <ClearSlotButton versionId={selectedVersionId} sectionId={selectedSectionId} weekday={w.value} periodNo={periodNo} />
                             )}

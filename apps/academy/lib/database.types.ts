@@ -7336,6 +7336,99 @@ export type Database = {
           },
         ]
       }
+      student_elective_choice: {
+        Row: {
+          campus_id: string
+          class_level_id: string
+          created_at: string
+          elective_bucket: number
+          id: string
+          session_id: string
+          student_id: string
+          subject_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          class_level_id: string
+          created_at?: string
+          elective_bucket: number
+          id?: string
+          session_id: string
+          student_id: string
+          subject_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          class_level_id?: string
+          created_at?: string
+          elective_bucket?: number
+          id?: string
+          session_id?: string
+          student_id?: string
+          subject_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_elective_choice_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_guardian: {
         Row: {
           created_at: string
@@ -8076,6 +8169,99 @@ export type Database = {
           },
         ]
       }
+      timetable_parallel_group: {
+        Row: {
+          campus_id: string
+          created_at: string
+          elective_bucket: number
+          id: string
+          period_no: number
+          section_id: string
+          tenant_id: string
+          timetable_version_id: string
+          weekday: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          elective_bucket: number
+          id?: string
+          period_no: number
+          section_id: string
+          tenant_id: string
+          timetable_version_id: string
+          weekday: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          elective_bucket?: number
+          id?: string
+          period_no?: number
+          section_id?: string
+          tenant_id?: string
+          timetable_version_id?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_parallel_group_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
+          },
+        ]
+      }
       timetable_publish_exception: {
         Row: {
           created_at: string
@@ -8229,6 +8415,13 @@ export type Database = {
           weekday?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_slot_parallel_group"
+            columns: ["parallel_group_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_parallel_group"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "timetable_slot_campus_id_fkey"
             columns: ["campus_id"]
@@ -8893,6 +9086,13 @@ export type Database = {
           weekday: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_slot_parallel_group"
+            columns: ["parallel_group_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_parallel_group"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "timetable_slot_campus_id_fkey"
             columns: ["campus_id"]
@@ -9872,6 +10072,16 @@ export type Database = {
         }
         Returns: string
       }
+      create_timetable_parallel_group: {
+        Args: {
+          p_elective_bucket: number
+          p_period_no: number
+          p_section_id: string
+          p_version_id: string
+          p_weekday: number
+        }
+        Returns: string
+      }
       create_timetable_version: {
         Args: {
           p_campus_id: string
@@ -10830,6 +11040,16 @@ export type Database = {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
       }
+      set_student_elective_choice: {
+        Args: {
+          p_class_level_id: string
+          p_elective_bucket: number
+          p_session_id: string
+          p_student_id: string
+          p_subject_id: string
+        }
+        Returns: string
+      }
       set_subject_active: {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
@@ -10865,6 +11085,10 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       student_balance: { Args: { p_enrolment_id: string }; Returns: number }
+      student_timetable: {
+        Args: { p_date: string; p_enrolment_id: string }
+        Returns: Json
+      }
       submit_interview_scorecard: {
         Args: {
           p_interview_id: string

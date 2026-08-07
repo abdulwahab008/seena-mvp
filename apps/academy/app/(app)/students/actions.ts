@@ -11,6 +11,7 @@ import {
   postLedgerEntrySchema,
   reverseLedgerEntrySchema,
   recordPaymentSchema,
+  setStudentElectiveChoiceSchema,
 } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
@@ -349,6 +350,40 @@ export async function recordPayment(studentId: string, enrolmentId: string, _pre
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to record payments.' };
     if (error.message.includes('AMOUNT_MUST_BE_POSITIVE')) return { error: 'Enter a positive amount.' };
     return { error: 'Could not record the payment.' };
+  }
+
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+export type SetElectiveChoiceState = { error: string | null };
+
+// FR-F07: which specific subject a student picked within an elective
+// bucket. set_student_elective_choice() itself validates the subject is
+// actually part of that bucket in the curriculum — this action only
+// shapes the client-facing error.
+export async function setElectiveChoice(studentId: string, _prev: SetElectiveChoiceState, formData: FormData): Promise<SetElectiveChoiceState> {
+  const parsed = setStudentElectiveChoiceSchema.safeParse({
+    sessionId: formData.get('sessionId'),
+    classLevelId: formData.get('classLevelId'),
+    electiveBucket: formData.get('electiveBucket'),
+    subjectId: formData.get('subjectId'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_student_elective_choice', {
+    p_student_id: studentId,
+    p_session_id: parsed.data.sessionId,
+    p_class_level_id: parsed.data.classLevelId,
+    p_elective_bucket: parsed.data.electiveBucket,
+    p_subject_id: parsed.data.subjectId,
+  });
+  if (error) {
+    if (error.message.includes('SUBJECT_NOT_IN_BUCKET')) return { error: 'This subject is not part of that elective bucket.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to set elective choices.' };
+    if (error.message.includes('STUDENT_NOT_FOUND')) return { error: 'Student not found.' };
+    return { error: 'Could not save the elective choice.' };
   }
 
   revalidatePath(`/students/${studentId}`);

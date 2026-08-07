@@ -941,8 +941,20 @@ export const upsertTimetableSlotSchema = z.object({
   roomId: optionalUuid,
   // FR-D03: only sent on a retry after a TEACH_SCOPE_VIOLATION.
   overrideReason: z.string().max(500).optional(),
+  // FR-F07: set together, only when building/joining an elective parallel
+  // block — see createTimetableParallelGroupSchema for the group itself.
+  electiveBucket: z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : v), z.coerce.number().int().optional()),
+  parallelGroupId: optionalUuid,
 });
 export type UpsertTimetableSlotInput = z.infer<typeof upsertTimetableSlotSchema>;
+
+// Mirrors create_timetable_parallel_group()'s own signature.
+export const createTimetableParallelGroupSchema = z.object({
+  weekday: z.coerce.number().int().min(0).max(6),
+  periodNo: z.coerce.number().int().positive(),
+  electiveBucket: z.coerce.number().int(),
+});
+export type CreateTimetableParallelGroupInput = z.infer<typeof createTimetableParallelGroupSchema>;
 
 // Mirrors create_staff_teachable_subject()'s own signature in
 // supabase/migrations/20260731620000_teachable_subject_grade_matrix.sql.
@@ -978,3 +990,13 @@ export const publishTimetableSchema = z.object({
   overrideReason: z.string().max(500).optional(),
 });
 export type PublishTimetableInput = z.infer<typeof publishTimetableSchema>;
+
+// Mirrors set_student_elective_choice()'s own signature in
+// supabase/migrations/20260731670000_section_double_booking_prevention.sql.
+export const setStudentElectiveChoiceSchema = z.object({
+  sessionId: z.string().uuid(),
+  classLevelId: z.string().uuid(),
+  electiveBucket: z.coerce.number().int(),
+  subjectId: z.string().uuid('Choose a subject'),
+});
+export type SetStudentElectiveChoiceInput = z.infer<typeof setStudentElectiveChoiceSchema>;
