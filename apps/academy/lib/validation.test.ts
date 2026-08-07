@@ -63,6 +63,8 @@ import {
   bellSegmentSchema,
   createBellTemplateSchema,
   createBellCalendarRuleSchema,
+  createTimetableVersionSchema,
+  upsertTimetableSlotSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1302,5 +1304,53 @@ describe('createBellCalendarRuleSchema', () => {
 
   it('rejects a non-uuid bellTemplateId', () => {
     expect(createBellCalendarRuleSchema.safeParse({ ...base, bellTemplateId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('createTimetableVersionSchema', () => {
+  it('accepts a valid version', () => {
+    expect(createTimetableVersionSchema.safeParse({ shift: 'MORNING', name: 'Draft v1' }).success).toBe(true);
+  });
+
+  it('rejects an empty name', () => {
+    expect(createTimetableVersionSchema.safeParse({ shift: 'MORNING', name: '' }).success).toBe(false);
+  });
+});
+
+describe('upsertTimetableSlotSchema', () => {
+  const base = { weekday: 1, periodNo: 3, subjectId: '11111111-1111-1111-1111-111111111111' };
+
+  it('accepts a slot with no teacher/room override', () => {
+    const result = upsertTimetableSlotSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.staffId).toBeUndefined();
+      expect(result.data.roomId).toBeUndefined();
+    }
+  });
+
+  // Regression class: a blank optional <select> reaches here as '' —
+  // without preprocessing that fails z.string().uuid() instead of being
+  // treated as "no override chosen", the same bug class this batch's
+  // createHomeworkSchema fix already caught for a blank number field.
+  it('treats a blank staffId/roomId as absent, not an invalid uuid', () => {
+    const result = upsertTimetableSlotSchema.safeParse({ ...base, staffId: '', roomId: '' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.staffId).toBeUndefined();
+      expect(result.data.roomId).toBeUndefined();
+    }
+  });
+
+  it('rejects a weekday outside 0-6', () => {
+    expect(upsertTimetableSlotSchema.safeParse({ ...base, weekday: 7 }).success).toBe(false);
+  });
+
+  it('rejects a non-positive periodNo', () => {
+    expect(upsertTimetableSlotSchema.safeParse({ ...base, periodNo: 0 }).success).toBe(false);
+  });
+
+  it('rejects a missing subjectId', () => {
+    expect(upsertTimetableSlotSchema.safeParse({ ...base, subjectId: undefined }).success).toBe(false);
   });
 });

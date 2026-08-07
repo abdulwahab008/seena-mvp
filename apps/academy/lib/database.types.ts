@@ -3039,6 +3039,7 @@ export type Database = {
           class_level_id: string
           created_at: string
           gender_restriction: Database["public"]["Enums"]["gender"] | null
+          home_room_id: string | null
           id: string
           is_active: boolean
           medium: Database["public"]["Enums"]["section_medium"]
@@ -3054,6 +3055,7 @@ export type Database = {
           class_level_id: string
           created_at?: string
           gender_restriction?: Database["public"]["Enums"]["gender"] | null
+          home_room_id?: string | null
           id?: string
           is_active?: boolean
           medium?: Database["public"]["Enums"]["section_medium"]
@@ -3069,6 +3071,7 @@ export type Database = {
           class_level_id?: string
           created_at?: string
           gender_restriction?: Database["public"]["Enums"]["gender"] | null
+          home_room_id?: string | null
           id?: string
           is_active?: boolean
           medium?: Database["public"]["Enums"]["section_medium"]
@@ -3091,6 +3094,13 @@ export type Database = {
             columns: ["class_level_id"]
             isOneToOne: false
             referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_section_home_room_id_fkey"
+            columns: ["home_room_id"]
+            isOneToOne: false
+            referencedRelation: "room"
             referencedColumns: ["id"]
           },
           {
@@ -7889,6 +7899,179 @@ export type Database = {
           },
         ]
       }
+      timetable_slot: {
+        Row: {
+          campus_id: string
+          created_at: string
+          elective_bucket: number | null
+          id: string
+          note: string | null
+          parallel_group_id: string | null
+          period_no: number
+          room_id: string | null
+          section_id: string
+          staff_id: string | null
+          subject_id: string
+          tenant_id: string
+          timetable_version_id: string
+          weekday: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          elective_bucket?: number | null
+          id?: string
+          note?: string | null
+          parallel_group_id?: string | null
+          period_no: number
+          room_id?: string | null
+          section_id: string
+          staff_id?: string | null
+          subject_id: string
+          tenant_id: string
+          timetable_version_id: string
+          weekday: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          elective_bucket?: number | null
+          id?: string
+          note?: string | null
+          parallel_group_id?: string | null
+          period_no?: number
+          room_id?: string | null
+          section_id?: string
+          staff_id?: string | null
+          subject_id?: string
+          tenant_id?: string
+          timetable_version_id?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "room"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timetable_version: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          name: string
+          published_at: string | null
+          session_id: string
+          shift: Database["public"]["Enums"]["section_shift"]
+          status: Database["public"]["Enums"]["timetable_version_status"]
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          name: string
+          published_at?: string | null
+          session_id: string
+          shift: Database["public"]["Enums"]["section_shift"]
+          status?: Database["public"]["Enums"]["timetable_version_status"]
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          published_at?: string | null
+          session_id?: string
+          shift?: Database["public"]["Enums"]["section_shift"]
+          status?: Database["public"]["Enums"]["timetable_version_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_version_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_version_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_version_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_campus: {
         Row: {
           campus_id: string
@@ -8474,6 +8657,15 @@ export type Database = {
         Args: { p_room_id: string; p_section_id: string }
         Returns: Json
       }
+      clear_timetable_slot: {
+        Args: {
+          p_period_no: number
+          p_section_id: string
+          p_version_id: string
+          p_weekday: number
+        }
+        Returns: undefined
+      }
       clone_academic_structure: {
         Args: {
           p_campus_id: string
@@ -8804,6 +8996,15 @@ export type Database = {
           p_session_id: string
           p_starts_at: string
           p_venue?: string
+        }
+        Returns: string
+      }
+      create_timetable_version: {
+        Args: {
+          p_campus_id: string
+          p_name: string
+          p_session_id: string
+          p_shift: Database["public"]["Enums"]["section_shift"]
         }
         Returns: string
       }
@@ -9432,6 +9633,13 @@ export type Database = {
         }
         Returns: string
       }
+      prefill_slot_defaults: {
+        Args: { p_section_id: string; p_subject_id: string }
+        Returns: {
+          room_id: string
+          staff_id: string
+        }[]
+      }
       print_receipt: { Args: { p_receipt_id: string }; Returns: Json }
       propose_fee_plan_override: {
         Args: {
@@ -9857,6 +10065,21 @@ export type Database = {
         }
         Returns: string
       }
+      upsert_timetable_slot: {
+        Args: {
+          p_elective_bucket?: number
+          p_note?: string
+          p_parallel_group_id?: string
+          p_period_no: number
+          p_room_id?: string
+          p_section_id: string
+          p_staff_id?: string
+          p_subject_id: string
+          p_version_id: string
+          p_weekday: number
+        }
+        Returns: string
+      }
       verify_admission_document: {
         Args: { p_document_id: string }
         Returns: undefined
@@ -10099,6 +10322,7 @@ export type Database = {
       subject_type: "CORE" | "ELECTIVE" | "ADDITIONAL" | "NON_EXAMINABLE"
       tenant_status: "provisioning" | "active" | "suspended" | "closed"
       test_attendance: "pending" | "present" | "absent"
+      timetable_version_status: "DRAFT" | "PUBLISHED" | "ARCHIVED"
       transport_direction: "pickup" | "drop" | "both"
       user_status: "active" | "suspended" | "terminated"
       waitlist_status: "waiting" | "offer_pending" | "withdrawn"
@@ -10474,6 +10698,7 @@ export const Constants = {
       subject_type: ["CORE", "ELECTIVE", "ADDITIONAL", "NON_EXAMINABLE"],
       tenant_status: ["provisioning", "active", "suspended", "closed"],
       test_attendance: ["pending", "present", "absent"],
+      timetable_version_status: ["DRAFT", "PUBLISHED", "ARCHIVED"],
       transport_direction: ["pickup", "drop", "both"],
       user_status: ["active", "suspended", "terminated"],
       waitlist_status: ["waiting", "offer_pending", "withdrawn"],

@@ -917,3 +917,27 @@ export const createBellCalendarRuleSchema = z.object({
   note: z.string().max(500).optional(),
 });
 export type CreateBellCalendarRuleInput = z.infer<typeof createBellCalendarRuleSchema>;
+
+// Mirrors create_timetable_version()'s own signature in
+// supabase/migrations/20260731600000_timetable_draft_slot_assignment.sql.
+export const createTimetableVersionSchema = z.object({
+  shift: z.enum(BELL_SHIFTS),
+  name: z.string().min(1, 'Required').max(200),
+});
+export type CreateTimetableVersionInput = z.infer<typeof createTimetableVersionSchema>;
+
+// Mirrors upsert_timetable_slot()'s own signature. staffId/roomId stay
+// optional blank strings from the <select> reach here as '' — preprocess
+// blank to undefined the same way createHomeworkSchema treats a blank
+// optional number, so an intentionally-cleared assignment isn't coerced
+// into a validation error.
+const optionalUuid = z.preprocess((v) => (v === '' || v === null || v === undefined ? undefined : v), z.string().uuid().optional());
+
+export const upsertTimetableSlotSchema = z.object({
+  weekday: z.coerce.number().int().min(0).max(6),
+  periodNo: z.coerce.number().int().positive(),
+  subjectId: z.string().uuid('Choose a subject'),
+  staffId: optionalUuid,
+  roomId: optionalUuid,
+});
+export type UpsertTimetableSlotInput = z.infer<typeof upsertTimetableSlotSchema>;
