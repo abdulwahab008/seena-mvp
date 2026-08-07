@@ -6,6 +6,7 @@ const LINKS = [
   { href: '/branding', label: 'Branding' },
   { href: '/sessions', label: 'Sessions' },
   { href: '/staff', label: 'Staff' },
+  { href: '/staff/directory', label: 'Staff Directory' },
   { href: '/staff/qualifications', label: 'Qualifications' },
   { href: '/leave', label: 'Leave' },
   { href: '/admissions/enquiries', label: 'Admissions' },

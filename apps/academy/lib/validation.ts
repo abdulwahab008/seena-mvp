@@ -1021,3 +1021,11 @@ export const setStudentElectiveChoiceSchema = z.object({
   subjectId: z.string().uuid('Choose a subject'),
 });
 export type SetStudentElectiveChoiceInput = z.infer<typeof setStudentElectiveChoiceSchema>;
+
+// Mirrors search_staff()'s own signature in
+// supabase/migrations/20260731720000_staff_directory_search.sql.
+export const searchStaffSchema = z.object({
+  q: z.string().max(200).optional(),
+  includeFormer: z.boolean().optional(),
+});
+export type SearchStaffInput = z.infer<typeof searchStaffSchema>;

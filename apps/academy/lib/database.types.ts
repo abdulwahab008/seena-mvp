@@ -7236,6 +7236,41 @@ export type Database = {
           },
         ]
       }
+      staff_private_contact: {
+        Row: {
+          address: string | null
+          alt_mobile: string | null
+          emergency_contact: string | null
+          mobile: string | null
+          staff_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          alt_mobile?: string | null
+          emergency_contact?: string | null
+          mobile?: string | null
+          staff_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          alt_mobile?: string | null
+          emergency_contact?: string | null
+          mobile?: string | null
+          staff_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_private_contact_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: true
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_qualification: {
         Row: {
           created_at: string
@@ -11246,6 +11281,22 @@ export type Database = {
       save_attendance_register: {
         Args: { p_attendance_date: string; p_marks: Json; p_section_id: string }
         Returns: Json
+      }
+      search_staff: {
+        Args: { p_include_former?: boolean; p_q?: string }
+        Returns: {
+          department: string
+          designation: string
+          employee_code: string
+          employment_status: Database["public"]["Enums"]["employment_status"]
+          full_name: string
+          full_name_ur: string
+          gender: Database["public"]["Enums"]["gender"]
+          identity_document_number: string
+          is_former: boolean
+          mobile: string
+          staff_id: string
+        }[]
       }
       section_register_submitted: {
         Args: { p_date: string; p_section_id: string }
