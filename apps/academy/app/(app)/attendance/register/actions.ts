@@ -135,6 +135,8 @@ export async function requestAttendanceCorrection(_prev: RequestCorrectionState,
   if (error) {
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to request a correction for this section.' };
     if (error.message.includes('ENROLMENT_NOT_FOUND')) return { error: 'Student not found.' };
+    if (error.message.includes('CORRECTION_ALREADY_PENDING')) return { error: 'A correction is already pending for this date.' };
+    if (error.message.includes('chk_correction_reason_len')) return { error: 'Explain the correction in at least 15 characters.' };
     return { error: 'Could not submit the correction request.' };
   }
 

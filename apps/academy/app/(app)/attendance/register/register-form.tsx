@@ -82,7 +82,7 @@ function CorrectionRequestControl({ enrolmentId, attendanceDate }: { enrolmentId
         </SelectContent>
       </Select>
       <Input
-        placeholder="Reason (min 10 chars)"
+        placeholder="Reason (min 15 chars)"
         className="h-8 w-56"
         value={reason}
         onChange={(e) => setReason(e.target.value)}

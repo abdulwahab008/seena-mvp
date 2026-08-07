@@ -821,12 +821,14 @@ export const bulkMarkAttendanceSchema = z.object({
 export type BulkMarkAttendanceInput = z.infer<typeof bulkMarkAttendanceSchema>;
 
 // Mirrors request_attendance_correction()'s own checks in
-// supabase/migrations/20260731520000_attendance_correction_approval.sql.
+// supabase/migrations/20260731520000_attendance_correction_approval.sql
+// and 20260731690000_attendance_correction_request_hardening.sql (FR-G10's
+// own 15-character minimum, tightened from FR-G11's original 10).
 export const requestAttendanceCorrectionSchema = z.object({
   enrolmentId: z.string().uuid(),
   attendanceDate: z.string().min(1, 'Choose a date'),
   newStatus: z.enum(STUDENT_ATTENDANCE_STATUSES),
-  reason: z.string().min(10, 'Explain the correction in at least 10 characters'),
+  reason: z.string().min(15, 'Explain the correction in at least 15 characters'),
 });
 export type RequestAttendanceCorrectionInput = z.infer<typeof requestAttendanceCorrectionSchema>;
 
