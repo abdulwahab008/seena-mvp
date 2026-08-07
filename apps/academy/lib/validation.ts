@@ -958,3 +958,15 @@ export const createTeachableSubjectSchema = z.object({
   streamId: optionalUuid,
 });
 export type CreateTeachableSubjectInput = z.infer<typeof createTeachableSubjectSchema>;
+
+// Mirrors create_substitution()'s own signature in
+// supabase/migrations/20260731630000_substitute_teacher_assignment.sql.
+export const SUBSTITUTION_REASONS = ['leave', 'official_duty', 'suspension', 'other'] as const;
+
+export const assignSubstitutionSchema = z.object({
+  slotId: z.string().uuid(),
+  subDate: z.string().min(1, 'Required'),
+  substituteStaffId: z.string().uuid('Choose a substitute'),
+  reason: z.enum(SUBSTITUTION_REASONS),
+});
+export type AssignSubstitutionInput = z.infer<typeof assignSubstitutionSchema>;

@@ -66,6 +66,7 @@ import {
   createTimetableVersionSchema,
   upsertTimetableSlotSchema,
   createTeachableSubjectSchema,
+  assignSubstitutionSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1378,5 +1379,26 @@ describe('createTeachableSubjectSchema', () => {
 
   it('rejects a missing teacher', () => {
     expect(createTeachableSubjectSchema.safeParse({ ...base, staffId: undefined }).success).toBe(false);
+  });
+});
+
+describe('assignSubstitutionSchema', () => {
+  const base = {
+    slotId: '11111111-1111-1111-1111-111111111111',
+    subDate: '2026-08-03',
+    substituteStaffId: '22222222-2222-2222-2222-222222222222',
+    reason: 'leave',
+  };
+
+  it('accepts a valid assignment', () => {
+    expect(assignSubstitutionSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a substitute that is not a chosen uuid', () => {
+    expect(assignSubstitutionSchema.safeParse({ ...base, substituteStaffId: '' }).success).toBe(false);
+  });
+
+  it('rejects a reason outside the enum', () => {
+    expect(assignSubstitutionSchema.safeParse({ ...base, reason: 'sick' }).success).toBe(false);
   });
 });

@@ -38,6 +38,26 @@ export async function applyLeave(staffId: string, _prev: ApplyLeaveState, formDa
   return { error: null };
 }
 
+export type CancelLeaveState = { error: string | null };
+
+// FR-D13 AC4: cancel an already-approved application. cancel_leave_
+// application() reverses its ledger consumption and its own trigger
+// flags (never deletes) any substitution built against the cancelled
+// dates — this action only shapes the client-facing error.
+export async function cancelLeave(applicationId: string): Promise<CancelLeaveState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('cancel_leave_application', { p_application_id: applicationId });
+  if (error) {
+    if (error.message.includes('APPLICATION_NOT_APPROVED')) return { error: 'Only an approved application can be cancelled.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to cancel this application.' };
+    return { error: 'Could not cancel this application.' };
+  }
+
+  revalidatePath('/leave');
+  revalidatePath('/academic-setup/substitutions');
+  return { error: null };
+}
+
 export type DecideLeaveState = { error: string | null };
 
 function mapDecideError(message: string): string {

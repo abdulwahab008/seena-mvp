@@ -8135,6 +8135,112 @@ export type Database = {
           },
         ]
       }
+      timetable_substitution: {
+        Row: {
+          absent_staff_id: string
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          reason: Database["public"]["Enums"]["substitution_reason"]
+          slot_id: string
+          status: Database["public"]["Enums"]["substitution_status"]
+          sub_date: string
+          substitute_staff_id: string
+          tenant_id: string
+        }
+        Insert: {
+          absent_staff_id: string
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason: Database["public"]["Enums"]["substitution_reason"]
+          slot_id: string
+          status?: Database["public"]["Enums"]["substitution_status"]
+          sub_date: string
+          substitute_staff_id: string
+          tenant_id: string
+        }
+        Update: {
+          absent_staff_id?: string
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: Database["public"]["Enums"]["substitution_reason"]
+          slot_id?: string
+          status?: Database["public"]["Enums"]["substitution_status"]
+          sub_date?: string
+          substitute_staff_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_substitution_absent_staff_id_fkey"
+            columns: ["absent_staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_slot"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_timetable"
+            referencedColumns: ["slot_id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_slot_clock_time"
+            referencedColumns: ["slot_id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_teach_scope_exception"
+            referencedColumns: ["slot_id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_substitute_staff_id_fkey"
+            columns: ["substitute_staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timetable_version: {
         Row: {
           campus_id: string
@@ -8344,6 +8450,101 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenant"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_daily_timetable: {
+        Row: {
+          campus_id: string | null
+          period_no: number | null
+          regular_staff_id: string | null
+          room_id: string | null
+          section_id: string | null
+          slot_id: string | null
+          sub_date: string | null
+          subject_id: string | null
+          substitute_staff_id: string | null
+          substitution_id: string | null
+          substitution_reason:
+            | Database["public"]["Enums"]["substitution_reason"]
+            | null
+          substitution_status:
+            | Database["public"]["Enums"]["substitution_status"]
+            | null
+          tenant_id: string | null
+          timetable_version_id: string | null
+          weekday: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "room"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_staff_id_fkey"
+            columns: ["regular_staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_substitute_staff_id_fkey"
+            columns: ["substitute_staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -8918,6 +9119,10 @@ export type Database = {
         Returns: boolean
       }
       cancel_interview: { Args: { p_interview_id: string }; Returns: undefined }
+      cancel_leave_application: {
+        Args: { p_application_id: string }
+        Returns: undefined
+      }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
       check_room_capacity: {
         Args: { p_room_id: string; p_section_id: string }
@@ -9261,6 +9466,15 @@ export type Database = {
           p_name_en: string
           p_name_ur: string
           p_subject_type?: Database["public"]["Enums"]["subject_type"]
+        }
+        Returns: string
+      }
+      create_substitution: {
+        Args: {
+          p_reason?: Database["public"]["Enums"]["substitution_reason"]
+          p_slot_id: string
+          p_sub_date: string
+          p_substitute_staff_id: string
         }
         Returns: string
       }
@@ -10320,6 +10534,16 @@ export type Database = {
           staff_id: string
         }[]
       }
+      suggest_substitutes: {
+        Args: { p_slot_id: string; p_sub_date: string }
+        Returns: {
+          can_teach_subject: boolean
+          full_name: string
+          is_free: boolean
+          periods_covered_today: number
+          staff_id: string
+        }[]
+      }
       swap_class_level_ordinals: {
         Args: { p_id_a: string; p_id_b: string }
         Returns: undefined
@@ -10609,6 +10833,8 @@ export type Database = {
         | "struck_off"
         | "on_leave"
       subject_type: "CORE" | "ELECTIVE" | "ADDITIONAL" | "NON_EXAMINABLE"
+      substitution_reason: "leave" | "official_duty" | "suspension" | "other"
+      substitution_status: "active" | "review"
       tenant_status: "provisioning" | "active" | "suspended" | "closed"
       test_attendance: "pending" | "present" | "absent"
       timetable_version_status: "DRAFT" | "PUBLISHED" | "ARCHIVED"
@@ -10985,6 +11211,8 @@ export const Constants = {
         "on_leave",
       ],
       subject_type: ["CORE", "ELECTIVE", "ADDITIONAL", "NON_EXAMINABLE"],
+      substitution_reason: ["leave", "official_duty", "suspension", "other"],
+      substitution_status: ["active", "review"],
       tenant_status: ["provisioning", "active", "suspended", "closed"],
       test_attendance: ["pending", "present", "absent"],
       timetable_version_status: ["DRAFT", "PUBLISHED", "ARCHIVED"],

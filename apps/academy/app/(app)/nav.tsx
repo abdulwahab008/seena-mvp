@@ -17,6 +17,7 @@ const LINKS = [
   { href: '/academic-setup/rooms', label: 'Rooms' },
   { href: '/academic-setup/bell-templates', label: 'Bell Templates' },
   { href: '/academic-setup/timetable', label: 'Timetable' },
+  { href: '/academic-setup/substitutions', label: 'Substitutions' },
   { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects' },
   { href: '/academic-setup/competency', label: 'Teacher Competency' },
   { href: '/academic-setup/rollover', label: 'Session Rollover' },
