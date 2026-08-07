@@ -45,6 +45,8 @@ select public.create_section(:'campus2_id'::uuid, :'session_id'::uuid, :'class1_
 select public.create_subject('PHY', 'Physics', 'فزکس') as physics_id \gset
 select public.upsert_class_subject(:'campus_id'::uuid, :'session_id'::uuid, :'class1_id'::uuid, :'physics_id'::uuid, 5::smallint) as cs_north \gset
 select public.upsert_class_subject(:'campus2_id'::uuid, :'session_id'::uuid, :'class1_id'::uuid, :'physics_id'::uuid, 5::smallint) as cs_south \gset
+-- FR-D03: upsert_timetable_slot() now also checks teach-scope.
+select public.create_staff_teachable_subject(:'teacher_user_id'::uuid, :'physics_id'::uuid, :'class1_id'::uuid, :'class1_id'::uuid);
 
 -- Campus North: period 2 is 09:00-09:40.
 select public.create_bell_template(

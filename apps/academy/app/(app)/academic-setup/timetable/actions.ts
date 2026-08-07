@@ -1,13 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createTimetableVersionSchema, upsertTimetableSlotSchema } from '@/lib/validation';
+import { createTimetableVersionSchema, upsertTimetableSlotSchema, createTeachableSubjectSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type ActionState = { error: string | null };
 
 function mapError(message: string): string {
   if (message.startsWith('TEACHER_CLASH')) return `This teacher already has a clash — ${message.replace('TEACHER_CLASH: ', '')}.`;
+  if (message.includes('TEACH_SCOPE_VIOLATION')) return 'TEACH_SCOPE_VIOLATION';
   if (message.includes('SUBJECT_NOT_OFFERED')) return 'This subject is not on the curriculum map for this class level/stream.';
   if (message.includes('VERSION_IMMUTABLE')) return 'This timetable version is no longer a draft and cannot be edited.';
   if (message.includes('VERSION_NOT_FOUND')) return 'Timetable version not found.';
@@ -64,6 +65,7 @@ export async function upsertTimetableSlot(
     subjectId: formData.get('subjectId'),
     staffId: formData.get('staffId') || undefined,
     roomId: formData.get('roomId') || undefined,
+    overrideReason: formData.get('overrideReason') || undefined,
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
 
@@ -76,6 +78,7 @@ export async function upsertTimetableSlot(
     p_subject_id: parsed.data.subjectId,
     p_staff_id: parsed.data.staffId,
     p_room_id: parsed.data.roomId,
+    p_override_reason: parsed.data.overrideReason,
   });
   if (error) return { error: mapError(error.message) };
 

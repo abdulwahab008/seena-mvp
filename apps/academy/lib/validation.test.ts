@@ -65,6 +65,7 @@ import {
   createBellCalendarRuleSchema,
   createTimetableVersionSchema,
   upsertTimetableSlotSchema,
+  createTeachableSubjectSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1352,5 +1353,30 @@ describe('upsertTimetableSlotSchema', () => {
 
   it('rejects a missing subjectId', () => {
     expect(upsertTimetableSlotSchema.safeParse({ ...base, subjectId: undefined }).success).toBe(false);
+  });
+});
+
+describe('createTeachableSubjectSchema', () => {
+  const base = {
+    staffId: '11111111-1111-1111-1111-111111111111',
+    subjectId: '22222222-2222-2222-2222-222222222222',
+    classLevelFromId: '33333333-3333-3333-3333-333333333333',
+    classLevelToId: '44444444-4444-4444-4444-444444444444',
+  };
+
+  it('accepts a grant with no stream restriction', () => {
+    const result = createTeachableSubjectSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.streamId).toBeUndefined();
+  });
+
+  it('treats a blank streamId as absent, not an invalid uuid', () => {
+    const result = createTeachableSubjectSchema.safeParse({ ...base, streamId: '' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.streamId).toBeUndefined();
+  });
+
+  it('rejects a missing teacher', () => {
+    expect(createTeachableSubjectSchema.safeParse({ ...base, staffId: undefined }).success).toBe(false);
   });
 });

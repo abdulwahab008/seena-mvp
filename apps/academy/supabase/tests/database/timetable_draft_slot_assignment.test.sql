@@ -46,6 +46,10 @@ select set_config(
   true
 );
 select public.assign_subject_teacher(:'section_id'::uuid, :'physics_id'::uuid, :'teacher_user_id'::uuid, current_date - 30);
+-- FR-D03: upsert_timetable_slot() now also checks teach-scope — without
+-- this grant, every staffed write below would fail TEACH_SCOPE_VIOLATION
+-- before ever reaching what this file actually tests.
+select public.create_staff_teachable_subject(:'teacher_user_id'::uuid, :'physics_id'::uuid, :'class1_id'::uuid, :'class1_id'::uuid);
 
 select public.create_timetable_version(:'campus_id'::uuid, :'session_id'::uuid, 'MORNING'::public.section_shift, 'Draft v1') as version_id \gset
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -104,6 +104,8 @@ function WriteSlotForm({
   staff: Staff[];
 }) {
   const [pending, startTransition] = useTransition();
+  const [needsOverride, setNeedsOverride] = useState(false);
+  const [overrideReason, setOverrideReason] = useState('');
   const {
     register,
     control,
@@ -119,6 +121,8 @@ function WriteSlotForm({
 
   const onSubjectChange = async (subjectId: string) => {
     setValue('subjectId', subjectId);
+    setNeedsOverride(false);
+    setOverrideReason('');
     if (!subjectId) return;
     // Prefill is async — if the user manually picks a teacher/room while
     // this fetch is still in flight, applying the fetched defaults
@@ -139,12 +143,19 @@ function WriteSlotForm({
     fd.set('subjectId', values.subjectId);
     if (values.staffId) fd.set('staffId', values.staffId);
     if (values.roomId) fd.set('roomId', values.roomId);
+    if (needsOverride && overrideReason.trim()) fd.set('overrideReason', overrideReason.trim());
 
     startTransition(async () => {
       const result = await upsertTimetableSlot(versionId, sectionId, { error: null }, fd);
-      if (result.error) toast.error(result.error);
-      else {
+      if (result.error === 'TEACH_SCOPE_VIOLATION') {
+        setNeedsOverride(true);
+        toast.error("This teacher isn't approved for this subject/grade. Supply a reason to override, or choose another teacher.");
+      } else if (result.error) {
+        toast.error(result.error);
+      } else {
         toast.success('Slot saved.');
+        setNeedsOverride(false);
+        setOverrideReason('');
         reset({ weekday: values.weekday, periodNo: values.periodNo, subjectId: '', staffId: undefined, roomId: undefined });
       }
     });
@@ -243,8 +254,22 @@ function WriteSlotForm({
           )}
         />
       </div>
+      {needsOverride && (
+        <div className="col-span-full space-y-1 rounded-md border border-amber-400 bg-amber-50 p-3">
+          <Label htmlFor="slot-override-reason" className="text-amber-900">
+            This teacher isn&apos;t approved for this subject/grade. Give a reason to override, or change the teacher above.
+          </Label>
+          <Input
+            id="slot-override-reason"
+            data-testid="slot-override-reason-input"
+            placeholder="e.g. temporary cover until replacement joins"
+            value={overrideReason}
+            onChange={(e) => setOverrideReason(e.target.value)}
+          />
+        </div>
+      )}
       <Button type="submit" disabled={pending} data-testid="save-slot-button" className="col-span-full w-fit">
-        {pending ? 'Saving…' : 'Save slot'}
+        {pending ? 'Saving…' : needsOverride ? 'Save with override' : 'Save slot'}
       </Button>
     </form>
   );

@@ -95,6 +95,13 @@ async function seedTenant() {
   });
   if (e12) throw e12;
 
+  // FR-D03: upsert_timetable_slot() now also checks teach-scope — without
+  // this grant every staffed write below would fail TEACH_SCOPE_VIOLATION.
+  const { error: e13 } = await admin
+    .from('staff_teachable_subject')
+    .insert({ tenant_id: tenantId as string, staff_id: teacherUser.user.id, subject_id: physics!.id, class_level_from_id: classLevel!.id, class_level_to_id: classLevel!.id });
+  if (e13) throw e13;
+
   return { ownerEmail, owner2Email, password };
 }
 

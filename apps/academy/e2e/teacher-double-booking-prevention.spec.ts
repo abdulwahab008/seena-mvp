@@ -66,6 +66,12 @@ async function seedTenant(sectionCount: number) {
     .insert({ tenant_id: tenantId as string, campus_id: campus!.id, session_id: session!.id, class_level_id: classLevel!.id, subject_id: physics!.id, weekly_periods: 5 });
   if (e8) throw e8;
 
+  // FR-D03: upsert_timetable_slot() now also checks teach-scope.
+  const { error: e8b } = await admin
+    .from('staff_teachable_subject')
+    .insert({ tenant_id: tenantId as string, staff_id: teacherUser.user.id, subject_id: physics!.id, class_level_from_id: classLevel!.id, class_level_to_id: classLevel!.id });
+  if (e8b) throw e8b;
+
   const { data: bellTemplate, error: e9 } = await admin
     .from('bell_template')
     .insert({ tenant_id: tenantId as string, campus_id: campus!.id, shift: 'MORNING', code: 'REGULAR', name: 'Regular', is_default: true })

@@ -939,5 +939,22 @@ export const upsertTimetableSlotSchema = z.object({
   subjectId: z.string().uuid('Choose a subject'),
   staffId: optionalUuid,
   roomId: optionalUuid,
+  // FR-D03: only sent on a retry after a TEACH_SCOPE_VIOLATION.
+  overrideReason: z.string().max(500).optional(),
 });
 export type UpsertTimetableSlotInput = z.infer<typeof upsertTimetableSlotSchema>;
+
+// Mirrors create_staff_teachable_subject()'s own signature in
+// supabase/migrations/20260731620000_teachable_subject_grade_matrix.sql.
+// classLevelFrom/To are class_level FKs, not raw grade numbers — see that
+// migration's own header for why (no numeric "grade" column exists;
+// class_level.ordinal isn't 1:1 with human grade numbers once
+// nursery/KG are counted).
+export const createTeachableSubjectSchema = z.object({
+  staffId: z.string().uuid('Choose a teacher'),
+  subjectId: z.string().uuid('Choose a subject'),
+  classLevelFromId: z.string().uuid('Choose a starting class'),
+  classLevelToId: z.string().uuid('Choose an ending class'),
+  streamId: optionalUuid,
+});
+export type CreateTeachableSubjectInput = z.infer<typeof createTeachableSubjectSchema>;

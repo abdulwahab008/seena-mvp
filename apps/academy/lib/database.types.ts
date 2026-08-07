@@ -7063,6 +7063,82 @@ export type Database = {
           },
         ]
       }
+      staff_teachable_subject: {
+        Row: {
+          class_level_from_id: string
+          class_level_to_id: string
+          created_at: string
+          id: string
+          staff_id: string
+          stream_id: string | null
+          subject_id: string
+          tenant_id: string
+        }
+        Insert: {
+          class_level_from_id: string
+          class_level_to_id: string
+          created_at?: string
+          id?: string
+          staff_id: string
+          stream_id?: string | null
+          subject_id: string
+          tenant_id: string
+        }
+        Update: {
+          class_level_from_id?: string
+          class_level_to_id?: string
+          created_at?: string
+          id?: string
+          staff_id?: string
+          stream_id?: string | null
+          subject_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_teachable_subject_class_level_from_id_fkey"
+            columns: ["class_level_from_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_teachable_subject_class_level_to_id_fkey"
+            columns: ["class_level_to_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_teachable_subject_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "staff_teachable_subject_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "stream"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_teachable_subject_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_teachable_subject_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stream: {
         Row: {
           applies_from_ordinal: number
@@ -7644,6 +7720,51 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teach_scope_override: {
+        Row: {
+          approved_by: string
+          assignment_id: string
+          assignment_type: string
+          created_at: string
+          id: string
+          reason: string
+          tenant_id: string
+        }
+        Insert: {
+          approved_by: string
+          assignment_id: string
+          assignment_type: string
+          created_at?: string
+          id?: string
+          reason: string
+          tenant_id: string
+        }
+        Update: {
+          approved_by?: string
+          assignment_id?: string
+          assignment_type?: string
+          created_at?: string
+          id?: string
+          reason?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teach_scope_override_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "teach_scope_override_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
         ]
@@ -8503,6 +8624,77 @@ export type Database = {
           },
         ]
       }
+      v_teach_scope_exception: {
+        Row: {
+          campus_id: string | null
+          period_no: number | null
+          section_id: string | null
+          slot_id: string | null
+          staff_id: string | null
+          subject_id: string | null
+          tenant_id: string | null
+          timetable_version_id: string | null
+          weekday: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_unallocated_section_subject: {
         Row: {
           campus_id: string | null
@@ -8716,6 +8908,15 @@ export type Database = {
         Returns: Json
       }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
+      can_teach: {
+        Args: {
+          p_class_level_id: string
+          p_staff_id: string
+          p_stream_id?: string
+          p_subject_id: string
+        }
+        Returns: boolean
+      }
       cancel_interview: { Args: { p_interview_id: string }; Returns: undefined }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
       check_room_capacity: {
@@ -9011,6 +9212,16 @@ export type Database = {
           p_notice_period_days?: number
           p_staff_id: string
           p_start_date: string
+        }
+        Returns: string
+      }
+      create_staff_teachable_subject: {
+        Args: {
+          p_class_level_from_id: string
+          p_class_level_to_id: string
+          p_staff_id: string
+          p_stream_id?: string
+          p_subject_id: string
         }
         Returns: string
       }
@@ -9850,6 +10061,10 @@ export type Database = {
         Args: { p_ledger_id: string; p_reason: string }
         Returns: string
       }
+      revoke_staff_teachable_subject: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
       rpc_bulk_mark_attendance: {
         Args: { p_date: string; p_exceptions?: Json; p_section_id: string }
         Returns: Json
@@ -10142,6 +10357,7 @@ export type Database = {
         Args: {
           p_elective_bucket?: number
           p_note?: string
+          p_override_reason?: string
           p_parallel_group_id?: string
           p_period_no: number
           p_room_id?: string
