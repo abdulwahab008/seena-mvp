@@ -8388,6 +8388,13 @@ export type Database = {
             foreignKeyName: "timetable_substitution_slot_id_fkey"
             columns: ["slot_id"]
             isOneToOne: false
+            referencedRelation: "v_section_timetable"
+            referencedColumns: ["slot_id"]
+          },
+          {
+            foreignKeyName: "timetable_substitution_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
             referencedRelation: "v_slot_clock_time"
             referencedColumns: ["slot_id"]
           },
@@ -8857,6 +8864,111 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "academic_session"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_section_timetable: {
+        Row: {
+          campus_id: string | null
+          elective_bucket: number | null
+          parallel_group_id: string | null
+          period_no: number | null
+          room_code: string | null
+          room_id: string | null
+          room_name: string | null
+          section_id: string | null
+          slot_id: string | null
+          staff_id: string | null
+          subject_code: string | null
+          subject_id: string | null
+          subject_name_en: string | null
+          subject_name_ur: string | null
+          teacher_name: string | null
+          tenant_id: string | null
+          timetable_version_id: string | null
+          version_status:
+            | Database["public"]["Enums"]["timetable_version_status"]
+            | null
+          version_validity: unknown
+          weekday: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "room"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
           },
         ]
       }
