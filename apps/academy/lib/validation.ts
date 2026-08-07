@@ -838,6 +838,25 @@ export const decideAttendanceCorrectionSchema = z.object({
 });
 export type DecideAttendanceCorrectionInput = z.infer<typeof decideAttendanceCorrectionSchema>;
 
+// Mirrors add_staff_qualification()/verify_staff_qualification()'s own
+// checks in supabase/migrations/20260731700000_staff_qualification_register.sql.
+export const QUALIFICATION_LEVELS = ['matric', 'intermediate', 'diploma', 'certification', 'bachelor', 'master', 'mphil', 'phd'] as const;
+
+export const addStaffQualificationSchema = z.object({
+  staffId: z.string().uuid(),
+  level: z.enum(QUALIFICATION_LEVELS),
+  discipline: z.string().min(1, 'Discipline is required'),
+  institution: z.string().min(1, 'Institution is required'),
+  yearCompleted: z.coerce.number().int().min(1960, 'Enter a real year').max(new Date().getFullYear(), 'Year cannot be in the future'),
+});
+export type AddStaffQualificationInput = z.infer<typeof addStaffQualificationSchema>;
+
+export const verifyStaffQualificationSchema = z.object({
+  qualificationId: z.string().uuid(),
+  status: z.enum(['verified', 'rejected']),
+});
+export type VerifyStaffQualificationInput = z.infer<typeof verifyStaffQualificationSchema>;
+
 // Mirrors compute_month_attendance()'s own signature in
 // supabase/migrations/20260731530000_monthly_attendance_summary.sql.
 export const recomputeMonthlyAttendanceSchema = z.object({

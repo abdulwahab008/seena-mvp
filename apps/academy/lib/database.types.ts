@@ -7119,6 +7119,132 @@ export type Database = {
           },
         ]
       }
+      staff_document: {
+        Row: {
+          id: string
+          label: string
+          staff_id: string
+          storage_path: string | null
+          tenant_id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          id?: string
+          label: string
+          staff_id: string
+          storage_path?: string | null
+          tenant_id: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          id?: string
+          label?: string
+          staff_id?: string
+          storage_path?: string | null
+          tenant_id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_document_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "staff_document_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_document_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      staff_qualification: {
+        Row: {
+          created_at: string
+          discipline: string
+          document_id: string | null
+          id: string
+          institution: string
+          level: Database["public"]["Enums"]["qualification_level"]
+          staff_id: string
+          tenant_id: string
+          verification_status: Database["public"]["Enums"]["qualification_verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+          year_completed: number
+        }
+        Insert: {
+          created_at?: string
+          discipline: string
+          document_id?: string | null
+          id?: string
+          institution: string
+          level: Database["public"]["Enums"]["qualification_level"]
+          staff_id: string
+          tenant_id: string
+          verification_status?: Database["public"]["Enums"]["qualification_verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+          year_completed: number
+        }
+        Update: {
+          created_at?: string
+          discipline?: string
+          document_id?: string | null
+          id?: string
+          institution?: string
+          level?: Database["public"]["Enums"]["qualification_level"]
+          staff_id?: string
+          tenant_id?: string
+          verification_status?: Database["public"]["Enums"]["qualification_verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+          year_completed?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_qualification_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "staff_document"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_qualification_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "staff_qualification_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_qualification_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       staff_teachable_subject: {
         Row: {
           class_level_from_id: string
@@ -9669,6 +9795,21 @@ export type Database = {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
         Returns: string
       }
+      add_staff_document: {
+        Args: { p_label: string; p_staff_id: string; p_storage_path?: string }
+        Returns: string
+      }
+      add_staff_qualification: {
+        Args: {
+          p_discipline: string
+          p_document_id?: string
+          p_institution: string
+          p_level: Database["public"]["Enums"]["qualification_level"]
+          p_staff_id: string
+          p_year_completed: number
+        }
+        Returns: string
+      }
       add_structure_line: {
         Args: {
           p_amount_paisa: number
@@ -10238,6 +10379,10 @@ export type Database = {
         Returns: undefined
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
+      delete_staff_document: {
+        Args: { p_document_id: string }
+        Returns: undefined
+      }
       delete_stream: { Args: { p_id: string }; Returns: undefined }
       detect_sibling_groups: {
         Args: { p_campus_id: string; p_session_id: string }
@@ -11167,6 +11312,10 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      staff_highest_qualification: {
+        Args: { p_staff_id: string }
+        Returns: Database["public"]["Enums"]["qualification_level"]
+      }
       student_balance: { Args: { p_enrolment_id: string }; Returns: number }
       student_timetable: {
         Args: { p_date: string; p_enrolment_id: string }
@@ -11325,6 +11474,13 @@ export type Database = {
           p_subject_id: string
         }
         Returns: string
+      }
+      verify_staff_qualification: {
+        Args: {
+          p_qualification_id: string
+          p_status: Database["public"]["Enums"]["qualification_verification_status"]
+        }
+        Returns: undefined
       }
       waive_admission_fee: {
         Args: { p_offer_id: string; p_reason: string }
@@ -11513,6 +11669,16 @@ export type Database = {
         | "first_student"
       onboarding_step_status: "pending" | "skipped" | "done"
       outbound_status: "queued" | "sent" | "failed" | "rate_capped"
+      qualification_level:
+        | "matric"
+        | "intermediate"
+        | "diploma"
+        | "certification"
+        | "bachelor"
+        | "master"
+        | "mphil"
+        | "phd"
+      qualification_verification_status: "pending" | "verified" | "rejected"
       reminder_kind: "followup_officer" | "appointment_parent"
       room_type_enum:
         | "CLASSROOM"
@@ -11887,6 +12053,17 @@ export const Constants = {
       ],
       onboarding_step_status: ["pending", "skipped", "done"],
       outbound_status: ["queued", "sent", "failed", "rate_capped"],
+      qualification_level: [
+        "matric",
+        "intermediate",
+        "diploma",
+        "certification",
+        "bachelor",
+        "master",
+        "mphil",
+        "phd",
+      ],
+      qualification_verification_status: ["pending", "verified", "rejected"],
       reminder_kind: ["followup_officer", "appointment_parent"],
       room_type_enum: [
         "CLASSROOM",
