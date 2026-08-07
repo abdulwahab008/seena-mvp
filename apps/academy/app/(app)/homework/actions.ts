@@ -47,15 +47,21 @@ export async function createHomework(_prev: ActionState, formData: FormData): Pr
   return { error: null };
 }
 
-export async function publishHomework(id: string, _prev: ActionState, _formData: FormData): Promise<ActionState> {
+export type PublishHomeworkState = { error: string | null; loadWarning: string | null };
+
+// FR-H03: the load-cap check is advisory, never blocking — publish_
+// homework() always publishes and returns {warning, message}; there is
+// no separate "publish anyway" round trip to make.
+export async function publishHomework(id: string, _prev: PublishHomeworkState, _formData: FormData): Promise<PublishHomeworkState> {
   const supabase = await supabaseServer();
-  const { error } = await supabase.rpc('publish_homework', { p_id: id });
+  const { data, error } = await supabase.rpc('publish_homework', { p_id: id });
   if (error) {
-    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to publish this assignment.' };
-    if (error.message.includes('ALREADY_PUBLISHED')) return { error: 'Already published.' };
-    return { error: 'Could not publish the assignment.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to publish this assignment.', loadWarning: null };
+    if (error.message.includes('ALREADY_PUBLISHED')) return { error: 'Already published.', loadWarning: null };
+    return { error: 'Could not publish the assignment.', loadWarning: null };
   }
 
   revalidatePath('/homework');
-  return { error: null };
+  const result = data as { warning: string | null; message?: string } | null;
+  return { error: null, loadWarning: result?.warning ? (result.message ?? result.warning) : null };
 }

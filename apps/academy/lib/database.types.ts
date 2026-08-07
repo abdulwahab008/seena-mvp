@@ -5421,6 +5421,8 @@ export type Database = {
           due_date: string
           estimated_minutes: number | null
           id: string
+          load_warning_overridden: boolean
+          overridden_by: string | null
           published_at: string | null
           section_id: string
           session_id: string
@@ -5438,6 +5440,8 @@ export type Database = {
           due_date: string
           estimated_minutes?: number | null
           id?: string
+          load_warning_overridden?: boolean
+          overridden_by?: string | null
           published_at?: string | null
           section_id: string
           session_id: string
@@ -5455,6 +5459,8 @@ export type Database = {
           due_date?: string
           estimated_minutes?: number | null
           id?: string
+          load_warning_overridden?: boolean
+          overridden_by?: string | null
           published_at?: string | null
           section_id?: string
           session_id?: string
@@ -5471,6 +5477,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "homework_section_id_fkey"
@@ -5523,6 +5536,58 @@ export type Database = {
           },
           {
             foreignKeyName: "homework_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_load_policy: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          max_assignments_per_day: number | null
+          max_minutes_per_day: number | null
+          session_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          max_assignments_per_day?: number | null
+          max_minutes_per_day?: number | null
+          session_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          max_assignments_per_day?: number | null
+          max_minutes_per_day?: number | null
+          session_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_load_policy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_load_policy_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_load_policy_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -9226,6 +9291,60 @@ export type Database = {
           },
         ]
       }
+      v_section_homework_load: {
+        Row: {
+          assignment_count: number | null
+          campus_id: string | null
+          due_date: string | null
+          section_id: string | null
+          tenant_id: string | null
+          total_minutes: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_section_seat_availability: {
         Row: {
           active_count: number | null
@@ -9927,6 +10046,14 @@ export type Database = {
         Returns: undefined
       }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
+      check_homework_load: {
+        Args: {
+          p_due_date: string
+          p_exclude_homework_id?: string
+          p_section_id: string
+        }
+        Returns: Json
+      }
       check_room_capacity: {
         Args: { p_room_id: string; p_section_id: string }
         Returns: Json
@@ -10968,7 +11095,7 @@ export type Database = {
         Args: { p_regulator_reference?: string; p_structure_id: string }
         Returns: undefined
       }
-      publish_homework: { Args: { p_id: string }; Returns: undefined }
+      publish_homework: { Args: { p_id: string }; Returns: Json }
       publish_timetable: {
         Args: {
           p_effective_from: string
@@ -11241,6 +11368,15 @@ export type Database = {
           p_prefix: string
         }
         Returns: undefined
+      }
+      set_homework_load_policy: {
+        Args: {
+          p_campus_id: string
+          p_max_assignments_per_day?: number
+          p_max_minutes_per_day?: number
+          p_session_id: string
+        }
+        Returns: string
       }
       set_leave_approval_chain_step: {
         Args: {

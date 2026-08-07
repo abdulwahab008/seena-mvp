@@ -21,9 +21,14 @@ function PublishButton({ id }: { id: string }) {
 
   const onClick = () => {
     startTransition(async () => {
-      const result = await publishHomework(id, { error: null }, new FormData());
+      const result = await publishHomework(id, { error: null, loadWarning: null }, new FormData());
       if (result.error) toast.error(result.error);
-      else toast.success('Published.');
+      else {
+        toast.success('Published.');
+        // FR-H03: advisory only — the assignment is already published by
+        // the time this fires, so it's a heads-up, never a retry prompt.
+        if (result.loadWarning) toast.warning(result.loadWarning, { duration: 8000 });
+      }
     });
   };
 

@@ -1,10 +1,12 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { CreateHomeworkForm } from './create-homework-form';
 import { HomeworkList } from './homework-list';
+import { SectionLoadCalendar } from './section-load-calendar';
 
 const ADMIN_ROLES = ['super_admin', 'owner', 'principal'];
 
-export default async function HomeworkPage() {
+export default async function HomeworkPage({ searchParams }: { searchParams: Promise<{ loadSection?: string }> }) {
+  const { loadSection } = await searchParams;
   const supabase = await supabaseServer();
   const {
     data: { user },
@@ -70,6 +72,23 @@ export default async function HomeworkPage() {
         .limit(50)
     : { data: [] as never[] };
 
+  // AC2: a 14-day per-section load calendar — deduped from `assignments`
+  // since a teacher may have several subjects in the same section.
+  const loadSections = Array.from(new Map(assignments.map((a) => [a.sectionId, a.sectionLabel])).entries()).map(([sectionId, sectionLabel]) => ({
+    sectionId,
+    sectionLabel,
+  }));
+  const selectedLoadSectionId = loadSection ?? loadSections[0]?.sectionId ?? null;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const { data: loadRows } = selectedLoadSectionId
+    ? await supabase
+        .from('v_section_homework_load')
+        .select('due_date, assignment_count, total_minutes')
+        .eq('section_id', selectedLoadSectionId)
+        .gte('due_date', todayIso)
+        .order('due_date')
+    : { data: [] as never[] };
+
   return (
     <div className="space-y-6">
       <div>
@@ -99,6 +118,13 @@ export default async function HomeworkPage() {
           };
         })}
       />
+      {loadSections.length > 0 && selectedLoadSectionId && (
+        <SectionLoadCalendar
+          sections={loadSections}
+          selectedSectionId={selectedLoadSectionId}
+          rows={(loadRows ?? []) as { due_date: string; assignment_count: number; total_minutes: number }[]}
+        />
+      )}
     </div>
   );
 }
