@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { CreateBellTemplateForm } from './create-bell-template-form';
 import { BellTemplateList, type BellTemplateRow } from './bell-template-list';
+import { BellCalendarRules, type CalendarRuleRow } from './bell-calendar-rules';
 
 const SHIFTS = ['MORNING', 'AFTERNOON'] as const;
 
@@ -19,7 +20,17 @@ export default async function BellTemplatesPage() {
         .order('code')
     : { data: [] as never[] };
 
+  const { data: rules } = campusId
+    ? await supabase
+        .from('bell_calendar_rule')
+        .select('id, shift, weekday, precedence, note, bell_template(code, name)')
+        .eq('campus_id', campusId)
+        .order('shift')
+        .order('weekday')
+    : { data: [] as never[] };
+
   const rows = (templates ?? []) as unknown as BellTemplateRow[];
+  const ruleRows = (rules ?? []) as unknown as CalendarRuleRow[];
   const shiftsWithoutDefault = SHIFTS.filter((s) => !rows.some((t) => t.shift === s && t.is_default));
 
   return (
@@ -42,6 +53,7 @@ export default async function BellTemplatesPage() {
           )}
           <CreateBellTemplateForm campusId={campusId} />
           <BellTemplateList templates={rows} />
+          <BellCalendarRules campusId={campusId} templates={rows} rules={ruleRows} />
         </>
       )}
     </div>

@@ -2465,6 +2465,70 @@ export type Database = {
         }
         Relationships: []
       }
+      bell_calendar_rule: {
+        Row: {
+          bell_template_id: string
+          campus_id: string
+          created_at: string
+          date_from: string | null
+          date_to: string | null
+          id: string
+          note: string | null
+          precedence: number
+          shift: Database["public"]["Enums"]["section_shift"]
+          tenant_id: string
+          weekday: number | null
+        }
+        Insert: {
+          bell_template_id: string
+          campus_id: string
+          created_at?: string
+          date_from?: string | null
+          date_to?: string | null
+          id?: string
+          note?: string | null
+          precedence?: number
+          shift: Database["public"]["Enums"]["section_shift"]
+          tenant_id: string
+          weekday?: number | null
+        }
+        Update: {
+          bell_template_id?: string
+          campus_id?: string
+          created_at?: string
+          date_from?: string | null
+          date_to?: string | null
+          id?: string
+          note?: string | null
+          precedence?: number
+          shift?: Database["public"]["Enums"]["section_shift"]
+          tenant_id?: string
+          weekday?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bell_calendar_rule_bell_template_id_fkey"
+            columns: ["bell_template_id"]
+            isOneToOne: false
+            referencedRelation: "bell_template"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bell_calendar_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bell_calendar_rule_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bell_period: {
         Row: {
           bell_template_id: string
@@ -8480,6 +8544,19 @@ export type Database = {
         Returns: Json
       }
       create_audit_partition: { Args: { p_month?: string }; Returns: undefined }
+      create_bell_calendar_rule: {
+        Args: {
+          p_bell_template_id: string
+          p_campus_id: string
+          p_date_from?: string
+          p_date_to?: string
+          p_note?: string
+          p_precedence?: number
+          p_shift: Database["public"]["Enums"]["section_shift"]
+          p_weekday?: number
+        }
+        Returns: string
+      }
       create_bell_template: {
         Args: {
           p_campus_id: string
@@ -8788,6 +8865,7 @@ export type Database = {
         Args: { p_document_id: string }
         Returns: undefined
       }
+      delete_bell_calendar_rule: { Args: { p_id: string }; Returns: undefined }
       delete_branding_asset: {
         Args: { p_asset_id: string }
         Returns: undefined
@@ -9461,6 +9539,14 @@ export type Database = {
           p_campus_id: string
           p_marked_time: string
           p_session_id: string
+        }
+        Returns: string
+      }
+      resolve_bell_template: {
+        Args: {
+          p_campus_id: string
+          p_date: string
+          p_shift: Database["public"]["Enums"]["section_shift"]
         }
         Returns: string
       }

@@ -901,3 +901,19 @@ export const createBellTemplateSchema = z.object({
   isDefault: z.boolean().optional(),
 });
 export type CreateBellTemplateInput = z.infer<typeof createBellTemplateSchema>;
+
+// Mirrors create_bell_calendar_rule()'s own signature in
+// supabase/migrations/20260731590000_bell_calendar_rule.sql. This form
+// only ever creates weekday rules (dateFrom/dateTo are FR-F03's own,
+// Ramadan-override, scope) — weekday is required here even though the DB
+// function itself allows a date-range-only rule instead.
+export const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+
+export const createBellCalendarRuleSchema = z.object({
+  shift: z.enum(BELL_SHIFTS),
+  bellTemplateId: z.string().uuid('Choose a template'),
+  weekday: z.coerce.number().int().min(0).max(6),
+  precedence: z.coerce.number().int().min(0).max(1000).default(50),
+  note: z.string().max(500).optional(),
+});
+export type CreateBellCalendarRuleInput = z.infer<typeof createBellCalendarRuleSchema>;

@@ -62,6 +62,7 @@ import {
   createHomeworkSchema,
   bellSegmentSchema,
   createBellTemplateSchema,
+  createBellCalendarRuleSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1282,5 +1283,24 @@ describe('createBellTemplateSchema', () => {
     const result = createBellTemplateSchema.safeParse(base);
     expect(result.success).toBe(true);
     if (result.success) expect(result.data.isDefault).toBeUndefined();
+  });
+});
+
+describe('createBellCalendarRuleSchema', () => {
+  const base = { shift: 'MORNING' as const, bellTemplateId: '11111111-1111-1111-1111-111111111111', weekday: 5 };
+
+  it('accepts a Friday (weekday 5) rule with default precedence', () => {
+    const result = createBellCalendarRuleSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.precedence).toBe(50);
+  });
+
+  it('rejects a weekday outside 0-6', () => {
+    expect(createBellCalendarRuleSchema.safeParse({ ...base, weekday: 7 }).success).toBe(false);
+    expect(createBellCalendarRuleSchema.safeParse({ ...base, weekday: -1 }).success).toBe(false);
+  });
+
+  it('rejects a non-uuid bellTemplateId', () => {
+    expect(createBellCalendarRuleSchema.safeParse({ ...base, bellTemplateId: 'not-a-uuid' }).success).toBe(false);
   });
 });

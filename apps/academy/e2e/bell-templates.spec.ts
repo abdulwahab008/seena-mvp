@@ -99,3 +99,62 @@ test('an owner builds a bell template, sees correct period numbering, and overla
   await expect(page.getByText('Segments 2 and 3 overlap.')).toBeVisible();
   await expect(page.getByTestId('bell-template-row-OVERLAP')).not.toBeVisible();
 });
+
+test('an owner shortens Friday with a calendar rule, and a duplicate weekday+precedence rule is rejected', async ({ page }) => {
+  const { email, password } = await seedOwner();
+
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/campuses$/);
+
+  await page.goto('/academic-setup/bell-templates');
+  await page.waitForLoadState('networkidle');
+
+  // Default 8-period regular template.
+  await page.getByLabel('Code').fill('REGULAR');
+  await page.getByLabel('Name').fill('Regular Morning');
+  await fillSegment(page, 0, 'TEACHING', '08:00', '08:40');
+  await page.getByRole('checkbox', { name: 'Set as default for this campus + shift' }).check();
+  await page.getByTestId('create-bell-template-button').click();
+  await expect(page.getByText('Regular Morning created.')).toBeVisible();
+
+  // Shortened Friday template.
+  await page.getByLabel('Code').fill('FRIDAY');
+  await page.getByLabel('Name').fill('Friday Shortened');
+  await fillSegment(page, 0, 'TEACHING', '08:00', '08:30');
+  await page.getByTestId('create-bell-template-button').click();
+  await expect(page.getByText('Friday Shortened created.')).toBeVisible();
+
+  await expect(page.getByText('No calendar rules yet')).toBeVisible();
+
+  // AC: nominate Friday to resolve to the shortened template.
+  await page.getByTestId('rule-weekday-trigger').click();
+  await page.getByRole('option', { name: 'Friday', exact: true }).click();
+  await page.getByTestId('rule-template-trigger').click();
+  await page.getByRole('option', { name: 'Friday Shortened (FRIDAY)' }).click();
+  await page.getByLabel('Note (optional)').fill('Jumma break');
+  await page.getByTestId('create-bell-rule-button').click();
+  await expect(page.getByText('Rule created.')).toBeVisible();
+
+  const ruleRow = page.locator('[data-testid^="bell-rule-row-"]');
+  await expect(ruleRow).toBeVisible();
+  await expect(ruleRow).toContainText('Friday');
+  await expect(ruleRow).toContainText('Friday Shortened (FRIDAY)');
+  await expect(ruleRow).toContainText('precedence 50');
+
+  // AC: a second rule at the same weekday + precedence is ambiguous and rejected.
+  await page.getByTestId('rule-weekday-trigger').click();
+  await page.getByRole('option', { name: 'Friday', exact: true }).click();
+  await page.getByTestId('rule-template-trigger').click();
+  await page.getByRole('option', { name: 'Regular Morning (REGULAR)' }).click();
+  await page.getByTestId('create-bell-rule-button').click();
+  await expect(page.getByText('A rule already exists for this weekday and precedence.')).toBeVisible();
+
+  // Removing the rule reverts to "no calendar rules".
+  await ruleRow.getByRole('button', { name: 'Remove' }).click();
+  await expect(page.getByText('Rule removed.')).toBeVisible();
+  await expect(page.getByText('No calendar rules yet')).toBeVisible();
+});
