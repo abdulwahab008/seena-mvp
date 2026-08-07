@@ -15,6 +15,7 @@ const LINKS = [
   { href: '/admissions/reminders', label: 'Reminders' },
   { href: '/academic-setup/curriculum', label: 'Curriculum' },
   { href: '/academic-setup/rooms', label: 'Rooms' },
+  { href: '/academic-setup/bell-templates', label: 'Bell Templates' },
   { href: '/academic-setup/competency', label: 'Teacher Competency' },
   { href: '/academic-setup/rollover', label: 'Session Rollover' },
   { href: '/academic-setup/attendance-policy', label: 'Attendance Policy' },

@@ -2465,6 +2465,95 @@ export type Database = {
         }
         Relationships: []
       }
+      bell_period: {
+        Row: {
+          bell_template_id: string
+          end_time: string
+          id: string
+          kind: Database["public"]["Enums"]["bell_segment_kind"]
+          period_no: number | null
+          segment_ordinal: number
+          start_time: string
+        }
+        Insert: {
+          bell_template_id: string
+          end_time: string
+          id?: string
+          kind: Database["public"]["Enums"]["bell_segment_kind"]
+          period_no?: number | null
+          segment_ordinal: number
+          start_time: string
+        }
+        Update: {
+          bell_template_id?: string
+          end_time?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["bell_segment_kind"]
+          period_no?: number | null
+          segment_ordinal?: number
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bell_period_bell_template_id_fkey"
+            columns: ["bell_template_id"]
+            isOneToOne: false
+            referencedRelation: "bell_template"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bell_template: {
+        Row: {
+          campus_id: string
+          code: string
+          created_at: string
+          id: string
+          is_default: boolean
+          is_locked: boolean
+          name: string
+          shift: Database["public"]["Enums"]["section_shift"]
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          code: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          is_locked?: boolean
+          name: string
+          shift: Database["public"]["Enums"]["section_shift"]
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          is_locked?: boolean
+          name?: string
+          shift?: Database["public"]["Enums"]["section_shift"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bell_template_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bell_template_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branding_asset: {
         Row: {
           asset_type: Database["public"]["Enums"]["branding_asset_type"]
@@ -8391,6 +8480,17 @@ export type Database = {
         Returns: Json
       }
       create_audit_partition: { Args: { p_month?: string }; Returns: undefined }
+      create_bell_template: {
+        Args: {
+          p_campus_id: string
+          p_code: string
+          p_is_default?: boolean
+          p_name: string
+          p_segments: Json
+          p_shift: Database["public"]["Enums"]["section_shift"]
+        }
+        Returns: string
+      }
       create_branding_asset: {
         Args: {
           p_asset_type: Database["public"]["Enums"]["branding_asset_type"]
@@ -9441,6 +9541,7 @@ export type Database = {
         }
         Returns: string
       }
+      set_bell_template_default: { Args: { p_id: string }; Returns: undefined }
       set_challan_template: {
         Args: {
           p_bank_account_no: string
@@ -9642,8 +9743,13 @@ export type Database = {
         Returns: undefined
       }
       sweep_attendance_locks: { Args: never; Returns: number }
+      timemultirange: { Args: never; Returns: unknown }
       unlink_guardian: {
         Args: { p_guardian_id: string; p_student_id: string }
+        Returns: undefined
+      }
+      update_bell_period_time: {
+        Args: { p_end_time: string; p_period_id: string; p_start_time: string }
         Returns: undefined
       }
       update_structure_line_amount: {
@@ -9729,6 +9835,7 @@ export type Database = {
       attendance_source: "manual" | "biometric" | "leave"
       attendance_status: "present" | "absent" | "on_leave" | "half_day" | "late"
       audit_action: "insert" | "update" | "delete"
+      bell_segment_kind: "TEACHING" | "BREAK" | "ASSEMBLY" | "PRAYER"
       board:
         | "FBISE"
         | "PUNJAB"
@@ -10084,6 +10191,7 @@ export const Constants = {
       attendance_source: ["manual", "biometric", "leave"],
       attendance_status: ["present", "absent", "on_leave", "half_day", "late"],
       audit_action: ["insert", "update", "delete"],
+      bell_segment_kind: ["TEACHING", "BREAK", "ASSEMBLY", "PRAYER"],
       board: [
         "FBISE",
         "PUNJAB",

@@ -60,6 +60,8 @@ import {
   recomputeMonthlyAttendanceSchema,
   dispatchAbsenteeNotificationsSchema,
   createHomeworkSchema,
+  bellSegmentSchema,
+  createBellTemplateSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1238,5 +1240,47 @@ describe('createHomeworkSchema', () => {
 
   it('rejects an empty due date', () => {
     expect(createHomeworkSchema.safeParse({ ...base, dueDate: '' }).success).toBe(false);
+  });
+});
+
+describe('bellSegmentSchema', () => {
+  it('accepts a segment where end is after start', () => {
+    expect(bellSegmentSchema.safeParse({ kind: 'TEACHING', startTime: '08:00', endTime: '08:40' }).success).toBe(true);
+  });
+
+  it('rejects a segment where end is not after start', () => {
+    expect(bellSegmentSchema.safeParse({ kind: 'TEACHING', startTime: '08:40', endTime: '08:00' }).success).toBe(false);
+    expect(bellSegmentSchema.safeParse({ kind: 'TEACHING', startTime: '08:00', endTime: '08:00' }).success).toBe(false);
+  });
+});
+
+describe('createBellTemplateSchema', () => {
+  const base = {
+    shift: 'MORNING' as const,
+    code: 'REGULAR',
+    name: 'Regular Morning',
+    segments: [{ kind: 'TEACHING' as const, startTime: '08:00', endTime: '08:40' }],
+  };
+
+  it('accepts a template with at least one segment', () => {
+    expect(createBellTemplateSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a template with zero segments', () => {
+    expect(createBellTemplateSchema.safeParse({ ...base, segments: [] }).success).toBe(false);
+  });
+
+  it('rejects a template whose segment has end before start', () => {
+    const result = createBellTemplateSchema.safeParse({
+      ...base,
+      segments: [{ kind: 'TEACHING', startTime: '09:00', endTime: '08:00' }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('defaults isDefault to undefined when omitted, not required', () => {
+    const result = createBellTemplateSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.isDefault).toBeUndefined();
   });
 });

@@ -877,3 +877,27 @@ export const createHomeworkSchema = z.object({
   ),
 });
 export type CreateHomeworkInput = z.infer<typeof createHomeworkSchema>;
+
+// Mirrors create_bell_template()'s own signature in
+// supabase/migrations/20260731580000_bell_template.sql. period_no
+// numbering and overlap checks are the DB's job — this schema only
+// catches empty fields and a backwards start/end pair before the RPC.
+export const BELL_SHIFTS = ['MORNING', 'AFTERNOON'] as const;
+export const BELL_SEGMENT_KINDS = ['TEACHING', 'BREAK', 'ASSEMBLY', 'PRAYER'] as const;
+
+export const bellSegmentSchema = z
+  .object({
+    kind: z.enum(BELL_SEGMENT_KINDS),
+    startTime: z.string().min(1, 'Required'),
+    endTime: z.string().min(1, 'Required'),
+  })
+  .refine((v) => v.endTime > v.startTime, { message: 'End time must be after start time', path: ['endTime'] });
+
+export const createBellTemplateSchema = z.object({
+  shift: z.enum(BELL_SHIFTS),
+  code: z.string().min(1, 'Required').max(50),
+  name: z.string().min(1, 'Required').max(200),
+  segments: z.array(bellSegmentSchema).min(1, 'At least one segment'),
+  isDefault: z.boolean().optional(),
+});
+export type CreateBellTemplateInput = z.infer<typeof createBellTemplateSchema>;
