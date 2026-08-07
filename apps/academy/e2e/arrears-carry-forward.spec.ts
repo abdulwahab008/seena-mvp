@@ -5,6 +5,22 @@ import { randomUUID } from 'node:crypto';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// Billing periods relative to today's month, not hardcoded 2026-07/08/09 —
+// fee_plan.effective_from defaults to current_date at enrol_student() time,
+// so a hardcoded period before "today" makes generate_challans() find zero
+// applicable charges once real time drifts past it. Same fix already
+// applied to this suite's 4 pgTAP equivalents (see supabase/tests/database/
+// arrears_carry_forward.test.sql's own header) and to the fee generated-
+// result assertion in late-fee-rules.spec.ts.
+function monthOffset(offset: number): string {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1));
+  return d.toISOString().slice(0, 7);
+}
+const MONTH1 = monthOffset(0);
+const MONTH2 = monthOffset(1);
+const MONTH3 = monthOffset(2);
+
 async function seedOwnerWithPublishedStructure() {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const runId = randomUUID().slice(0, 8);
@@ -110,20 +126,20 @@ test('an unpaid challan carries forward as arrears on the next month, and clears
   await page.goto('/fees/challans');
   await page.waitForLoadState('networkidle');
 
-  // July is left unpaid on purpose.
-  await page.getByTestId('challan-period-input').fill('2026-07');
+  // Month 1 is left unpaid on purpose.
+  await page.getByTestId('challan-period-input').fill(MONTH1);
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
 
-  // August's challan shows the carried-forward arrears from July.
-  await page.getByTestId('challan-period-input').fill('2026-08');
+  // Month 2's challan shows the carried-forward arrears from month 1.
+  await page.getByTestId('challan-period-input').fill(MONTH2);
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
 
-  const augustRow = page.locator('[data-testid^="challan-row-"]').filter({ hasText: '2026-08-01' });
-  await expect(augustRow.getByTestId(/challan-arrears-/)).toContainText('Current PKR 5,000');
-  await expect(augustRow.getByTestId(/challan-arrears-/)).toContainText('Arrears PKR 5,000');
-  await expect(augustRow.getByTestId(/challan-net-/)).toContainText('Net PKR 10,000');
+  const month2Row = page.locator('[data-testid^="challan-row-"]').filter({ hasText: `${MONTH2}-01` });
+  await expect(month2Row.getByTestId(/challan-arrears-/)).toContainText('Current PKR 5,000');
+  await expect(month2Row.getByTestId(/challan-arrears-/)).toContainText('Arrears PKR 5,000');
+  await expect(month2Row.getByTestId(/challan-net-/)).toContainText('Net PKR 10,000');
 
   // Pay the full arrears-inclusive net payable — it reaches back and
   // settles July too, via the ordinary payment waterfall.
@@ -134,14 +150,14 @@ test('an unpaid challan carries forward as arrears on the next month, and clears
   await expect(page.getByText('Payment recorded and allocated.')).toBeVisible();
   await expect(page.getByTestId('ledger-balance')).toHaveText('Balance: PKR 0');
 
-  // September now shows zero arrears.
+  // Month 3 now shows zero arrears.
   await page.goto('/fees/challans');
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('challan-period-input').fill('2026-09');
+  await page.getByTestId('challan-period-input').fill(MONTH3);
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
 
-  const septemberRow = page.locator('[data-testid^="challan-row-"]').filter({ hasText: '2026-09-01' });
-  await expect(septemberRow.getByTestId(/challan-arrears-/)).toHaveCount(0);
-  await expect(septemberRow.getByTestId(/challan-net-/)).toContainText('Net PKR 5,000');
+  const month3Row = page.locator('[data-testid^="challan-row-"]').filter({ hasText: `${MONTH3}-01` });
+  await expect(month3Row.getByTestId(/challan-arrears-/)).toHaveCount(0);
+  await expect(month3Row.getByTestId(/challan-net-/)).toContainText('Net PKR 5,000');
 });

@@ -5,6 +5,30 @@ import { randomUUID } from 'node:crypto';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// Billing period relative to today, not hardcoded 2026-07 — fee_plan.
+// effective_from defaults to current_date at enrol_student() time, so a
+// hardcoded period before "today" makes generate_challans() find zero
+// applicable charges once real time drifts past it. Also searches for a
+// period whose due_date (period end + 10 days, FR-K09's own formula) is
+// NOT a Sunday — compute_late_fee() shifts a Sunday due date forward by a
+// day, which would throw off this test's own exact day-count arithmetic,
+// same reasoning as this batch's late_fee_rules.test.sql pgTAP file.
+function findSafePeriod(): { period: string; dueDate: string } {
+  const now = new Date();
+  for (let offset = 0; offset < 12; offset++) {
+    const periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1));
+    const periodEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset + 1, 0));
+    const due = new Date(periodEnd.getTime() + 10 * 86400000);
+    if (due.getUTCDay() !== 0) {
+      return { period: periodStart.toISOString().slice(0, 7), dueDate: due.toISOString().slice(0, 10) };
+    }
+  }
+  throw new Error('no safe (non-Sunday-due) period found in the next 12 months');
+}
+function addDays(dateStr: string, days: number): string {
+  return new Date(new Date(dateStr).getTime() + days * 86400000).toISOString().slice(0, 10);
+}
+
 async function seedOwnerWithChallan() {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const runId = randomUUID().slice(0, 8);
@@ -84,6 +108,8 @@ async function seedOwnerWithChallan() {
 
 test('an owner configures a per_day late fee rule and previews the accrued amount on a real challan', async ({ page }) => {
   const { email, password } = await seedOwnerWithChallan();
+  const { period, dueDate } = findSafePeriod();
+  const asOf = addDays(dueDate, 10);
 
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
@@ -108,11 +134,10 @@ test('an owner configures a per_day late fee rule and previews the accrued amoun
   await page.getByRole('button', { name: 'Enrol into section' }).click();
   await expect(page.getByText('Enrolled.')).toBeVisible();
 
-  // Generate a July-billing challan — due_date lands on 10 August, the
-  // same date this batch's pgTAP AC coverage uses.
+  // Generate a challan for the first safe (non-Sunday-due) upcoming period.
   await page.goto('/fees/challans');
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('challan-period-input').fill('2026-07');
+  await page.getByTestId('challan-period-input').fill(period);
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
   await expect(page.getByTestId('generate-result')).toHaveText('Generated: 1 · Skipped: 0 · Failed: 0');
@@ -127,11 +152,11 @@ test('an owner configures a per_day late fee rule and previews the accrued amoun
   await expect(page.getByText('Rule created.')).toBeVisible();
   await expect(page.getByText('per day · 3 grace days')).toBeVisible();
 
-  // Preview against the real challan at 20 August: 10 days late minus 3
-  // grace days = 7 chargeable days at PKR 50/day = PKR 350.
+  // Preview 10 days after due_date: 10 days late minus 3 grace days = 7
+  // chargeable days at PKR 50/day = PKR 350.
   await page.getByTestId('preview-challan-trigger').click();
   await page.getByRole('option').first().click();
-  await page.getByTestId('preview-as-of-input').fill('2026-08-20');
+  await page.getByTestId('preview-as-of-input').fill(asOf);
   await page.getByTestId('preview-late-fee-button').click();
   await expect(page.getByTestId('late-fee-preview-result')).toHaveText('Late fee: PKR 350');
 });
