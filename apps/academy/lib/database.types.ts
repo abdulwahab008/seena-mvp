@@ -1919,6 +1919,82 @@ export type Database = {
           },
         ]
       }
+      attendance_gap_log: {
+        Row: {
+          attendance_date: string
+          campus_id: string
+          enrolled_count: number
+          id: string
+          marked_count: number
+          notified_at: string
+          section_id: string
+          tenant_id: string
+        }
+        Insert: {
+          attendance_date: string
+          campus_id: string
+          enrolled_count: number
+          id?: string
+          marked_count: number
+          notified_at?: string
+          section_id: string
+          tenant_id: string
+        }
+        Update: {
+          attendance_date?: string
+          campus_id?: string
+          enrolled_count?: number
+          id?: string
+          marked_count?: number
+          notified_at?: string
+          section_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_gap_log_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_gap_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_gap_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_gap_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_gap_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_gap_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_lock: {
         Row: {
           attendance_date: string
@@ -10159,6 +10235,16 @@ export type Database = {
         Args: { p_room_id: string; p_section_id: string }
         Returns: Json
       }
+      check_unmarked_attendance: {
+        Args: { p_campus_id: string; p_date?: string }
+        Returns: {
+          class_teacher_name: string
+          enrolled_count: number
+          marked_count: number
+          section_id: string
+          section_label: string
+        }[]
+      }
       clear_timetable_slot: {
         Args: {
           p_period_no: number
@@ -11342,6 +11428,10 @@ export type Database = {
       }
       rpc_bulk_mark_attendance: {
         Args: { p_date: string; p_exceptions?: Json; p_section_id: string }
+        Returns: Json
+      }
+      run_unmarked_attendance_check: {
+        Args: { p_campus_id: string; p_date?: string }
         Returns: Json
       }
       save_attendance_register: {
