@@ -186,10 +186,19 @@ select set_config(
   json_build_object('tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text,
   true
 );
+-- Since 20260731770000_security_definer_campus_scope_audit.sql, the
+-- app.auth_campus_ids() scope check runs before the CAMPUS_NOT_FOUND
+-- existence check (same order as every other scope-checked function in
+-- the schema) — so for this accountant, scoped to :campus_id only, a
+-- random unknown campus id is rejected as FORBIDDEN (it can never be in
+-- their own scope), not CAMPUS_NOT_FOUND. CAMPUS_NOT_FOUND is still
+-- reachable for a campus id that IS in scope (or for an owner/super_admin,
+-- who are exempt from the scope check) but doesn't exist in the tenant —
+-- not re-tested here since that existence check itself is unchanged.
 select throws_ok(
   format('select public.generate_challans(%L, %L, ''2026-08-01''::date, false)', gen_random_uuid(), :'session_id'),
-  'CAMPUS_NOT_FOUND',
-  'an unknown campus id is rejected'
+  'FORBIDDEN',
+  'an unknown campus id outside this accountant''s own scope is rejected as FORBIDDEN, not CAMPUS_NOT_FOUND'
 );
 
 select * from finish();
