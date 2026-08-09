@@ -471,10 +471,13 @@ export const printReceiptSchema = z.object({ receiptId: z.string().uuid() });
 export type PrintReceiptInput = z.infer<typeof printReceiptSchema>;
 
 // Mirrors build_collection_report_payload()'s own signature in
-// supabase/migrations/20260731280000_daily_collection_report.sql.
+// supabase/migrations/20260731280000_daily_collection_report.sql /
+// 20260731760000_per_campus_role_scoping.sql. campusId is '' for FR-A12
+// AC2's "All campuses" filter option, converted to a null p_campus_id
+// (aggregate across the caller's whole campus scope) before the RPC call.
 export const collectionReportSchema = z
   .object({
-    campusId: z.string().uuid(),
+    campusId: z.union([z.string().uuid(), z.literal('')]),
     from: z.string().min(1, 'Required'),
     to: z.string().min(1, 'Required'),
   })

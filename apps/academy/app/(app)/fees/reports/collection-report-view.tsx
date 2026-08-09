@@ -7,14 +7,31 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ALL_CAMPUSES_VALUE, buildCampusFilterOptions, type CampusOption } from '@/lib/campus-scope';
 
-export function CollectionReportView({ campusId, canFinalise }: { campusId: string; canFinalise: boolean }) {
+// Radix's Select.Item rejects an empty-string value outright, but '' is the
+// campus-scope module's own "All campuses" sentinel (kept empty so it
+// round-trips through a plain FormData field with no UI-library baggage).
+// This mapping is purely a Select-widget concern — buildCampusFilterOptions
+// itself stays free of it.
+const UI_ALL_SENTINEL = '__all__';
+const toUiValue = (v: string) => (v === ALL_CAMPUSES_VALUE ? UI_ALL_SENTINEL : v);
+const fromUiValue = (v: string) => (v === UI_ALL_SENTINEL ? ALL_CAMPUSES_VALUE : v);
+
+export function CollectionReportView({ campuses, canFinalise }: { campuses: CampusOption[]; canFinalise: boolean }) {
   const [pending, startTransition] = useTransition();
+  const [campusId, setCampusId] = useState(campuses[0]?.id ?? ALL_CAMPUSES_VALUE);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [grandTotalPaisa, setGrandTotalPaisa] = useState<number | null>(null);
   const [byDay, setByDay] = useState<ReportDay[]>([]);
   const [finalisedDate, setFinalisedDate] = useState<string | null>(null);
+
+  const campusOptions = buildCampusFilterOptions(campuses);
+  // FR-K29's cash_book_day is per-campus (its PK includes campus_id) — a
+  // "close the day" action makes no sense while "All campuses" is selected.
+  const canFinaliseSelection = canFinalise && campusId !== ALL_CAMPUSES_VALUE;
 
   const onRun = () => {
     if (!from || !to) {
@@ -37,6 +54,7 @@ export function CollectionReportView({ campusId, canFinalise }: { campusId: stri
   };
 
   const onFinalise = (bookDate: string) => {
+    if (!canFinaliseSelection) return;
     const fd = new FormData();
     fd.set('campusId', campusId);
     fd.set('bookDate', bookDate);
@@ -54,6 +72,25 @@ export function CollectionReportView({ campusId, canFinalise }: { campusId: stri
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-2 rounded-lg border p-4">
+        <div className="space-y-1">
+          <Label htmlFor="report-campus">Campus</Label>
+          <Select value={toUiValue(campusId)} onValueChange={(v) => setCampusId(fromUiValue(v))}>
+            <SelectTrigger id="report-campus" data-testid="report-campus-trigger">
+              <SelectValue placeholder="Select a campus" />
+            </SelectTrigger>
+            <SelectContent>
+              {campusOptions.map((o) => (
+                <SelectItem
+                  key={o.value || 'all'}
+                  value={toUiValue(o.value)}
+                  data-testid={o.value === ALL_CAMPUSES_VALUE ? 'report-campus-option-all' : `report-campus-option-${o.value}`}
+                >
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div className="space-y-1">
           <Label htmlFor="report-from">From</Label>
           <Input id="report-from" type="date" data-testid="report-from-input" value={from} onChange={(e) => setFrom(e.target.value)} />
@@ -87,7 +124,7 @@ export function CollectionReportView({ campusId, canFinalise }: { campusId: stri
                       .map(([mode, v]) => `${mode.replace(/_/g, ' ')}: PKR ${(v.amount_paisa / 100).toLocaleString()} (${v.count})`)
                       .join(' · ')}
                   </p>
-                  {canFinalise && (
+                  {canFinaliseSelection && (
                     <Button
                       type="button"
                       size="sm"

@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
+import { isTenantWideRole } from '@/lib/campus-scope';
 import { CollectionReportView } from './collection-report-view';
 
 export default async function CollectionReportsPage() {
@@ -11,8 +12,21 @@ export default async function CollectionReportsPage() {
   const canView = role === 'super_admin' || role === 'owner' || role === 'accountant' || role === 'principal';
   const canFinalise = role === 'super_admin' || role === 'owner' || role === 'accountant';
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
-  const campus = campuses?.[0];
+  // FR-A12 AC2: the campus filter must offer exactly the campuses this
+  // caller can see, not every campus in the tenant — public.campus's own
+  // RLS policy is tenant-wide only (no campus_id scoping), so a Principal
+  // scoped to one campus is derived from their own user_campus rows
+  // instead of the raw campus table.
+  const campuses =
+    role && isTenantWideRole(role)
+      ? ((await supabase.from('campus').select('id, code, name').eq('status', 'active').order('code')).data ?? [])
+      : await (async () => {
+          const { data: scoped } = await supabase.from('user_campus').select('campus_id').eq('user_id', user!.id).eq('is_active', true);
+          const ids = (scoped ?? []).map((r) => r.campus_id);
+          if (ids.length === 0) return [];
+          const { data } = await supabase.from('campus').select('id, code, name').in('id', ids).eq('status', 'active').order('code');
+          return data ?? [];
+        })();
 
   return (
     <div className="space-y-6">
@@ -23,11 +37,13 @@ export default async function CollectionReportsPage() {
           earlier, already-reported day.
         </p>
       </div>
-      {canView && campus ? (
-        <CollectionReportView campusId={campus.id} canFinalise={canFinalise} />
+      {canView && campuses.length > 0 ? (
+        <CollectionReportView campuses={campuses} canFinalise={canFinalise} />
       ) : (
         <p className="text-sm text-muted-foreground">
-          {campus ? 'Only an Accountant, Principal, Owner, or Super Admin can view collection reports.' : 'No active campus found.'}
+          {campuses.length > 0
+            ? 'Only an Accountant, Principal, Owner, or Super Admin can view collection reports.'
+            : 'No campus assigned — ask your Owner or Principal for access.'}
         </p>
       )}
     </div>

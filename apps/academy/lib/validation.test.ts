@@ -592,6 +592,14 @@ describe('collectionReportSchema', () => {
   it('rejects an end date before the start date', () => {
     expect(collectionReportSchema.safeParse({ ...base, from: '2026-08-31', to: '2026-08-01' }).success).toBe(false);
   });
+
+  it('FR-A12 AC2: accepts an empty campusId as the "All campuses" sentinel', () => {
+    expect(collectionReportSchema.safeParse({ ...base, campusId: '' }).success).toBe(true);
+  });
+
+  it('rejects a campusId that is neither a UUID nor the empty sentinel', () => {
+    expect(collectionReportSchema.safeParse({ ...base, campusId: 'not-a-uuid' }).success).toBe(false);
+  });
 });
 
 describe('finaliseCashBookDaySchema', () => {

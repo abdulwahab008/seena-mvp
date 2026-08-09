@@ -62,7 +62,9 @@ select is(
   'AC: three mode subtotals (cash, bank_challan, online) — one row per mode, no residual bucket'
 );
 
-select public.build_collection_report_payload(:'campus_id'::uuid, :'pay_date'::date, :'pay_date'::date) as payload \gset
+-- FR-A12: p_campus_id moved to last (default null) so "All campuses" can
+-- omit it — see 20260731760000_per_campus_role_scoping.sql.
+select public.build_collection_report_payload(:'pay_date'::date, :'pay_date'::date, :'campus_id'::uuid) as payload \gset
 select is((:'payload'::jsonb ->> 'grand_total_paisa')::bigint, 1500000::bigint, 'the payload''s grand_total_paisa matches the report function''s own total');
 select is(
   (
@@ -138,7 +140,7 @@ select throws_ok(
   'a class teacher cannot finalise the cash book'
 );
 select throws_ok(
-  format('select public.build_collection_report_payload(%L, %L, %L)', :'campus_id', :'pay_date', :'pay_date'),
+  format('select public.build_collection_report_payload(%L, %L, %L)', :'pay_date', :'pay_date', :'campus_id'),
   'FORBIDDEN',
   'a class teacher cannot pull the collection report either'
 );

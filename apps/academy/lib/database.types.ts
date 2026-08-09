@@ -10204,7 +10204,7 @@ export type Database = {
         Returns: Json
       }
       build_collection_report_payload: {
-        Args: { p_campus_id: string; p_from: string; p_to: string }
+        Args: { p_campus_id?: string; p_from: string; p_to: string }
         Returns: Json
       }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }

@@ -20,8 +20,11 @@ export async function buildCollectionReport(_prev: ReportResult, formData: FormD
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
 
   const supabase = await supabaseServer();
+  // FR-A12 AC2: '' is the "All campuses" filter option — omitting
+  // p_campus_id entirely lets it fall to the RPC's own `default null`,
+  // which means "aggregate across every campus in my scope".
   const { data, error } = await supabase.rpc('build_collection_report_payload', {
-    p_campus_id: parsed.data.campusId,
+    p_campus_id: parsed.data.campusId || undefined,
     p_from: parsed.data.from,
     p_to: parsed.data.to,
   });
