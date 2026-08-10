@@ -7,7 +7,11 @@ export default async function StudentsPage() {
 
   const [{ data: campuses }, { data: students }] = await Promise.all([
     supabase.from('campus').select('id, code, name').eq('status', 'active').order('code'),
-    supabase.from('student').select('id, name_en, gr_number, status').order('created_at', { ascending: false }),
+    // FR-A15 AC1: an explicit filter, not just RLS — an Owner/Super Admin
+    // also matches student_recycle_bin_read (the two SELECT policies are
+    // OR'd), so an unfiltered query would silently readmit soft-deleted
+    // students into this ordinary roster for those two roles.
+    supabase.from('student').select('id, name_en, gr_number, status').is('deleted_at', null).order('created_at', { ascending: false }),
   ]);
 
   return (

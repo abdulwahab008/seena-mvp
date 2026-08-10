@@ -356,6 +356,44 @@ export async function recordPayment(studentId: string, enrolmentId: string, _pre
   return { error: null };
 }
 
+export type DeleteStudentState = { error: string | null };
+
+// FR-A15: soft delete. Cascades to the student's own live enrolment (and
+// that enrolment's unpaid challans) inside soft_delete() itself — nothing
+// here to orchestrate beyond shaping the client-facing error.
+export async function deleteStudent(studentId: string): Promise<DeleteStudentState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('soft_delete', { p_table: 'student', p_id: studentId });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to delete this student.' };
+    if (error.message.includes('STUDENT_NOT_FOUND')) return { error: 'Student not found.' };
+    return { error: 'Could not delete the student.' };
+  }
+
+  revalidatePath('/students');
+  revalidatePath('/students/recycle-bin');
+  return { error: null };
+}
+
+export type RestoreStudentState = { error: string | null };
+
+// FR-A15 AC2/AC4: Owner/Super Admin-only restore — enforced inside
+// restore_record() itself, which also brings the student's enrolment and
+// its challans back exactly as they were.
+export async function restoreStudent(studentId: string): Promise<RestoreStudentState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('restore_record', { p_table: 'student', p_id: studentId });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only an Owner or Super Admin can restore a deleted student.' };
+    if (error.message.includes('STUDENT_NOT_FOUND')) return { error: 'This student was not found in the Recycle Bin.' };
+    return { error: 'Could not restore the student.' };
+  }
+
+  revalidatePath('/students/recycle-bin');
+  revalidatePath('/students');
+  return { error: null };
+}
+
 export type SetElectiveChoiceState = { error: string | null };
 
 // FR-F07: which specific subject a student picked within an elective

@@ -31,6 +31,7 @@ const LINKS = [
   { href: '/attendance/absentee-notifications', label: 'Absentee Notifications' },
   { href: '/attendance/unmarked', label: 'Unmarked Attendance' },
   { href: '/students', label: 'Students' },
+  { href: '/students/recycle-bin', label: 'Recycle Bin' },
   { href: '/homework', label: 'Homework' },
   { href: '/fees/heads', label: 'Fee Heads' },
   { href: '/fees/structure', label: 'Fee Structure' },

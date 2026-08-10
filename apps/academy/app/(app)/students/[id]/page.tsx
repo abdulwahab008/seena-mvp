@@ -8,6 +8,7 @@ import { ConcessionAwardView, type AwardRow } from './concession-award-view';
 import { LedgerView, type LedgerEntryRow } from './ledger-view';
 import { PaymentView, type PaymentRow } from './payment-view';
 import { ElectiveChoiceView, type ElectiveBucket } from './elective-choice-view';
+import { DeleteStudentControl } from './delete-student-control';
 
 // supabase-js types every embedded to-one relation as a possible array —
 // the FK is unique per enrolment/section row, so it's really ever 0 or 1.
@@ -19,10 +20,16 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const supabase = await supabaseServer();
 
+  // FR-A15 AC1: explicit filter, not just RLS — an Owner/Super Admin also
+  // matches student_recycle_bin_read (OR'd with the ordinary SELECT
+  // policy), so a soft-deleted student's page would otherwise keep
+  // rendering as if nothing happened. The Recycle Bin is the only route to
+  // a deleted student's record now.
   const { data: student } = await supabase
     .from('student')
     .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status')
     .eq('id', id)
+    .is('deleted_at', null)
     .maybeSingle();
   if (!student) notFound();
 
@@ -31,11 +38,16 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   } = await supabase.auth.getUser();
 
   const [{ data: enrolment }, { data: sections }, { data: guardianLinks }, { data: appUser }] = await Promise.all([
+    // FR-A15: explicit filter — an enrolment can be soft-deleted on its
+    // own (not only cascaded from its student), and an Owner/Super Admin
+    // also matches enrolment_recycle_bin_read, so this would otherwise
+    // keep showing a deleted enrolment as the student's active one.
     supabase
       .from('enrolment')
       .select('id, roll_no, session_id, class_section(name, class_level_id, class_level(name_en))')
       .eq('student_id', id)
       .eq('status', 'active')
+      .is('deleted_at', null)
       .maybeSingle(),
     supabase.from('class_section').select('id, name, class_level(name_en)').eq('campus_id', student.campus_id).eq('is_active', true),
     supabase
@@ -78,6 +90,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const canPostLedger = role === 'super_admin' || role === 'owner' || role === 'accountant';
   const canReverseLedger = role === 'super_admin' || role === 'owner';
   const canRecordPayment = role === 'super_admin' || role === 'owner' || role === 'accountant';
+  // FR-A15: mirrors soft_delete()'s own FORBIDDEN role list — the roles who
+  // can admit a student are the roles who can undo admitting one.
+  const canDelete = role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'admissions_officer';
 
   const { data: schemes } = await supabase
     .from('concession_scheme')
@@ -199,11 +214,14 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">{student.name_en}</h1>
-        <p className="text-sm text-muted-foreground">
-          GR {student.gr_number} · {student.gender} · DOB {student.dob} · {student.status}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">{student.name_en}</h1>
+          <p className="text-sm text-muted-foreground">
+            GR {student.gr_number} · {student.gender} · DOB {student.dob} · {student.status}
+          </p>
+        </div>
+        {canDelete && <DeleteStudentControl studentId={student.id} studentName={student.name_en} />}
       </div>
 
       <section className="space-y-2">

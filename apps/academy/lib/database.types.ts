@@ -3792,6 +3792,8 @@ export type Database = {
           campus_id: string
           class_level_id: string
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           joined_on: string
           left_on: string | null
@@ -3814,6 +3816,8 @@ export type Database = {
           campus_id: string
           class_level_id: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           joined_on?: string
           left_on?: string | null
@@ -3836,6 +3840,8 @@ export type Database = {
           campus_id?: string
           class_level_id?: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           joined_on?: string
           left_on?: string | null
@@ -3886,6 +3892,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "enrolment_override_by_fkey"
@@ -4034,6 +4047,8 @@ export type Database = {
           challan_no: string
           concession_paisa: number
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           due_date: string
           enrolment_id: string
           gross_paisa: number
@@ -4053,6 +4068,8 @@ export type Database = {
           challan_no: string
           concession_paisa?: number
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           due_date: string
           enrolment_id: string
           gross_paisa: number
@@ -4072,6 +4089,8 @@ export type Database = {
           challan_no?: string
           concession_paisa?: number
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           due_date?: string
           enrolment_id?: string
           gross_paisa?: number
@@ -4097,6 +4116,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "fee_challan_enrolment_id_fkey"
@@ -6472,6 +6498,41 @@ export type Database = {
           },
         ]
       }
+      purge_hold: {
+        Row: {
+          flagged_at: string
+          id: string
+          reason: string
+          row_id: string
+          table_name: string
+          tenant_id: string
+        }
+        Insert: {
+          flagged_at?: string
+          id?: string
+          reason: string
+          row_id: string
+          table_name: string
+          tenant_id: string
+        }
+        Update: {
+          flagged_at?: string
+          id?: string
+          reason?: string
+          row_id?: string
+          table_name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purge_hold_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role: {
         Row: {
           code: string
@@ -7607,6 +7668,8 @@ export type Database = {
           blood_group: string | null
           campus_id: string
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           dob: string
           family_group_id: string | null
           father_name_en: string | null
@@ -7631,6 +7694,8 @@ export type Database = {
           blood_group?: string | null
           campus_id: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           dob: string
           family_group_id?: string | null
           father_name_en?: string | null
@@ -7655,6 +7720,8 @@ export type Database = {
           blood_group?: string | null
           campus_id?: string
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           dob?: string
           family_group_id?: string | null
           father_name_en?: string | null
@@ -7679,6 +7746,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "student_family_group_fk"
@@ -11291,6 +11365,10 @@ export type Database = {
         }
         Returns: string
       }
+      purge_soft_deleted_records: {
+        Args: { p_older_than_days?: number }
+        Returns: Json
+      }
       reconcile_admission_fee_payment: {
         Args: { p_payment_id: string }
         Returns: undefined
@@ -11417,6 +11495,10 @@ export type Database = {
       resolve_timetable_version: {
         Args: { p_campus_id: string; p_date: string; p_session_id: string }
         Returns: string
+      }
+      restore_record: {
+        Args: { p_id: string; p_table: string }
+        Returns: undefined
       }
       reverse_ledger_entry: {
         Args: { p_ledger_id: string; p_reason: string }
@@ -11664,6 +11746,10 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      soft_delete: {
+        Args: { p_id: string; p_table: string }
+        Returns: undefined
+      }
       staff_highest_qualification: {
         Args: { p_staff_id: string }
         Returns: Database["public"]["Enums"]["qualification_level"]
