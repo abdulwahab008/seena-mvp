@@ -1044,3 +1044,29 @@ export const setAttendanceStatusWeightSchema = z.object({
   weight: z.coerce.number().min(0, 'Weight must be between 0 and 1').max(1, 'Weight must be between 0 and 1'),
 });
 export type SetAttendanceStatusWeightInput = z.infer<typeof setAttendanceStatusWeightSchema>;
+
+// Mirrors request_audit_export()'s own signature in
+// supabase/migrations/20260731790000_audit_trail_export.sql. The entity
+// list is a fixed, curated set rather than every audited table name in
+// the schema — 'certificate_issue' is included even though no such table
+// exists yet (module T's first shipped FR), a real filter parameter that
+// simply matches nothing today; see that migration's own header.
+export const AUDIT_EXPORT_ENTITIES = [
+  'certificate_issue',
+  'fee_challan',
+  'fee_payment',
+  'concession_award',
+  'student',
+  'enrolment',
+  'app_user',
+] as const;
+
+export const requestAuditExportSchema = z
+  .object({
+    from: z.string().min(1, 'Required'),
+    to: z.string().min(1, 'Required'),
+    tableNames: z.array(z.enum(AUDIT_EXPORT_ENTITIES)).min(1, 'Choose at least one entity'),
+    campusId: z.union([z.string().uuid(), z.literal('')]).optional(),
+  })
+  .refine((v) => v.to >= v.from, { message: 'End date must be on or after the start date', path: ['to'] });
+export type RequestAuditExportInput = z.infer<typeof requestAuditExportSchema>;

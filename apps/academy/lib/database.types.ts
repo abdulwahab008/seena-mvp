@@ -2380,6 +2380,126 @@ export type Database = {
           },
         ]
       }
+      audit_chain_verification: {
+        Row: {
+          broken_audit_log_id: string | null
+          broken_occurred_at: string | null
+          broken_reason: string | null
+          id: string
+          rows_checked: number
+          run_at: string
+          status: Database["public"]["Enums"]["audit_chain_status"]
+          tenant_id: string
+        }
+        Insert: {
+          broken_audit_log_id?: string | null
+          broken_occurred_at?: string | null
+          broken_reason?: string | null
+          id?: string
+          rows_checked?: number
+          run_at?: string
+          status: Database["public"]["Enums"]["audit_chain_status"]
+          tenant_id: string
+        }
+        Update: {
+          broken_audit_log_id?: string | null
+          broken_occurred_at?: string | null
+          broken_reason?: string | null
+          id?: string
+          rows_checked?: number
+          run_at?: string
+          status?: Database["public"]["Enums"]["audit_chain_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_chain_verification_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_export_job: {
+        Row: {
+          campus_id: string | null
+          completed_at: string | null
+          download_expires_at: string | null
+          download_url: string | null
+          error: string | null
+          from_date: string
+          id: string
+          manifest: Json | null
+          requested_at: string
+          requested_by: string | null
+          row_count: number | null
+          status: Database["public"]["Enums"]["audit_export_status"]
+          storage_prefix: string | null
+          table_names: string[]
+          tenant_id: string
+          to_date: string
+        }
+        Insert: {
+          campus_id?: string | null
+          completed_at?: string | null
+          download_expires_at?: string | null
+          download_url?: string | null
+          error?: string | null
+          from_date: string
+          id?: string
+          manifest?: Json | null
+          requested_at?: string
+          requested_by?: string | null
+          row_count?: number | null
+          status?: Database["public"]["Enums"]["audit_export_status"]
+          storage_prefix?: string | null
+          table_names: string[]
+          tenant_id: string
+          to_date: string
+        }
+        Update: {
+          campus_id?: string | null
+          completed_at?: string | null
+          download_expires_at?: string | null
+          download_url?: string | null
+          error?: string | null
+          from_date?: string
+          id?: string
+          manifest?: Json | null
+          requested_at?: string
+          requested_by?: string | null
+          row_count?: number | null
+          status?: Database["public"]["Enums"]["audit_export_status"]
+          storage_prefix?: string | null
+          table_names?: string[]
+          tenant_id?: string
+          to_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_export_job_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_export_job_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "audit_export_job_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -2391,6 +2511,8 @@ export type Database = {
           changed_columns: string[] | null
           id: string
           occurred_at: string
+          prev_hash: string | null
+          row_hash: string | null
           row_id: string | null
           table_name: string
           tenant_id: string
@@ -2405,6 +2527,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name: string
           tenant_id: string
@@ -2419,6 +2543,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name?: string
           tenant_id?: string
@@ -2436,6 +2562,8 @@ export type Database = {
           changed_columns: string[] | null
           id: string
           occurred_at: string
+          prev_hash: string | null
+          row_hash: string | null
           row_id: string | null
           table_name: string
           tenant_id: string
@@ -2450,6 +2578,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name: string
           tenant_id: string
@@ -2464,6 +2594,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name?: string
           tenant_id?: string
@@ -2481,6 +2613,8 @@ export type Database = {
           changed_columns: string[] | null
           id: string
           occurred_at: string
+          prev_hash: string | null
+          row_hash: string | null
           row_id: string | null
           table_name: string
           tenant_id: string
@@ -2495,6 +2629,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name: string
           tenant_id: string
@@ -2509,6 +2645,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name?: string
           tenant_id?: string
@@ -2526,6 +2664,8 @@ export type Database = {
           changed_columns: string[] | null
           id: string
           occurred_at: string
+          prev_hash: string | null
+          row_hash: string | null
           row_id: string | null
           table_name: string
           tenant_id: string
@@ -2540,6 +2680,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name: string
           tenant_id: string
@@ -2554,6 +2696,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name?: string
           tenant_id?: string
@@ -2571,6 +2715,8 @@ export type Database = {
           changed_columns: string[] | null
           id: string
           occurred_at: string
+          prev_hash: string | null
+          row_hash: string | null
           row_id: string | null
           table_name: string
           tenant_id: string
@@ -2585,6 +2731,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name: string
           tenant_id: string
@@ -2599,6 +2747,8 @@ export type Database = {
           changed_columns?: string[] | null
           id?: string
           occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
           row_id?: string | null
           table_name?: string
           tenant_id?: string
@@ -10351,6 +10501,17 @@ export type Database = {
         }
         Returns: Json
       }
+      complete_audit_export: {
+        Args: {
+          p_download_url: string
+          p_expires_hours?: number
+          p_job_id: string
+          p_manifest: Json
+          p_row_count: number
+          p_storage_prefix: string
+        }
+        Returns: undefined
+      }
       complete_onboarding_step: {
         Args: {
           p_status: Database["public"]["Enums"]["onboarding_step_status"]
@@ -10819,6 +10980,10 @@ export type Database = {
         Returns: string
       }
       expire_due_concessions: { Args: { p_as_of?: string }; Returns: number }
+      fail_audit_export: {
+        Args: { p_error: string; p_job_id: string }
+        Returns: undefined
+      }
       finalise_cash_book_day: {
         Args: { p_book_date: string; p_campus_id: string }
         Returns: {
@@ -11429,6 +11594,15 @@ export type Database = {
         }
         Returns: string
       }
+      request_audit_export: {
+        Args: {
+          p_campus_id?: string
+          p_from: string
+          p_table_names: string[]
+          p_to: string
+        }
+        Returns: string
+      }
       request_concession_award: {
         Args: {
           p_document_paths?: string[]
@@ -11511,6 +11685,25 @@ export type Database = {
       rpc_bulk_mark_attendance: {
         Args: { p_date: string; p_exceptions?: Json; p_section_id: string }
         Returns: Json
+      }
+      run_audit_chain_verification: {
+        Args: { p_tenant_id?: string }
+        Returns: {
+          broken_audit_log_id: string | null
+          broken_occurred_at: string | null
+          broken_reason: string | null
+          id: string
+          rows_checked: number
+          run_at: string
+          status: Database["public"]["Enums"]["audit_chain_status"]
+          tenant_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "audit_chain_verification"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       run_unmarked_attendance_check: {
         Args: { p_campus_id: string; p_date?: string }
@@ -11972,6 +12165,8 @@ export type Database = {
       attendance_source: "manual" | "biometric" | "leave"
       attendance_status: "present" | "absent" | "on_leave" | "half_day" | "late"
       audit_action: "insert" | "update" | "delete"
+      audit_chain_status: "ok" | "broken"
+      audit_export_status: "queued" | "running" | "completed" | "failed"
       bell_segment_kind: "TEACHING" | "BREAK" | "ASSEMBLY" | "PRAYER"
       board:
         | "FBISE"
@@ -12341,6 +12536,8 @@ export const Constants = {
       attendance_source: ["manual", "biometric", "leave"],
       attendance_status: ["present", "absent", "on_leave", "half_day", "late"],
       audit_action: ["insert", "update", "delete"],
+      audit_chain_status: ["ok", "broken"],
+      audit_export_status: ["queued", "running", "completed", "failed"],
       bell_segment_kind: ["TEACHING", "BREAK", "ASSEMBLY", "PRAYER"],
       board: [
         "FBISE",

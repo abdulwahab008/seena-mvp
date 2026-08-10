@@ -68,6 +68,7 @@ import {
   createTeachableSubjectSchema,
   assignSubstitutionSchema,
   publishTimetableSchema,
+  requestAuditExportSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1421,5 +1422,33 @@ describe('publishTimetableSchema', () => {
 
   it('rejects a missing effective date', () => {
     expect(publishTimetableSchema.safeParse({ effectiveFrom: '' }).success).toBe(false);
+  });
+});
+
+describe('requestAuditExportSchema', () => {
+  const base = { from: '2026-01-01', to: '2026-06-30', tableNames: ['fee_challan', 'certificate_issue'] };
+
+  it('accepts a valid date range with no campus filter', () => {
+    const result = requestAuditExportSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.campusId).toBeUndefined();
+  });
+
+  it('accepts an explicit campus filter', () => {
+    const result = requestAuditExportSchema.safeParse({ ...base, campusId: '11111111-1111-1111-1111-111111111111' });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a to-date before the from-date', () => {
+    const result = requestAuditExportSchema.safeParse({ ...base, from: '2026-06-30', to: '2026-01-01' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty entity list', () => {
+    expect(requestAuditExportSchema.safeParse({ ...base, tableNames: [] }).success).toBe(false);
+  });
+
+  it('rejects an entity outside the curated list', () => {
+    expect(requestAuditExportSchema.safeParse({ ...base, tableNames: ['not_a_real_table'] }).success).toBe(false);
   });
 });
