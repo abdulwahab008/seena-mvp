@@ -3,10 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { requestTimetableExportSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
-import { checkGlyphCoverage, parseCmapRanges, resolveNastaliqFont, NASTALIQ_FONT_FAMILY } from '@/lib/timetable-export/font';
+import { checkGlyphCoverage, parseCmapRanges, resolveNastaliqFont, NASTALIQ_FONT_FAMILY } from '@/lib/pdf/font';
 import { buildExportHtml } from '@/lib/timetable-export/html';
 import { collectUrduStrings, type ExportPayload } from '@/lib/timetable-export/layout';
-import { RendererUnavailableError, pdfPageCount, renderPdf } from '@/lib/timetable-export/pdf';
+import { RendererUnavailableError, pdfPageCount, renderPdf } from '@/lib/pdf/render';
 
 export type TimetableExportState = {
   error: string | null;

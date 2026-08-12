@@ -1,6 +1,10 @@
-import type { PrintDocument } from './html';
-
 /**
+ * The house PDF seam. Established by FR-F15 (timetable print and export) as
+ * lib/timetable-export/pdf.ts, moved here by FR-T01 (certificate template
+ * designer) once a second, unrelated feature needed the same renderer and
+ * the same Nastaliq machinery — the module was never timetable-specific,
+ * only its address was. Callers own their own HTML; this owns the bytes.
+ *
  * FR-F15: how a stored PDF file actually gets produced, and why this way.
  *
  * The ACs need real PDF bytes in a bucket behind a signed URL, so print
@@ -33,6 +37,18 @@ import type { PrintDocument } from './html';
  * RENDERER_UNAVAILABLE and the job records it; it never silently returns
  * something that is not a PDF.
  */
+
+/** Paper sizes any caller of this seam prints on, as CSS `@page size` names. */
+export type PageFormat = 'A3' | 'A4' | 'A5' | 'Legal';
+
+/**
+ * A complete, self-contained print document: the HTML carries its own
+ * `@page` rule and every asset inlined (fonts as data: URIs, images as
+ * data: URIs), because the renderer loads it with setContent() and no
+ * network. pageFormat/landscape restate what the stylesheet already says,
+ * for callers that want to record or display it.
+ */
+export type PrintDocument = { html: string; pageFormat: PageFormat; landscape: boolean };
 
 export class RendererUnavailableError extends Error {
   constructor(cause: unknown) {

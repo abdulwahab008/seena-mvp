@@ -1,4 +1,5 @@
-import { NASTALIQ_FONT_FAMILY, nastaliqFontFaceCss, type ResolvedFont } from './font';
+import { NASTALIQ_FONT_FAMILY, nastaliqFontFaceCss, type ResolvedFont } from '@/lib/pdf/font';
+import type { PrintDocument } from '@/lib/pdf/render';
 import {
   SCHOOL_WEEKDAYS,
   buildMasterPages,
@@ -14,8 +15,6 @@ import {
   type PayloadSlot,
   type Sheet,
 } from './layout';
-
-export type PrintDocument = { html: string; pageFormat: 'A4' | 'A3'; landscape: boolean };
 
 const LAYOUT_TITLE = {
   section: 'Section timetable',

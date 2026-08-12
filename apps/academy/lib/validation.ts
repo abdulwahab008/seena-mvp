@@ -1105,3 +1105,39 @@ export const requestTimetableExportSchema = z.object({
   staffId: z.union([z.string().uuid(), z.literal('')]).optional(),
 });
 export type RequestTimetableExportInput = z.infer<typeof requestTimetableExportSchema>;
+
+// FR-T01: mirrors public.certificate_type / certificate_language /
+// certificate_page_size and create_certificate_template()'s own signature
+// in supabase/migrations/20260731860000_certificate_template_designer.sql.
+export const CERTIFICATE_TYPES = ['transfer', 'character', 'bonafide'] as const;
+export type CertificateType = (typeof CERTIFICATE_TYPES)[number];
+export const CERTIFICATE_LANGUAGES = ['en', 'ur'] as const;
+export type CertificateLanguageCode = (typeof CERTIFICATE_LANGUAGES)[number];
+export const CERTIFICATE_PAGE_SIZES = ['A4', 'A5', 'Legal'] as const;
+export type CertificatePageSize = (typeof CERTIFICATE_PAGE_SIZES)[number];
+
+// Same shape as chk_cert_template_board: an empty string means "any board",
+// which is how a bonafide or character certificate is authored.
+const boardCodeSchema = z
+  .string()
+  .regex(/^[A-Z0-9][A-Z0-9-]{1,23}$/, 'Use capitals, digits and dashes, e.g. FBISE')
+  .or(z.literal(''));
+
+export const createCertificateTemplateSchema = z.object({
+  certificateType: z.enum(CERTIFICATE_TYPES),
+  title: z.string().min(1, 'Required').max(200),
+  bodyHtml: z.string().min(1, 'Required').max(50000),
+  boardCode: boardCodeSchema.optional(),
+  language: z.enum(CERTIFICATE_LANGUAGES),
+  pageSize: z.enum(CERTIFICATE_PAGE_SIZES),
+  campusId: z.union([z.string().uuid(), z.literal('')]).optional(),
+});
+export type CreateCertificateTemplateInput = z.infer<typeof createCertificateTemplateSchema>;
+
+export const saveCertificateTemplateSchema = z.object({
+  templateId: z.string().uuid(),
+  title: z.string().min(1, 'Required').max(200),
+  bodyHtml: z.string().min(1, 'Required').max(50000),
+  pageSize: z.enum(CERTIFICATE_PAGE_SIZES),
+});
+export type SaveCertificateTemplateInput = z.infer<typeof saveCertificateTemplateSchema>;

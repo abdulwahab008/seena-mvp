@@ -16,7 +16,7 @@ import {
   type PayloadSlot,
 } from './layout';
 import { buildExportHtml } from './html';
-import { embeddedFontNames, isPdf, pdfPageCount } from './pdf';
+import { embeddedFontNames, isPdf, pdfPageCount } from '@/lib/pdf/render';
 
 function section(id: string, name: string, ordinal = 1, medium: 'ENGLISH' | 'URDU' = 'ENGLISH') {
   return {

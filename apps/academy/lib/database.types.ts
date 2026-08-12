@@ -3325,6 +3325,119 @@ export type Database = {
           },
         ]
       }
+      certificate_template: {
+        Row: {
+          activated_at: string | null
+          activated_by: string | null
+          board_code: string | null
+          body_html: string
+          campus_id: string | null
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          created_at: string
+          created_by: string | null
+          id: string
+          language: Database["public"]["Enums"]["certificate_language"]
+          merge_field_whitelist: Json
+          page_size: Database["public"]["Enums"]["certificate_page_size"]
+          status: Database["public"]["Enums"]["certificate_template_status"]
+          tenant_id: string
+          title: string
+          version: number
+        }
+        Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
+          board_code?: string | null
+          body_html: string
+          campus_id?: string | null
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["certificate_language"]
+          merge_field_whitelist?: Json
+          page_size?: Database["public"]["Enums"]["certificate_page_size"]
+          status?: Database["public"]["Enums"]["certificate_template_status"]
+          tenant_id: string
+          title: string
+          version: number
+        }
+        Update: {
+          activated_at?: string | null
+          activated_by?: string | null
+          board_code?: string | null
+          body_html?: string
+          campus_id?: string | null
+          certificate_type?: Database["public"]["Enums"]["certificate_type"]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          language?: Database["public"]["Enums"]["certificate_language"]
+          merge_field_whitelist?: Json
+          page_size?: Database["public"]["Enums"]["certificate_page_size"]
+          status?: Database["public"]["Enums"]["certificate_template_status"]
+          tenant_id?: string
+          title?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_template_activated_by_fkey"
+            columns: ["activated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "certificate_template_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_template_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "certificate_template_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      certificate_type_field_catalog: {
+        Row: {
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          field_path: string
+          label_en: string
+          required: boolean
+          sample_en: string
+          sample_ur: string | null
+        }
+        Insert: {
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          field_path: string
+          label_en: string
+          required?: boolean
+          sample_en: string
+          sample_ur?: string | null
+        }
+        Update: {
+          certificate_type?: Database["public"]["Enums"]["certificate_type"]
+          field_path?: string
+          label_en?: string
+          required?: boolean
+          sample_en?: string
+          sample_ur?: string | null
+        }
+        Relationships: []
+      }
       challan_counter: {
         Row: {
           campus_id: string
@@ -11354,6 +11467,10 @@ export type Database = {
         }[]
       }
       accept_invitation: { Args: { p_token: string }; Returns: string }
+      activate_certificate_template: {
+        Args: { p_template_id: string }
+        Returns: string
+      }
       activate_guardian_account: { Args: { p_token: string }; Returns: string }
       add_holiday: {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
@@ -11497,6 +11614,14 @@ export type Database = {
       cancel_leave_application: {
         Args: { p_application_id: string }
         Returns: undefined
+      }
+      certificate_merge_fields: {
+        Args: { p_body_html: string }
+        Returns: string[]
+      }
+      certificate_preview_payload: {
+        Args: { p_template_id: string }
+        Returns: Json
       }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
       check_homework_load: {
@@ -11666,6 +11791,18 @@ export type Database = {
       }
       create_campus: {
         Args: { p_city?: string; p_code: string; p_name: string }
+        Returns: string
+      }
+      create_certificate_template: {
+        Args: {
+          p_board_code?: string
+          p_body_html: string
+          p_campus_id?: string
+          p_certificate_type: Database["public"]["Enums"]["certificate_type"]
+          p_language?: Database["public"]["Enums"]["certificate_language"]
+          p_page_size?: Database["public"]["Enums"]["certificate_page_size"]
+          p_title: string
+        }
         Returns: string
       }
       create_class_level: {
@@ -12757,6 +12894,15 @@ export type Database = {
         }
         Returns: Json
       }
+      resolve_certificate_template: {
+        Args: {
+          p_board_code?: string
+          p_campus_id: string
+          p_certificate_type: Database["public"]["Enums"]["certificate_type"]
+          p_language?: Database["public"]["Enums"]["certificate_language"]
+        }
+        Returns: string
+      }
       resolve_fee_structure: {
         Args: {
           p_campus_id: string
@@ -12825,6 +12971,15 @@ export type Database = {
           p_synced_at?: string
         }
         Returns: Json
+      }
+      save_certificate_template: {
+        Args: {
+          p_body_html: string
+          p_page_size: Database["public"]["Enums"]["certificate_page_size"]
+          p_template_id: string
+          p_title: string
+        }
+        Returns: string
       }
       search_staff: {
         Args: { p_include_former?: boolean; p_q?: string }
@@ -13238,6 +13393,10 @@ export type Database = {
         }
         Returns: string
       }
+      validate_certificate_template: {
+        Args: { p_template_id: string }
+        Returns: Json
+      }
       verify_admission_document: {
         Args: { p_document_id: string }
         Returns: undefined
@@ -13323,6 +13482,10 @@ export type Database = {
         | "CAMBRIDGE"
       branding_asset_type: "logo" | "letterhead" | "signature" | "stamp"
       campus_status: "active" | "archived"
+      certificate_language: "en" | "ur"
+      certificate_page_size: "A4" | "A5" | "Legal"
+      certificate_template_status: "draft" | "active" | "retired"
+      certificate_type: "transfer" | "character" | "bonafide"
       competency_source_enum: "DECLARED" | "INFERRED" | "VERIFIED"
       concession_award_status: "pending" | "approved" | "rejected" | "expired"
       concession_calc_type: "percentage" | "fixed_amount"
@@ -13704,6 +13867,10 @@ export const Constants = {
       ],
       branding_asset_type: ["logo", "letterhead", "signature", "stamp"],
       campus_status: ["active", "archived"],
+      certificate_language: ["en", "ur"],
+      certificate_page_size: ["A4", "A5", "Legal"],
+      certificate_template_status: ["draft", "active", "retired"],
+      certificate_type: ["transfer", "character", "bonafide"],
       competency_source_enum: ["DECLARED", "INFERRED", "VERIFIED"],
       concession_award_status: ["pending", "approved", "rejected", "expired"],
       concession_calc_type: ["percentage", "fixed_amount"],
