@@ -1085,3 +1085,14 @@ export const requestAuditExportSchema = z
   })
   .refine((v) => v.to >= v.from, { message: 'End date must be on or after the start date', path: ['to'] });
 export type RequestAuditExportInput = z.infer<typeof requestAuditExportSchema>;
+
+// FR-F15: mirrors public.timetable_export_layout.
+export const TIMETABLE_EXPORT_LAYOUTS = ['section', 'teacher', 'master'] as const;
+export type TimetableExportLayout = (typeof TIMETABLE_EXPORT_LAYOUTS)[number];
+
+export const requestTimetableExportSchema = z.object({
+  versionId: z.string().uuid('Choose a timetable version'),
+  layout: z.enum(TIMETABLE_EXPORT_LAYOUTS),
+  staffId: z.union([z.string().uuid(), z.literal('')]).optional(),
+});
+export type RequestTimetableExportInput = z.infer<typeof requestTimetableExportSchema>;

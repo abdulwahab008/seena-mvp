@@ -19,6 +19,7 @@ const LINKS = [
   { href: '/academic-setup/rooms', label: 'Rooms' },
   { href: '/academic-setup/bell-templates', label: 'Bell Templates' },
   { href: '/academic-setup/timetable', label: 'Timetable' },
+  { href: '/academic-setup/timetable-export', label: 'Timetable Export' },
   { href: '/academic-setup/substitutions', label: 'Substitutions' },
   { href: '/my-timetable', label: 'My Timetable' },
   { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects' },

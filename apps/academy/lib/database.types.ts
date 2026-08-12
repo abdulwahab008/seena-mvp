@@ -9299,6 +9299,112 @@ export type Database = {
           },
         ]
       }
+      timetable_export_job: {
+        Row: {
+          campus_id: string
+          completed_at: string | null
+          download_expires_at: string | null
+          download_url: string | null
+          error: string | null
+          file_path: string | null
+          font_family: string | null
+          id: string
+          layout: Database["public"]["Enums"]["timetable_export_layout"]
+          missing_glyph_count: number | null
+          page_count: number | null
+          requested_at: string
+          requested_by: string | null
+          scope_section_ids: string[] | null
+          scope_staff_id: string | null
+          status: Database["public"]["Enums"]["timetable_export_status"]
+          tenant_id: string
+          timetable_version_id: string
+        }
+        Insert: {
+          campus_id: string
+          completed_at?: string | null
+          download_expires_at?: string | null
+          download_url?: string | null
+          error?: string | null
+          file_path?: string | null
+          font_family?: string | null
+          id?: string
+          layout: Database["public"]["Enums"]["timetable_export_layout"]
+          missing_glyph_count?: number | null
+          page_count?: number | null
+          requested_at?: string
+          requested_by?: string | null
+          scope_section_ids?: string[] | null
+          scope_staff_id?: string | null
+          status?: Database["public"]["Enums"]["timetable_export_status"]
+          tenant_id: string
+          timetable_version_id: string
+        }
+        Update: {
+          campus_id?: string
+          completed_at?: string | null
+          download_expires_at?: string | null
+          download_url?: string | null
+          error?: string | null
+          file_path?: string | null
+          font_family?: string | null
+          id?: string
+          layout?: Database["public"]["Enums"]["timetable_export_layout"]
+          missing_glyph_count?: number | null
+          page_count?: number | null
+          requested_at?: string
+          requested_by?: string | null
+          scope_section_ids?: string[] | null
+          scope_staff_id?: string | null
+          status?: Database["public"]["Enums"]["timetable_export_status"]
+          tenant_id?: string
+          timetable_version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_export_job_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_export_job_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_export_job_scope_staff_id_fkey"
+            columns: ["scope_staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_export_job_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_export_job_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_export_job_timetable_version_id_fkey"
+            columns: ["timetable_version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
+          },
+        ]
+      }
       timetable_parallel_group: {
         Row: {
           campus_id: string
@@ -11365,6 +11471,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      complete_timetable_export: {
+        Args: {
+          p_download_url: string
+          p_expires_hours?: number
+          p_file_path: string
+          p_font_family?: string
+          p_job_id: string
+          p_missing_glyph_count: number
+          p_page_count: number
+        }
+        Returns: undefined
+      }
       compute_late_fee: {
         Args: { p_as_of?: string; p_challan_id: string }
         Returns: number
@@ -11840,6 +11958,10 @@ export type Database = {
       }
       expire_due_concessions: { Args: { p_as_of?: string }; Returns: number }
       fail_audit_export: {
+        Args: { p_error: string; p_job_id: string }
+        Returns: undefined
+      }
+      fail_timetable_export: {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
       }
@@ -12398,6 +12520,10 @@ export type Database = {
         Args: { p_older_than_days?: number }
         Returns: Json
       }
+      purge_timetable_exports: {
+        Args: { p_older_than_days?: number }
+        Returns: Json
+      }
       reconcile_admission_fee_payment: {
         Args: { p_payment_id: string }
         Returns: undefined
@@ -12475,6 +12601,14 @@ export type Database = {
           p_enrolment_id: string
           p_scheme_id: string
           p_value: number
+        }
+        Returns: string
+      }
+      request_timetable_export: {
+        Args: {
+          p_layout: Database["public"]["Enums"]["timetable_export_layout"]
+          p_staff_id?: string
+          p_version_id: string
         }
         Returns: string
       }
@@ -12945,6 +13079,7 @@ export type Database = {
         }[]
       }
       timemultirange: { Args: never; Returns: unknown }
+      timetable_export_payload: { Args: { p_job_id: string }; Returns: Json }
       undo_import_batch: { Args: { p_batch_id: string }; Returns: Json }
       unlink_guardian: {
         Args: { p_guardian_id: string; p_student_id: string }
@@ -13258,6 +13393,8 @@ export type Database = {
       substitution_status: "active" | "review"
       tenant_status: "provisioning" | "active" | "suspended" | "closed"
       test_attendance: "pending" | "present" | "absent"
+      timetable_export_layout: "section" | "teacher" | "master"
+      timetable_export_status: "queued" | "running" | "completed" | "failed"
       timetable_version_status: "DRAFT" | "PUBLISHED" | "SUPERSEDED"
       transport_direction: "pickup" | "drop" | "both"
       user_status: "active" | "suspended" | "terminated"
@@ -13655,6 +13792,8 @@ export const Constants = {
       substitution_status: ["active", "review"],
       tenant_status: ["provisioning", "active", "suspended", "closed"],
       test_attendance: ["pending", "present", "absent"],
+      timetable_export_layout: ["section", "teacher", "master"],
+      timetable_export_status: ["queued", "running", "completed", "failed"],
       timetable_version_status: ["DRAFT", "PUBLISHED", "SUPERSEDED"],
       transport_direction: ["pickup", "drop", "both"],
       user_status: ["active", "suspended", "terminated"],
