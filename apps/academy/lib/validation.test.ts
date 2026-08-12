@@ -36,6 +36,7 @@ import {
   declareCompetencySchema,
   suggestSubstitutesSchema,
   cloneAcademicStructureSchema,
+  startRolloverSchema,
   setDocumentRequirementSchema,
   setDocumentSubmissionSchema,
   createTestSittingSchema,
@@ -746,6 +747,26 @@ describe('cloneAcademicStructureSchema', () => {
 
   it('rejects a missing campus', () => {
     expect(cloneAcademicStructureSchema.safeParse({ ...base, campusId: '' }).success).toBe(false);
+  });
+});
+
+describe('startRolloverSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    fromSessionId: '22222222-2222-2222-2222-222222222222',
+    toSessionId: '33333333-3333-3333-3333-333333333333',
+  };
+
+  it('accepts distinct source and target sessions', () => {
+    expect(startRolloverSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects rolling a session into itself', () => {
+    expect(startRolloverSchema.safeParse({ ...base, toSessionId: base.fromSessionId }).success).toBe(false);
+  });
+
+  it('rejects a missing campus', () => {
+    expect(startRolloverSchema.safeParse({ ...base, campusId: '' }).success).toBe(false);
   });
 });
 

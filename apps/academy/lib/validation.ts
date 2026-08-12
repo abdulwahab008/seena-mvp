@@ -570,6 +570,21 @@ export const cloneAcademicStructureSchema = z
   });
 export type CloneAcademicStructureInput = z.infer<typeof cloneAcademicStructureSchema>;
 
+// FR-A06: session rollover and promotion engine. Mirrors
+// start_session_rollover()'s own SAME_SESSION check in
+// supabase/migrations/20260731810000_session_rollover_and_promotion.sql.
+export const startRolloverSchema = z
+  .object({
+    campusId: z.string().uuid('Choose a campus'),
+    fromSessionId: z.string().uuid('Choose the source session'),
+    toSessionId: z.string().uuid('Choose the target session'),
+  })
+  .refine((v) => v.fromSessionId !== v.toSessionId, {
+    message: 'The source and target sessions must be different',
+    path: ['toSessionId'],
+  });
+export type StartRolloverInput = z.infer<typeof startRolloverSchema>;
+
 export const DOCUMENT_TYPES = [
   'birth_certificate',
   'transfer_certificate',

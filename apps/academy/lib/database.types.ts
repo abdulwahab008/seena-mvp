@@ -288,6 +288,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admission_application_class_applied_id_fkey"
+            columns: ["class_applied_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
             foreignKeyName: "admission_application_enquiry_id_fkey"
             columns: ["enquiry_id"]
             isOneToOne: false
@@ -616,6 +623,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_enquiry_class_applied_id_fkey"
+            columns: ["class_applied_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "admission_enquiry_merged_into_id_fkey"
@@ -1176,6 +1190,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admission_offer_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
             foreignKeyName: "admission_offer_extended_by_fkey"
             columns: ["extended_by"]
             isOneToOne: false
@@ -1399,6 +1420,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admission_test_sitting_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
             foreignKeyName: "admission_test_sitting_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -1478,6 +1506,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_waitlist_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "admission_waitlist_removed_by_fkey"
@@ -3402,6 +3437,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "class_section_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
             foreignKeyName: "class_section_home_room_id_fkey"
             columns: ["home_room_id"]
             isOneToOne: false
@@ -3512,6 +3554,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subject_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "class_subject_session_id_fkey"
@@ -4042,6 +4091,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "enrolment_deleted_by_fkey"
@@ -5434,6 +5490,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_structure_line_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "fee_structure_line_fee_head_id_fkey"
@@ -7151,6 +7214,249 @@ export type Database = {
           },
         ]
       }
+      session_rollover_decision: {
+        Row: {
+          created_at: string
+          decision: Database["public"]["Enums"]["rollover_decision"]
+          error_code: string | null
+          id: string
+          new_enrolment_id: string | null
+          processed_at: string | null
+          run_id: string
+          source_enrolment_id: string
+          student_id: string
+          target_class_id: string | null
+          target_section_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          decision?: Database["public"]["Enums"]["rollover_decision"]
+          error_code?: string | null
+          id?: string
+          new_enrolment_id?: string | null
+          processed_at?: string | null
+          run_id: string
+          source_enrolment_id: string
+          student_id: string
+          target_class_id?: string | null
+          target_section_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          decision?: Database["public"]["Enums"]["rollover_decision"]
+          error_code?: string | null
+          id?: string
+          new_enrolment_id?: string | null
+          processed_at?: string | null
+          run_id?: string
+          source_enrolment_id?: string
+          student_id?: string
+          target_class_id?: string | null
+          target_section_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
+            columns: ["new_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
+            columns: ["new_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "session_rollover_run"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_source_enrolment_id_fkey"
+            columns: ["source_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_source_enrolment_id_fkey"
+            columns: ["source_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_class_id_fkey"
+            columns: ["target_class_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_class_id_fkey"
+            columns: ["target_class_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+        ]
+      }
+      session_rollover_run: {
+        Row: {
+          already_existing_count: number
+          campus_id: string
+          created_at: string
+          created_count: number
+          finished_at: string | null
+          from_session_id: string
+          held_count: number
+          id: string
+          is_no_op: boolean | null
+          passed_out_count: number
+          processed_count: number
+          promoted_count: number
+          retained_count: number
+          started_at: string | null
+          started_by: string | null
+          status: Database["public"]["Enums"]["rollover_run_status"]
+          tenant_id: string
+          to_session_id: string
+          total_count: number
+        }
+        Insert: {
+          already_existing_count?: number
+          campus_id: string
+          created_at?: string
+          created_count?: number
+          finished_at?: string | null
+          from_session_id: string
+          held_count?: number
+          id?: string
+          is_no_op?: boolean | null
+          passed_out_count?: number
+          processed_count?: number
+          promoted_count?: number
+          retained_count?: number
+          started_at?: string | null
+          started_by?: string | null
+          status?: Database["public"]["Enums"]["rollover_run_status"]
+          tenant_id: string
+          to_session_id: string
+          total_count?: number
+        }
+        Update: {
+          already_existing_count?: number
+          campus_id?: string
+          created_at?: string
+          created_count?: number
+          finished_at?: string | null
+          from_session_id?: string
+          held_count?: number
+          id?: string
+          is_no_op?: boolean | null
+          passed_out_count?: number
+          processed_count?: number
+          promoted_count?: number
+          retained_count?: number
+          started_at?: string | null
+          started_by?: string | null
+          status?: Database["public"]["Enums"]["rollover_run_status"]
+          tenant_id?: string
+          to_session_id?: string
+          total_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_rollover_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_run_from_session_id_fkey"
+            columns: ["from_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_run_started_by_fkey"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_run_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_run_to_session_id_fkey"
+            columns: ["to_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sibling_discount_scheme_rank: {
         Row: {
           scheme_id: string
@@ -7730,11 +8036,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "staff_teachable_subject_class_level_from_id_fkey"
+            columns: ["class_level_from_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
             foreignKeyName: "staff_teachable_subject_class_level_to_id_fkey"
             columns: ["class_level_to_id"]
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_teachable_subject_class_level_to_id_fkey"
+            columns: ["class_level_to_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "staff_teachable_subject_staff_id_fkey"
@@ -7968,6 +8288,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "student_elective_choice_session_id_fkey"
@@ -9446,6 +9773,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "class_subject_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
             foreignKeyName: "class_subject_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -9664,6 +9998,145 @@ export type Database = {
           },
         ]
       }
+      v_rollover_decision_detail: {
+        Row: {
+          campus_id: string | null
+          created_at: string | null
+          decision: Database["public"]["Enums"]["rollover_decision"] | null
+          error_code: string | null
+          from_session_id: string | null
+          gr_number: string | null
+          id: string | null
+          new_enrolment_id: string | null
+          processed_at: string | null
+          run_id: string | null
+          run_status: Database["public"]["Enums"]["rollover_run_status"] | null
+          source_class_id: string | null
+          source_class_name: string | null
+          student_id: string | null
+          student_name: string | null
+          target_class_id: string | null
+          target_class_name: string | null
+          target_section_id: string | null
+          target_section_name: string | null
+          tenant_id: string | null
+          to_session_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
+            columns: ["new_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
+            columns: ["new_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "session_rollover_run"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_class_id_fkey"
+            columns: ["target_class_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_class_id_fkey"
+            columns: ["target_class_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_run_from_session_id_fkey"
+            columns: ["from_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_run_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_run_to_session_id_fkey"
+            columns: ["to_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_scheduled_vs_required_periods: {
         Row: {
           required_periods: number | null
@@ -9763,6 +10236,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_section_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "class_section_session_id_fkey"
@@ -10220,6 +10700,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_level"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subject_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
           },
           {
             foreignKeyName: "class_subject_session_id_fkey"
@@ -10979,6 +11466,10 @@ export type Database = {
         }
         Returns: string
       }
+      execute_rollover_batch: {
+        Args: { p_limit?: number; p_run_id: string }
+        Returns: Json
+      }
       expire_due_concessions: { Args: { p_as_of?: string }; Returns: number }
       fail_audit_export: {
         Args: { p_error: string; p_job_id: string }
@@ -11682,6 +12173,7 @@ export type Database = {
         Args: { p_id: string }
         Returns: undefined
       }
+      rollover_run_summary: { Args: { p_run_id: string }; Returns: Json }
       rpc_bulk_mark_attendance: {
         Args: { p_date: string; p_exceptions?: Json; p_section_id: string }
         Returns: Json
@@ -11879,6 +12371,23 @@ export type Database = {
         }
         Returns: string
       }
+      set_rollover_decision: {
+        Args: {
+          p_decision: Database["public"]["Enums"]["rollover_decision"]
+          p_run_id: string
+          p_student_id: string
+          p_target_class_id?: string
+        }
+        Returns: undefined
+      }
+      set_rollover_decisions_bulk: {
+        Args: {
+          p_decision: Database["public"]["Enums"]["rollover_decision"]
+          p_run_id: string
+          p_student_ids: string[]
+        }
+        Returns: number
+      }
       set_room_active: {
         Args: { p_id: string; p_inactive_from?: string; p_is_active: boolean }
         Returns: undefined
@@ -11946,6 +12455,14 @@ export type Database = {
       staff_highest_qualification: {
         Args: { p_staff_id: string }
         Returns: Database["public"]["Enums"]["qualification_level"]
+      }
+      start_session_rollover: {
+        Args: {
+          p_campus_id: string
+          p_from_session_id: string
+          p_to_session_id: string
+        }
+        Returns: Json
       }
       student_balance: { Args: { p_enrolment_id: string }; Returns: number }
       student_timetable: {
@@ -12313,6 +12830,8 @@ export type Database = {
         | "phd"
       qualification_verification_status: "pending" | "verified" | "rejected"
       reminder_kind: "followup_officer" | "appointment_parent"
+      rollover_decision: "promote" | "retain" | "pass_out" | "hold"
+      rollover_run_status: "pending" | "running" | "completed"
       room_type_enum:
         | "CLASSROOM"
         | "SCIENCE_LAB"
@@ -12352,6 +12871,7 @@ export type Database = {
         | "transferred"
         | "struck_off"
         | "on_leave"
+        | "passed_out"
       subject_type: "CORE" | "ELECTIVE" | "ADDITIONAL" | "NON_EXAMINABLE"
       substitution_reason: "leave" | "official_duty" | "suspension" | "other"
       substitution_status: "active" | "review"
@@ -12700,6 +13220,8 @@ export const Constants = {
       ],
       qualification_verification_status: ["pending", "verified", "rejected"],
       reminder_kind: ["followup_officer", "appointment_parent"],
+      rollover_decision: ["promote", "retain", "pass_out", "hold"],
+      rollover_run_status: ["pending", "running", "completed"],
       room_type_enum: [
         "CLASSROOM",
         "SCIENCE_LAB",
@@ -12742,6 +13264,7 @@ export const Constants = {
         "transferred",
         "struck_off",
         "on_leave",
+        "passed_out",
       ],
       subject_type: ["CORE", "ELECTIVE", "ADDITIONAL", "NON_EXAMINABLE"],
       substitution_reason: ["leave", "official_duty", "suspension", "other"],
