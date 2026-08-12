@@ -1847,6 +1847,7 @@ export type Database = {
           session_id: string
           source: Database["public"]["Enums"]["student_attendance_source"]
           status: Database["public"]["Enums"]["student_attendance_status"]
+          synced_at: string | null
           tenant_id: string
         }
         Insert: {
@@ -1863,6 +1864,7 @@ export type Database = {
           session_id: string
           source?: Database["public"]["Enums"]["student_attendance_source"]
           status: Database["public"]["Enums"]["student_attendance_status"]
+          synced_at?: string | null
           tenant_id: string
         }
         Update: {
@@ -1879,6 +1881,7 @@ export type Database = {
           session_id?: string
           source?: Database["public"]["Enums"]["student_attendance_source"]
           status?: Database["public"]["Enums"]["student_attendance_status"]
+          synced_at?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -2408,6 +2411,104 @@ export type Database = {
           },
           {
             foreignKeyName: "attendance_status_weight_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_sync_log: {
+        Row: {
+          attendance_date: string
+          campus_id: string
+          captured_at: string
+          error_text: string | null
+          id: string
+          idempotency_key: string
+          payload: Json
+          response: Json
+          result: Database["public"]["Enums"]["attendance_sync_result"]
+          section_id: string
+          synced_at: string
+          teacher_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          attendance_date: string
+          campus_id: string
+          captured_at: string
+          error_text?: string | null
+          id?: string
+          idempotency_key: string
+          payload: Json
+          response: Json
+          result: Database["public"]["Enums"]["attendance_sync_result"]
+          section_id: string
+          synced_at: string
+          teacher_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          attendance_date?: string
+          campus_id?: string
+          captured_at?: string
+          error_text?: string | null
+          id?: string
+          idempotency_key?: string
+          payload?: Json
+          response?: Json
+          result?: Database["public"]["Enums"]["attendance_sync_result"]
+          section_id?: string
+          synced_at?: string
+          teacher_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_sync_log_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -12682,7 +12783,13 @@ export type Database = {
       }
       rollover_run_summary: { Args: { p_run_id: string }; Returns: Json }
       rpc_bulk_mark_attendance: {
-        Args: { p_date: string; p_exceptions?: Json; p_section_id: string }
+        Args: {
+          p_captured_at?: string
+          p_date: string
+          p_exceptions?: Json
+          p_idempotency_key?: string
+          p_section_id: string
+        }
         Returns: Json
       }
       run_audit_chain_verification: {
@@ -12709,7 +12816,14 @@ export type Database = {
         Returns: Json
       }
       save_attendance_register: {
-        Args: { p_attendance_date: string; p_marks: Json; p_section_id: string }
+        Args: {
+          p_attendance_date: string
+          p_marked_at?: string
+          p_marks: Json
+          p_section_id: string
+          p_source?: Database["public"]["Enums"]["student_attendance_source"]
+          p_synced_at?: string
+        }
         Returns: Json
       }
       search_staff: {
@@ -13194,6 +13308,7 @@ export type Database = {
       attendance_lock_source: "cron" | "manual"
       attendance_source: "manual" | "biometric" | "leave"
       attendance_status: "present" | "absent" | "on_leave" | "half_day" | "late"
+      attendance_sync_result: "applied" | "rejected_locked" | "rejected_stale"
       audit_action: "insert" | "update" | "delete"
       audit_chain_status: "ok" | "broken"
       audit_export_status: "queued" | "running" | "completed" | "failed"
@@ -13573,6 +13688,7 @@ export const Constants = {
       attendance_lock_source: ["cron", "manual"],
       attendance_source: ["manual", "biometric", "leave"],
       attendance_status: ["present", "absent", "on_leave", "half_day", "late"],
+      attendance_sync_result: ["applied", "rejected_locked", "rejected_stale"],
       audit_action: ["insert", "update", "delete"],
       audit_chain_status: ["ok", "broken"],
       audit_export_status: ["queued", "running", "completed", "failed"],

@@ -1,8 +1,16 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { loadRegisterRoster, bulkMarkAttendance, lockAttendanceNow, requestAttendanceCorrection, type RosterStudent } from './actions';
+import {
+  loadRegisterRoster,
+  bulkMarkAttendance,
+  lockAttendanceNow,
+  requestAttendanceCorrection,
+  syncQueuedRegister,
+  type RosterStudent,
+} from './actions';
+import { enqueue, flushQueue, queueDepth, type QueuedMark } from '@/lib/offline-queue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +20,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 // dialog, no dropdown. The AC's own cycle names the 4th state "leave" —
 // this schema's enum (FR-G02) calls the same concept 'excused'.
 const CYCLE = ['present', 'absent', 'late', 'excused'] as const;
+
+// FR-G05 AC1's own literal wording.
+const SAVED_ON_DEVICE = 'Saved on device — will upload when online';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -114,6 +125,52 @@ export function RegisterForm({
   const [loaded, setLoaded] = useState(false);
   const [locked, setLocked] = useState(false);
   const [lockedAt, setLockedAt] = useState<string | null>(null);
+  const [pendingUploads, setPendingUploads] = useState(0);
+  const draining = useRef(false);
+
+  // FR-G05: drain whatever the device captured while it had no signal.
+  // Runs on mount and on every 'online' event — a teacher who walks from
+  // a dead-zone classroom to the staff room never touches this.
+  const drain = useCallback(async () => {
+    if (draining.current) return;
+    draining.current = true;
+    try {
+      const report = await flushQueue(window.localStorage, (entry) =>
+        syncQueuedRegister({
+          sectionId: entry.sectionId,
+          attendanceDate: entry.attendanceDate,
+          exceptions: entry.exceptions,
+          idempotencyKey: entry.idempotencyKey,
+          capturedAt: entry.capturedAt,
+        }).catch(() => ({ kind: 'failed', retryable: true, error: 'Still offline.' }) as const)
+      );
+      setPendingUploads(report.remaining);
+      if (report.applied > 0) toast.success(`Uploaded ${report.applied} register(s) saved on this device.`);
+      // AC4: the locked-date rejection is never silent — the capture
+      // became correction requests a Principal now has to decide.
+      if (report.locked > 0) {
+        toast.error(`That date was locked before your register uploaded — sent for approval as correction requests.`);
+      }
+      if (report.stale > 0) toast.error('A newer register was already saved for that date — your offline copy was not applied.');
+      report.dropped.forEach((message) => toast.error(message));
+    } finally {
+      draining.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    setPendingUploads(queueDepth(window.localStorage));
+    if (navigator.onLine) void drain();
+
+    const onOnline = () => void drain();
+    const onOffline = () => setPendingUploads(queueDepth(window.localStorage));
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, [drain]);
 
   const onLoad = () => {
     if (!sectionId || !attendanceDate) return;
@@ -156,18 +213,43 @@ export function RegisterForm({
     // present server-side, so a zero-touch submit is a tiny fixed payload.
     // FR-G06 AC2: an unset arrival_time on a 'late' mark is left out
     // entirely — save_attendance_register() defaults it server-side.
-    const exceptions = students
+    const exceptions: QueuedMark[] = students
       .map((s) => ({ enrolmentId: s.enrolmentId, status: marks[s.enrolmentId] ?? 'present', arrivalTime: arrivalTimes[s.enrolmentId] || undefined }))
       .filter((m) => m.status !== 'present');
+
+    // AC1/AC3: the capture time is the device clock at submit, and it is
+    // what marked_at will end up holding however much later this uploads.
+    const captureOnDevice = () => {
+      enqueue(window.localStorage, {
+        idempotencyKey: crypto.randomUUID(),
+        sectionId,
+        attendanceDate,
+        exceptions,
+        capturedAt: new Date().toISOString(),
+      });
+      setPendingUploads(queueDepth(window.localStorage));
+      toast.success(SAVED_ON_DEVICE);
+    };
+
+    if (!navigator.onLine) {
+      captureOnDevice();
+      return;
+    }
 
     const fd = new FormData();
     fd.set('sectionId', sectionId);
     fd.set('attendanceDate', attendanceDate);
     fd.set('exceptions', JSON.stringify(exceptions));
     startTransition(async () => {
-      const result = await bulkMarkAttendance({ error: null, saved: null }, fd);
-      if (result.error) toast.error(result.error);
-      else toast.success(`Register saved — ${result.saved} student(s).`);
+      try {
+        const result = await bulkMarkAttendance({ error: null, saved: null }, fd);
+        if (result.error) toast.error(result.error);
+        else toast.success(`Register saved — ${result.saved} student(s).`);
+      } catch {
+        // The connection died mid-flight rather than before it — same
+        // outcome for the teacher, who must never mark the register twice.
+        captureOnDevice();
+      }
     });
   };
 
@@ -203,6 +285,12 @@ export function RegisterForm({
           Load register
         </Button>
       </div>
+
+      {pendingUploads > 0 && (
+        <p className="rounded-lg border border-sky-300 bg-sky-50 p-3 text-sm text-sky-900" data-testid="offline-queue-banner">
+          {SAVED_ON_DEVICE} — <span data-testid="offline-queue-depth">{pendingUploads}</span> register(s) waiting to upload.
+        </p>
+      )}
 
       {loaded && holiday && (
         <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800" data-testid="register-holiday-banner">

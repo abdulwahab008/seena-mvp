@@ -840,6 +840,15 @@ export const bulkMarkAttendanceSchema = z.object({
 });
 export type BulkMarkAttendanceInput = z.infer<typeof bulkMarkAttendanceSchema>;
 
+// FR-G05: the same payload, plus the two facts a queued submission
+// carries that a live one does not — the key that makes replaying it
+// exactly-once, and the device clock reading from when it was captured.
+export const syncQueuedRegisterSchema = bulkMarkAttendanceSchema.extend({
+  idempotencyKey: z.string().uuid(),
+  capturedAt: z.string().datetime(),
+});
+export type SyncQueuedRegisterInput = z.infer<typeof syncQueuedRegisterSchema>;
+
 // Mirrors request_attendance_correction()'s own checks in
 // supabase/migrations/20260731520000_attendance_correction_approval.sql
 // and 20260731690000_attendance_correction_request_hardening.sql (FR-G10's

@@ -1,7 +1,8 @@
 'use server';
 
-import { bulkMarkAttendanceSchema, requestAttendanceCorrectionSchema } from '@/lib/validation';
+import { bulkMarkAttendanceSchema, requestAttendanceCorrectionSchema, syncQueuedRegisterSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
+import type { SyncOutcome } from '@/lib/offline-queue';
 
 export type RosterStudent = { enrolmentId: string; name: string; grNumber: string; currentStatus: string | null };
 export type LoadRegisterState = {
@@ -110,6 +111,48 @@ export async function bulkMarkAttendance(_prev: SaveRegisterState, formData: For
   }
 
   return { error: null, saved: (data as { saved: number } | null)?.saved ?? null };
+}
+
+// FR-G05: the upload half of the device queue. Same RPC as the live
+// submit, plus the idempotency key and the device capture time — the
+// server decides between applying it, replaying an earlier answer for
+// this key, or rejecting it (locked / stale). Only a failure to reach
+// the server at all is worth another attempt, so the outcome says so
+// explicitly rather than making the caller guess from an error string.
+export async function syncQueuedRegister(input: unknown): Promise<SyncOutcome> {
+  const parsed = syncQueuedRegisterSchema.safeParse(input);
+  if (!parsed.success) {
+    return { kind: 'failed', retryable: false, error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+  }
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('rpc_bulk_mark_attendance', {
+    p_section_id: parsed.data.sectionId,
+    p_date: parsed.data.attendanceDate,
+    p_exceptions: parsed.data.exceptions.map((m) => ({ enrolment_id: m.enrolmentId, status: m.status, arrival_time: m.arrivalTime || null })),
+    p_idempotency_key: parsed.data.idempotencyKey,
+    p_captured_at: parsed.data.capturedAt,
+  });
+
+  if (error) {
+    if (error.message.startsWith('HOLIDAY:'))
+      return { kind: 'failed', retryable: false, error: `This is a declared holiday (${error.message.split(':')[1]}).` };
+    if (error.message.includes('POLICY_NOT_CONFIGURED'))
+      return { kind: 'failed', retryable: false, error: 'Attendance policy not configured for this session — contact your Principal.' };
+    if (error.message.includes('FORBIDDEN'))
+      return { kind: 'failed', retryable: false, error: 'You do not have permission to mark this section.' };
+    if (error.message.includes('SECTION_NOT_FOUND')) return { kind: 'failed', retryable: false, error: 'Section not found.' };
+    if (error.message.includes('IDEMPOTENCY_KEY_CONFLICT'))
+      return { kind: 'failed', retryable: false, error: 'This submission was already uploaded by another account.' };
+    return { kind: 'failed', retryable: true, error: 'Could not upload the register — will try again.' };
+  }
+
+  const result = data as { result?: string; saved?: number; corrections_requested?: number } | null;
+  if (result?.result === 'rejected_locked') {
+    return { kind: 'rejected_locked', correctionsRequested: result.corrections_requested ?? 0 };
+  }
+  if (result?.result === 'rejected_stale') return { kind: 'rejected_stale' };
+  return { kind: 'applied', saved: result?.saved ?? 0 };
 }
 
 export type RequestCorrectionState = { error: string | null };
