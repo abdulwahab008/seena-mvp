@@ -45,6 +45,7 @@ const LINKS = [
   { href: '/fees/late-fee-rules', label: 'Late Fee Rules' },
   { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
   { href: '/certificates/templates', label: 'Certificate Templates' },
+  { href: '/certificates/serials', label: 'Certificate Serials' },
   { href: '/audit-export', label: 'Audit Export' },
 ];
 

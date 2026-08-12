@@ -3325,6 +3325,77 @@ export type Database = {
           },
         ]
       }
+      certificate_serial_counter: {
+        Row: {
+          academic_year: number
+          campus_id: string
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          created_at: string
+          current_value: number
+          last_allocated_at: string | null
+          last_allocated_by: string | null
+          prefix_pattern: string
+          seq_width: number
+          session_id: string
+          tenant_id: string
+        }
+        Insert: {
+          academic_year: number
+          campus_id: string
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          created_at?: string
+          current_value?: number
+          last_allocated_at?: string | null
+          last_allocated_by?: string | null
+          prefix_pattern: string
+          seq_width?: number
+          session_id: string
+          tenant_id: string
+        }
+        Update: {
+          academic_year?: number
+          campus_id?: string
+          certificate_type?: Database["public"]["Enums"]["certificate_type"]
+          created_at?: string
+          current_value?: number
+          last_allocated_at?: string | null
+          last_allocated_by?: string | null
+          prefix_pattern?: string
+          seq_width?: number
+          session_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_serial_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_serial_counter_last_allocated_by_fkey"
+            columns: ["last_allocated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "certificate_serial_counter_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_serial_counter_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificate_template: {
         Row: {
           activated_at: string | null
@@ -10287,6 +10358,57 @@ export type Database = {
           },
         ]
       }
+      v_certificate_serial_register: {
+        Row: {
+          academic_year: number | null
+          campus_code: string | null
+          campus_id: string | null
+          campus_name: string | null
+          certificate_type:
+            | Database["public"]["Enums"]["certificate_type"]
+            | null
+          current_value: number | null
+          last_allocated_at: string | null
+          last_allocated_by: string | null
+          last_serial: string | null
+          next_serial: string | null
+          prefix_pattern: string | null
+          seq_width: number | null
+          session_id: string | null
+          session_name: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_serial_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_serial_counter_last_allocated_by_fkey"
+            columns: ["last_allocated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "certificate_serial_counter_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_serial_counter_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_class_weekly_period_load: {
         Row: {
           campus_id: string | null
@@ -11511,6 +11633,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      allocate_certificate_serial: {
+        Args: {
+          p_campus_id: string
+          p_certificate_type: Database["public"]["Enums"]["certificate_type"]
+          p_session_id?: string
+        }
+        Returns: string
+      }
       allocate_payment: { Args: { p_payment_id: string }; Returns: Json }
       amount_in_words: { Args: { p_amount_paisa: number }; Returns: string }
       apply_advance_credit: {
@@ -12582,6 +12712,16 @@ export type Database = {
           p_student_id: string
         }
         Returns: undefined
+      }
+      format_certificate_serial: {
+        Args: {
+          p_academic_year: number
+          p_campus_code: string
+          p_pattern: string
+          p_seq: number
+          p_seq_width: number
+        }
+        Returns: string
       }
       generate_challans: {
         Args: {
