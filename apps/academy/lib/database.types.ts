@@ -5968,6 +5968,127 @@ export type Database = {
           },
         ]
       }
+      import_batch: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          dry_run: boolean
+          error_rows: number
+          file_path: string
+          id: string
+          kind: Database["public"]["Enums"]["import_kind"]
+          ok_rows: number
+          original_filename: string
+          session_id: string
+          status: Database["public"]["Enums"]["import_batch_status"]
+          tenant_id: string
+          total_rows: number
+          warning_rows: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          dry_run?: boolean
+          error_rows?: number
+          file_path: string
+          id?: string
+          kind?: Database["public"]["Enums"]["import_kind"]
+          ok_rows?: number
+          original_filename: string
+          session_id: string
+          status?: Database["public"]["Enums"]["import_batch_status"]
+          tenant_id: string
+          total_rows?: number
+          warning_rows?: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          dry_run?: boolean
+          error_rows?: number
+          file_path?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["import_kind"]
+          ok_rows?: number
+          original_filename?: string
+          session_id?: string
+          status?: Database["public"]["Enums"]["import_batch_status"]
+          tenant_id?: string
+          total_rows?: number
+          warning_rows?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "import_batch_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_row: {
+        Row: {
+          batch_id: string
+          errors: Json
+          id: string
+          normalised: Json
+          raw: Json
+          row_no: number
+          severity: Database["public"]["Enums"]["import_row_severity"]
+        }
+        Insert: {
+          batch_id: string
+          errors?: Json
+          id?: string
+          normalised?: Json
+          raw?: Json
+          row_no: number
+          severity?: Database["public"]["Enums"]["import_row_severity"]
+        }
+        Update: {
+          batch_id?: string
+          errors?: Json
+          id?: string
+          normalised?: Json
+          raw?: Json
+          row_no?: number
+          severity?: Database["public"]["Enums"]["import_row_severity"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_row_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batch"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       late_fee_rule: {
         Row: {
           amount_paisa: number | null
@@ -11173,6 +11294,15 @@ export type Database = {
         }
         Returns: string
       }
+      create_import_batch: {
+        Args: {
+          p_campus_id: string
+          p_kind?: Database["public"]["Enums"]["import_kind"]
+          p_original_filename: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
       create_late_fee_rule: {
         Args: {
           p_amount_paisa?: number
@@ -11495,6 +11625,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      finalise_import_batch: { Args: { p_batch_id: string }; Returns: Json }
       fn_allocate_test_seat: {
         Args: { p_application_id: string; p_sitting_id: string }
         Returns: number
@@ -12456,6 +12587,10 @@ export type Database = {
         Args: { p_staff_id: string }
         Returns: Database["public"]["Enums"]["qualification_level"]
       }
+      stage_import_rows: {
+        Args: { p_batch_id: string; p_rows: Json }
+        Returns: number
+      }
       start_session_rollover: {
         Args: {
           p_campus_id: string
@@ -12771,6 +12906,9 @@ export type Database = {
         | "other"
       homework_status: "draft" | "published" | "archived"
       id_document_type: "cnic" | "passport"
+      import_batch_status: "validating" | "validated" | "committed" | "undone"
+      import_kind: "student"
+      import_row_severity: "ok" | "warning" | "error"
       interview_criterion:
         | "communication"
         | "confidence"
@@ -13154,6 +13292,9 @@ export const Constants = {
       ],
       homework_status: ["draft", "published", "archived"],
       id_document_type: ["cnic", "passport"],
+      import_batch_status: ["validating", "validated", "committed", "undone"],
+      import_kind: ["student"],
+      import_row_severity: ["ok", "warning", "error"],
       interview_criterion: [
         "communication",
         "confidence",
