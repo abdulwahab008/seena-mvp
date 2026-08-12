@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   IMPORT_CHUNK_SIZE,
   STUDENT_IMPORT_COLUMNS,
+  buildFailureReportCsv,
   buildStudentImportTemplateCsv,
   chunkRows,
   formatClassChoices,
@@ -11,6 +12,7 @@ import {
   validateImportHeader,
   validateStudentImportRows,
   type ClassOption,
+  type FailureReportRow,
   type ValidatedImportRow,
 } from './student-import';
 
@@ -272,6 +274,45 @@ describe('validateStudentImportRows', () => {
     // issues. Nothing here is an insert, an id, or a GR allocation.
     expect(Object.keys(toStagePayload(rows)[0]!).sort()).toEqual(['errors', 'normalised', 'raw', 'row_no']);
     expect(rows.every((r) => !('id' in r) && !('student_id' in r))).toBe(true);
+  });
+});
+
+describe('buildFailureReportCsv', () => {
+  const blocked: FailureReportRow[] = [
+    {
+      rowNo: 4,
+      raw: { gr_number: 'PAPER-7', name_en: 'Sana Malik', class: 'Class One' },
+      errors: [{ column: 'class', code: 'UNKNOWN_CLASS', severity: 'error', message: "Unknown class 'Class One'" }],
+    },
+    {
+      rowNo: 9,
+      raw: { gr_number: '', name_en: 'Ali, Hassan', class: '3' },
+      errors: [
+        { column: 'b_form_no', code: 'BFORM_MISSING', severity: 'warning', message: 'No B-Form number' },
+        { column: 'dob', code: 'INVALID_DATE', severity: 'error', message: 'Not a date - use "YYYY-MM-DD"' },
+      ],
+    },
+  ];
+
+  it('writes one line per broken cell, with the row number the Principal sees in Excel', () => {
+    const lines = buildFailureReportCsv(blocked).trimEnd().split('\n');
+    expect(lines[0]).toBe('row,gr_number,name_en,class,column,code,message');
+    expect(lines[1]).toContain('4,PAPER-7,Sana Malik,Class One,class,UNKNOWN_CLASS');
+    expect(lines).toHaveLength(3);
+  });
+
+  it('leaves warnings out - they blocked nothing', () => {
+    expect(buildFailureReportCsv(blocked)).not.toContain('BFORM_MISSING');
+  });
+
+  it('quotes cells containing commas or quotes', () => {
+    const csv = buildFailureReportCsv(blocked);
+    expect(csv).toContain('"Ali, Hassan"');
+    expect(csv).toContain('"Not a date - use ""YYYY-MM-DD"""');
+  });
+
+  it('is a header-only file when nothing was blocked', () => {
+    expect(buildFailureReportCsv([])).toBe('row,gr_number,name_en,class,column,code,message\n');
   });
 });
 

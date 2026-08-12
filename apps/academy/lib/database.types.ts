@@ -5971,11 +5971,20 @@ export type Database = {
       import_batch: {
         Row: {
           campus_id: string
+          committed_at: string | null
+          committed_by: string | null
+          committed_rows: number
           created_at: string
           created_by: string | null
           dry_run: boolean
+          error_report_path: string | null
           error_rows: number
+          failed_at: string | null
+          failed_message: string | null
+          failed_row_no: number | null
           file_path: string
+          gr_next_value_after: number | null
+          gr_next_value_before: number | null
           id: string
           kind: Database["public"]["Enums"]["import_kind"]
           ok_rows: number
@@ -5984,15 +5993,27 @@ export type Database = {
           status: Database["public"]["Enums"]["import_batch_status"]
           tenant_id: string
           total_rows: number
+          undo_deadline: string | null
+          undone_at: string | null
+          undone_by: string | null
           warning_rows: number
         }
         Insert: {
           campus_id: string
+          committed_at?: string | null
+          committed_by?: string | null
+          committed_rows?: number
           created_at?: string
           created_by?: string | null
           dry_run?: boolean
+          error_report_path?: string | null
           error_rows?: number
+          failed_at?: string | null
+          failed_message?: string | null
+          failed_row_no?: number | null
           file_path: string
+          gr_next_value_after?: number | null
+          gr_next_value_before?: number | null
           id?: string
           kind?: Database["public"]["Enums"]["import_kind"]
           ok_rows?: number
@@ -6001,15 +6022,27 @@ export type Database = {
           status?: Database["public"]["Enums"]["import_batch_status"]
           tenant_id: string
           total_rows?: number
+          undo_deadline?: string | null
+          undone_at?: string | null
+          undone_by?: string | null
           warning_rows?: number
         }
         Update: {
           campus_id?: string
+          committed_at?: string | null
+          committed_by?: string | null
+          committed_rows?: number
           created_at?: string
           created_by?: string | null
           dry_run?: boolean
+          error_report_path?: string | null
           error_rows?: number
+          failed_at?: string | null
+          failed_message?: string | null
+          failed_row_no?: number | null
           file_path?: string
+          gr_next_value_after?: number | null
+          gr_next_value_before?: number | null
           id?: string
           kind?: Database["public"]["Enums"]["import_kind"]
           ok_rows?: number
@@ -6018,6 +6051,9 @@ export type Database = {
           status?: Database["public"]["Enums"]["import_batch_status"]
           tenant_id?: string
           total_rows?: number
+          undo_deadline?: string | null
+          undone_at?: string | null
+          undone_by?: string | null
           warning_rows?: number
         }
         Relationships: [
@@ -6027,6 +6063,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_committed_by_fkey"
+            columns: ["committed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "import_batch_created_by_fkey"
@@ -6049,35 +6092,48 @@ export type Database = {
             referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "import_batch_undone_by_fkey"
+            columns: ["undone_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       import_row: {
         Row: {
           batch_id: string
+          enrolment_id: string | null
           errors: Json
           id: string
           normalised: Json
           raw: Json
           row_no: number
           severity: Database["public"]["Enums"]["import_row_severity"]
+          student_id: string | null
         }
         Insert: {
           batch_id: string
+          enrolment_id?: string | null
           errors?: Json
           id?: string
           normalised?: Json
           raw?: Json
           row_no: number
           severity?: Database["public"]["Enums"]["import_row_severity"]
+          student_id?: string | null
         }
         Update: {
           batch_id?: string
+          enrolment_id?: string | null
           errors?: Json
           id?: string
           normalised?: Json
           raw?: Json
           row_no?: number
           severity?: Database["public"]["Enums"]["import_row_severity"]
+          student_id?: string | null
         }
         Relationships: [
           {
@@ -6086,6 +6142,48 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "import_batch"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_row_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "v_import_batch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_row_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_row_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "import_row_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_row_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "import_row_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
           },
         ]
       }
@@ -10099,6 +10197,145 @@ export type Database = {
           },
         ]
       }
+      v_import_batch: {
+        Row: {
+          campus_id: string | null
+          can_undo: boolean | null
+          commit_state: string | null
+          committed_at: string | null
+          committed_by: string | null
+          committed_rows: number | null
+          created_at: string | null
+          created_by: string | null
+          dry_run: boolean | null
+          error_report_path: string | null
+          error_rows: number | null
+          failed_at: string | null
+          failed_message: string | null
+          failed_row_no: number | null
+          file_path: string | null
+          gr_next_value_after: number | null
+          gr_next_value_before: number | null
+          id: string | null
+          kind: Database["public"]["Enums"]["import_kind"] | null
+          ok_rows: number | null
+          original_filename: string | null
+          session_id: string | null
+          status: Database["public"]["Enums"]["import_batch_status"] | null
+          tenant_id: string | null
+          total_rows: number | null
+          undo_deadline: string | null
+          undone_at: string | null
+          undone_by: string | null
+          warning_rows: number | null
+        }
+        Insert: {
+          campus_id?: string | null
+          can_undo?: never
+          commit_state?: never
+          committed_at?: string | null
+          committed_by?: string | null
+          committed_rows?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dry_run?: boolean | null
+          error_report_path?: string | null
+          error_rows?: number | null
+          failed_at?: string | null
+          failed_message?: string | null
+          failed_row_no?: number | null
+          file_path?: string | null
+          gr_next_value_after?: number | null
+          gr_next_value_before?: number | null
+          id?: string | null
+          kind?: Database["public"]["Enums"]["import_kind"] | null
+          ok_rows?: number | null
+          original_filename?: string | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["import_batch_status"] | null
+          tenant_id?: string | null
+          total_rows?: number | null
+          undo_deadline?: string | null
+          undone_at?: string | null
+          undone_by?: string | null
+          warning_rows?: number | null
+        }
+        Update: {
+          campus_id?: string | null
+          can_undo?: never
+          commit_state?: never
+          committed_at?: string | null
+          committed_by?: string | null
+          committed_rows?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dry_run?: boolean | null
+          error_report_path?: string | null
+          error_rows?: number | null
+          failed_at?: string | null
+          failed_message?: string | null
+          failed_row_no?: number | null
+          file_path?: string | null
+          gr_next_value_after?: number | null
+          gr_next_value_before?: number | null
+          id?: string | null
+          kind?: Database["public"]["Enums"]["import_kind"] | null
+          ok_rows?: number | null
+          original_filename?: string | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["import_batch_status"] | null
+          tenant_id?: string | null
+          total_rows?: number | null
+          undo_deadline?: string | null
+          undone_at?: string | null
+          undone_by?: string | null
+          warning_rows?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_committed_by_fkey"
+            columns: ["committed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "import_batch_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "import_batch_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_batch_undone_by_fkey"
+            columns: ["undone_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       v_onboarding_summary: {
         Row: {
           completed_at: string | null
@@ -11109,6 +11346,7 @@ export type Database = {
         }
         Returns: Json
       }
+      commit_import_batch: { Args: { p_batch_id: string }; Returns: Json }
       complete_audit_export: {
         Args: {
           p_download_url: string
@@ -12152,6 +12390,10 @@ export type Database = {
         }
         Returns: string
       }
+      purge_import_staging: {
+        Args: { p_older_than_days?: number }
+        Returns: Json
+      }
       purge_soft_deleted_records: {
         Args: { p_older_than_days?: number }
         Returns: Json
@@ -12703,6 +12945,7 @@ export type Database = {
         }[]
       }
       timemultirange: { Args: never; Returns: unknown }
+      undo_import_batch: { Args: { p_batch_id: string }; Returns: Json }
       unlink_guardian: {
         Args: { p_guardian_id: string; p_student_id: string }
         Returns: undefined

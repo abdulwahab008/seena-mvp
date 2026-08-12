@@ -428,6 +428,52 @@ export function chunkRows<T>(rows: T[], size: number = IMPORT_CHUNK_SIZE): T[][]
   return chunks;
 }
 
+// ── failure report (FR-C15) ──────────────────────────────────────────────
+
+export type FailureReportRow = {
+  rowNo: number;
+  raw: Record<string, string>;
+  errors: ImportIssue[];
+};
+
+const FAILURE_REPORT_COLUMNS = ['row', 'gr_number', 'name_en', 'class', 'column', 'code', 'message'] as const;
+
+function csvCell(value: string): string {
+  return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+/**
+ * FR-C15: the report a school takes away when a commit imports 4,882 of
+ * 5,000 rows. One line per broken cell, not per row, so a row with two
+ * problems produces two lines — the same shape the on-screen table has,
+ * except the screen shows the first 200 and this is all of them.
+ *
+ * Only error-severity issues are listed: a warning did not block anything,
+ * and a report full of rows that imported fine is a report nobody reads.
+ */
+export function buildFailureReportCsv(rows: FailureReportRow[]): string {
+  const lines = [FAILURE_REPORT_COLUMNS.join(',')];
+  for (const row of rows) {
+    for (const issue of row.errors) {
+      if (issue.severity !== 'error') continue;
+      lines.push(
+        [
+          String(row.rowNo),
+          row.raw.gr_number ?? '',
+          row.raw.name_en ?? '',
+          row.raw.class ?? '',
+          issue.column,
+          issue.code,
+          issue.message,
+        ]
+          .map(csvCell)
+          .join(','),
+      );
+    }
+  }
+  return `${lines.join('\n')}\n`;
+}
+
 export function buildStudentImportTemplateCsv(): string {
   const example = [
     '', // gr_number — leave blank to have one allocated at commit
