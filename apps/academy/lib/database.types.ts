@@ -7200,6 +7200,144 @@ export type Database = {
           },
         ]
       }
+      grading_band: {
+        Row: {
+          created_at: string
+          gpa_point: number | null
+          grade_label: string
+          id: string
+          is_pass: boolean
+          max_pct: number
+          min_pct: number
+          remark_en: string | null
+          remark_ur: string | null
+          scheme_id: string
+          sequence: number
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          gpa_point?: number | null
+          grade_label: string
+          id?: string
+          is_pass?: boolean
+          max_pct: number
+          min_pct: number
+          remark_en?: string | null
+          remark_ur?: string | null
+          scheme_id: string
+          sequence: number
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          gpa_point?: number | null
+          grade_label?: string
+          id?: string
+          is_pass?: boolean
+          max_pct?: number
+          min_pct?: number
+          remark_en?: string | null
+          remark_ur?: string | null
+          scheme_id?: string
+          sequence?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grading_band_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grading_band_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "v_grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grading_band_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grading_scheme: {
+        Row: {
+          activated_at: string | null
+          board: Database["public"]["Enums"]["board"]
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["grading_scheme_status"]
+          supersedes_id: string | null
+          tenant_id: string
+          version: number
+        }
+        Insert: {
+          activated_at?: string | null
+          board: Database["public"]["Enums"]["board"]
+          created_at?: string
+          created_by?: string | null
+          effective_from: string
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["grading_scheme_status"]
+          supersedes_id?: string | null
+          tenant_id: string
+          version?: number
+        }
+        Update: {
+          activated_at?: string | null
+          board?: Database["public"]["Enums"]["board"]
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["grading_scheme_status"]
+          supersedes_id?: string | null
+          tenant_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grading_scheme_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "grading_scheme_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grading_scheme_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "v_grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grading_scheme_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardian: {
         Row: {
           alt_phone: string | null
@@ -14430,6 +14568,46 @@ export type Database = {
           },
         ]
       }
+      v_grading_scheme: {
+        Row: {
+          activated_at: string | null
+          band_count: number | null
+          bands: Json | null
+          board: Database["public"]["Enums"]["board"] | null
+          coverage_error: string | null
+          created_at: string | null
+          effective_from: string | null
+          id: string | null
+          name: string | null
+          status: Database["public"]["Enums"]["grading_scheme_status"] | null
+          supersedes_id: string | null
+          tenant_id: string | null
+          version: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grading_scheme_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grading_scheme_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "v_grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grading_scheme_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_guardian_children: {
         Row: {
           campus_id: string | null
@@ -15963,6 +16141,10 @@ export type Database = {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: number
       }
+      activate_grading_scheme: {
+        Args: { p_scheme_id: string }
+        Returns: string
+      }
       activate_guardian_account: { Args: { p_token: string }; Returns: string }
       add_holiday: {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
@@ -17040,6 +17222,33 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      fn_grade_for_percentage: {
+        Args: { p_pct: number; p_scheme_id: string }
+        Returns: {
+          created_at: string
+          gpa_point: number | null
+          grade_label: string
+          id: string
+          is_pass: boolean
+          max_pct: number
+          min_pct: number
+          remark_en: string | null
+          remark_ur: string | null
+          scheme_id: string
+          sequence: number
+          tenant_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "grading_band"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fn_grading_scheme_for_section: {
+        Args: { p_on_date?: string; p_section_id: string }
+        Returns: string
+      }
       fn_grant_leave_balance: {
         Args: {
           p_days: number
@@ -17242,6 +17451,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      fn_validate_grading_bands: {
+        Args: { p_scheme_id: string }
+        Returns: boolean
+      }
       fn_validate_term_weightage: {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: undefined
@@ -17407,6 +17620,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      new_grading_scheme_version: {
+        Args: { p_effective_from: string; p_scheme_id: string }
+        Returns: string
       }
       next_challan_no: {
         Args: { p_campus_id: string; p_session_id: string; p_tenant_id: string }
@@ -17757,6 +17974,16 @@ export type Database = {
         }
         Returns: string
       }
+      save_grading_scheme: {
+        Args: {
+          p_bands: Json
+          p_board: Database["public"]["Enums"]["board"]
+          p_effective_from: string
+          p_name: string
+          p_scheme_id?: string
+        }
+        Returns: string
+      }
       search_staff: {
         Args: { p_include_former?: boolean; p_q?: string }
         Returns: {
@@ -17846,6 +18073,13 @@ export type Database = {
         Returns: undefined
       }
       set_bell_template_default: { Args: { p_id: string }; Returns: undefined }
+      set_campus_board: {
+        Args: {
+          p_board: Database["public"]["Enums"]["board"]
+          p_campus_id: string
+        }
+        Returns: undefined
+      }
       set_certificate_replacement: {
         Args: { p_cancelled_issue_id: string; p_replacement_issue_id: string }
         Returns: Json
@@ -18418,6 +18652,7 @@ export type Database = {
         | "visit_scheduled"
         | "not_interested"
       gender: "male" | "female" | "other"
+      grading_scheme_status: "draft" | "active" | "retired"
       guardian_relationship:
         | "father"
         | "mother"
@@ -18844,6 +19079,7 @@ export const Constants = {
         "not_interested",
       ],
       gender: ["male", "female", "other"],
+      grading_scheme_status: ["draft", "active", "retired"],
       guardian_relationship: [
         "father",
         "mother",

@@ -240,3 +240,43 @@ export function ocrReviewError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not teach this class subject.';
   return 'Could not complete that review.';
 }
+
+/**
+ * FR-J01. Every coverage refusal passes through verbatim, for the reason
+ * FR-I16's completeness sentences do: AC2 asserts that the refusal NAMES the
+ * uncovered range, and a code the screen expands cannot name a range the
+ * database computed. The freeze sentence passes through for FR-I01's reason —
+ * it already says what happened and what to do next.
+ */
+const GRADING_PASS_THROUGH = [
+  /^grading bands /,
+  /^grading scheme is in use/,
+  /^a grading scheme needs at least one band$/,
+  /^band .+ bounds must have at most two decimal places$/,
+  /^band .+ has bounds /,
+];
+
+export function gradingSchemeError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  const verbatim = GRADING_PASS_THROUGH.find((p) => p.test(line));
+  if (verbatim) return line;
+
+  if (message.includes('GRADE_LABEL_DUPLICATED')) {
+    return 'Two bands of one scheme cannot carry the same grade.';
+  }
+  if (message.includes('EFFECTIVE_FROM_NOT_LATER')) {
+    return 'A new version has to start after the version it replaces.';
+  }
+  if (message.includes('EFFECTIVE_FROM_REQUIRED')) return 'Choose the date this scale starts applying.';
+  if (message.includes('SCHEME_NAME_REQUIRED')) return 'A scheme needs a name.';
+  if (message.includes('GRADING_SCHEME_RETIRED')) return 'That scheme was withdrawn and cannot be activated.';
+  if (message.includes('GRADING_SCHEME_NOT_FOUND')) return 'Grading scheme not found.';
+  if (message.includes('duplicate key') && message.includes('uq_grading_scheme_effective')) {
+    return 'That board already has a scheme starting on that date.';
+  }
+  if (message.includes('excl_grading_band_range')) return 'Two of those bands overlap.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to configure a grade scale.';
+  return 'Could not save that grading scheme.';
+}

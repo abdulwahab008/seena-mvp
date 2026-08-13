@@ -1646,3 +1646,138 @@ export const cancelOcrJobSchema = z.object({
     .max(2000),
 });
 export type CancelOcrJobInput = z.infer<typeof cancelOcrJobSchema>;
+
+// FR-J01: board grading scheme configuration. Mirrors
+// supabase/migrations/20260731995000_board_grading_scheme.sql.
+//
+// Percentages and band bounds live on a two-decimal grid. That is not a
+// display choice: FR-J02 rounds a percentage to two decimals once and grades
+// THAT number, so a boundary is only unambiguous if the boundary is on the
+// same grid. 32.995% is 33.00% and grades as such.
+export const BOARDS = ['FBISE', 'PUNJAB', 'SINDH', 'KPK', 'BALOCHISTAN', 'AKU_EB', 'CAMBRIDGE'] as const;
+export type Board = (typeof BOARDS)[number];
+
+export const GRADING_SCHEME_STATUSES = ['draft', 'active', 'retired'] as const;
+export type GradingSchemeStatus = (typeof GRADING_SCHEME_STATUSES)[number];
+
+/** save_grading_scheme(), activate_grading_scheme(), new_grading_scheme_version(). */
+export const GRADING_SCHEME_ROLES = ['super_admin', 'owner', 'principal', 'exam_controller'] as const;
+
+/** One step on the two-decimal grid — the distance between adjacent bands. */
+export const PCT_STEP = 0.01;
+
+/**
+ * Round half away from zero at two decimals, matching Postgres
+ * round(numeric, 2).
+ *
+ * The shift is done on the DECIMAL representation rather than by multiplying,
+ * because a double cannot hold 32.995: `32.995 * 100` is 3299.4999999999995 and
+ * Math.round would give 32.99 where Postgres numeric gives 33.00. Parsing
+ * "32.995e2" instead asks the number parser for the nearest double to 3299.5,
+ * which is exact — the same answer the database reaches, on the value the user
+ * actually typed.
+ *
+ * This is a preview. The percentage a result is graded on is computed in
+ * numeric, in the database, and never here.
+ */
+export function roundPct(pct: number): number {
+  if (!Number.isFinite(pct)) return pct;
+  const literal = `${pct}`;
+  if (literal.includes('e') || literal.includes('E')) return Math.round(pct * 100) / 100;
+  const shifted = Number(`${literal}e2`);
+  return Number(`${Math.sign(shifted) * Math.round(Math.abs(shifted))}e-2`);
+}
+
+const pct2 = (n: number) => n.toFixed(2);
+
+export const gradingBandSchema = z
+  .object({
+    gradeLabel: z.string().trim().min(1, 'A band needs a grade').max(8),
+    minPct: z.coerce.number().min(0, 'Not below 0').max(100, 'Not above 100'),
+    maxPct: z.coerce.number().min(0, 'Not below 0').max(100, 'Not above 100'),
+    gpaPoint: z.coerce.number().min(0).max(9.99).nullable().optional(),
+    isPass: z.boolean().default(true),
+    remarkEn: z.string().trim().max(160).optional(),
+    remarkUr: z.string().trim().max(160).optional(),
+  })
+  .refine((b) => b.minPct <= b.maxPct, { message: 'The lower bound cannot exceed the upper', path: ['maxPct'] });
+export type GradingBandInput = z.infer<typeof gradingBandSchema>;
+
+export const saveGradingSchemeSchema = z.object({
+  schemeId: z.string().uuid().optional(),
+  board: z.enum(BOARDS),
+  name: z.string().trim().min(1, 'A scheme needs a name').max(120),
+  effectiveFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the date this scale starts applying'),
+  bands: z.array(gradingBandSchema).min(1, 'A grading scheme needs at least one band'),
+});
+export type SaveGradingSchemeInput = z.infer<typeof saveGradingSchemeSchema>;
+
+export const gradingSchemeIdSchema = z.object({ schemeId: z.string().uuid() });
+
+export const newGradingSchemeVersionSchema = z.object({
+  schemeId: z.string().uuid(),
+  effectiveFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the date the new version starts applying'),
+});
+export type NewGradingSchemeVersionInput = z.infer<typeof newGradingSchemeVersionSchema>;
+
+/**
+ * The same gap/overlap rule app.fn_grading_band_coverage_error() holds, so the
+ * editor can name the uncovered range while the controller is still typing.
+ * The database is still the gate — save_grading_scheme() re-runs it before
+ * writing a row — but a boundary is much easier to fix while you can see it.
+ *
+ * Returns null when the bands cover 0.00-100.00 exactly once, else the same
+ * sentence the database would refuse with.
+ */
+export function gradingBandCoverageError(bands: { gradeLabel: string; minPct: number; maxPct: number }[]): string | null {
+  if (bands.length === 0) return 'a grading scheme needs at least one band';
+
+  const bad = bands.find((b) => b.minPct > b.maxPct || b.minPct < 0 || b.maxPct > 100);
+  if (bad) {
+    return `band ${bad.gradeLabel} has bounds ${pct2(bad.minPct)}-${pct2(bad.maxPct)}, which is not a range inside 0.00-100.00`;
+  }
+  const imprecise = bands.find((b) => roundPct(b.minPct) !== b.minPct || roundPct(b.maxPct) !== b.maxPct);
+  if (imprecise) return `band ${imprecise.gradeLabel} bounds must have at most two decimal places`;
+
+  const sorted = [...bands].sort((a, b) => a.minPct - b.minPct);
+  if (sorted[0]!.minPct > 0) return `grading bands leave 0.00-${pct2(sorted[0]!.minPct)} uncovered`;
+
+  const ceiling = Math.max(...bands.map((b) => b.maxPct));
+  if (ceiling < 100) return `grading bands leave ${pct2(ceiling)}-100.00 uncovered`;
+
+  for (let i = 1; i < sorted.length; i += 1) {
+    const prev = sorted[i - 1]!;
+    const band = sorted[i]!;
+    const expected = roundPct(prev.maxPct + PCT_STEP);
+    if (band.minPct === expected) continue;
+    if (band.minPct > expected) {
+      return `grading bands leave ${pct2(prev.maxPct)}-${pct2(band.minPct)} uncovered`;
+    }
+    return `grading bands ${prev.gradeLabel} and ${band.gradeLabel} overlap between ${pct2(band.minPct)} and ${pct2(prev.maxPct)}`;
+  }
+  return null;
+}
+
+/** The band a percentage falls in, on the same two-decimal grid the database uses. */
+export function bandForPct<T extends { minPct: number; maxPct: number }>(bands: T[], pct: number | null): T | null {
+  if (pct === null || Number.isNaN(pct)) return null;
+  const p = roundPct(pct);
+  return bands.find((b) => p >= b.minPct && p <= b.maxPct) ?? null;
+}
+
+/**
+ * The published FBISE scale, as the configuration screen's preset. It is here
+ * and not seeded into the database on purpose: a board's bands are a fact
+ * about a particular gazette in a particular year, and a scale nobody chose
+ * quietly grading transcripts is exactly what FR-J01's Notes warn about. A
+ * human clicks this, reads it, and saves it.
+ */
+export const FBISE_PRESET_BANDS: GradingBandInput[] = [
+  { gradeLabel: 'A1', minPct: 80, maxPct: 100, gpaPoint: 4.0, isPass: true, remarkEn: 'Outstanding' },
+  { gradeLabel: 'A', minPct: 70, maxPct: 79.99, gpaPoint: 3.7, isPass: true, remarkEn: 'Excellent' },
+  { gradeLabel: 'B', minPct: 60, maxPct: 69.99, gpaPoint: 3.3, isPass: true, remarkEn: 'Very good' },
+  { gradeLabel: 'C', minPct: 50, maxPct: 59.99, gpaPoint: 3.0, isPass: true, remarkEn: 'Good' },
+  { gradeLabel: 'D', minPct: 40, maxPct: 49.99, gpaPoint: 2.5, isPass: true, remarkEn: 'Fair' },
+  { gradeLabel: 'E', minPct: 33, maxPct: 39.99, gpaPoint: 2.0, isPass: true, remarkEn: 'Satisfactory' },
+  { gradeLabel: 'F', minPct: 0, maxPct: 32.99, gpaPoint: 0, isPass: false, remarkEn: 'Fail' },
+];

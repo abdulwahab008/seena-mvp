@@ -49,6 +49,7 @@ const LINKS = [
   { href: '/exams/marks', label: 'Mark Entry' },
   { href: '/exams/approvals', label: 'Mark Approval' },
   { href: '/exams/unlocks', label: 'Break-Glass Unlocks' },
+  { href: '/exams/grading', label: 'Grading Schemes' },
   { href: '/expenses/vouchers', label: 'Expense Vouchers' },
   { href: '/expenses/approvals', label: 'Voucher Approvals' },
   { href: '/certificates/templates', label: 'Certificate Templates' },
