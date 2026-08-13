@@ -86,14 +86,46 @@ async function seedOwnerWithPublishedStructure() {
     .single();
   if (e6) throw e6;
 
-  const { error: e7 } = await admin.from('fee_structure_line').insert({
-    structure_id: structure!.id,
-    class_id: classLevel!.id,
-    fee_head_id: tuition!.id,
-    amount_paisa: 500000,
-    frequency: 'monthly',
-  });
+  // The AC's 8,500-owed / 8,000-charged pair needs two different amounts in
+  // two consecutive months off one snapshot plan, so an annual head billed
+  // in MONTH1 only rides on top of the flat monthly tuition: MONTH1 =
+  // 800,000 + 50,000 = 850,000 paisa, MONTH2 = 800,000 paisa.
+  const { data: annual, error: e7 } = await admin
+    .from('fee_head')
+    .insert({
+      tenant_id: tenantId as string,
+      code: 'ANNUAL',
+      name_en: 'Annual Fund',
+      name_ur: 'سالانہ فنڈ',
+      is_mandatory: false,
+      default_frequency: 'annual',
+    })
+    .select('id')
+    .single();
   if (e7) throw e7;
+
+  const { error: e8 } = await admin.from('fee_structure_line').insert([
+    {
+      structure_id: structure!.id,
+      class_id: classLevel!.id,
+      fee_head_id: tuition!.id,
+      amount_paisa: 800000,
+      frequency: 'monthly',
+      // Spelled out rather than left to the column default: a multi-row
+      // PostgREST insert unions the keys across all rows, so a key absent
+      // from one object arrives as an explicit NULL, not "use the default".
+      billing_month_mask: 4095,
+    },
+    {
+      structure_id: structure!.id,
+      class_id: classLevel!.id,
+      fee_head_id: annual!.id,
+      amount_paisa: 50000,
+      frequency: 'annual',
+      billing_month_mask: 1 << (Number(MONTH1.slice(5, 7)) - 1),
+    },
+  ]);
+  if (e8) throw e8;
 
   return { email, password };
 }
@@ -137,15 +169,15 @@ test('an unpaid challan carries forward as arrears on the next month, and clears
   await expect(page.getByText('Challans generated.')).toBeVisible();
 
   const month2Row = page.locator('[data-testid^="challan-row-"]').filter({ hasText: `${MONTH2}-01` });
-  await expect(month2Row.getByTestId(/challan-arrears-/)).toContainText('Current PKR 5,000');
-  await expect(month2Row.getByTestId(/challan-arrears-/)).toContainText('Arrears PKR 5,000');
-  await expect(month2Row.getByTestId(/challan-net-/)).toContainText('Net PKR 10,000');
+  await expect(month2Row.getByTestId(/challan-arrears-/)).toContainText('Current PKR 8,000');
+  await expect(month2Row.getByTestId(/challan-arrears-/)).toContainText('Arrears PKR 8,500');
+  await expect(month2Row.getByTestId(/challan-net-/)).toContainText('Net PKR 16,500');
 
   // Pay the full arrears-inclusive net payable — it reaches back and
   // settles July too, via the ordinary payment waterfall.
   await page.goto(studentUrl);
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('payment-amount-input').fill('10000');
+  await page.getByTestId('payment-amount-input').fill('16500');
   await page.getByTestId('record-payment-button').click();
   await expect(page.getByText('Payment recorded and allocated.')).toBeVisible();
   await expect(page.getByTestId('ledger-balance')).toHaveText('Balance: PKR 0');
@@ -159,5 +191,5 @@ test('an unpaid challan carries forward as arrears on the next month, and clears
 
   const month3Row = page.locator('[data-testid^="challan-row-"]').filter({ hasText: `${MONTH3}-01` });
   await expect(month3Row.getByTestId(/challan-arrears-/)).toHaveCount(0);
-  await expect(month3Row.getByTestId(/challan-net-/)).toContainText('Net PKR 5,000');
+  await expect(month3Row.getByTestId(/challan-net-/)).toContainText('Net PKR 8,000');
 });

@@ -15,6 +15,7 @@ export type ChallanRow = {
   grossPaisa: number;
   concessionPaisa: number;
   arrearsPaisa: number;
+  arrearsFrom: { sessionName: string; amountPaisa: number }[];
   netPaisa: number;
   status: string;
 };
@@ -174,6 +175,16 @@ export function ChallanGenerator({
                   <p className="text-xs text-muted-foreground" data-testid={`challan-arrears-${c.challanNo}`}>
                     Current PKR {((c.grossPaisa - c.concessionPaisa) / 100).toLocaleString()} + Arrears PKR{' '}
                     {(c.arrearsPaisa / 100).toLocaleString()}
+                    {c.arrearsFrom.length > 0 && (
+                      <span data-testid={`challan-arrears-source-${c.challanNo}`}>
+                        {' '}
+                        (incl.{' '}
+                        {c.arrearsFrom
+                          .map((s) => `PKR ${(s.amountPaisa / 100).toLocaleString()} from ${s.sessionName}`)
+                          .join(', ')}
+                        )
+                      </span>
+                    )}
                   </p>
                 )}
                 <PayloadPreview challanId={c.id} />

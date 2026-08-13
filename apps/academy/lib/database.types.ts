@@ -4994,6 +4994,7 @@ export type Database = {
       fee_challan: {
         Row: {
           arrears_paisa: number
+          arrears_source: Json
           batch_id: string | null
           billing_period: string
           campus_id: string
@@ -5015,6 +5016,7 @@ export type Database = {
         }
         Insert: {
           arrears_paisa?: number
+          arrears_source?: Json
           batch_id?: string | null
           billing_period: string
           campus_id: string
@@ -5036,6 +5038,7 @@ export type Database = {
         }
         Update: {
           arrears_paisa?: number
+          arrears_source?: Json
           batch_id?: string | null
           billing_period?: string
           campus_id?: string
