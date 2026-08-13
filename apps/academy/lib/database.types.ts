@@ -3338,6 +3338,7 @@ export type Database = {
           original_issue_id: string | null
           payload_snapshot: Json
           pdf_path: string
+          pdf_sha256: string | null
           replaced_by_issue_id: string | null
           revoke_reason: string | null
           revoked_at: string | null
@@ -3345,6 +3346,7 @@ export type Database = {
           serial_no: string
           serial_seq: number | null
           session_id: string
+          signing_identity_id: string | null
           status: Database["public"]["Enums"]["certificate_issue_status"]
           student_id: string
           template_id: string
@@ -3363,6 +3365,7 @@ export type Database = {
           original_issue_id?: string | null
           payload_snapshot: Json
           pdf_path: string
+          pdf_sha256?: string | null
           replaced_by_issue_id?: string | null
           revoke_reason?: string | null
           revoked_at?: string | null
@@ -3370,6 +3373,7 @@ export type Database = {
           serial_no: string
           serial_seq?: number | null
           session_id: string
+          signing_identity_id?: string | null
           status?: Database["public"]["Enums"]["certificate_issue_status"]
           student_id: string
           template_id: string
@@ -3388,6 +3392,7 @@ export type Database = {
           original_issue_id?: string | null
           payload_snapshot?: Json
           pdf_path?: string
+          pdf_sha256?: string | null
           replaced_by_issue_id?: string | null
           revoke_reason?: string | null
           revoked_at?: string | null
@@ -3395,6 +3400,7 @@ export type Database = {
           serial_no?: string
           serial_seq?: number | null
           session_id?: string
+          signing_identity_id?: string | null
           status?: Database["public"]["Enums"]["certificate_issue_status"]
           student_id?: string
           template_id?: string
@@ -3484,6 +3490,13 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_signing_identity_id_fkey"
+            columns: ["signing_identity_id"]
+            isOneToOne: false
+            referencedRelation: "signing_identity"
             referencedColumns: ["id"]
           },
           {
@@ -3608,6 +3621,13 @@ export type Database = {
           language: Database["public"]["Enums"]["certificate_language"]
           merge_field_whitelist: Json
           page_size: Database["public"]["Enums"]["certificate_page_size"]
+          signature_anchor_x_mm: number
+          signature_anchor_y_mm: number
+          signature_width_mm: number
+          stamp_anchor_x_mm: number
+          stamp_anchor_y_mm: number
+          stamp_opacity: number
+          stamp_width_mm: number
           status: Database["public"]["Enums"]["certificate_template_status"]
           tenant_id: string
           title: string
@@ -3626,6 +3646,13 @@ export type Database = {
           language?: Database["public"]["Enums"]["certificate_language"]
           merge_field_whitelist?: Json
           page_size?: Database["public"]["Enums"]["certificate_page_size"]
+          signature_anchor_x_mm?: number
+          signature_anchor_y_mm?: number
+          signature_width_mm?: number
+          stamp_anchor_x_mm?: number
+          stamp_anchor_y_mm?: number
+          stamp_opacity?: number
+          stamp_width_mm?: number
           status?: Database["public"]["Enums"]["certificate_template_status"]
           tenant_id: string
           title: string
@@ -3644,6 +3671,13 @@ export type Database = {
           language?: Database["public"]["Enums"]["certificate_language"]
           merge_field_whitelist?: Json
           page_size?: Database["public"]["Enums"]["certificate_page_size"]
+          signature_anchor_x_mm?: number
+          signature_anchor_y_mm?: number
+          signature_width_mm?: number
+          stamp_anchor_x_mm?: number
+          stamp_anchor_y_mm?: number
+          stamp_opacity?: number
+          stamp_width_mm?: number
           status?: Database["public"]["Enums"]["certificate_template_status"]
           tenant_id?: string
           title?: string
@@ -7943,6 +7977,67 @@ export type Database = {
           },
         ]
       }
+      security_event: {
+        Row: {
+          actor_user_id: string | null
+          campus_id: string | null
+          detail: Json
+          event_type: string
+          id: string
+          occurred_at: string
+          severity: string
+          subject_id: string | null
+          subject_table: string | null
+          tenant_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          campus_id?: string | null
+          detail?: Json
+          event_type: string
+          id?: string
+          occurred_at?: string
+          severity?: string
+          subject_id?: string | null
+          subject_table?: string | null
+          tenant_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          campus_id?: string | null
+          detail?: Json
+          event_type?: string
+          id?: string
+          occurred_at?: string
+          severity?: string
+          subject_id?: string | null
+          subject_table?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_event_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "security_event_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_event_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_rollover_decision: {
         Row: {
           created_at: string
@@ -8264,6 +8359,84 @@ export type Database = {
           },
           {
             foreignKeyName: "sibling_group_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signing_identity: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          designation: string
+          holder_name: string
+          id: string
+          signature_asset_id: string
+          stamp_asset_id: string | null
+          tenant_id: string
+          valid_from: string
+          valid_to: string | null
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          designation: string
+          holder_name: string
+          id?: string
+          signature_asset_id: string
+          stamp_asset_id?: string | null
+          tenant_id: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          designation?: string
+          holder_name?: string
+          id?: string
+          signature_asset_id?: string
+          stamp_asset_id?: string | null
+          tenant_id?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signing_identity_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_identity_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "signing_identity_signature_asset_id_fkey"
+            columns: ["signature_asset_id"]
+            isOneToOne: false
+            referencedRelation: "branding_asset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_identity_stamp_asset_id_fkey"
+            columns: ["stamp_asset_id"]
+            isOneToOne: false
+            referencedRelation: "branding_asset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_identity_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -10607,6 +10780,7 @@ export type Database = {
           language: Database["public"]["Enums"]["certificate_language"] | null
           original_issue_id: string | null
           pdf_path: string | null
+          pdf_sha256: string | null
           replaced_by_issue_id: string | null
           replaced_by_serial_no: string | null
           replaces_issue_id: string | null
@@ -10616,6 +10790,9 @@ export type Database = {
           serial_seq: number | null
           session_id: string | null
           session_name: string | null
+          signed_by_designation: string | null
+          signed_by_name: string | null
+          signing_identity_id: string | null
           status: Database["public"]["Enums"]["certificate_issue_status"] | null
           student_id: string | null
           student_name: string | null
@@ -10706,6 +10883,13 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_signing_identity_id_fkey"
+            columns: ["signing_identity_id"]
+            isOneToOne: false
+            referencedRelation: "signing_identity"
             referencedColumns: ["id"]
           },
           {
@@ -12078,6 +12262,10 @@ export type Database = {
         }
         Returns: Json
       }
+      attach_certificate_pdf_digest: {
+        Args: { p_issue_id: string; p_sha256: string }
+        Returns: Json
+      }
       attach_staff_campus: {
         Args: { p_campus_id: string; p_staff_id: string }
         Returns: undefined
@@ -12495,6 +12683,17 @@ export type Database = {
           p_shift?: Database["public"]["Enums"]["section_shift"]
         }
         Returns: string
+      }
+      create_signing_identity: {
+        Args: {
+          p_campus_id: string
+          p_designation: string
+          p_holder_name: string
+          p_signature_asset_id: string
+          p_stamp_asset_id?: string
+          p_valid_from?: string
+        }
+        Returns: Json
       }
       create_staff: {
         Args: {
@@ -13234,6 +13433,14 @@ export type Database = {
         Args: { p_date: string; p_section_id: string }
         Returns: undefined
       }
+      log_certificate_digest_mismatch: {
+        Args: {
+          p_issue_id: string
+          p_observed_bytes: number
+          p_observed_sha256: string
+        }
+        Returns: Json
+      }
       lookup_challan_for_counter: {
         Args: { p_challan_no: string }
         Returns: Json
@@ -13486,6 +13693,7 @@ export type Database = {
         }
         Returns: string
       }
+      resolve_signing_identity: { Args: { p_campus_id: string }; Returns: Json }
       resolve_timetable_version: {
         Args: { p_campus_id: string; p_date: string; p_session_id: string }
         Returns: string
@@ -13493,6 +13701,10 @@ export type Database = {
       restore_record: {
         Args: { p_id: string; p_table: string }
         Returns: undefined
+      }
+      retire_signing_identity: {
+        Args: { p_identity_id: string; p_valid_to?: string }
+        Returns: Json
       }
       reverse_ledger_entry: {
         Args: { p_ledger_id: string; p_reason: string }

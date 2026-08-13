@@ -799,6 +799,41 @@ export const uploadBrandingAssetSchema = z.object({
 });
 export type UploadBrandingAssetInput = z.infer<typeof uploadBrandingAssetSchema>;
 
+// FR-T09. Mirrors create_signing_identity()'s own checks in
+// supabase/migrations/20260731910000_certificate_digital_signature.sql. The
+// pixel floors are app.min_px_for_mm(45, 300) and app.min_px_for_mm(35, 300)
+// — the default anchor boxes at 300 DPI — restated as literals rather than
+// imported from lib/certificates/seal.ts, which pulls in node:crypto and has
+// no business in a client bundle.
+export const SEAL_REQUIRED_DPI = 300;
+export const SIGNING_IDENTITY_MIN_WIDTH_PX = { signature: 532, stamp: 414 } as const;
+
+export const createSigningIdentitySchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  holderName: z.string().trim().min(1, 'A name is printed under the signature').max(120),
+  designation: z.string().trim().min(1, 'A designation is printed under the signature').max(120),
+  validFrom: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
+    .optional()
+    .or(z.literal('')),
+  signatureWidthPx: z.coerce.number().int().positive(),
+  signatureHeightPx: z.coerce.number().int().positive(),
+  stampWidthPx: z.coerce.number().int().positive().optional(),
+  stampHeightPx: z.coerce.number().int().positive().optional(),
+});
+export type CreateSigningIdentityInput = z.infer<typeof createSigningIdentitySchema>;
+
+export const retireSigningIdentitySchema = z.object({
+  identityId: z.string().uuid(),
+  validTo: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
+    .optional()
+    .or(z.literal('')),
+});
+export type RetireSigningIdentityInput = z.infer<typeof retireSigningIdentitySchema>;
+
 const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
 export const setTenantThemeSchema = z.object({
   primaryHex: z.string().regex(HEX_COLOR_REGEX, 'Use a 6-digit hex colour, e.g. #112233').optional().or(z.literal('')),

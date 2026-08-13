@@ -223,6 +223,77 @@ describe('a character certificate rendered from payload_snapshot', () => {
   });
 });
 
+// FR-T09. What the composited seal looks like in the document that is about
+// to be handed to Chromium — the anchor arithmetic itself is
+// lib/certificates/seal.test.ts.
+describe('the signature and stamp composited onto an issued certificate', () => {
+  const sealed = (): CertificatePreviewPayload => ({
+    ...payload(),
+    seal: {
+      signing_identity_id: 'si-1',
+      holder_name: 'Farhat Jabeen',
+      designation: 'Principal',
+      valid_from: '2026-01-01',
+      valid_to: null,
+      signature_storage_path: 't/c/signature/1.png',
+      signature_width_px: 900,
+      signature_height_px: 300,
+      stamp_storage_path: 't/c/stamp/1.png',
+      stamp_width_px: 800,
+      stamp_height_px: 800,
+      signature_anchor_x_mm: 140,
+      signature_anchor_y_mm: 235,
+      signature_width_mm: 45,
+      stamp_anchor_x_mm: 35,
+      stamp_anchor_y_mm: 232,
+      stamp_width_mm: 35,
+      stamp_opacity: 0.6,
+    },
+  });
+
+  const assets = { letterheadDataUri: null, logoDataUri: null, signatureDataUri: 'data:image/png;base64,SIG', stampDataUri: 'data:image/png;base64,STAMP' };
+
+  it('AC1: places the signature at the template anchor, converted into the page area', () => {
+    const html = buildCertificateHtml(sealed(), null, assets).html;
+    // (140mm, 235mm) on the page, less the 18mm/16mm @page margins.
+    expect(html).toContain('class="seal-signature" src="data:image/png;base64,SIG"');
+    expect(html).toContain('left:122mm;top:219mm;width:45mm;');
+  });
+
+  it('AC1: composites the stamp at 60% opacity', () => {
+    expect(buildCertificateHtml(sealed(), null, assets).html).toContain('width:35mm;opacity:0.6;');
+  });
+
+  it('AC1: paints the seal behind the page content, so nothing it covers is obscured', () => {
+    const html = buildCertificateHtml(sealed(), null, assets).html;
+    expect(html).toContain('.seal-layer { position: fixed; inset: 0; z-index: 0; }');
+    expect(html).toContain('.content { position: relative; z-index: 1; }');
+    // …and the serial is part of that content, so it is painted on top.
+    expect(html.indexOf('class="seal-layer"')).toBeLessThan(html.indexOf('class="content"'));
+  });
+
+  it('names the signatory and designation under the signature line', () => {
+    const html = buildCertificateHtml(sealed(), null, assets).html;
+    expect(html).toContain('<div class="signatory-name">Farhat Jabeen</div>');
+    expect(html).toContain('<div class="signatory-name">Principal</div>');
+  });
+
+  it('prints the signature alone when the campus has a signature but no stamp', () => {
+    const withoutStamp = sealed();
+    withoutStamp.seal = { ...withoutStamp.seal!, stamp_storage_path: null, stamp_width_px: null, stamp_height_px: null };
+    const html = buildCertificateHtml(withoutStamp, null, { ...assets, stampDataUri: null }).html;
+    expect(html).toContain('class="seal-signature"');
+    expect(html).not.toContain('class="seal-stamp"');
+  });
+
+  it('draws no seal layer at all for a campus with no signing identity', () => {
+    const html = buildCertificateHtml(payload(), null, { letterheadDataUri: null, logoDataUri: null }).html;
+    expect(html).not.toContain('<div class="seal-layer">');
+    // The ruled lines FR-T01 printed are still there to sign by hand.
+    expect(html).toContain('class="signatures"');
+  });
+});
+
 describe('collectCertificateStrings', () => {
   it('includes the merged body, so an Urdu value in an English template is still glyph-checked', () => {
     const p = payload();

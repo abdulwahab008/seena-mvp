@@ -1,6 +1,7 @@
 import { NASTALIQ_FONT_FAMILY, nastaliqFontFaceCss, type ResolvedFont } from '@/lib/pdf/font';
 import type { PageFormat, PrintDocument } from '@/lib/pdf/render';
 import { applyMergeFields, escapeHtml } from './merge';
+import { anchorToPageArea, type CertificateSeal } from './seal';
 
 /**
  * FR-T01: the printed certificate itself. Shape mirrors
@@ -35,10 +36,22 @@ export type CertificatePreviewPayload = {
   campus: { name: string; name_ur: string | null; code: string; city: string | null } | null;
   letterhead_storage_path: string | null;
   logo_storage_path: string | null;
+  /**
+   * FR-T09: who signs this document and where their signature and the stamp
+   * go. Absent on a template preview (nothing has been signed) and null for
+   * a campus with no signing identity, in which case the page prints the
+   * ruled signature lines it always did.
+   */
+  seal?: CertificateSeal | null;
   sample_values: Record<string, string | null>;
 };
 
-export type CertificateAssets = { letterheadDataUri: string | null; logoDataUri: string | null };
+export type CertificateAssets = {
+  letterheadDataUri: string | null;
+  logoDataUri: string | null;
+  signatureDataUri?: string | null;
+  stampDataUri?: string | null;
+};
 
 /**
  * FR-T03: what issue_transfer_certificate() freezes onto
@@ -123,7 +136,40 @@ body {
 .body th, .body td { border: 0.2mm solid #666; padding: 1.5mm 2mm; text-align: ${rtl ? 'right' : 'left'}; }
 .signatures { margin-top: 18mm; display: flex; justify-content: space-between; gap: 10mm; }
 .signatures div { flex: 1 1 0; border-top: 0.3mm solid #111; padding-top: 2mm; font-size: 10pt; text-align: center; }
-.watermark { position: fixed; top: 45%; left: 0; right: 0; text-align: center; font-size: 46pt; color: rgba(0,0,0,0.08); letter-spacing: 3mm; }`;
+.signatures .signatory-name { border: 0; padding-top: 1mm; font-weight: 700; }
+/* FR-T09. The seal is painted BEHIND the page's text, which is what makes
+   "without obscuring the serial number" true wherever the anchor is moved
+   to and whatever the template's wording puts near it — z-order needs no
+   knowledge of where the serial ended up after layout, and a template edit
+   cannot defeat it. A fixed-position box is measured from the PAGE AREA, so
+   the anchors are converted from page-absolute mm in anchorToPageArea(). */
+.seal-layer { position: fixed; inset: 0; z-index: 0; }
+.seal-layer img { position: absolute; height: auto; }
+.content { position: relative; z-index: 1; }
+.watermark { position: fixed; top: 45%; left: 0; right: 0; z-index: 2; text-align: center; font-size: 46pt; color: rgba(0,0,0,0.08); letter-spacing: 3mm; }`;
+}
+
+/**
+ * AC1: the signature at its anchor, the stamp at its own with the
+ * template's opacity. Both are placed by WIDTH only — an aspect ratio is a
+ * property of the uploaded image and stretching it to a box would distort a
+ * signature into something its owner did not write.
+ */
+function sealHtml(seal: CertificateSeal | null | undefined, assets: CertificateAssets): string {
+  if (!seal || !assets.signatureDataUri) return '';
+
+  const signature = anchorToPageArea(seal.signature_anchor_x_mm, seal.signature_anchor_y_mm);
+  const stamp = anchorToPageArea(seal.stamp_anchor_x_mm, seal.stamp_anchor_y_mm);
+
+  const stampImg =
+    seal.stamp_storage_path && assets.stampDataUri
+      ? `<img class="seal-stamp" src="${assets.stampDataUri}" alt="" style="left:${stamp.leftMm}mm;top:${stamp.topMm}mm;width:${seal.stamp_width_mm}mm;opacity:${seal.stamp_opacity};" />`
+      : '';
+
+  return `<div class="seal-layer">
+  ${stampImg}
+  <img class="seal-signature" src="${assets.signatureDataUri}" alt="" style="left:${signature.leftMm}mm;top:${signature.topMm}mm;width:${seal.signature_width_mm}mm;" />
+</div>`;
 }
 
 export function buildCertificateHtml(
@@ -145,12 +191,24 @@ export function buildCertificateHtml(
   const watermark =
     template.status === 'issued' ? null : template.status === 'active' ? 'PREVIEW' : `DRAFT v${template.version} — PREVIEW`;
 
+  // FR-T09: with a real signature composited above them, the ruled lines are
+  // captions rather than blanks to sign on, and the holder is named under
+  // the one their signature sits on.
+  const seal = payload.seal ?? null;
+  const signatoryCaption =
+    seal && assets.signatureDataUri
+      ? `<div>${escapeHtml(signatoryLabel)}<div class="signatory-name">${escapeHtml(seal.holder_name)}</div><div class="signatory-name">${escapeHtml(seal.designation)}</div></div>`
+      : `<div>${escapeHtml(signatoryLabel)}</div>`;
+
   const html = `<!doctype html><html lang="${rtl ? 'ur' : 'en'}" dir="${rtl ? 'rtl' : 'ltr'}"><head><meta charset="utf-8"><title>${escapeHtml(template.title)}</title><style>${css(payload, font)}</style></head><body>
 ${watermark ? `<div class="watermark">${escapeHtml(watermark)}</div>` : ''}
+${sealHtml(seal, assets)}
+<div class="content">
 ${letterheadHtml(payload, assets)}
 <h1 class="doc-title">${escapeHtml(template.title)}</h1>
 <div class="body">${body}</div>
-<div class="signatures"><div>${escapeHtml(stampLabel)}</div><div>${escapeHtml(signatoryLabel)}</div></div>
+<div class="signatures"><div>${escapeHtml(stampLabel)}</div>${signatoryCaption}</div>
+</div>
 </body></html>`;
 
   return { html, pageFormat: template.page_size, landscape: false };

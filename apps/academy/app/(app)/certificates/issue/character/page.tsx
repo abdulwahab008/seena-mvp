@@ -1,5 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
-import { DOWNLOAD_URL_TTL_SECONDS } from '@/lib/certificates/issue';
+import { certificateDownloadPath } from '@/lib/certificates/issue';
 import { IssueCharacterCertificate, type IssuedRow, type StudentRow, type TemplateOption } from './issue-character-certificate';
 
 // Matches cert_issue_campus_scope and issue_character_certificate()'s own
@@ -45,17 +45,11 @@ export default async function IssueCharacterCertificatePage() {
     templates = (templateRows ?? []) as TemplateOption[];
 
     const rows = (issueRows ?? []) as unknown as Omit<IssuedRow, 'downloadUrl'>[];
-    // Signed in one batch rather than one round trip per row; a private
-    // bucket has no other readable form.
-    const livePaths = rows.filter((r) => r.status === 'issued').map((r) => r.pdf_path);
-    const signedByPath = new Map<string, string>();
-    if (livePaths.length > 0) {
-      const { data: signed } = await supabase.storage.from('certificates').createSignedUrls(livePaths, DOWNLOAD_URL_TTL_SECONDS);
-      for (const s of signed ?? []) {
-        if (s.signedUrl && s.path) signedByPath.set(s.path, s.signedUrl);
-      }
-    }
-    issued = rows.map((r) => ({ ...r, downloadUrl: signedByPath.get(r.pdf_path) ?? null }));
+    // FR-T09: through the verifying route, not a signed bucket URL. A link
+    // straight to storage is a link that hands over whatever the object
+    // currently contains, which is exactly what the digest check exists to
+    // catch.
+    issued = rows.map((r) => ({ ...r, downloadUrl: r.status === 'issued' ? certificateDownloadPath(r.id) : null }));
   }
 
   return (
