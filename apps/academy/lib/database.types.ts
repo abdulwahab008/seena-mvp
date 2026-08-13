@@ -12943,6 +12943,18 @@ export type Database = {
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
+      issue_character_certificate: {
+        Args: {
+          p_board_code?: string
+          p_conduct: string
+          p_language?: Database["public"]["Enums"]["certificate_language"]
+          p_period_from?: string
+          p_period_to?: string
+          p_remarks?: string
+          p_student_id: string
+        }
+        Returns: Json
+      }
       issue_otp: { Args: { p_phone: string }; Returns: Json }
       issue_transfer_certificate: {
         Args: {
@@ -13569,6 +13581,7 @@ export type Database = {
         }
         Returns: Json
       }
+      student_attendance_span: { Args: { p_student_id: string }; Returns: Json }
       student_balance: { Args: { p_enrolment_id: string }; Returns: number }
       student_timetable: {
         Args: { p_date: string; p_enrolment_id: string }

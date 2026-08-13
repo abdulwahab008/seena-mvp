@@ -1157,3 +1157,32 @@ export const issueTransferCertificateSchema = z.object({
   language: z.enum(CERTIFICATE_LANGUAGES),
 });
 export type IssueTransferCertificateInput = z.infer<typeof issueTransferCertificateSchema>;
+
+// FR-T05: mirrors issue_character_certificate()'s own guard and
+// chk_conduct_grade in
+// supabase/migrations/20260731890000_character_certificate_issuance.sql.
+// Both of those still fire — this only keeps an obviously wrong form out of
+// a transaction.
+export const CHARACTER_CONDUCT_GRADES = ['Excellent', 'Very Good', 'Good', 'Satisfactory'] as const;
+export type CharacterConductGrade = (typeof CHARACTER_CONDUCT_GRADES)[number];
+
+const optionalDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a full date')
+  .or(z.literal(''))
+  .optional();
+
+// periodFrom/periodTo are OVERRIDES: left blank, the database derives the
+// attendance period from the student's whole enrolment history (AC1).
+export const issueCharacterCertificateSchema = z.object({
+  studentId: z.string().uuid('Choose a student'),
+  conduct: z.enum(CHARACTER_CONDUCT_GRADES, {
+    errorMap: () => ({ message: 'Conduct must be Excellent, Very Good, Good or Satisfactory' }),
+  }),
+  periodFrom: optionalDateSchema,
+  periodTo: optionalDateSchema,
+  remarks: z.string().max(500).optional(),
+  boardCode: boardCodeSchema.optional(),
+  language: z.enum(CERTIFICATE_LANGUAGES),
+});
+export type IssueCharacterCertificateInput = z.infer<typeof issueCharacterCertificateSchema>;

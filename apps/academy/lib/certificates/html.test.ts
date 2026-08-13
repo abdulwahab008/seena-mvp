@@ -169,6 +169,60 @@ describe('an issued certificate rendered from payload_snapshot', () => {
   });
 });
 
+// FR-T05. The renderer never learns what a character certificate is — it
+// substitutes whatever the snapshot froze — so what is worth pinning is that
+// the field paths the SQL writes are the ones a character template names.
+describe('a character certificate rendered from payload_snapshot', () => {
+  const snapshot: CertificateSnapshot = {
+    template: {
+      id: 'tpl-cc-1',
+      certificate_type: 'character',
+      board_code: null,
+      language: 'en',
+      version: 1,
+      status: 'issued',
+      title: 'Character Certificate',
+      body_html:
+        '<p>Certified that {{student.name_en}}, GR {{student.gr_number}}, was a student of this school from ' +
+        '{{character.period_from}} to {{character.period_to}} and that his conduct was ' +
+        '{{character.conduct_grade}}. {{character.remarks}} Serial {{issue.serial_no}}.</p>',
+      page_size: 'A4',
+    },
+    tenant: { name: 'Seena Model High School', name_ur: null },
+    campus: { name: 'Main Campus', name_ur: null, code: 'MAIN', city: 'Lahore' },
+    letterhead_storage_path: null,
+    logo_storage_path: null,
+    values: {
+      'student.name_en': 'Ali Raza',
+      'student.gr_number': '2018-0311',
+      'character.period_from': '01-04-2018',
+      'character.period_to': '31-03-2023',
+      'character.conduct_grade': 'Excellent',
+      'character.remarks': 'A diligent and courteous student.',
+      'issue.serial_no': 'CC-2026-000001',
+    },
+  };
+
+  const doc = () =>
+    buildCertificateHtml(snapshotToPayload(snapshot), null, { letterheadDataUri: null, logoDataUri: null });
+
+  it('AC1: prints the attendance period the issue derived, not today', () => {
+    expect(doc().html).toContain('from 01-04-2018 to 31-03-2023');
+  });
+
+  it('AC2: prints the graded conduct', () => {
+    expect(doc().html).toContain('his conduct was Excellent');
+  });
+
+  it('AC3: prints the serial from its own series', () => {
+    expect(doc().html).toContain('Serial CC-2026-000001');
+  });
+
+  it('carries no PREVIEW watermark — an issued character certificate is the real document', () => {
+    expect(doc().html).not.toContain('class="watermark"');
+  });
+});
+
 describe('collectCertificateStrings', () => {
   it('includes the merged body, so an Urdu value in an English template is still glyph-checked', () => {
     const p = payload();
