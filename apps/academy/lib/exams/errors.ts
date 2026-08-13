@@ -43,3 +43,34 @@ export function examTermError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not have permission to do that.';
   return 'Could not complete that action.';
 }
+
+/**
+ * FR-I02. Same shape as examTermError above. 'pass marks cannot exceed
+ * maximum marks' and 'exam setup is locked by approved marks' are passed
+ * through untranslated for the same reason: the first is asserted wording,
+ * the second already says what to do next.
+ */
+const SUBJECT_PASS_THROUGH = ['pass marks cannot exceed maximum marks', 'exam setup is locked by approved marks'];
+
+export function examSubjectError(message: string): string {
+  const verbatim = SUBJECT_PASS_THROUGH.find((p) => message.includes(p));
+  if (verbatim) return message.slice(message.indexOf(verbatim));
+
+  if (message.includes('COMPONENTS_REQUIRED')) {
+    return 'Add at least one component — a subject with no components has no denominator.';
+  }
+  if (message.includes('COMPONENT_DUPLICATED')) return 'Each component can only be configured once.';
+  if (message.includes('MARKS_OUT_OF_RANGE')) {
+    return 'Maximum marks must be above zero and pass marks cannot be negative.';
+  }
+  if (message.includes('SUBJECT_NOT_EXAMINABLE')) return 'That subject is not examinable.';
+  if (message.includes('CLASS_SUBJECT_TERM_MISMATCH')) {
+    return 'That subject belongs to a different campus or session than this exam term.';
+  }
+  if (message.includes('CLASS_SUBJECT_NOT_FOUND')) return 'That class subject is not in the curriculum.';
+  if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'Exam subject not found.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to do that.';
+  return 'Could not complete that action.';
+}

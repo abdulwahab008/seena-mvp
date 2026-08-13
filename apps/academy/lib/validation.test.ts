@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  examComponentSchema,
+  upsertExamSubjectSchema,
+  examSubjectTotalMax,
+  EXAM_SETUP_PENDING,
+  PASS_EXCEEDS_MAX,
   pctToBasisPoints,
   formatWeightPct,
   upsertExamTermSchema,
@@ -1595,5 +1600,80 @@ describe('upsertExamTermSchema', () => {
   it('rejects a sequence outside the chk_exam_term_sequence range', () => {
     expect(upsertExamTermSchema.safeParse({ ...base, sequence: 0 }).success).toBe(false);
     expect(upsertExamTermSchema.safeParse({ ...base, sequence: 41 }).success).toBe(false);
+  });
+});
+
+// FR-I02. The client copy of two rules the database also enforces: pass <=
+// max (chk_pass_le_max plus upsert_exam_subject's own raise) and the total
+// max being the sum of the components.
+describe('exam subject components', () => {
+  const theory = { component: 'theory' as const, maxMarks: 65, passMarks: 23 };
+  const practical = { component: 'practical' as const, maxMarks: 20, passMarks: 7 };
+
+  it('accepts AC1\'s theory 65/23 and practical 20/7', () => {
+    expect(examComponentSchema.safeParse(theory).success).toBe(true);
+    expect(examComponentSchema.safeParse(practical).success).toBe(true);
+  });
+
+  it('totals AC1\'s configuration at 85', () => {
+    expect(examSubjectTotalMax([theory, practical])).toBe(85);
+  });
+
+  it('rejects AC2\'s practical — pass 7 out of a maximum of 5', () => {
+    const result = examComponentSchema.safeParse({ component: 'practical', maxMarks: 5, passMarks: 7 });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error.issues[0]?.message).toBe(PASS_EXCEEDS_MAX);
+  });
+
+  it('accepts pass equal to max — "cannot exceed", not "must be below"', () => {
+    expect(examComponentSchema.safeParse({ component: 'viva', maxMarks: 10, passMarks: 10 }).success).toBe(true);
+  });
+
+  it('rejects a component out of zero marks, and a negative pass mark', () => {
+    expect(examComponentSchema.safeParse({ component: 'theory', maxMarks: 0, passMarks: 0 }).success).toBe(false);
+    expect(examComponentSchema.safeParse({ component: 'theory', maxMarks: 50, passMarks: -1 }).success).toBe(false);
+  });
+
+  it('rejects a component the mark_component_code enum does not have', () => {
+    expect(examComponentSchema.safeParse({ component: 'homework', maxMarks: 10, passMarks: 4 }).success).toBe(false);
+  });
+
+  it('keeps AC4\'s wording where a disabled grid can reach it', () => {
+    expect(EXAM_SETUP_PENDING).toBe('exam setup pending — contact the exam office');
+  });
+});
+
+describe('upsertExamSubjectSchema', () => {
+  const base = {
+    examTermId: '11111111-1111-1111-1111-111111111111',
+    classSubjectId: '22222222-2222-2222-2222-222222222222',
+    components: [
+      { component: 'theory' as const, maxMarks: 65, passMarks: 23 },
+      { component: 'practical' as const, maxMarks: 20, passMarks: 7 },
+    ],
+  };
+
+  it('accepts a two-component configuration', () => {
+    expect(upsertExamSubjectSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a configuration with no components — there would be no denominator', () => {
+    expect(upsertExamSubjectSchema.safeParse({ ...base, components: [] }).success).toBe(false);
+  });
+
+  it('rejects the same component twice — the grid would have two identical columns', () => {
+    expect(
+      upsertExamSubjectSchema.safeParse({
+        ...base,
+        components: [
+          { component: 'theory' as const, maxMarks: 50, passMarks: 17 },
+          { component: 'theory' as const, maxMarks: 30, passMarks: 10 },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects a configuration with no exam term', () => {
+    expect(upsertExamSubjectSchema.safeParse({ ...base, examTermId: '' }).success).toBe(false);
   });
 });

@@ -1221,6 +1221,13 @@ export type Database = {
             foreignKeyName: "admission_offer_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "admission_offer_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -1969,6 +1976,13 @@ export type Database = {
             foreignKeyName: "attendance_day_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_day_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -2052,6 +2066,13 @@ export type Database = {
             foreignKeyName: "attendance_gap_log_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_gap_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -2130,6 +2151,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "attendance_lock_section_id_fkey"
@@ -2523,6 +2551,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "attendance_sync_log_section_id_fkey"
@@ -4909,6 +4944,13 @@ export type Database = {
             foreignKeyName: "enrolment_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "enrolment_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -4977,6 +5019,145 @@ export type Database = {
           },
           {
             foreignKeyName: "enrolment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_subject: {
+        Row: {
+          campus_id: string
+          class_subject_id: string
+          created_at: string
+          exam_term_id: string
+          id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          class_subject_id: string
+          created_at?: string
+          exam_term_id: string
+          id?: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          class_subject_id?: string
+          created_at?: string
+          exam_term_id?: string
+          id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_subject_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_class_subject_id_fkey"
+            columns: ["class_subject_id"]
+            isOneToOne: false
+            referencedRelation: "class_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_class_subject_id_fkey"
+            columns: ["class_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["class_subject_id"]
+          },
+          {
+            foreignKeyName: "exam_subject_class_subject_id_fkey"
+            columns: ["class_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["class_subject_id"]
+          },
+          {
+            foreignKeyName: "exam_subject_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "exam_subject_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_subject_component: {
+        Row: {
+          component: Database["public"]["Enums"]["mark_component_code"]
+          created_at: string
+          exam_subject_id: string
+          id: string
+          max_marks: number
+          pass_marks: number
+          sequence: number
+          tenant_id: string
+        }
+        Insert: {
+          component: Database["public"]["Enums"]["mark_component_code"]
+          created_at?: string
+          exam_subject_id: string
+          id?: string
+          max_marks: number
+          pass_marks: number
+          sequence: number
+          tenant_id: string
+        }
+        Update: {
+          component?: Database["public"]["Enums"]["mark_component_code"]
+          created_at?: string
+          exam_subject_id?: string
+          id?: string
+          max_marks?: number
+          pass_marks?: number
+          sequence?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_subject_component_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_component_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "exam_subject_component_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -6962,6 +7143,13 @@ export type Database = {
             foreignKeyName: "homework_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -7774,6 +7962,13 @@ export type Database = {
             foreignKeyName: "marketing_gallery_export_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -8497,6 +8692,13 @@ export type Database = {
             foreignKeyName: "section_class_teacher_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "section_class_teacher_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -8601,6 +8803,13 @@ export type Database = {
             foreignKeyName: "section_membership_history_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "section_membership_history_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -8677,6 +8886,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "section_subject_teacher_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "section_subject_teacher_section_id_fkey"
@@ -8907,6 +9123,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "session_rollover_decision_target_section_id_fkey"
@@ -10893,6 +11116,13 @@ export type Database = {
             foreignKeyName: "timetable_parallel_group_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -10984,6 +11214,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "timetable_publish_exception_section_id_fkey"
@@ -11188,6 +11425,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "timetable_slot_section_id_fkey"
@@ -12006,6 +12250,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -12064,6 +12315,76 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      v_exam_section_subject_setup: {
+        Row: {
+          campus_id: string | null
+          class_level_id: string | null
+          class_subject_id: string | null
+          class_subject_stream_id: string | null
+          component_count: number | null
+          exam_subject_id: string | null
+          exam_term_code: string | null
+          exam_term_id: string | null
+          is_configured: boolean | null
+          section_id: string | null
+          section_name: string | null
+          section_stream_id: string | null
+          subject_id: string | null
+          tenant_id: string | null
+          total_max_marks: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_section_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_section_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_section_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "class_section_stream_id_fkey"
+            columns: ["section_stream_id"]
+            isOneToOne: false
+            referencedRelation: "stream"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_section_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subject_stream_id_fkey"
+            columns: ["class_subject_stream_id"]
+            isOneToOne: false
+            referencedRelation: "stream"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subject_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -12516,6 +12837,13 @@ export type Database = {
             foreignKeyName: "session_rollover_decision_target_section_id_fkey"
             columns: ["target_section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -12606,6 +12934,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "homework_section_id_fkey"
@@ -12737,6 +13072,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -12847,6 +13189,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_scheduled_vs_required_periods"
             referencedColumns: ["section_id"]
           },
@@ -12916,6 +13265,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "homework_section_id_fkey"
@@ -13043,6 +13399,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "timetable_slot_section_id_fkey"
@@ -13977,6 +14340,10 @@ export type Database = {
         Returns: undefined
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
+      delete_exam_subject: {
+        Args: { p_exam_subject_id: string }
+        Returns: undefined
+      }
       delete_exam_term: { Args: { p_exam_term_id: string }; Returns: undefined }
       delete_staff_document: {
         Args: { p_document_id: string }
@@ -14168,6 +14535,18 @@ export type Database = {
         Returns: Json
       }
       fn_escalate_overdue_steps: { Args: never; Returns: number }
+      fn_exam_entry_readiness: {
+        Args: {
+          p_exam_term_id: string
+          p_section_id: string
+          p_subject_id: string
+        }
+        Returns: Json
+      }
+      fn_exam_subject_total_max: {
+        Args: { p_exam_subject_id: string }
+        Returns: number
+      }
       fn_expire_offers: { Args: never; Returns: number }
       fn_extend_offer: {
         Args: { p_new_expires_at: string; p_offer_id: string; p_reason: string }
@@ -15369,6 +15748,14 @@ export type Database = {
         }
         Returns: string
       }
+      upsert_exam_subject: {
+        Args: {
+          p_class_subject_id: string
+          p_components: Json
+          p_exam_term_id: string
+        }
+        Returns: string
+      }
       upsert_exam_term: {
         Args: {
           p_campus_id: string
@@ -15605,6 +15992,12 @@ export type Database = {
         | "consumption"
         | "encashment"
         | "carry_forward"
+      mark_component_code:
+        | "theory"
+        | "practical"
+        | "internal"
+        | "project"
+        | "viva"
       notification_channel: "sms" | "whatsapp" | "push"
       notification_language: "en" | "ur"
       notification_status:
@@ -16009,6 +16402,13 @@ export const Constants = {
         "consumption",
         "encashment",
         "carry_forward",
+      ],
+      mark_component_code: [
+        "theory",
+        "practical",
+        "internal",
+        "project",
+        "viva",
       ],
       notification_channel: ["sms", "whatsapp", "push"],
       notification_language: ["en", "ur"],

@@ -1367,3 +1367,46 @@ export const activateExamTermsSchema = z.object({
 export type ActivateExamTermsInput = z.infer<typeof activateExamTermsSchema>;
 
 export const examTermIdSchema = z.object({ examTermId: z.string().uuid() });
+
+// FR-I02: mirrors upsert_exam_subject() in
+// supabase/migrations/20260731960000_exam_subject_and_component_setup.sql.
+// Marks are integers, matching subject.default_max_marks and
+// class_subject.max_marks, which are already int — half marks are not
+// representable and that is module E's existing decision.
+export const MARK_COMPONENT_CODES = ['theory', 'practical', 'internal', 'project', 'viva'] as const;
+export type MarkComponentCode = (typeof MARK_COMPONENT_CODES)[number];
+
+// AC4's wording, asserted by pgTAP against fn_exam_entry_readiness(). Kept
+// here so a screen rendering the disabled grid without calling the function
+// still says the same thing.
+export const EXAM_SETUP_PENDING = 'exam setup pending — contact the exam office';
+
+// AC2's wording. The database raises it too — this is the copy a form can
+// show before a round trip.
+export const PASS_EXCEEDS_MAX = 'pass marks cannot exceed maximum marks';
+
+export const examComponentSchema = z
+  .object({
+    component: z.enum(MARK_COMPONENT_CODES),
+    maxMarks: z.coerce.number().int().min(1, 'Above zero').max(1000),
+    passMarks: z.coerce.number().int().min(0, 'Cannot be negative').max(1000),
+  })
+  .refine((c) => c.passMarks <= c.maxMarks, { message: PASS_EXCEEDS_MAX, path: ['passMarks'] });
+export type ExamComponentInput = z.infer<typeof examComponentSchema>;
+
+export const upsertExamSubjectSchema = z
+  .object({
+    examTermId: z.string().uuid('Choose an exam term'),
+    classSubjectId: z.string().uuid('Choose a class subject'),
+    components: z.array(examComponentSchema).min(1, 'Add at least one component').max(MARK_COMPONENT_CODES.length),
+  })
+  .refine((v) => new Set(v.components.map((c) => c.component)).size === v.components.length, {
+    message: 'Each component can only be configured once',
+    path: ['components'],
+  });
+export type UpsertExamSubjectInput = z.infer<typeof upsertExamSubjectSchema>;
+
+export const examSubjectTotalMax = (components: { maxMarks: number }[]): number =>
+  components.reduce((sum, c) => sum + (Number.isFinite(c.maxMarks) ? c.maxMarks : 0), 0);
+
+export const examSubjectIdSchema = z.object({ examSubjectId: z.string().uuid() });

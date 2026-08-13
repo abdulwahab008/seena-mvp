@@ -45,6 +45,7 @@ const LINKS = [
   { href: '/fees/late-fee-rules', label: 'Late Fee Rules' },
   { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
   { href: '/exams/terms', label: 'Exam Terms' },
+  { href: '/exams/subjects', label: 'Exam Subjects' },
   { href: '/expenses/vouchers', label: 'Expense Vouchers' },
   { href: '/expenses/approvals', label: 'Voucher Approvals' },
   { href: '/certificates/templates', label: 'Certificate Templates' },
