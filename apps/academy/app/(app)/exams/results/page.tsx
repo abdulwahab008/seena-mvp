@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { ResultBoard } from './result-board';
 import { PositionBoard } from './position-board';
+import { WithholdBoard } from './withhold-board';
 
 /**
  * FR-J02. The computed per-subject results for one section of one term.
@@ -101,6 +102,21 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
         </p>
         <div className="mt-4">
           <PositionBoard examTermId={term.id} termName={term.name} campusId={campus.id} classes={classes} />
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <h2 className="text-xl font-semibold" id="withholds">
+          Withheld results
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          FR-J08 — a candidate whose outstanding balance is above the campus threshold has their result withheld from
+          the parent and from the report card, automatically, and released the moment the money lands. Withholding
+          stops disclosure and nothing else: the marks above and the positions beside them are computed and ranked for
+          a withheld candidate exactly as for anyone else, which is what keeps the internal gazette honest.
+        </p>
+        <div className="mt-4">
+          <WithholdBoard examTermId={term.id} termName={term.name} campusId={campus.id} classes={classes} />
         </div>
       </div>
     </div>

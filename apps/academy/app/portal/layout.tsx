@@ -5,6 +5,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 const PORTAL_LINKS = [
   { href: '/portal/homework', label: 'Homework' },
   { href: '/portal/timetable', label: 'Timetable' },
+  { href: '/portal/results', label: 'Results' },
   { href: '/portal/consent', label: 'Consent' },
 ];
 

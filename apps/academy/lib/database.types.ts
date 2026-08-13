@@ -10466,6 +10466,140 @@ export type Database = {
           },
         ]
       }
+      result_withhold: {
+        Row: {
+          amount_outstanding_paisa: number | null
+          campus_id: string
+          cutoff_date: string
+          enrolment_id: string
+          exam_term_id: string
+          id: string
+          note: string | null
+          raised_at: string
+          raised_by: string | null
+          reason: Database["public"]["Enums"]["result_withhold_reason"]
+          release_kind:
+            | Database["public"]["Enums"]["result_withhold_release"]
+            | null
+          release_reason: string | null
+          released_at: string | null
+          released_by: string | null
+          tenant_id: string
+          threshold_paisa: number | null
+        }
+        Insert: {
+          amount_outstanding_paisa?: number | null
+          campus_id: string
+          cutoff_date: string
+          enrolment_id: string
+          exam_term_id: string
+          id?: string
+          note?: string | null
+          raised_at?: string
+          raised_by?: string | null
+          reason: Database["public"]["Enums"]["result_withhold_reason"]
+          release_kind?:
+            | Database["public"]["Enums"]["result_withhold_release"]
+            | null
+          release_reason?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          tenant_id: string
+          threshold_paisa?: number | null
+        }
+        Update: {
+          amount_outstanding_paisa?: number | null
+          campus_id?: string
+          cutoff_date?: string
+          enrolment_id?: string
+          exam_term_id?: string
+          id?: string
+          note?: string | null
+          raised_at?: string
+          raised_by?: string | null
+          reason?: Database["public"]["Enums"]["result_withhold_reason"]
+          release_kind?:
+            | Database["public"]["Enums"]["result_withhold_release"]
+            | null
+          release_reason?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          tenant_id?: string
+          threshold_paisa?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "result_withhold_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_withhold_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_withhold_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "result_withhold_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "result_withhold_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_withhold_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "result_withhold_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_withhold_raised_by_fkey"
+            columns: ["raised_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "result_withhold_released_by_fkey"
+            columns: ["released_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "result_withhold_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role: {
         Row: {
           code: string
@@ -18142,6 +18276,10 @@ export type Database = {
         Args: { p_enrolment_id: string; p_session_id: string }
         Returns: undefined
       }
+      fn_assert_result_disclosable: {
+        Args: { p_enrolment_id: string; p_exam_term_id: string }
+        Returns: undefined
+      }
       fn_assign_next_roll_no: {
         Args: { p_enrolment_id: string }
         Returns: number
@@ -18449,6 +18587,10 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_portal_term_result: {
+        Args: { p_enrolment_id: string; p_exam_term_id?: string }
+        Returns: Json
+      }
       fn_position_readiness: {
         Args: { p_class_level_id: string; p_exam_term_id: string }
         Returns: Json
@@ -18590,6 +18732,10 @@ export type Database = {
           student_id: string
         }[]
       }
+      fn_sync_fee_withholds: {
+        Args: { p_as_of?: string; p_exam_term_id: string }
+        Returns: Json
+      }
       fn_term_result_ready: {
         Args: { p_exam_term_id: string; p_section_id: string }
         Returns: Json
@@ -18623,6 +18769,10 @@ export type Database = {
       fn_validate_term_weightage: {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: undefined
+      }
+      fn_withhold_sheet: {
+        Args: { p_class_id: string; p_exam_term_id: string }
+        Returns: Json
       }
       format_certificate_serial: {
         Args: {
@@ -18866,6 +19016,15 @@ export type Database = {
         Args: { p_older_than_days?: number }
         Returns: Json
       }
+      raise_result_withhold: {
+        Args: {
+          p_enrolment_id: string
+          p_exam_term_id: string
+          p_note?: string
+          p_reason: Database["public"]["Enums"]["result_withhold_reason"]
+        }
+        Returns: string
+      }
       reconcile_admission_fee_payment: {
         Args: { p_payment_id: string }
         Returns: undefined
@@ -18923,6 +19082,10 @@ export type Database = {
       reject_mark_unlock: {
         Args: { p_note?: string; p_request_id: string }
         Returns: Json
+      }
+      release_result_withhold: {
+        Args: { p_reason: string; p_withhold_id: string }
+        Returns: undefined
       }
       remove_fee_plan_line: {
         Args: { p_line_id: string; p_reason?: string }
@@ -19362,6 +19525,10 @@ export type Database = {
           p_campus_id: string
           p_policy: Database["public"]["Enums"]["rank_policy"]
         }
+        Returns: undefined
+      }
+      set_result_withhold_threshold: {
+        Args: { p_campus_id: string; p_paisa: number }
         Returns: undefined
       }
       set_rollover_decision: {
@@ -19911,6 +20078,8 @@ export type Database = {
       qualification_verification_status: "pending" | "verified" | "rejected"
       rank_policy: "exclude_absentees" | "include_all"
       reminder_kind: "followup_officer" | "appointment_parent"
+      result_withhold_reason: "fee_default" | "discipline" | "document_pending"
+      result_withhold_release: "paid" | "hardship"
       rollover_decision: "promote" | "retain" | "pass_out" | "hold"
       rollover_run_status: "pending" | "running" | "completed"
       room_type_enum:
@@ -20349,6 +20518,8 @@ export const Constants = {
       qualification_verification_status: ["pending", "verified", "rejected"],
       rank_policy: ["exclude_absentees", "include_all"],
       reminder_kind: ["followup_officer", "appointment_parent"],
+      result_withhold_reason: ["fee_default", "discipline", "document_pending"],
+      result_withhold_release: ["paid", "hardship"],
       rollover_decision: ["promote", "retain", "pass_out", "hold"],
       rollover_run_status: ["pending", "running", "completed"],
       room_type_enum: [

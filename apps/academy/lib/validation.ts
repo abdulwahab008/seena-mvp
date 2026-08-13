@@ -1833,3 +1833,42 @@ export const setRankPolicySchema = z.object({
   policy: z.enum(RANK_POLICIES),
 });
 export type SetRankPolicyInput = z.infer<typeof setRankPolicySchema>;
+
+// FR-J08. A withhold is per (candidate, term); the screen that manages them
+// is per class, because that is the list the accounts office works through.
+export const WITHHOLD_MANUAL_REASONS = ['discipline', 'document_pending'] as const;
+
+export const withholdSheetSchema = z.object({
+  examTermId: z.string().uuid(),
+  classLevelId: z.string().uuid(),
+});
+export type WithholdSheetInput = z.infer<typeof withholdSheetSchema>;
+
+export const syncFeeWithholdsSchema = z.object({
+  examTermId: z.string().uuid(),
+});
+export type SyncFeeWithholdsInput = z.infer<typeof syncFeeWithholdsSchema>;
+
+// The reason is compulsory here as well as in the database: an override with
+// no explanation is the one thing AC3 is asking to be recorded.
+export const releaseWithholdSchema = z.object({
+  withholdId: z.string().uuid(),
+  reason: z.string().trim().min(10, 'Say why the dues are being set aside — at least a sentence.').max(500),
+});
+export type ReleaseWithholdInput = z.infer<typeof releaseWithholdSchema>;
+
+export const raiseWithholdSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examTermId: z.string().uuid(),
+  reason: z.enum(WITHHOLD_MANUAL_REASONS),
+  note: z.string().trim().min(5, 'Say why this result is being held.').max(500),
+});
+export type RaiseWithholdInput = z.infer<typeof raiseWithholdSchema>;
+
+// Rupees on the screen, paisa in the database — the conversion happens once,
+// in the action, so no component has to remember which unit it is holding.
+export const setWithholdThresholdSchema = z.object({
+  campusId: z.string().uuid(),
+  rupees: z.coerce.number().int().min(0).max(100_000_000),
+});
+export type SetWithholdThresholdInput = z.infer<typeof setWithholdThresholdSchema>;

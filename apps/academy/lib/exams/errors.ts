@@ -345,3 +345,36 @@ export function positionError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not have permission to compute positions.';
   return 'Could not compute the positions.';
 }
+
+/**
+ * FR-J08. Every refusal this module raises is a sentence built in the
+ * database from the row that caused it — "outstanding dues of PKR 12,000 as
+ * at 30 Jun 2026 exceed the PKR 5,000 threshold" names an amount, a cut-off
+ * and a threshold that no screen holds. Rewriting them here would mean the
+ * counter and the database disagree about what a parent is being told, so
+ * they pass through, the call FR-J02, FR-J03 and FR-J05 each made about
+ * theirs.
+ */
+const WITHHOLD_PASS_THROUGH = [
+  /^result withheld/,
+  /^annual result is provisional/,
+  /^annual result is stale/,
+  /^a fee-default withhold is opened by the sync/,
+  /^a hardship release needs a reason/,
+  /^fee withholds can only be synced by a signed-in user/,
+];
+
+export function withholdError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (WITHHOLD_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('WITHHOLD_ALREADY_RELEASED')) return 'That withhold has already been released.';
+  if (message.includes('WITHHOLD_NOTE_REQUIRED')) return 'Say why this result is being held.';
+  if (message.includes('WITHHOLD_NOT_FOUND')) return 'That withhold no longer exists.';
+  if (message.includes('WITHHOLD_THRESHOLD_INVALID')) return 'The threshold must be zero or more.';
+  if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to change result withholds.';
+  return 'Could not update the result withholds.';
+}
