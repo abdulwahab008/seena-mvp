@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { ResultBoard } from './result-board';
+import { PositionBoard } from './position-board';
 
 /**
  * FR-J02. The computed per-subject results for one section of one term.
@@ -9,6 +10,11 @@ import { ResultBoard } from './result-board';
  * Nothing here computes on load: approving the last paper of a section already
  * did that. This screen shows what came out, names the scale it was graded on,
  * and is loud about a result a break-glass correction has left stale.
+ *
+ * FR-J05's merit list is on this page rather than on one of its own, because it
+ * is the same term's marks read a second way — a total instead of a subject,
+ * and a cohort instead of a candidate. It is a class wide where the board above
+ * is one section, which is the whole point of it.
  */
 type SearchParams = { term?: string };
 
@@ -57,7 +63,7 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
     );
   }
 
-  const { sections } = await readMarkEntryOptions(supabase, campus.id, session.id);
+  const { sections, classes } = await readMarkEntryOptions(supabase, campus.id, session.id);
 
   return (
     <div className="space-y-6">
@@ -79,6 +85,24 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
       </p>
 
       <ResultBoard examTermId={term.id} termName={term.name} sections={sections} />
+
+      <div className="border-t pt-6">
+        <h2 className="text-xl font-semibold" id="merit-list">
+          Positions
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          FR-J05 — each candidate&rsquo;s position in their section and in their class, on total marks. Ranking waits for
+          every section of the class, because a class position taken against half a cohort would move the week the rest
+          were signed off. The year&rsquo;s figures are on the{' '}
+          <Link href="/exams/annual" className="underline">
+            annual results
+          </Link>{' '}
+          screen.
+        </p>
+        <div className="mt-4">
+          <PositionBoard examTermId={term.id} termName={term.name} campusId={campus.id} classes={classes} />
+        </div>
+      </div>
     </div>
   );
 }

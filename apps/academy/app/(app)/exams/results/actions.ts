@@ -1,9 +1,10 @@
 'use server';
 
 import { supabaseServer } from '@/lib/supabase/server';
-import { subjectResultError } from '@/lib/exams/errors';
+import { positionError, subjectResultError } from '@/lib/exams/errors';
 import type { SubjectResultSheet } from '@/lib/exams/result-query';
-import { computeSubjectResultSchema } from '@/lib/validation';
+import type { PositionSheet } from '@/lib/exams/position-query';
+import { computePositionsSchema, computeSubjectResultSchema, setRankPolicySchema } from '@/lib/validation';
 
 /**
  * FR-J02. Two calls, and the split is the requirement's:
@@ -44,4 +45,57 @@ export async function computeSubjectResults(input: unknown): Promise<ComputeResu
   if (error) return { error: subjectResultError(error.message) };
 
   return { error: null, rows: data ?? 0 };
+}
+
+/**
+ * FR-J05. The merit list sits on this screen rather than on one of its own
+ * because it is the same term's marks read a second way — a total instead of a
+ * subject, and a cohort instead of a candidate. The three calls split the way
+ * FR-J02's two do: reading, the explicit re-rank, and the one setting the FR
+ * insists must be stored rather than implied by an ORDER BY.
+ *
+ * Ordinary ranking is none of them: signing off the LAST section of the class
+ * chains into the positions on its own.
+ */
+export type PositionSheetState = { error: string | null; sheet?: PositionSheet };
+export type ComputePositionsState = { error: string | null; rows?: number };
+
+export async function readPositionSheet(examTermId: string, classLevelId: string): Promise<PositionSheetState> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_position_sheet', {
+    p_exam_term_id: examTermId,
+    p_class_id: classLevelId,
+  });
+  if (error || !data) {
+    return { error: error ? positionError(error.message) : 'Could not read the merit list.' };
+  }
+  return { error: null, sheet: data as unknown as PositionSheet };
+}
+
+export async function computePositions(input: unknown): Promise<ComputePositionsState> {
+  const parsed = computePositionsSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_compute_positions', {
+    p_exam_term_id: parsed.data.examTermId,
+    p_class_id: parsed.data.classLevelId,
+  });
+  if (error) return { error: positionError(error.message) };
+
+  return { error: null, rows: data ?? 0 };
+}
+
+export async function setRankPolicy(input: unknown): Promise<{ error: string | null }> {
+  const parsed = setRankPolicySchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_rank_policy', {
+    p_campus_id: parsed.data.campusId,
+    p_policy: parsed.data.policy,
+  });
+  if (error) return { error: positionError(error.message) };
+
+  return { error: null };
 }

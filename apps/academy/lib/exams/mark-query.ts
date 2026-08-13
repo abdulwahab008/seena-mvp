@@ -224,6 +224,8 @@ export type MarkApprovalQueue = {
 
 export type MarkSectionOption = { id: string; label: string; classLevelId: string; streamId: string | null };
 export type MarkSubjectOption = { subjectId: string; subjectName: string; classLevelId: string };
+/** FR-J05 ranks a whole CLASS, so it picks one of these rather than a section. */
+export type MarkClassOption = { id: string; label: string };
 
 /**
  * The section and subject pickers. Listing is campus-scoped by RLS; whether
@@ -234,7 +236,7 @@ export async function readMarkEntryOptions(
   supabase: SupabaseClient<Database>,
   campusId: string,
   sessionId: string,
-): Promise<{ sections: MarkSectionOption[]; subjects: MarkSubjectOption[] }> {
+): Promise<{ sections: MarkSectionOption[]; subjects: MarkSubjectOption[]; classes: MarkClassOption[] }> {
   const [{ data: sections }, { data: classSubjects }] = await Promise.all([
     supabase
       .from('class_section')
@@ -249,16 +251,26 @@ export async function readMarkEntryOptions(
       .eq('session_id', sessionId),
   ]);
 
-  const sectionOptions = (sections ?? [])
-    .map((s) => ({
-      id: s.id,
-      label: `${s.class_level?.name_en ?? ''} — ${s.name}`,
-      classLevelId: s.class_level_id,
-      streamId: s.stream_id,
-      ordinal: s.class_level?.ordinal ?? 0,
-    }))
+  const sectionRows = (sections ?? []).map((s) => ({
+    id: s.id,
+    label: `${s.class_level?.name_en ?? ''} — ${s.name}`,
+    classLevelId: s.class_level_id,
+    streamId: s.stream_id,
+    className: s.class_level?.name_en ?? '',
+    ordinal: s.class_level?.ordinal ?? 0,
+  }));
+
+  const sectionOptions = sectionRows
+    .slice()
     .sort((a, b) => a.ordinal - b.ordinal || a.label.localeCompare(b.label))
     .map(({ id, label, classLevelId, streamId }) => ({ id, label, classLevelId, streamId }));
+
+  const classSeen = new Set<string>();
+  const classOptions = sectionRows
+    .slice()
+    .sort((a, b) => a.ordinal - b.ordinal || a.className.localeCompare(b.className))
+    .filter((s) => (classSeen.has(s.classLevelId) ? false : (classSeen.add(s.classLevelId), true)))
+    .map((s) => ({ id: s.classLevelId, label: s.className }));
 
   const seen = new Set<string>();
   const subjectOptions = (classSubjects ?? [])
@@ -275,5 +287,5 @@ export async function readMarkEntryOptions(
     })
     .sort((a, b) => a.subjectName.localeCompare(b.subjectName));
 
-  return { sections: sectionOptions, subjects: subjectOptions };
+  return { sections: sectionOptions, subjects: subjectOptions, classes: classOptions };
 }

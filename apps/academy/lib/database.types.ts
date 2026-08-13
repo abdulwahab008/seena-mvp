@@ -10276,6 +10276,196 @@ export type Database = {
           },
         ]
       }
+      result_position: {
+        Row: {
+          campus_id: string
+          class_level_id: string
+          computed_at: string
+          computed_by: string | null
+          enrolment_id: string
+          exam_term_id: string
+          exclusion_reason: string | null
+          id: string
+          is_ranked: boolean
+          rank_in_class: number | null
+          rank_in_section: number | null
+          rank_policy: Database["public"]["Enums"]["rank_policy"]
+          ranked_out_of: number | null
+          ranked_out_of_class: number | null
+          section_id: string
+          tenant_id: string
+          total_max: number
+          total_obtained: number
+        }
+        Insert: {
+          campus_id: string
+          class_level_id: string
+          computed_at?: string
+          computed_by?: string | null
+          enrolment_id: string
+          exam_term_id: string
+          exclusion_reason?: string | null
+          id?: string
+          is_ranked: boolean
+          rank_in_class?: number | null
+          rank_in_section?: number | null
+          rank_policy: Database["public"]["Enums"]["rank_policy"]
+          ranked_out_of?: number | null
+          ranked_out_of_class?: number | null
+          section_id: string
+          tenant_id: string
+          total_max: number
+          total_obtained: number
+        }
+        Update: {
+          campus_id?: string
+          class_level_id?: string
+          computed_at?: string
+          computed_by?: string | null
+          enrolment_id?: string
+          exam_term_id?: string
+          exclusion_reason?: string | null
+          id?: string
+          is_ranked?: boolean
+          rank_in_class?: number | null
+          rank_in_section?: number | null
+          rank_policy?: Database["public"]["Enums"]["rank_policy"]
+          ranked_out_of?: number | null
+          ranked_out_of_class?: number | null
+          section_id?: string
+          tenant_id?: string
+          total_max?: number
+          total_obtained?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "result_position_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "result_position_computed_by_fkey"
+            columns: ["computed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "result_position_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "result_position_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "result_position_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "result_position_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role: {
         Row: {
           code: string
@@ -15807,6 +15997,154 @@ export type Database = {
           },
         ]
       }
+      v_result_position: {
+        Row: {
+          campus_id: string | null
+          class_level_id: string | null
+          class_name: string | null
+          computed_at: string | null
+          enrolment_id: string | null
+          exam_term_id: string | null
+          exclusion_reason: string | null
+          gr_number: string | null
+          id: string | null
+          is_ranked: boolean | null
+          is_stale: boolean | null
+          rank_in_class: number | null
+          rank_in_section: number | null
+          rank_policy: Database["public"]["Enums"]["rank_policy"] | null
+          ranked_out_of: number | null
+          ranked_out_of_class: number | null
+          roll_no: number | null
+          section_id: string | null
+          section_name: string | null
+          student_name: string | null
+          tenant_id: string | null
+          total_max: number | null
+          total_obtained: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "result_position_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "result_position_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "result_position_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "result_position_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "result_position_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "result_position_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_rollover_decision_detail: {
         Row: {
           campus_id: string | null
@@ -17875,6 +18213,10 @@ export type Database = {
         Args: { p_class_id: string; p_session_id: string }
         Returns: number
       }
+      fn_compute_positions: {
+        Args: { p_class_id: string; p_exam_term_id: string }
+        Returns: number
+      }
       fn_compute_subject_result: {
         Args: { p_exam_term_id: string; p_section_id: string }
         Returns: number
@@ -18107,6 +18449,14 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_position_readiness: {
+        Args: { p_class_level_id: string; p_exam_term_id: string }
+        Returns: Json
+      }
+      fn_position_sheet: {
+        Args: { p_class_id: string; p_exam_term_id: string }
+        Returns: Json
+      }
       fn_preview_checklist: {
         Args: {
           p_board?: Database["public"]["Enums"]["board"]
@@ -18162,6 +18512,10 @@ export type Database = {
       }
       fn_recompute_stale_annual_results: {
         Args: { p_session_id?: string }
+        Returns: number
+      }
+      fn_recompute_stale_positions: {
+        Args: { p_exam_term_id?: string }
         Returns: number
       }
       fn_record_ocr_review: {
@@ -19003,6 +19357,13 @@ export type Database = {
         Args: { p_campus_id: string; p_precision: number }
         Returns: undefined
       }
+      set_rank_policy: {
+        Args: {
+          p_campus_id: string
+          p_policy: Database["public"]["Enums"]["rank_policy"]
+        }
+        Returns: undefined
+      }
       set_rollover_decision: {
         Args: {
           p_decision: Database["public"]["Enums"]["rollover_decision"]
@@ -19548,6 +19909,7 @@ export type Database = {
         | "mphil"
         | "phd"
       qualification_verification_status: "pending" | "verified" | "rejected"
+      rank_policy: "exclude_absentees" | "include_all"
       reminder_kind: "followup_officer" | "appointment_parent"
       rollover_decision: "promote" | "retain" | "pass_out" | "hold"
       rollover_run_status: "pending" | "running" | "completed"
@@ -19985,6 +20347,7 @@ export const Constants = {
         "phd",
       ],
       qualification_verification_status: ["pending", "verified", "rejected"],
+      rank_policy: ["exclude_absentees", "include_all"],
       reminder_kind: ["followup_officer", "appointment_parent"],
       rollover_decision: ["promote", "retain", "pass_out", "hold"],
       rollover_run_status: ["pending", "running", "completed"],

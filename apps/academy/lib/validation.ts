@@ -1813,3 +1813,23 @@ export const computeAnnualResultSchema = z.object({
   classLevelId: z.string().uuid(),
 });
 export type ComputeAnnualResultInput = z.infer<typeof computeAnnualResultSchema>;
+
+// FR-J05: class and section position. Mirrors
+// supabase/migrations/20260731998000_class_and_section_position.sql.
+//
+// Ranking is per CLASS for the reason the annual aggregate is: a class
+// position is against every section of the class, and one taken while a
+// section is still marking would move the day that section landed.
+export const RANK_POLICIES = ['exclude_absentees', 'include_all'] as const;
+
+export const computePositionsSchema = z.object({
+  examTermId: z.string().uuid(),
+  classLevelId: z.string().uuid(),
+});
+export type ComputePositionsInput = z.infer<typeof computePositionsSchema>;
+
+export const setRankPolicySchema = z.object({
+  campusId: z.string().uuid(),
+  policy: z.enum(RANK_POLICIES),
+});
+export type SetRankPolicyInput = z.infer<typeof setRankPolicySchema>;

@@ -326,3 +326,22 @@ export function annualResultError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not have permission to compute annual results.';
   return 'Could not compute the annual results.';
 }
+
+/**
+ * FR-J05. "positions wait on section B, C" names rows only the database has —
+ * which sections of the class are still being marked — so it passes through
+ * verbatim, the same call FR-J02 and FR-J03 made about theirs.
+ */
+const POSITION_PASS_THROUGH = [/^positions wait on section /, /^marks are open under a break-glass window on /];
+
+export function positionError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (POSITION_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('RANK_POLICY_REQUIRED')) return 'Choose whether absentees are ranked.';
+  if (message.includes('CLASS_LEVEL_NOT_FOUND')) return 'That class is not part of this school.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to compute positions.';
+  return 'Could not compute the positions.';
+}
