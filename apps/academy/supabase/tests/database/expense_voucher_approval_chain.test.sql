@@ -733,10 +733,15 @@ select throws_ok(
   'expense approval trail is append-only',
   'AC4: and so is TRUNCATE CASCADE'
 );
+-- 20260731999100 gave expense_voucher a TRUNCATE guard of its own, so a
+-- cascade from the voucher table is now refused one relation earlier than
+-- it used to be — by the voucher's guard rather than the trail's. Either
+-- refusal aborts the whole statement, and the count assertion below still
+-- proves the trail survived a TRUNCATE aimed at its parent.
 select throws_ok(
   $$ truncate table public.expense_voucher cascade $$,
   '42501',
-  'expense approval trail is append-only',
+  'table public.expense_voucher cannot be truncated',
   'AC4: including one that reaches the trail by cascading from the voucher table'
 );
 

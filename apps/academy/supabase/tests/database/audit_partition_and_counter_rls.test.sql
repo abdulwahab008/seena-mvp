@@ -20,7 +20,7 @@
 -- literal 'audit_log_2026_08' would start failing the moment the clock
 -- rolls into September.
 begin;
-select plan(39);
+select plan(41);
 
 select public.provision_tenant('test-part-rls-co', 'Partition RLS Co', 'owner@partrls.test');
 select id as tenant_id from public.tenant where slug = 'test-part-rls-co' \gset
@@ -299,16 +299,20 @@ select lives_ok(
   $$ update public.employee_code_counter set next_value = 1 $$,
   'and so is a direct rewind of the employee-code counter'
 );
-select throws_ok(
+-- These two originally asserted the statement trigger's message, because
+-- authenticated still held the TRUNCATE privilege and the trigger was the
+-- only thing that could refuse. 20260731999100 revoked TRUNCATE from
+-- authenticated schema-wide, so the refusal now happens a layer earlier,
+-- on privilege. The trigger is still what refuses service_role, and that
+-- is asserted in the service_role block below.
+select throws_like(
   $$ truncate public.application_no_counter $$,
-  '42501',
-  'number counters cannot be truncated',
-  'TRUNCATE, which no policy would ever have seen, is refused by its own statement trigger'
+  '%permission denied%',
+  'TRUNCATE, which no policy would ever have seen, is refused before any trigger is reached'
 );
-select throws_ok(
+select throws_like(
   $$ truncate public.employee_code_counter cascade $$,
-  '42501',
-  'number counters cannot be truncated',
+  '%permission denied%',
   'and so is TRUNCATE ... CASCADE'
 );
 
@@ -319,6 +323,18 @@ select throws_ok(
 reset role;
 set local role service_role;
 
+select throws_ok(
+  $$ truncate public.application_no_counter $$,
+  '42501',
+  'number counters cannot be truncated',
+  'service_role keeps the TRUNCATE privilege by design, so the statement trigger is what refuses it'
+);
+select throws_ok(
+  $$ truncate public.employee_code_counter cascade $$,
+  '42501',
+  'number counters cannot be truncated',
+  'and it refuses TRUNCATE ... CASCADE the same way'
+);
 select throws_ok(
   format($$ update public.application_no_counter set next_seq = 1 where campus_id = %L $$, :'campus_a'),
   '42501',
