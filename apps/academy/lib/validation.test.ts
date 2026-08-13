@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  pctToBasisPoints,
+  formatWeightPct,
+  upsertExamTermSchema,
   provisionTenantSchema,
   slugSchema,
   createCampusSchema,
@@ -1519,5 +1522,78 @@ describe('buildGalleryExportSchema', () => {
 
   it('rejects a missing campus', () => {
     expect(buildGalleryExportSchema.safeParse({ campusId: '' }).success).toBe(false);
+  });
+});
+
+// FR-I01. Weightage is basis points in the database (1 bp = 0.01%); these
+// two are the only place the app converts, so they are the only place a
+// percentage can be silently mangled on the way in or out.
+describe('exam term weightage, as basis points', () => {
+  it('converts whole percentages exactly', () => {
+    expect(pctToBasisPoints(25)).toBe(2500);
+    expect(pctToBasisPoints(100)).toBe(10000);
+    expect(pctToBasisPoints(0)).toBe(0);
+  });
+
+  it('converts two-decimal percentages exactly — 33.33% is 3333 bp, not 3332', () => {
+    expect(pctToBasisPoints(33.33)).toBe(3333);
+    expect(pctToBasisPoints(0.01)).toBe(1);
+    expect(pctToBasisPoints(85.5)).toBe(8550);
+  });
+
+  it('renders a weight with the two decimal places FR-I01 quotes', () => {
+    expect(formatWeightPct(90)).toBe('90.00');
+    expect(formatWeightPct(100)).toBe('100.00');
+    expect(formatWeightPct(0)).toBe('0.00');
+    expect(formatWeightPct(85.5)).toBe('85.50');
+  });
+
+  it('survives the float sum that the basis-point representation exists to avoid', () => {
+    const total = [25.0, 15.0, 0.0, 60.0].reduce((s, w) => s + w, 0);
+    expect(formatWeightPct(total)).toBe('100.00');
+    expect([2500, 1500, 0, 6000].reduce((s, w) => s + w, 0)).toBe(10000);
+  });
+});
+
+describe('upsertExamTermSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    code: 'T1',
+    name: 'First Term',
+    sequence: 1,
+    weightPct: 25,
+    countsTowardAnnual: true,
+  };
+
+  it('accepts a term', () => {
+    expect(upsertExamTermSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a 0% non-counting term — AC1\'s Pre-Board', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: 0, countsTowardAnnual: false }).success).toBe(true);
+  });
+
+  it('accepts two decimal places, the basis-point floor', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: 33.33 }).success).toBe(true);
+  });
+
+  it('rejects a third decimal place rather than rounding it away', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: 33.333 }).success).toBe(false);
+  });
+
+  it('rejects a weight outside 0-100', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: 100.01 }).success).toBe(false);
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: -1 }).success).toBe(false);
+  });
+
+  it('rejects a term with no code or no name', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, code: '' }).success).toBe(false);
+    expect(upsertExamTermSchema.safeParse({ ...base, name: '' }).success).toBe(false);
+  });
+
+  it('rejects a sequence outside the chk_exam_term_sequence range', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, sequence: 0 }).success).toBe(false);
+    expect(upsertExamTermSchema.safeParse({ ...base, sequence: 41 }).success).toBe(false);
   });
 });

@@ -1325,3 +1325,45 @@ export const markExpenseVoucherPaidSchema = z.object({
   paidReference: z.string().trim().max(100).optional(),
 });
 export type MarkExpenseVoucherPaidInput = z.infer<typeof markExpenseVoucherPaidSchema>;
+
+// FR-I01: mirrors upsert_exam_term() in
+// supabase/migrations/20260731950000_exam_term_definition_and_weightage.sql.
+// Weightage is entered as a PERCENTAGE and stored as basis points (1 bp =
+// 0.01%), the same smallest-unit discipline as paisa above. The two-decimal
+// bound is the basis-point floor, re-raised as WEIGHT_PRECISION by
+// app.exam_term_weight_bp() — this only keeps an obviously wrong form out
+// of a transaction that would raise.
+export const EXAM_TERM_WEIGHT_BP_TOTAL = 10000;
+export const pctToBasisPoints = (pct: number): number => Math.round(pct * 100);
+export const formatWeightPct = (pct: number): string => pct.toFixed(2);
+
+export const upsertExamTermSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  sessionId: z.string().uuid('Choose an academic session'),
+  code: z
+    .string()
+    .trim()
+    .min(1, 'Required')
+    .max(20, 'At most 20 characters')
+    .regex(/^[A-Za-z0-9_-]+$/, 'Letters, numbers, hyphens and underscores only'),
+  name: z.string().trim().min(1, 'Required').max(100),
+  nameUr: z.string().trim().max(100).optional(),
+  sequence: z.coerce.number().int().min(1, 'From 1').max(40, 'At most 40'),
+  weightPct: z.coerce
+    .number()
+    .min(0, 'Between 0 and 100')
+    .max(100, 'Between 0 and 100')
+    .refine((v) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-9, {
+      message: 'At most two decimal places',
+    }),
+  countsTowardAnnual: z.boolean(),
+});
+export type UpsertExamTermInput = z.infer<typeof upsertExamTermSchema>;
+
+export const activateExamTermsSchema = z.object({
+  campusId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+});
+export type ActivateExamTermsInput = z.infer<typeof activateExamTermsSchema>;
+
+export const examTermIdSchema = z.object({ examTermId: z.string().uuid() });

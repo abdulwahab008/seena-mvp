@@ -4984,6 +4984,82 @@ export type Database = {
           },
         ]
       }
+      exam_term: {
+        Row: {
+          activated_at: string | null
+          campus_id: string
+          code: string
+          counts_toward_annual: boolean
+          created_at: string
+          id: string
+          locked_at: string | null
+          name: string
+          name_ur: string | null
+          sequence: number
+          session_id: string
+          status: Database["public"]["Enums"]["exam_term_status"]
+          tenant_id: string
+          weight_bp: number
+          weight_pct: number | null
+        }
+        Insert: {
+          activated_at?: string | null
+          campus_id: string
+          code: string
+          counts_toward_annual?: boolean
+          created_at?: string
+          id?: string
+          locked_at?: string | null
+          name: string
+          name_ur?: string | null
+          sequence: number
+          session_id: string
+          status?: Database["public"]["Enums"]["exam_term_status"]
+          tenant_id: string
+          weight_bp?: number
+          weight_pct?: number | null
+        }
+        Update: {
+          activated_at?: string | null
+          campus_id?: string
+          code?: string
+          counts_toward_annual?: boolean
+          created_at?: string
+          id?: string
+          locked_at?: string | null
+          name?: string
+          name_ur?: string | null
+          sequence?: number
+          session_id?: string
+          status?: Database["public"]["Enums"]["exam_term_status"]
+          tenant_id?: string
+          weight_bp?: number
+          weight_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_term_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_term_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_term_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expense_head: {
         Row: {
           code: string
@@ -11991,6 +12067,73 @@ export type Database = {
           },
         ]
       }
+      v_exam_term_selectable: {
+        Row: {
+          campus_id: string | null
+          code: string | null
+          counts_toward_annual: boolean | null
+          id: string | null
+          is_locked: boolean | null
+          name: string | null
+          name_ur: string | null
+          sequence: number | null
+          session_id: string | null
+          status: Database["public"]["Enums"]["exam_term_status"] | null
+          tenant_id: string | null
+          weight_pct: number | null
+        }
+        Insert: {
+          campus_id?: string | null
+          code?: string | null
+          counts_toward_annual?: boolean | null
+          id?: string | null
+          is_locked?: never
+          name?: string | null
+          name_ur?: string | null
+          sequence?: number | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["exam_term_status"] | null
+          tenant_id?: string | null
+          weight_pct?: number | null
+        }
+        Update: {
+          campus_id?: string | null
+          code?: string | null
+          counts_toward_annual?: boolean | null
+          id?: string | null
+          is_locked?: never
+          name?: string | null
+          name_ur?: string | null
+          sequence?: number | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["exam_term_status"] | null
+          tenant_id?: string | null
+          weight_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_term_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_term_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_term_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_expense_voucher: {
         Row: {
           amount_paisa: number | null
@@ -13076,6 +13219,10 @@ export type Database = {
         Args: { p_template_id: string }
         Returns: string
       }
+      activate_exam_terms: {
+        Args: { p_campus_id: string; p_session_id: string }
+        Returns: number
+      }
       activate_guardian_account: { Args: { p_token: string }; Returns: string }
       add_holiday: {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
@@ -13830,6 +13977,7 @@ export type Database = {
         Returns: undefined
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
+      delete_exam_term: { Args: { p_exam_term_id: string }; Returns: undefined }
       delete_staff_document: {
         Args: { p_document_id: string }
         Returns: undefined
@@ -14286,6 +14434,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      fn_validate_term_weightage: {
+        Args: { p_campus_id: string; p_session_id: string }
+        Returns: undefined
+      }
       format_certificate_serial: {
         Args: {
           p_academic_year: number
@@ -14399,6 +14551,7 @@ export type Database = {
         Args: { p_date: string; p_section_id: string }
         Returns: undefined
       }
+      lock_exam_term: { Args: { p_exam_term_id: string }; Returns: undefined }
       log_certificate_digest_mismatch: {
         Args: {
           p_issue_id: string
@@ -14924,6 +15077,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_exam_term_weight: {
+        Args: { p_exam_term_id: string; p_weight_pct: number }
+        Returns: undefined
+      }
       set_fee_head_active: {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
@@ -15212,6 +15369,19 @@ export type Database = {
         }
         Returns: string
       }
+      upsert_exam_term: {
+        Args: {
+          p_campus_id: string
+          p_code: string
+          p_counts_toward_annual?: boolean
+          p_name: string
+          p_name_ur?: string
+          p_sequence: number
+          p_session_id: string
+          p_weight_pct: number
+        }
+        Returns: string
+      }
       upsert_timetable_slot: {
         Args: {
           p_elective_bucket?: number
@@ -15357,6 +15527,7 @@ export type Database = {
       enquiry_source: "walk_in" | "phone" | "web" | "referral" | "other"
       enquiry_status: "open" | "converted" | "lost" | "merged"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
+      exam_term_status: "draft" | "active" | "locked"
       expense_approval_decision: "approved" | "rejected" | "escalated"
       expense_voucher_status:
         | "pending_approval"
@@ -15752,6 +15923,7 @@ export const Constants = {
       enquiry_source: ["walk_in", "phone", "web", "referral", "other"],
       enquiry_status: ["open", "converted", "lost", "merged"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
+      exam_term_status: ["draft", "active", "locked"],
       expense_approval_decision: ["approved", "rejected", "escalated"],
       expense_voucher_status: [
         "pending_approval",
