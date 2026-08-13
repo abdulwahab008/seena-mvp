@@ -1,0 +1,19 @@
+-- FR-G11 follow-up: a student_attendance_source value for an
+-- attendance_day row that no register ever produced.
+--
+-- The companion migration (20260731994000) teaches
+-- approve_attendance_correction() to INSERT the attendance_day row when
+-- the corrected date was never marked at all. Such a row is genuinely
+-- none of the four existing values: nobody submitted a register for it
+-- from the web (FR-G02) or a phone, no device queue replayed it
+-- (FR-G05's 'offline_sync' means "a teacher captured this offline and it
+-- reached us later" — the row that comes out of an approval was never in
+-- any device queue), and no scanner produced it. Reusing any of them
+-- would stamp a false provenance on the row, which is the exact class of
+-- lie the FR-G11 audit trail exists to make impossible.
+--
+-- Split into its own migration because ALTER TYPE ... ADD VALUE cannot be
+-- used in the same transaction that later references the new value, and
+-- each migration file is its own transaction — the same convention
+-- 20260731800000_student_status_enum_extend_passed_out.sql established.
+alter type public.student_attendance_source add value if not exists 'correction';

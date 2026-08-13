@@ -22,7 +22,6 @@ async function decide(command: 'approve' | 'reject', formData: FormData): Promis
     if (error.message.includes('FORBIDDEN')) return { error: 'Only an Owner or Principal can decide correction requests.' };
     if (error.message.includes('CORRECTION_NOT_PENDING')) return { error: 'This request has already been decided.' };
     if (error.message.includes('CORRECTION_NOT_FOUND')) return { error: 'Request not found.' };
-    if (error.message.includes('ATTENDANCE_DAY_NOT_FOUND')) return { error: 'The original attendance record no longer exists.' };
     return { error: `Could not ${command} this request.` };
   }
 
@@ -32,7 +31,9 @@ async function decide(command: 'approve' | 'reject', formData: FormData): Promis
 
 // FR-G11: approve_attendance_correction() writes attendance_day and
 // exactly one attendance_audit row in the same transaction — this
-// action only shapes the client-facing error.
+// action only shapes the client-facing error. A correction for a date
+// that was never marked creates the day row rather than failing, so
+// there is no ATTENDANCE_DAY_NOT_FOUND case left to translate.
 export async function approveAttendanceCorrection(_prev: DecideCorrectionState, formData: FormData): Promise<DecideCorrectionState> {
   return decide('approve', formData);
 }

@@ -17954,7 +17954,12 @@ export type Database = {
         | "medical"
         | "relocation"
         | "other"
-      student_attendance_source: "web" | "mobile" | "offline_sync" | "biometric"
+      student_attendance_source:
+        | "web"
+        | "mobile"
+        | "offline_sync"
+        | "biometric"
+        | "correction"
       student_attendance_status:
         | "present"
         | "absent"
@@ -18384,7 +18389,13 @@ export const Constants = {
         "relocation",
         "other",
       ],
-      student_attendance_source: ["web", "mobile", "offline_sync", "biometric"],
+      student_attendance_source: [
+        "web",
+        "mobile",
+        "offline_sync",
+        "biometric",
+        "correction",
+      ],
       student_attendance_status: [
         "present",
         "absent",
