@@ -8,6 +8,7 @@ import {
   ABSENCE_REASONS_BY_STATUS,
   EXAM_ATTENDANCE_STATUSES,
   examReportSymbol,
+  unlockMinutesLeft,
   validateMarkCell,
   type ExamAbsenceReason,
   type ExamAttendanceStatus,
@@ -373,10 +374,36 @@ export function MarkGrid({ examTermId, sections, subjects }: Props) {
             )}
           </div>
 
+          {/* FR-I17. A window being open is the loudest thing on this screen
+              on purpose: the marks under the caret are already signed off, the
+              minutes are running, and every keystroke is recorded against the
+              request that allowed it. The countdown is decoration — the
+              deadline is enforced on every write server-side, so a stale tab
+              buys nothing. */}
+          {sheet.break_glass && (
+            <div
+              className="rounded-md border-2 border-destructive p-3 text-sm"
+              data-testid="mark-entry-break-glass"
+            >
+              <p className="font-semibold">
+                Break-glass window open — closes in{' '}
+                <span data-testid="mark-entry-break-glass-minutes">
+                  {unlockMinutesLeft(sheet.break_glass.expires_at) ?? 0}
+                </span>{' '}
+                min
+              </p>
+              <p className="mt-1">&ldquo;{sheet.break_glass.reason}&rdquo;</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                granted by {sheet.break_glass.approved_by_name ?? 'a Principal'} &middot; every change you make here is
+                recorded against this request
+              </p>
+            </div>
+          )}
+
           {/* FR-I16 AC2. Read-only because the set was signed off is a
               different fact from read-only because you do not teach it, and
               the second sentence would be a lie on a locked grid. */}
-          {sheet.is_locked ? (
+          {sheet.is_locked && !sheet.break_glass ? (
             <p className="text-sm text-destructive" data-testid="mark-entry-locked">
               Approved and locked
               {sheet.lock?.locked_by_name ? ` by ${sheet.lock.locked_by_name}` : ''} — these marks can no longer be

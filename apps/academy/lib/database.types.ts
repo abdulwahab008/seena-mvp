@@ -8355,6 +8355,191 @@ export type Database = {
           },
         ]
       }
+      mark_entry_audit: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          campus_id: string
+          changed_at: string
+          component_code: Database["public"]["Enums"]["mark_component_code"]
+          enrolment_id: string
+          exam_subject_id: string
+          id: string
+          mark_entry_id: string
+          mark_unlock_request_id: string
+          new_marks: number | null
+          old_marks: number | null
+          section_id: string
+          tenant_id: string
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          campus_id: string
+          changed_at?: string
+          component_code: Database["public"]["Enums"]["mark_component_code"]
+          enrolment_id: string
+          exam_subject_id: string
+          id?: string
+          mark_entry_id: string
+          mark_unlock_request_id: string
+          new_marks?: number | null
+          old_marks?: number | null
+          section_id: string
+          tenant_id: string
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          campus_id?: string
+          changed_at?: string
+          component_code?: Database["public"]["Enums"]["mark_component_code"]
+          enrolment_id?: string
+          exam_subject_id?: string
+          id?: string
+          mark_entry_id?: string
+          mark_unlock_request_id?: string
+          new_marks?: number | null
+          old_marks?: number | null
+          section_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mark_entry_audit_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_mark_unlock_request_id_fkey"
+            columns: ["mark_unlock_request_id"]
+            isOneToOne: false
+            referencedRelation: "mark_unlock_request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_mark_unlock_request_id_fkey"
+            columns: ["mark_unlock_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_mark_unlock_request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mark_entry_batch: {
         Row: {
           campus_id: string
@@ -8452,6 +8637,8 @@ export type Database = {
           locked_at: string
           locked_by: string | null
           mark_count: number
+          result_stale_at: string | null
+          result_stale_request_id: string | null
           section_id: string
           tenant_id: string
           unlock_state: Database["public"]["Enums"]["mark_unlock_state"]
@@ -8466,6 +8653,8 @@ export type Database = {
           locked_at?: string
           locked_by?: string | null
           mark_count: number
+          result_stale_at?: string | null
+          result_stale_request_id?: string | null
           section_id: string
           tenant_id: string
           unlock_state?: Database["public"]["Enums"]["mark_unlock_state"]
@@ -8480,6 +8669,8 @@ export type Database = {
           locked_at?: string
           locked_by?: string | null
           mark_count?: number
+          result_stale_at?: string | null
+          result_stale_request_id?: string | null
           section_id?: string
           tenant_id?: string
           unlock_state?: Database["public"]["Enums"]["mark_unlock_state"]
@@ -8549,6 +8740,20 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
+            foreignKeyName: "mark_lock_result_stale_request_id_fkey"
+            columns: ["result_stale_request_id"]
+            isOneToOne: false
+            referencedRelation: "mark_unlock_request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_lock_result_stale_request_id_fkey"
+            columns: ["result_stale_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_mark_unlock_request"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "mark_lock_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
@@ -8599,6 +8804,190 @@ export type Database = {
           },
           {
             foreignKeyName: "mark_lock_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mark_unlock_request: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          campus_id: string
+          created_at: string
+          decision_note: string | null
+          exam_subject_id: string
+          exam_term_id: string
+          expires_at: string | null
+          id: string
+          reason: string
+          relocked_at: string | null
+          requested_at: string
+          requested_by: string | null
+          section_id: string
+          status: Database["public"]["Enums"]["mark_unlock_status"]
+          tenant_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          campus_id: string
+          created_at?: string
+          decision_note?: string | null
+          exam_subject_id: string
+          exam_term_id: string
+          expires_at?: string | null
+          id?: string
+          reason: string
+          relocked_at?: string | null
+          requested_at?: string
+          requested_by?: string | null
+          section_id: string
+          status?: Database["public"]["Enums"]["mark_unlock_status"]
+          tenant_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          campus_id?: string
+          created_at?: string
+          decision_note?: string | null
+          exam_subject_id?: string
+          exam_term_id?: string
+          expires_at?: string | null
+          id?: string
+          reason?: string
+          relocked_at?: string | null
+          requested_at?: string
+          requested_by?: string | null
+          section_id?: string
+          status?: Database["public"]["Enums"]["mark_unlock_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mark_unlock_request_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -13379,6 +13768,8 @@ export type Database = {
           locked_at: string | null
           locked_by: string | null
           mark_lock_id: string | null
+          result_stale_at: string | null
+          result_stale_request_id: string | null
           section_id: string | null
           section_name: string | null
           stream_id: string | null
@@ -13477,6 +13868,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mark_lock_result_stale_request_id_fkey"
+            columns: ["result_stale_request_id"]
+            isOneToOne: false
+            referencedRelation: "mark_unlock_request"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_lock_result_stale_request_id_fkey"
+            columns: ["result_stale_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_mark_unlock_request"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -13814,6 +14219,243 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      v_mark_unlock_exception: {
+        Row: {
+          approvers: string[] | null
+          campus_id: string | null
+          class_name: string | null
+          exam_subject_id: string | null
+          exam_term_id: string | null
+          exam_term_name: string | null
+          first_unlocked_at: string | null
+          last_unlocked_at: string | null
+          reasons: string[] | null
+          requesters: string[] | null
+          sections: string[] | null
+          subject_name: string | null
+          tenant_id: string | null
+          unlock_count: number | null
+          windows_with_edits: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mark_unlock_request_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_mark_unlock_request: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          approved_by_name: string | null
+          campus_id: string | null
+          class_name: string | null
+          decision_note: string | null
+          edit_count: number | null
+          exam_subject_id: string | null
+          exam_term_id: string | null
+          expires_at: string | null
+          id: string | null
+          reason: string | null
+          relocked_at: string | null
+          requested_at: string | null
+          requested_by: string | null
+          requested_by_name: string | null
+          section_id: string | null
+          section_name: string | null
+          status: Database["public"]["Enums"]["mark_unlock_status"] | null
+          subject_name: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mark_unlock_request_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -15654,6 +16296,10 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_break_glass_unlock: {
+        Args: { p_request_id: string; p_window_minutes?: number }
+        Returns: Json
+      }
       fn_build_interview_notification_payload: {
         Args: { p_interview_id: string }
         Returns: Json
@@ -15936,6 +16582,7 @@ export type Database = {
         Returns: number
       }
       fn_reinstate_offer: { Args: { p_offer_id: string }; Returns: undefined }
+      fn_relock_expired_unlocks: { Args: { p_as_of?: string }; Returns: number }
       fn_required_approver_role: {
         Args: { p_amount_paisa: number; p_campus_id: string; p_head_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -16320,6 +16967,10 @@ export type Database = {
         Args: { p_correction_id: string; p_note: string }
         Returns: undefined
       }
+      reject_mark_unlock: {
+        Args: { p_note?: string; p_request_id: string }
+        Returns: Json
+      }
       remove_fee_plan_line: {
         Args: { p_line_id: string; p_reason?: string }
         Returns: undefined
@@ -16354,6 +17005,14 @@ export type Database = {
           p_enrolment_id: string
           p_scheme_id: string
           p_value: number
+        }
+        Returns: string
+      }
+      request_mark_unlock: {
+        Args: {
+          p_exam_subject_id: string
+          p_reason: string
+          p_section_id: string
         }
         Returns: string
       }
@@ -17233,6 +17892,7 @@ export type Database = {
         | "viva"
       mark_status: "draft" | "submitted" | "moderated" | "approved" | "locked"
       mark_unlock_state: "locked" | "unlocked"
+      mark_unlock_status: "pending" | "approved" | "expired" | "rejected"
       notification_channel: "sms" | "whatsapp" | "push"
       notification_language: "en" | "ur"
       notification_status:
@@ -17656,6 +18316,7 @@ export const Constants = {
       ],
       mark_status: ["draft", "submitted", "moderated", "approved", "locked"],
       mark_unlock_state: ["locked", "unlocked"],
+      mark_unlock_status: ["pending", "approved", "expired", "rejected"],
       notification_channel: ["sms", "whatsapp", "push"],
       notification_language: ["en", "ur"],
       notification_status: [

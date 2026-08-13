@@ -1538,3 +1538,58 @@ export const approveMarksSchema = z.object({
   sectionId: z.string().uuid(),
 });
 export type ApproveMarksInput = z.infer<typeof approveMarksSchema>;
+
+// FR-I17: break-glass mark unlock. Mirrors
+// supabase/migrations/20260731991000_break_glass_mark_unlock.sql.
+//
+// Two role lists, and the gap between them IS the control: the person who
+// wants the marks open is never the person who opens them. A user in both
+// lists still cannot approve their OWN request — chk_unlock_no_self_approve is
+// a table constraint, so that holds for every caller, not just this form.
+export const MARK_UNLOCK_REQUESTER_ROLES = [
+  'super_admin',
+  'owner',
+  'principal',
+  'vice_principal',
+  'exam_controller',
+] as const;
+export const MARK_UNLOCK_APPROVER_ROLES = ['super_admin', 'owner', 'principal'] as const;
+
+export const UNLOCK_REASON_MIN = 10;
+export const DEFAULT_UNLOCK_WINDOW_MINUTES = 60;
+export const MIN_UNLOCK_WINDOW_MINUTES = 1;
+export const MAX_UNLOCK_WINDOW_MINUTES = 240;
+
+export const requestMarkUnlockSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  sectionId: z.string().uuid(),
+  reason: z
+    .string()
+    .trim()
+    .min(UNLOCK_REASON_MIN, `Say why in at least ${UNLOCK_REASON_MIN} characters`)
+    .max(2000),
+});
+export type RequestMarkUnlockInput = z.infer<typeof requestMarkUnlockSchema>;
+
+export const breakGlassUnlockSchema = z.object({
+  requestId: z.string().uuid(),
+  windowMinutes: z.coerce
+    .number()
+    .int()
+    .min(MIN_UNLOCK_WINDOW_MINUTES)
+    .max(MAX_UNLOCK_WINDOW_MINUTES)
+    .default(DEFAULT_UNLOCK_WINDOW_MINUTES),
+});
+export type BreakGlassUnlockInput = z.infer<typeof breakGlassUnlockSchema>;
+
+export const rejectMarkUnlockSchema = z.object({
+  requestId: z.string().uuid(),
+  note: z.string().trim().max(2000).optional(),
+});
+export type RejectMarkUnlockInput = z.infer<typeof rejectMarkUnlockSchema>;
+
+/** Minutes left in an open window, floored at 0. Null when there is no window. */
+export function unlockMinutesLeft(expiresAt: string | null | undefined, now: number = Date.now()): number | null {
+  if (!expiresAt) return null;
+  return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - now) / 60_000));
+}

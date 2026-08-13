@@ -158,3 +158,35 @@ export function markApprovalError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not have permission to approve marks.';
   return 'Could not approve those marks.';
 }
+
+/**
+ * FR-I17. Every refusal on the break-glass path is a named code, deliberately:
+ * unlike FR-I16's completeness message there is nothing here the database
+ * knows and the screen does not, so a sentence built in SQL would only be a
+ * second place for the wording to live.
+ */
+export function markUnlockError(message: string): string {
+  if (message.includes('UNLOCK_SELF_APPROVAL')) {
+    return 'A break-glass request cannot be decided by the person who raised it.';
+  }
+  if (message.includes('UNLOCK_APPROVER_ONLY')) {
+    return 'Only a Principal, Owner or Super Admin can grant a break-glass unlock.';
+  }
+  if (message.includes('UNLOCK_REASON_REQUIRED')) {
+    return 'Say why in at least 10 characters — it is what the exceptions report shows.';
+  }
+  if (message.includes('UNLOCK_WINDOW_OUT_OF_RANGE')) return 'A break-glass window is 1 to 240 minutes.';
+  if (message.includes('UNLOCK_ALREADY_OPEN')) {
+    return 'This set already has a request awaiting a decision, or a window still open.';
+  }
+  if (message.includes('UNLOCK_NOT_PENDING')) return 'That request has already been decided.';
+  if (message.includes('UNLOCK_REQUEST_NOT_FOUND')) return 'Break-glass request not found.';
+  if (message.includes('MARKS_NOT_LOCKED')) {
+    return 'These marks were never signed off, so there is nothing to break the glass on.';
+  }
+  if (message.includes('break-glass request is append-only')) {
+    return 'A break-glass request records what was asked, by whom and why. None of those is editable afterwards.';
+  }
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to do that.';
+  return 'Could not complete that action.';
+}

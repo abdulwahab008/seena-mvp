@@ -35,6 +35,22 @@ export type MarkLockInfo = {
   unlock_state: 'locked' | 'unlocked';
   candidate_count: number;
   mark_count: number;
+  /** FR-I17 AC3: a mark changed inside a break-glass window since sign-off. */
+  result_stale_at: string | null;
+};
+
+/**
+ * FR-I17. Present only while a window is genuinely open — the same
+ * clock_timestamp() comparison the write path makes, so the banner and the
+ * database cannot disagree about whether the glass is broken.
+ */
+export type BreakGlassWindow = {
+  request_id: string;
+  reason: string;
+  approved_at: string;
+  expires_at: string;
+  approved_by_name: string | null;
+  requested_by_name: string | null;
 };
 
 export type MarkEntrySheet = ExamEntryReadiness & {
@@ -50,6 +66,8 @@ export type MarkEntrySheet = ExamEntryReadiness & {
   /** FR-I16. Read-only because it was signed off is not read-only because you do not teach it. */
   is_locked: boolean;
   lock: MarkLockInfo | null;
+  /** FR-I17. Non-null means is_locked is true AND the grid is writable anyway. */
+  break_glass: BreakGlassWindow | null;
   can_approve: boolean;
   students: MarkEntryStudent[];
 };
@@ -92,6 +110,46 @@ export type TermResultReady = {
   locked_count: number;
   pending_subjects: string[];
   ready: boolean;
+  /** FR-I17 AC3. Ready AND stale is the normal state after a correction. */
+  stale: boolean;
+  stale_subjects: string[];
+  stale_at: string | null;
+};
+
+/** FR-I17. One row of v_mark_unlock_request — the decision queue. */
+export type MarkUnlockRequestRow = {
+  id: string;
+  exam_subject_id: string;
+  section_id: string;
+  subject_name: string | null;
+  class_name: string | null;
+  section_name: string | null;
+  reason: string;
+  status: 'pending' | 'approved' | 'expired' | 'rejected';
+  requested_by: string | null;
+  requested_by_name: string | null;
+  requested_at: string;
+  approved_by_name: string | null;
+  approved_at: string | null;
+  expires_at: string | null;
+  decision_note: string | null;
+  edit_count: number;
+};
+
+/** FR-I17 AC4's report. */
+export type MarkUnlockException = {
+  exam_subject_id: string;
+  exam_term_name: string | null;
+  subject_name: string | null;
+  class_name: string | null;
+  unlock_count: number;
+  sections: string[];
+  reasons: string[];
+  approvers: string[];
+  requesters: string[];
+  windows_with_edits: number;
+  first_unlocked_at: string | null;
+  last_unlocked_at: string | null;
 };
 
 export type MarkApprovalQueue = {

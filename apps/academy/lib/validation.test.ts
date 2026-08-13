@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { markEntryError } from '@/lib/exams/errors';
+import { markApprovalError, markEntryError, markUnlockError } from '@/lib/exams/errors';
 import {
   ABSENCE_REASONS_BY_STATUS,
+  breakGlassUnlockSchema,
+  DEFAULT_UNLOCK_WINDOW_MINUTES,
+  requestMarkUnlockSchema,
+  unlockMinutesLeft,
   EXAM_ABSENCE_REASONS,
   examReportSymbol,
   setExamAttendanceSchema,
@@ -1845,6 +1849,97 @@ describe('FR-I11 markEntryError', () => {
   it('translates the office-only refusal', () => {
     expect(markEntryError('EXAM_STATUS_OFFICE_ONLY')).toBe(
       'Only the exam office can record an exemption or a debarment.',
+    );
+  });
+});
+
+describe('FR-I16 markApprovalError', () => {
+  it("AC1: passes the completeness refusal through, because the GR numbers are IN it", () => {
+    const refusal = '2 candidates have neither a mark nor an exam status: GR-0039, GR-0040';
+    expect(markApprovalError(refusal)).toBe(refusal);
+    const one = '1 candidate has neither a mark nor an exam status: GR-0039';
+    expect(markApprovalError(one)).toBe(one);
+  });
+
+  it('and the partial-component one too, with the component named', () => {
+    const refusal = '1 candidate is missing a component mark: GR-0039 (practical)';
+    expect(markApprovalError(refusal)).toBe(refusal);
+  });
+
+  it('translates the named codes', () => {
+    expect(markApprovalError('MARKS_ALREADY_APPROVED')).toBe(
+      'This set is already signed off. Reopening it is a break-glass unlock.',
+    );
+    expect(markApprovalError('FORBIDDEN')).toBe('You do not have permission to approve marks.');
+  });
+});
+
+describe('FR-I16 markEntryError: the lock', () => {
+  it("AC3's own token becomes a sentence exactly once, here", () => {
+    expect(markEntryError('marks_locked')).toBe(
+      'These marks were approved and signed off — a correction needs a break-glass unlock.',
+    );
+  });
+});
+
+describe('FR-I17 break-glass schemas', () => {
+  const ids = {
+    examSubjectId: '11111111-1111-4111-8111-111111111111',
+    sectionId: '22222222-2222-4222-8222-222222222222',
+  };
+
+  it('AC1: a reason under ten characters is not a reason', () => {
+    expect(requestMarkUnlockSchema.safeParse({ ...ids, reason: 'oops' }).success).toBe(false);
+    expect(
+      requestMarkUnlockSchema.safeParse({ ...ids, reason: 'Q5 total mis-added on 6 scripts' }).success,
+    ).toBe(true);
+  });
+
+  it('AC1: and whitespace does not pad it out to ten', () => {
+    expect(requestMarkUnlockSchema.safeParse({ ...ids, reason: '  bad      ' }).success).toBe(false);
+  });
+
+  it('AC2: the window defaults to 60 minutes and is bounded at both ends', () => {
+    const requestId = '33333333-3333-4333-8333-333333333333';
+    expect(breakGlassUnlockSchema.parse({ requestId }).windowMinutes).toBe(DEFAULT_UNLOCK_WINDOW_MINUTES);
+    expect(breakGlassUnlockSchema.safeParse({ requestId, windowMinutes: 0 }).success).toBe(false);
+    expect(breakGlassUnlockSchema.safeParse({ requestId, windowMinutes: 241 }).success).toBe(false);
+    expect(breakGlassUnlockSchema.safeParse({ requestId, windowMinutes: 240 }).success).toBe(true);
+  });
+});
+
+describe('FR-I17 unlockMinutesLeft', () => {
+  const now = Date.parse('2026-08-13T14:00:00Z');
+
+  it('AC2: counts the minutes to the deadline, rounding up so 59:01 reads as 60', () => {
+    expect(unlockMinutesLeft('2026-08-13T15:00:00Z', now)).toBe(60);
+    expect(unlockMinutesLeft('2026-08-13T14:00:01Z', now)).toBe(1);
+  });
+
+  it('AC2: never goes negative — a lapsed window has zero minutes left, not minus five', () => {
+    expect(unlockMinutesLeft('2026-08-13T13:55:00Z', now)).toBe(0);
+    expect(unlockMinutesLeft('2026-08-13T14:00:00Z', now)).toBe(0);
+  });
+
+  it('and no window at all is null rather than zero — the two mean different things', () => {
+    expect(unlockMinutesLeft(null, now)).toBeNull();
+    expect(unlockMinutesLeft(undefined, now)).toBeNull();
+  });
+});
+
+describe('FR-I17 markUnlockError', () => {
+  it('AC1: names the self-approval refusal in the words the control is about', () => {
+    expect(markUnlockError('UNLOCK_SELF_APPROVAL')).toBe(
+      'A break-glass request cannot be decided by the person who raised it.',
+    );
+    expect(markUnlockError('UNLOCK_APPROVER_ONLY')).toBe(
+      'Only a Principal, Owner or Super Admin can grant a break-glass unlock.',
+    );
+  });
+
+  it('and the append-only refusal, which is the whole evidentiary point', () => {
+    expect(markUnlockError('break-glass request is append-only')).toBe(
+      'A break-glass request records what was asked, by whom and why. None of those is editable afterwards.',
     );
   });
 });

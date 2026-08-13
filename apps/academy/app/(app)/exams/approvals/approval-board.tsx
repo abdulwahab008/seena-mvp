@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { approveMarks, readApprovalQueue } from './actions';
+import { requestMarkUnlock } from '../unlocks/actions';
 import type { MarkApprovalQueue, MarkApprovalSubject, MarkSectionOption } from '@/lib/exams/mark-query';
+import { UNLOCK_REASON_MIN } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 /**
@@ -29,6 +32,9 @@ export function ApprovalBoard({ examTermId, termName, sections }: Props) {
   const [queue, setQueue] = useState<MarkApprovalQueue | null>(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState('');
+  // FR-I17. Raised here rather than on /exams/unlocks because this is the
+  // screen the controller is on when they discover the mark is wrong.
+  const [reasons, setReasons] = useState<Record<string, string>>({});
 
   const load = async (id: string) => {
     if (!id) {
@@ -61,6 +67,23 @@ export function ApprovalBoard({ examTermId, termName, sections }: Props) {
         ? `${subject.subject_name} signed off — every paper in ${termName} is now locked.`
         : `${subject.subject_name} signed off — ${result.marksLocked} marks locked.`,
     );
+    await load(sectionId);
+  };
+
+  const onRequestUnlock = async (subject: MarkApprovalSubject) => {
+    setBusy(subject.exam_subject_id);
+    const result = await requestMarkUnlock({
+      examSubjectId: subject.exam_subject_id,
+      sectionId,
+      reason: reasons[subject.exam_subject_id] ?? '',
+    });
+    setBusy('');
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    setReasons((prev) => ({ ...prev, [subject.exam_subject_id]: '' }));
+    toast.success('Requested. A Principal other than you has to grant it.');
     await load(sectionId);
   };
 
@@ -168,6 +191,45 @@ export function ApprovalBoard({ examTermId, termName, sections }: Props) {
                   <p className="text-sm text-muted-foreground">
                     Every candidate is accounted for. Approving locks these marks against every role, including yours.
                   </p>
+                )}
+
+                {/* FR-I17. The only way back into a signed-off set. */}
+                {subject.is_locked && (
+                  <div className="space-y-2 border-t pt-3">
+                    {subject.unlock_state === 'unlocked' ? (
+                      <p className="text-sm text-destructive" data-testid={`approval-unlocked-${subject.subject_name}`}>
+                        A break-glass window is open on this paper — every edit is being recorded against it.
+                      </p>
+                    ) : (
+                      <div className="flex flex-wrap items-end gap-3">
+                        <div className="flex-1 space-y-1">
+                          <Label htmlFor={`unlock-reason-${subject.exam_subject_id}`}>
+                            Break-glass reason (at least {UNLOCK_REASON_MIN} characters)
+                          </Label>
+                          <Input
+                            id={`unlock-reason-${subject.exam_subject_id}`}
+                            data-testid={`request-unlock-reason-${subject.subject_name}`}
+                            placeholder="Q5 total mis-added on 6 scripts"
+                            value={reasons[subject.exam_subject_id] ?? ''}
+                            onChange={(e) =>
+                              setReasons((prev) => ({ ...prev, [subject.exam_subject_id]: e.target.value }))
+                            }
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          disabled={
+                            busy === subject.exam_subject_id ||
+                            (reasons[subject.exam_subject_id] ?? '').trim().length < UNLOCK_REASON_MIN
+                          }
+                          data-testid={`request-unlock-${subject.subject_name}`}
+                          onClick={() => void onRequestUnlock(subject)}
+                        >
+                          Request unlock
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             );
