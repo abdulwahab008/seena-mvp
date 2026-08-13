@@ -1781,3 +1781,23 @@ export const FBISE_PRESET_BANDS: GradingBandInput[] = [
   { gradeLabel: 'E', minPct: 33, maxPct: 39.99, gpaPoint: 2.0, isPass: true, remarkEn: 'Satisfactory' },
   { gradeLabel: 'F', minPct: 0, maxPct: 32.99, gpaPoint: 0, isPass: false, remarkEn: 'Fail' },
 ];
+
+// FR-J02: subject term result computation. Mirrors
+// supabase/migrations/20260731996000_subject_term_result_computation.sql.
+//
+// The Actors are System and Exam Controller; a Vice Principal is in the list
+// because fn_compute_subject_result() accepts one and a screen that hid the
+// button from a role the database allows would be lying about the rule.
+export const RESULT_COMPUTE_ROLES = [
+  'super_admin',
+  'owner',
+  'principal',
+  'vice_principal',
+  'exam_controller',
+] as const;
+
+export const computeSubjectResultSchema = z.object({
+  examTermId: z.string().uuid(),
+  sectionId: z.string().uuid(),
+});
+export type ComputeSubjectResultInput = z.infer<typeof computeSubjectResultSchema>;

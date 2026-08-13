@@ -280,3 +280,25 @@ export function gradingSchemeError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not have permission to configure a grade scale.';
   return 'Could not save that grading scheme.';
 }
+
+/**
+ * FR-J02. Three refusals are sentences the database composes from rows the
+ * screen does not have — which papers are still unlocked, which board has no
+ * scale, which paper is open under a break-glass window — so they pass through
+ * verbatim, the same call FR-I16's completeness messages make.
+ */
+const RESULT_PASS_THROUGH = [
+  /^term result computation waits on /,
+  /^no grading scheme is configured for /,
+  /^marks are open under a break-glass window on /,
+];
+
+export function subjectResultError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (RESULT_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to compute results.';
+  return 'Could not compute those results.';
+}

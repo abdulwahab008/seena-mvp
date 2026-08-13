@@ -12359,6 +12359,237 @@ export type Database = {
           },
         ]
       }
+      subject_result: {
+        Row: {
+          campus_id: string
+          computed_at: string
+          computed_by: string | null
+          enrolment_id: string
+          exam_subject_id: string
+          exam_term_id: string
+          failed_components: Json
+          gpa_point: number | null
+          grade_label: string | null
+          grading_scheme_id: string | null
+          id: string
+          is_blocked: boolean
+          is_pass: boolean | null
+          max_marks: number
+          obtained: number
+          pct: number | null
+          report_symbol: string | null
+          section_id: string
+          subject_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          computed_at?: string
+          computed_by?: string | null
+          enrolment_id: string
+          exam_subject_id: string
+          exam_term_id: string
+          failed_components?: Json
+          gpa_point?: number | null
+          grade_label?: string | null
+          grading_scheme_id?: string | null
+          id?: string
+          is_blocked?: boolean
+          is_pass?: boolean | null
+          max_marks: number
+          obtained: number
+          pct?: number | null
+          report_symbol?: string | null
+          section_id: string
+          subject_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          computed_at?: string
+          computed_by?: string | null
+          enrolment_id?: string
+          exam_subject_id?: string
+          exam_term_id?: string
+          failed_components?: Json
+          gpa_point?: number | null
+          grade_label?: string | null
+          grading_scheme_id?: string | null
+          id?: string
+          is_blocked?: boolean
+          is_pass?: boolean | null
+          max_marks?: number
+          obtained?: number
+          pct?: number | null
+          report_symbol?: string | null
+          section_id?: string
+          subject_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_result_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_computed_by_fkey"
+            columns: ["computed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "subject_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "subject_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_grading_scheme_id_fkey"
+            columns: ["grading_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_grading_scheme_id_fkey"
+            columns: ["grading_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "v_grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teach_scope_override: {
         Row: {
           approved_by: string
@@ -15914,6 +16145,195 @@ export type Database = {
           },
         ]
       }
+      v_subject_result: {
+        Row: {
+          board: Database["public"]["Enums"]["board"] | null
+          campus_id: string | null
+          computed_at: string | null
+          enrolment_id: string | null
+          exam_subject_id: string | null
+          exam_term_id: string | null
+          failed_components: Json | null
+          gpa_point: number | null
+          gr_number: string | null
+          grade_label: string | null
+          grading_scheme_id: string | null
+          grading_scheme_name: string | null
+          grading_scheme_version: number | null
+          id: string | null
+          is_blocked: boolean | null
+          is_pass: boolean | null
+          is_stale: boolean | null
+          max_marks: number | null
+          obtained: number | null
+          pct: number | null
+          report_symbol: string | null
+          result_stale_at: string | null
+          roll_no: number | null
+          section_id: string | null
+          student_name: string | null
+          subject_id: string | null
+          subject_name: string | null
+          subject_name_ur: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_result_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "subject_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "subject_result_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_grading_scheme_id_fkey"
+            columns: ["grading_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_grading_scheme_id_fkey"
+            columns: ["grading_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "v_grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "subject_result_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_teach_scope_exception: {
         Row: {
           campus_id: string | null
@@ -17076,6 +17496,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      fn_compute_subject_result: {
+        Args: { p_exam_term_id: string; p_section_id: string }
+        Returns: number
+      }
       fn_decide_leave_application: {
         Args: {
           p_application_id: string
@@ -17407,6 +17831,10 @@ export type Database = {
           has_critical_allergy: boolean
           student_id: string
         }[]
+      }
+      fn_subject_result_sheet: {
+        Args: { p_exam_term_id: string; p_section_id: string }
+        Returns: Json
       }
       fn_submit_application: {
         Args: {
