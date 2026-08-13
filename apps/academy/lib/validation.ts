@@ -1186,3 +1186,32 @@ export const issueCharacterCertificateSchema = z.object({
   language: z.enum(CERTIFICATE_LANGUAGES),
 });
 export type IssueCharacterCertificateInput = z.infer<typeof issueCharacterCertificateSchema>;
+
+// FR-T08: mirrors revoke_certificate() and set_certificate_replacement() in
+// supabase/migrations/20260731900000_certificate_register_immutability.sql.
+// The database re-checks all of it — the role, the campus scope, that the
+// entry is still live, that the replacement is a live certificate of the
+// same type for the same student — and the append-only trigger refuses
+// anything these functions did not do, so this only keeps an obviously
+// incomplete form out of a transaction.
+export const revokeCertificateSchema = z.object({
+  issueId: z.string().uuid(),
+  reason: z.string().trim().min(3, 'Say why the certificate is being cancelled').max(500),
+  replacementIssueId: z.union([z.string().uuid(), z.literal('')]).optional(),
+});
+export type RevokeCertificateInput = z.infer<typeof revokeCertificateSchema>;
+
+export const setCertificateReplacementSchema = z.object({
+  cancelledIssueId: z.string().uuid(),
+  replacementIssueId: z.string().uuid('Choose the certificate that replaced it'),
+});
+export type SetCertificateReplacementInput = z.infer<typeof setCertificateReplacementSchema>;
+
+// AC3's filter: a certificate type and an academic year, optionally one
+// campus. The year range is the same one FR-T02's counter accepts.
+export const certificateRegisterFilterSchema = z.object({
+  campusId: z.union([z.string().uuid(), z.literal('')]).optional(),
+  certificateType: z.enum(CERTIFICATE_TYPES),
+  academicYear: z.coerce.number().int().min(1900).max(2999),
+});
+export type CertificateRegisterFilterInput = z.infer<typeof certificateRegisterFilterSchema>;

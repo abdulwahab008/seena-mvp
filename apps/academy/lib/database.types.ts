@@ -3341,7 +3341,9 @@ export type Database = {
           replaced_by_issue_id: string | null
           revoke_reason: string | null
           revoked_at: string | null
+          revoked_by: string | null
           serial_no: string
+          serial_seq: number | null
           session_id: string
           status: Database["public"]["Enums"]["certificate_issue_status"]
           student_id: string
@@ -3364,7 +3366,9 @@ export type Database = {
           replaced_by_issue_id?: string | null
           revoke_reason?: string | null
           revoked_at?: string | null
+          revoked_by?: string | null
           serial_no: string
+          serial_seq?: number | null
           session_id: string
           status?: Database["public"]["Enums"]["certificate_issue_status"]
           student_id: string
@@ -3387,7 +3391,9 @@ export type Database = {
           replaced_by_issue_id?: string | null
           revoke_reason?: string | null
           revoked_at?: string | null
+          revoked_by?: string | null
           serial_no?: string
+          serial_seq?: number | null
           session_id?: string
           status?: Database["public"]["Enums"]["certificate_issue_status"]
           student_id?: string
@@ -3432,11 +3438,46 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "certificate_issue_original_issue_id_fkey"
+            columns: ["original_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_original_issue_id_fkey"
+            columns: ["original_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["replaces_issue_id"]
+          },
+          {
             foreignKeyName: "certificate_issue_replaced_by_issue_id_fkey"
             columns: ["replaced_by_issue_id"]
             isOneToOne: false
             referencedRelation: "certificate_issue"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_replaced_by_issue_id_fkey"
+            columns: ["replaced_by_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_replaced_by_issue_id_fkey"
+            columns: ["replaced_by_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["replaces_issue_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "certificate_issue_session_id_fkey"
@@ -4637,6 +4678,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "certificate_issue"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_tc_certificate_issue_id_fkey"
+            columns: ["tc_certificate_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_tc_certificate_issue_id_fkey"
+            columns: ["tc_certificate_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["replaces_issue_id"]
           },
           {
             foreignKeyName: "enrolment_tenant_id_fkey"
@@ -10528,6 +10583,168 @@ export type Database = {
           },
         ]
       }
+      v_certificate_register: {
+        Row: {
+          academic_year: number | null
+          campus_code: string | null
+          campus_id: string | null
+          campus_name: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_by_name: string | null
+          cancelled_reason: string | null
+          certificate_type:
+            | Database["public"]["Enums"]["certificate_type"]
+            | null
+          class_name: string | null
+          enrolment_id: string | null
+          father_name: string | null
+          gr_number: string | null
+          id: string | null
+          issued_at: string | null
+          issued_by: string | null
+          issued_by_name: string | null
+          language: Database["public"]["Enums"]["certificate_language"] | null
+          original_issue_id: string | null
+          pdf_path: string | null
+          replaced_by_issue_id: string | null
+          replaced_by_serial_no: string | null
+          replaces_issue_id: string | null
+          replaces_serial_no: string | null
+          section_name: string | null
+          serial_no: string | null
+          serial_seq: number | null
+          session_id: string | null
+          session_name: string | null
+          status: Database["public"]["Enums"]["certificate_issue_status"] | null
+          student_id: string | null
+          student_name: string | null
+          template_id: string | null
+          template_version: number | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_issue_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_original_issue_id_fkey"
+            columns: ["original_issue_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_issue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_original_issue_id_fkey"
+            columns: ["original_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_original_issue_id_fkey"
+            columns: ["original_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["replaces_issue_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_replaced_by_issue_id_fkey"
+            columns: ["replaced_by_issue_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_issue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_replaced_by_issue_id_fkey"
+            columns: ["replaced_by_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_replaced_by_issue_id_fkey"
+            columns: ["replaced_by_issue_id"]
+            isOneToOne: false
+            referencedRelation: "v_certificate_register"
+            referencedColumns: ["replaces_issue_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_revoked_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_template"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_certificate_serial_register: {
         Row: {
           academic_year: number | null
@@ -11923,6 +12140,27 @@ export type Database = {
         Args: { p_template_id: string }
         Returns: Json
       }
+      certificate_register_continuity: {
+        Args: {
+          p_academic_year?: number
+          p_campus_id?: string
+          p_certificate_type?: Database["public"]["Enums"]["certificate_type"]
+        }
+        Returns: {
+          academic_year: number
+          campus_code: string
+          campus_id: string
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          counter_value: number
+          expected_count: number
+          first_serial: string
+          last_serial: string
+          missing_seq: number[]
+          present_count: number
+          session_id: string
+          unnumbered_count: number
+        }[]
+      }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
       check_homework_load: {
         Args: {
@@ -13260,6 +13498,14 @@ export type Database = {
         Args: { p_ledger_id: string; p_reason: string }
         Returns: string
       }
+      revoke_certificate: {
+        Args: {
+          p_issue_id: string
+          p_reason: string
+          p_replacement_issue_id?: string
+        }
+        Returns: Json
+      }
       revoke_staff_teachable_subject: {
         Args: { p_id: string }
         Returns: undefined
@@ -13394,6 +13640,10 @@ export type Database = {
         Returns: undefined
       }
       set_bell_template_default: { Args: { p_id: string }; Returns: undefined }
+      set_certificate_replacement: {
+        Args: { p_cancelled_issue_id: string; p_replacement_issue_id: string }
+        Returns: Json
+      }
       set_challan_template: {
         Args: {
           p_bank_account_no: string

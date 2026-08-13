@@ -48,6 +48,7 @@ const LINKS = [
   { href: '/certificates/serials', label: 'Certificate Serials' },
   { href: '/certificates/issue', label: 'Issue Certificate' },
   { href: '/certificates/issue/character', label: 'Character Certificate' },
+  { href: '/certificates/register', label: 'Certificate Register' },
   { href: '/audit-export', label: 'Audit Export' },
 ];
 

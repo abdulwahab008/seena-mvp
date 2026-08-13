@@ -394,7 +394,12 @@ select lives_ok(
          :'tenant_id', :'campus_a', :'student_ali', :'session_id', :'tpl_v1'),
   'while a permitted grade passes, so the constraint is a scale and not a blanket refusal'
 );
-delete from public.certificate_issue where serial_no = 'CC-DIRECT-000003';
+-- FR-T08 made certificate_issue append-only, so this probe row cannot be
+-- cleaned up any more — a delete now raises 'certificate register is
+-- append-only' even for the table owner. It is left standing instead: it
+-- carries no serial_seq (its serial is not one FR-T02's counter ever
+-- allocated), so it claims no position in the register's run, and every
+-- assertion below is scoped to a student, a counter or a role.
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
