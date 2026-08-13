@@ -1521,3 +1521,20 @@ export const setExamAttendanceSchema = z
     path: ['reason'],
   });
 export type SetExamAttendanceInput = z.infer<typeof setExamAttendanceSchema>;
+
+// FR-I16: mark approval and locking. Mirrors
+// supabase/migrations/20260731990000_mark_approval_and_locking.sql.
+//
+// AC3's own token, raised by trg_mark_entry_block_when_locked for every
+// caller. Kept here so a grid that already knows the set is locked says the
+// same thing as the refusal it would get.
+export const MARKS_LOCKED = 'marks_locked';
+
+/** The roles fn_approve_marks() accepts — FR-I01's lock_exam_term() gate. */
+export const MARK_APPROVER_ROLES = ['super_admin', 'owner', 'principal', 'exam_controller'] as const;
+
+export const approveMarksSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  sectionId: z.string().uuid(),
+});
+export type ApproveMarksInput = z.infer<typeof approveMarksSchema>;

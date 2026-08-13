@@ -373,10 +373,21 @@ export function MarkGrid({ examTermId, sections, subjects }: Props) {
             )}
           </div>
 
-          {!sheet.can_enter && (
-            <p className="text-sm text-destructive" data-testid="mark-entry-readonly">
-              You do not teach this class subject — these marks are read-only for you.
+          {/* FR-I16 AC2. Read-only because the set was signed off is a
+              different fact from read-only because you do not teach it, and
+              the second sentence would be a lie on a locked grid. */}
+          {sheet.is_locked ? (
+            <p className="text-sm text-destructive" data-testid="mark-entry-locked">
+              Approved and locked
+              {sheet.lock?.locked_by_name ? ` by ${sheet.lock.locked_by_name}` : ''} — these marks can no longer be
+              edited by anyone. A correction needs a break-glass unlock.
             </p>
+          ) : (
+            !sheet.can_enter && (
+              <p className="text-sm text-destructive" data-testid="mark-entry-readonly">
+                You do not teach this class subject — these marks are read-only for you.
+              </p>
+            )
           )}
 
           <table className="w-full text-sm">

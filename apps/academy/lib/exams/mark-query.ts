@@ -27,12 +27,79 @@ export type MarkEntryStudent = {
   report_symbol: string | null;
 };
 
+/** FR-I16. Null until the set is approved. */
+export type MarkLockInfo = {
+  locked_at: string;
+  locked_by: string | null;
+  locked_by_name: string | null;
+  unlock_state: 'locked' | 'unlocked';
+  candidate_count: number;
+  mark_count: number;
+};
+
 export type MarkEntrySheet = ExamEntryReadiness & {
+  /**
+   * FR-I16 folds the lock into this: a locked set is read-only for EVERY
+   * caller, the controller who approved it included, so the grid asks one
+   * question rather than two.
+   */
   can_enter: boolean;
   /** FR-I11: an exemption and a debarment are the exam office's to record. */
   can_exempt: boolean;
   mark_precision: number;
+  /** FR-I16. Read-only because it was signed off is not read-only because you do not teach it. */
+  is_locked: boolean;
+  lock: MarkLockInfo | null;
+  can_approve: boolean;
   students: MarkEntryStudent[];
+};
+
+/**
+ * FR-I16. app.fn_mark_completeness()'s answer: what stops this (paper,
+ * section) being signed off, named per candidate rather than as a count.
+ */
+export type MarkCompleteness = {
+  components: MarkComponentCode[];
+  candidate_count: number;
+  mark_count: number;
+  /** AC1's candidates: no mark at all, and no exam status either. */
+  not_started: { gr_number: string; roll_no: number | null; student_name: string }[];
+  partial: {
+    gr_number: string;
+    roll_no: number | null;
+    student_name: string;
+    missing: MarkComponentCode[];
+  }[];
+  complete: boolean;
+};
+
+export type MarkApprovalSubject = {
+  exam_subject_id: string;
+  subject_id: string;
+  subject_name: string;
+  is_locked: boolean;
+  locked_at: string | null;
+  locked_by_name: string | null;
+  unlock_state: 'locked' | 'unlocked' | null;
+  completeness: MarkCompleteness;
+};
+
+/** FR-I16 AC4, per class rather than per term — see the migration header. */
+export type TermResultReady = {
+  exam_term_id: string;
+  section_id: string;
+  subject_count: number;
+  locked_count: number;
+  pending_subjects: string[];
+  ready: boolean;
+};
+
+export type MarkApprovalQueue = {
+  exam_term_id: string;
+  section_id: string;
+  can_approve: boolean;
+  subjects: MarkApprovalSubject[];
+  result_ready: TermResultReady;
 };
 
 export type MarkSectionOption = { id: string; label: string; classLevelId: string; streamId: string | null };

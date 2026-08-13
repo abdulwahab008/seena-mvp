@@ -97,6 +97,12 @@ export function markEntryError(message: string): string {
   const line = message.split('\n')[0]?.trim() ?? message;
   if (MARK_PASS_THROUGH.some((p) => p.test(line))) return line;
 
+  // FR-I16. 'marks_locked' is the acceptance criterion's own token rather
+  // than a sentence, so this is the one place it becomes one.
+  if (line === 'marks_locked') {
+    return 'These marks were approved and signed off — a correction needs a break-glass unlock.';
+  }
+
   if (message.includes('MARK_COMPONENT_NOT_CONFIGURED')) {
     return 'That component is not part of this paper — reload the grid.';
   }
@@ -120,4 +126,35 @@ export function markEntryError(message: string): string {
   if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
   if (message.includes('FORBIDDEN')) return 'You do not teach this class subject.';
   return 'Could not save those marks.';
+}
+
+/**
+ * FR-I16. fn_approve_marks() builds two of its refusals as SENTENCES rather
+ * than as codes, because the acceptance criterion asserts the LISTING —
+ * "approval is refused and the 2 GR numbers are listed" — and a code the UI
+ * expands cannot name rows the database found. Those pass through verbatim.
+ */
+const APPROVAL_PASS_THROUGH = [
+  /^\d+ candidates? (has|have) neither a mark nor an exam status: /,
+  /^\d+ candidates? (is|are) missing a component mark: /,
+];
+
+export function markApprovalError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (APPROVAL_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('MARKS_ALREADY_APPROVED')) {
+    return 'This set is already signed off. Reopening it is a break-glass unlock.';
+  }
+  if (message.includes('SECTION_NOT_IN_EXAM_SUBJECT')) {
+    return 'That section does not sit this paper — check the class and stream.';
+  }
+  if (message.includes('EXAM_SETUP_PENDING')) {
+    return 'This paper has no components configured, so it has no denominator to sign off.';
+  }
+  if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'This paper has no exam setup yet.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to approve marks.';
+  return 'Could not approve those marks.';
 }
