@@ -1250,3 +1250,29 @@ export const certificateRegisterFilterSchema = z.object({
   academicYear: z.coerce.number().int().min(1900).max(2999),
 });
 export type CertificateRegisterFilterInput = z.infer<typeof certificateRegisterFilterSchema>;
+
+// FR-T15: mirrors record_consent() and reserve_consent_evidence_path() in
+// supabase/migrations/20260731920000_consent_capture.sql. Every one of
+// these is re-checked there — the guardian link, the campus scope, the
+// paper-needs-a-scan rule, the file size and type — so this only keeps an
+// obviously incomplete form out of a transaction that would raise anyway.
+export const CONSENT_DECISIONS = ['granted', 'denied', 'withdrawn'] as const;
+export type ConsentDecision = (typeof CONSENT_DECISIONS)[number];
+
+export const CONSENT_CHANNELS = ['portal', 'paper', 'counter', 'whatsapp'] as const;
+export type ConsentChannel = (typeof CONSENT_CHANNELS)[number];
+
+export const recordConsentSchema = z.object({
+  studentId: z.string().uuid('Choose a student'),
+  purposeCode: z.string().min(1, 'Choose a purpose'),
+  guardianId: z.string().uuid('Choose the guardian whose decision this is'),
+  decision: z.enum(CONSENT_DECISIONS),
+  channel: z.enum(CONSENT_CHANNELS),
+});
+export type RecordConsentInput = z.infer<typeof recordConsentSchema>;
+
+export const buildGalleryExportSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  sectionId: z.union([z.string().uuid(), z.literal('')]).optional(),
+});
+export type BuildGalleryExportInput = z.infer<typeof buildGalleryExportSchema>;

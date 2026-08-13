@@ -70,6 +70,8 @@ import {
   assignSubstitutionSchema,
   publishTimetableSchema,
   requestAuditExportSchema,
+  recordConsentSchema,
+  buildGalleryExportSchema,
 } from './validation';
 
 describe('slugSchema', () => {
@@ -1471,5 +1473,51 @@ describe('requestAuditExportSchema', () => {
 
   it('rejects an entity outside the curated list', () => {
     expect(requestAuditExportSchema.safeParse({ ...base, tableNames: ['not_a_real_table'] }).success).toBe(false);
+  });
+});
+
+describe('recordConsentSchema', () => {
+  const base = {
+    studentId: '11111111-1111-1111-1111-111111111111',
+    purposeCode: 'student_photo_marketing',
+    guardianId: '22222222-2222-2222-2222-222222222222',
+    decision: 'granted',
+    channel: 'counter',
+  };
+
+  it('accepts a counter capture', () => {
+    expect(recordConsentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a withdrawal from the portal', () => {
+    expect(recordConsentSchema.safeParse({ ...base, decision: 'withdrawn', channel: 'portal' }).success).toBe(true);
+  });
+
+  it('rejects a decision outside granted/denied/withdrawn', () => {
+    expect(recordConsentSchema.safeParse({ ...base, decision: 'maybe' }).success).toBe(false);
+  });
+
+  it('rejects a channel the register does not model', () => {
+    expect(recordConsentSchema.safeParse({ ...base, channel: 'telepathy' }).success).toBe(false);
+  });
+
+  it('rejects a missing guardian — a decision always belongs to someone', () => {
+    expect(recordConsentSchema.safeParse({ ...base, guardianId: '' }).success).toBe(false);
+  });
+});
+
+describe('buildGalleryExportSchema', () => {
+  it('accepts a whole campus', () => {
+    expect(buildGalleryExportSchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111' }).success).toBe(true);
+  });
+
+  it('accepts an empty section filter as "no section filter"', () => {
+    expect(
+      buildGalleryExportSchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111', sectionId: '' }).success,
+    ).toBe(true);
+  });
+
+  it('rejects a missing campus', () => {
+    expect(buildGalleryExportSchema.safeParse({ campusId: '' }).success).toBe(false);
   });
 });

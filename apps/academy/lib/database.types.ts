@@ -4327,6 +4327,209 @@ export type Database = {
           },
         ]
       }
+      consent_purpose: {
+        Row: {
+          code: string
+          created_at: string
+          description_en: string
+          description_ur: string | null
+          gates_channel:
+            | Database["public"]["Enums"]["notification_channel"]
+            | null
+          requires_explicit_grant: boolean
+          requires_reconsent_on_version_change: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description_en: string
+          description_ur?: string | null
+          gates_channel?:
+            | Database["public"]["Enums"]["notification_channel"]
+            | null
+          requires_explicit_grant?: boolean
+          requires_reconsent_on_version_change?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description_en?: string
+          description_ur?: string | null
+          gates_channel?:
+            | Database["public"]["Enums"]["notification_channel"]
+            | null
+          requires_explicit_grant?: boolean
+          requires_reconsent_on_version_change?: boolean
+        }
+        Relationships: []
+      }
+      consent_record: {
+        Row: {
+          campus_id: string
+          channel: string
+          decision: string
+          evidence_path: string | null
+          granted_by_guardian_id: string
+          id: string
+          purpose_code: string
+          recorded_at: string
+          recorded_by: string | null
+          student_id: string
+          superseded_by: string | null
+          tenant_id: string
+          text_version: number
+        }
+        Insert: {
+          campus_id: string
+          channel: string
+          decision: string
+          evidence_path?: string | null
+          granted_by_guardian_id: string
+          id?: string
+          purpose_code: string
+          recorded_at?: string
+          recorded_by?: string | null
+          student_id: string
+          superseded_by?: string | null
+          tenant_id: string
+          text_version: number
+        }
+        Update: {
+          campus_id?: string
+          channel?: string
+          decision?: string
+          evidence_path?: string | null
+          granted_by_guardian_id?: string
+          id?: string
+          purpose_code?: string
+          recorded_at?: string
+          recorded_by?: string | null
+          student_id?: string
+          superseded_by?: string | null
+          tenant_id?: string
+          text_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_record_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_granted_by_guardian_id_fkey"
+            columns: ["granted_by_guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_purpose_code_fkey"
+            columns: ["purpose_code"]
+            isOneToOne: false
+            referencedRelation: "consent_purpose"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "consent_record_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "consent_record_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "consent_record"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "v_consent_guardian_decision"
+            referencedColumns: ["consent_record_id"]
+          },
+          {
+            foreignKeyName: "consent_record_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consent_text_version: {
+        Row: {
+          body_en: string
+          body_ur: string | null
+          created_at: string
+          effective_from: string
+          id: string
+          purpose_code: string
+          tenant_id: string
+          version: number
+        }
+        Insert: {
+          body_en: string
+          body_ur?: string | null
+          created_at?: string
+          effective_from?: string
+          id?: string
+          purpose_code: string
+          tenant_id: string
+          version: number
+        }
+        Update: {
+          body_en?: string
+          body_ur?: string | null
+          created_at?: string
+          effective_from?: string
+          id?: string
+          purpose_code?: string
+          tenant_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_text_version_purpose_code_fkey"
+            columns: ["purpose_code"]
+            isOneToOne: false
+            referencedRelation: "consent_purpose"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "consent_text_version_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       department: {
         Row: {
           code: string
@@ -7167,6 +7370,209 @@ export type Database = {
           succeeded?: boolean
         }
         Relationships: []
+      }
+      marketing_gallery_export: {
+        Row: {
+          campus_id: string
+          excluded_count: number
+          id: string
+          included_count: number
+          requested_at: string
+          requested_by: string | null
+          section_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          excluded_count?: number
+          id?: string
+          included_count?: number
+          requested_at?: string
+          requested_by?: string | null
+          section_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          excluded_count?: number
+          id?: string
+          included_count?: number
+          requested_at?: string
+          requested_by?: string | null
+          section_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_gallery_export_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_gallery_export_exclusion: {
+        Row: {
+          campus_id: string
+          created_at: string
+          export_id: string
+          id: string
+          reason: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          export_id: string
+          id?: string
+          reason: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          export_id?: string
+          id?: string
+          reason?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_gallery_export_exclusion_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_exclusion_export_id_fkey"
+            columns: ["export_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_gallery_export"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_exclusion_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_exclusion_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_exclusion_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_exclusion_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_gallery_export_item: {
+        Row: {
+          export_id: string
+          photo_path: string
+          student_id: string
+        }
+        Insert: {
+          export_id: string
+          photo_path: string
+          student_id: string
+        }
+        Update: {
+          export_id?: string
+          photo_path?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_gallery_export_item_export_id_fkey"
+            columns: ["export_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_gallery_export"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_item_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_item_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_item_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+        ]
       }
       message_template: {
         Row: {
@@ -11034,6 +11440,136 @@ export type Database = {
           },
         ]
       }
+      v_consent_attention: {
+        Row: {
+          campus_id: string | null
+          denied_count: number | null
+          gr_number: string | null
+          granted_count: number | null
+          guardian_count: number | null
+          has_conflict: boolean | null
+          last_recorded_at: string | null
+          purpose_code: string | null
+          reconsent_required: boolean | null
+          student_id: string | null
+          student_name: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_record_purpose_code_fkey"
+            columns: ["purpose_code"]
+            isOneToOne: false
+            referencedRelation: "consent_purpose"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "student_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_consent_guardian_decision: {
+        Row: {
+          campus_id: string | null
+          channel: string | null
+          consent_record_id: string | null
+          decision: string | null
+          evidence_path: string | null
+          granted_by_guardian_id: string | null
+          guardian_name: string | null
+          purpose_code: string | null
+          recorded_at: string | null
+          relationship:
+            | Database["public"]["Enums"]["guardian_relationship"]
+            | null
+          student_id: string | null
+          tenant_id: string | null
+          text_version: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_record_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_granted_by_guardian_id_fkey"
+            columns: ["granted_by_guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_purpose_code_fkey"
+            columns: ["purpose_code"]
+            isOneToOne: false
+            referencedRelation: "consent_purpose"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "consent_record_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "consent_record_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_daily_collection: {
         Row: {
           amount_paisa: number | null
@@ -12306,6 +12842,10 @@ export type Database = {
         Returns: Json
       }
       build_fee_plan: { Args: { p_enrolment_id: string }; Returns: string }
+      build_marketing_gallery_export: {
+        Args: { p_campus_id: string; p_section_id?: string }
+        Returns: Json
+      }
       can_teach: {
         Args: {
           p_class_level_id: string
@@ -12449,6 +12989,22 @@ export type Database = {
       }
       confirm_family_group: { Args: { p_group_id: string }; Returns: undefined }
       confirm_probation: { Args: { p_contract_id: string }; Returns: undefined }
+      consent_state_for_student: {
+        Args: { p_student_id: string }
+        Returns: {
+          current_version: number
+          denied_count: number
+          description_en: string
+          description_ur: string
+          effective: boolean
+          granted_count: number
+          guardian_count: number
+          has_conflict: boolean
+          purpose_code: string
+          reconsent_required: boolean
+          requires_explicit_grant: boolean
+        }[]
+      }
       copy_class_subject_map: {
         Args: {
           p_campus_id: string
@@ -12812,6 +13368,10 @@ export type Database = {
         }
         Returns: string
       }
+      current_consent_text_version: {
+        Args: { p_purpose_code: string; p_tenant_id: string }
+        Returns: number
+      }
       current_contract: {
         Args: { p_on?: string; p_staff_id: string }
         Returns: {
@@ -12886,7 +13446,11 @@ export type Database = {
         Returns: Json
       }
       dispatch_absentee_notifications: {
-        Args: { p_campus_id: string; p_date?: string }
+        Args: {
+          p_campus_id: string
+          p_channel?: Database["public"]["Enums"]["notification_channel"]
+          p_date?: string
+        }
         Returns: Json
       }
       dob_to_words: {
@@ -13362,6 +13926,10 @@ export type Database = {
           valid: boolean
         }[]
       }
+      has_consent: {
+        Args: { p_purpose: string; p_student_id: string }
+        Returns: boolean
+      }
       invite_user: {
         Args: {
           p_campus_ids?: string[]
@@ -13519,6 +14087,15 @@ export type Database = {
         Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
         Returns: string
       }
+      publish_consent_text_version: {
+        Args: {
+          p_body_en: string
+          p_body_ur?: string
+          p_effective_from?: string
+          p_purpose_code: string
+        }
+        Returns: number
+      }
       publish_fee_structure: {
         Args: { p_regulator_reference?: string; p_structure_id: string }
         Returns: undefined
@@ -13556,6 +14133,17 @@ export type Database = {
           p_reference_no?: string
         }
         Returns: string
+      }
+      record_consent: {
+        Args: {
+          p_channel: string
+          p_decision: string
+          p_evidence_path?: string
+          p_guardian_id: string
+          p_purpose_code: string
+          p_student_id: string
+        }
+        Returns: Json
       }
       record_payment: {
         Args: {
@@ -13629,6 +14217,15 @@ export type Database = {
           p_layout: Database["public"]["Enums"]["timetable_export_layout"]
           p_staff_id?: string
           p_version_id: string
+        }
+        Returns: string
+      }
+      reserve_consent_evidence_path: {
+        Args: {
+          p_file_ext: string
+          p_file_size: number
+          p_mime_type: string
+          p_student_id: string
         }
         Returns: string
       }
