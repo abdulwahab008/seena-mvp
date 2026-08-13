@@ -87,6 +87,10 @@ const MARK_PASS_THROUGH = [
   /^at most \d decimal places?$/,
   /^marks cannot be negative$/,
   /^marks are locked by approval/,
+  // FR-I11: both name the candidate's status or the way through, and a
+  // paraphrase would only make either vaguer.
+  /^candidate is marked (Absent|Exempt|Debarred) for this paper$/,
+  /^candidate exam status is locked by approved marks/,
 ];
 
 export function markEntryError(message: string): string {
@@ -100,6 +104,14 @@ export function markEntryError(message: string): string {
     return 'That candidate is not in the class this paper is set for.';
   }
   if (message.includes('MARK_PAYLOAD_INVALID')) return 'Could not read those marks — reload the grid.';
+  if (message.includes('EXAM_STATUS_OFFICE_ONLY')) {
+    return 'Only the exam office can record an exemption or a debarment.';
+  }
+  if (message.includes('ABSENCE_REASON_REQUIRED')) return 'Choose a reason code.';
+  if (message.includes('REASON_NOT_APPLICABLE')) return 'A candidate who sat the paper has no absence reason.';
+  if (message.includes('MARKS_ALREADY_ENTERED')) {
+    return 'Clear this candidate\u2019s marks for the paper before recording them as not present.';
+  }
   if (message.includes('MARK_PRECISION_OUT_OF_RANGE')) return 'Mark precision must be 0, 1 or 2 decimal places.';
   if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
   if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'This paper has no exam setup yet.';

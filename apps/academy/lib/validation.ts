@@ -1473,3 +1473,51 @@ export const setMarkPrecisionSchema = z.object({
   precision: z.coerce.number().int().min(0).max(2),
 });
 export type SetMarkPrecisionInput = z.infer<typeof setMarkPrecisionSchema>;
+
+// FR-I11: absent, exempt and debarred handling. Mirrors
+// supabase/migrations/20260731980000_exam_absence_exemption_debarment.sql.
+export const EXAM_ATTENDANCE_STATUSES = ['present', 'absent', 'exempt', 'debarred'] as const;
+export type ExamAttendanceStatus = (typeof EXAM_ATTENDANCE_STATUSES)[number];
+
+export const EXAM_ABSENCE_REASONS = [
+  'medical',
+  'unauthorised',
+  'fee_default',
+  'religious_exemption',
+  'board_exemption',
+  'disciplinary',
+] as const;
+export type ExamAbsenceReason = (typeof EXAM_ABSENCE_REASONS)[number];
+
+// A UI convenience only: the database accepts any reason with any
+// non-present status, deliberately, because a school will eventually have a
+// case none of these pairings anticipated. This narrows the dropdown to the
+// ones that make sense together so the common case is one click.
+export const ABSENCE_REASONS_BY_STATUS: Record<
+  Exclude<ExamAttendanceStatus, 'present'>,
+  readonly ExamAbsenceReason[]
+> = {
+  absent: ['medical', 'unauthorised'],
+  exempt: ['religious_exemption', 'board_exemption'],
+  debarred: ['fee_default', 'disciplinary'],
+};
+
+/** AC3's 'AB', and its two siblings. Null for a candidate who sat the paper. */
+export const examReportSymbol = (status: ExamAttendanceStatus): string | null =>
+  status === 'absent' ? 'AB' : status === 'exempt' ? 'EX' : status === 'debarred' ? 'DEB' : null;
+
+export const setExamAttendanceSchema = z
+  .object({
+    examSubjectId: z.string().uuid(),
+    enrolmentId: z.string().uuid(),
+    status: z.enum(EXAM_ATTENDANCE_STATUSES),
+    reason: z.enum(EXAM_ABSENCE_REASONS).nullable(),
+    note: z.string().max(500).optional(),
+  })
+  // chk_exam_attendance_reason, both ways: the requirement's mandatory reason
+  // code, and no reason at all on a candidate who sat the paper.
+  .refine((v) => (v.status === 'present') === (v.reason === null), {
+    message: 'Absent, exempt and debarred each need a reason code',
+    path: ['reason'],
+  });
+export type SetExamAttendanceInput = z.infer<typeof setExamAttendanceSchema>;

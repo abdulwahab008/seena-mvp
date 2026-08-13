@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
 import type { ExamEntryReadiness } from '@/lib/exams/subject-query';
-import type { MarkComponentCode, MarkStatus } from '@/lib/validation';
+import type { ExamAbsenceReason, ExamAttendanceStatus, MarkComponentCode, MarkStatus } from '@/lib/validation';
 
 /**
  * FR-I12. The shape fn_mark_entry_sheet() returns: FR-I02's readiness answer
@@ -17,10 +17,20 @@ export type MarkEntryStudent = {
   /** Keyed by component. A component with no entry is simply absent here. */
   marks: Partial<Record<MarkComponentCode, number>>;
   status: MarkStatus | null;
+  /**
+   * FR-I11. Always one of the four values — 'present' when nothing was
+   * recorded — so a grid never infers "sat the paper" from an empty cell.
+   */
+  attendance_status: ExamAttendanceStatus;
+  absence_reason: ExamAbsenceReason | null;
+  /** 'AB' / 'EX' / 'DEB', or null for a candidate who sat the paper. */
+  report_symbol: string | null;
 };
 
 export type MarkEntrySheet = ExamEntryReadiness & {
   can_enter: boolean;
+  /** FR-I11: an exemption and a debarment are the exam office's to record. */
+  can_exempt: boolean;
   mark_precision: number;
   students: MarkEntryStudent[];
 };

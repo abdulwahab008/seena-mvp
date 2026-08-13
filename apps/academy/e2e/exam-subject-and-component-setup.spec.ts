@@ -212,7 +212,8 @@ test('an Exam Controller configures Class 9 Pre-Medical Biology as theory plus p
   await expect(page.getByTestId('mark-entry-total-max')).toHaveText('85');
   await expect(page.getByTestId('mark-entry-column-theory')).toContainText('max 65 / pass 23');
   await expect(page.getByTestId('mark-entry-column-practical')).toContainText('max 20 / pass 7');
-  await expect(page.getByTestId('mark-entry-grid').locator('thead th')).toHaveCount(3); // Student + two components
+  // Student + FR-I11's exam status + one column per component.
+  await expect(page.getByTestId('mark-entry-grid').locator('thead th')).toHaveCount(4);
 
   // AC4: Computer Science, which nobody configured, is still disabled with
   // the exact message — in the same term, for the same section.

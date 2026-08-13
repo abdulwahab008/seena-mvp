@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { markEntryError } from '@/lib/exams/errors';
 import {
+  ABSENCE_REASONS_BY_STATUS,
+  EXAM_ABSENCE_REASONS,
+  examReportSymbol,
+  setExamAttendanceSchema,
   validateMarkCell,
   markMaxMessage,
   markPrecisionMessage,
@@ -1776,5 +1780,71 @@ describe('FR-I12 upsertMarksSchema', () => {
 
   it('rejects a client batch id that is not a uuid — an idempotency key has to be one', () => {
     expect(upsertMarksSchema.safeParse({ ...base, clientBatchId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('FR-I11 exam attendance', () => {
+  it("AC3: an absent candidate's report symbol is 'AB'", () => {
+    expect(examReportSymbol('absent')).toBe('AB');
+  });
+
+  it('an exempt one prints EX and a debarred one DEB', () => {
+    expect(examReportSymbol('exempt')).toBe('EX');
+    expect(examReportSymbol('debarred')).toBe('DEB');
+  });
+
+  it('a candidate who sat the paper carries no symbol at all', () => {
+    expect(examReportSymbol('present')).toBeNull();
+  });
+
+  it('offers only the reason codes that fit each status', () => {
+    expect(ABSENCE_REASONS_BY_STATUS.exempt).toContain('religious_exemption');
+    expect(ABSENCE_REASONS_BY_STATUS.debarred).toContain('fee_default');
+    expect(ABSENCE_REASONS_BY_STATUS.absent).not.toContain('religious_exemption');
+    // Every narrowed option is still a real enum value the database accepts.
+    for (const reasons of Object.values(ABSENCE_REASONS_BY_STATUS)) {
+      for (const reason of reasons) expect(EXAM_ABSENCE_REASONS).toContain(reason);
+    }
+  });
+
+  it('requires a reason code for every non-present status', () => {
+    const base = {
+      examSubjectId: '11111111-1111-4111-8111-111111111111',
+      enrolmentId: '22222222-2222-4222-8222-222222222222',
+    };
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'absent', reason: 'medical' }).success).toBe(true);
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'absent', reason: null }).success).toBe(false);
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'debarred', reason: null }).success).toBe(false);
+  });
+
+  it('and refuses one on a candidate who sat the paper — "present, medical" is not a thing', () => {
+    const base = {
+      examSubjectId: '11111111-1111-4111-8111-111111111111',
+      enrolmentId: '22222222-2222-4222-8222-222222222222',
+    };
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'present', reason: null }).success).toBe(true);
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'present', reason: 'medical' }).success).toBe(false);
+  });
+});
+
+describe('FR-I11 markEntryError', () => {
+  it("AC1: passes the candidate's status through verbatim, for each status", () => {
+    for (const s of ['Absent', 'Exempt', 'Debarred']) {
+      expect(markEntryError(`candidate is marked ${s} for this paper`)).toBe(
+        `candidate is marked ${s} for this paper`,
+      );
+    }
+  });
+
+  it('AC4: passes the lock through, because it names the break-glass path', () => {
+    const locked =
+      'candidate exam status is locked by approved marks \u2014 the break-glass path is a result-recompute request';
+    expect(markEntryError(locked)).toBe(locked);
+  });
+
+  it('translates the office-only refusal', () => {
+    expect(markEntryError('EXAM_STATUS_OFFICE_ONLY')).toBe(
+      'Only the exam office can record an exemption or a debarment.',
+    );
   });
 });

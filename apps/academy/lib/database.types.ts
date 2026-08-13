@@ -719,6 +719,13 @@ export type Database = {
             foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
             columns: ["consumed_by_enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
+            columns: ["consumed_by_enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -804,6 +811,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_fee_waiver_consumed_by_enrolment_id_fkey"
+            columns: ["consumed_by_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "admission_fee_waiver_consumed_by_enrolment_id_fkey"
@@ -1216,6 +1230,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_offer_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "admission_offer_section_id_fkey"
@@ -1741,6 +1762,13 @@ export type Database = {
             foreignKeyName: "attendance_audit_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -1858,6 +1886,13 @@ export type Database = {
             foreignKeyName: "attendance_correction_request_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_correction_request_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -1955,6 +1990,13 @@ export type Database = {
             foreignKeyName: "attendance_day_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_day_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -1971,6 +2013,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_day_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "attendance_day_section_id_fkey"
@@ -2066,6 +2115,13 @@ export type Database = {
             foreignKeyName: "attendance_gap_log_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "attendance_gap_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_exam_section_subject_setup"
             referencedColumns: ["section_id"]
           },
@@ -2151,6 +2207,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "attendance_lock_section_id_fkey"
@@ -2263,6 +2326,13 @@ export type Database = {
             foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -2342,6 +2412,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_notification_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "attendance_notification_enrolment_id_fkey"
@@ -2551,6 +2628,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "attendance_sync_log_section_id_fkey"
@@ -3506,6 +3590,13 @@ export type Database = {
             foreignKeyName: "certificate_issue_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -4267,6 +4358,13 @@ export type Database = {
             foreignKeyName: "concession_award_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "concession_award_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -4930,6 +5028,13 @@ export type Database = {
             foreignKeyName: "enrolment_previous_enrolment_id_fkey"
             columns: ["previous_enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "enrolment_previous_enrolment_id_fkey"
+            columns: ["previous_enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -4939,6 +5044,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "enrolment_section_id_fkey"
@@ -5019,6 +5131,109 @@ export type Database = {
           },
           {
             foreignKeyName: "enrolment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_attendance: {
+        Row: {
+          campus_id: string
+          enrolment_id: string
+          exam_subject_id: string
+          id: string
+          note: string | null
+          reason: Database["public"]["Enums"]["exam_absence_reason"] | null
+          recorded_at: string
+          recorded_by: string | null
+          status: Database["public"]["Enums"]["exam_attendance_status"]
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          enrolment_id: string
+          exam_subject_id: string
+          id?: string
+          note?: string | null
+          reason?: Database["public"]["Enums"]["exam_absence_reason"] | null
+          recorded_at?: string
+          recorded_by?: string | null
+          status: Database["public"]["Enums"]["exam_attendance_status"]
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          enrolment_id?: string
+          exam_subject_id?: string
+          id?: string
+          note?: string | null
+          reason?: Database["public"]["Enums"]["exam_absence_reason"] | null
+          recorded_at?: string
+          recorded_by?: string | null
+          status?: Database["public"]["Enums"]["exam_attendance_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_attendance_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_attendance_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_attendance_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "exam_attendance_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "exam_attendance_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_attendance_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "exam_attendance_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "exam_attendance_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "exam_attendance_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -5148,6 +5363,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "exam_subject"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_component_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
           },
           {
             foreignKeyName: "exam_subject_component_exam_subject_id_fkey"
@@ -5615,6 +5837,13 @@ export type Database = {
             foreignKeyName: "fee_challan_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -5748,6 +5977,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_batch_error_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_challan_batch_error_enrolment_id_fkey"
@@ -6106,6 +6342,13 @@ export type Database = {
             foreignKeyName: "fee_ledger_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -6204,6 +6447,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_payment_enrolment_id_fkey"
@@ -6322,6 +6572,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_plan_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: true
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_plan_enrolment_id_fkey"
@@ -7143,6 +7400,13 @@ export type Database = {
             foreignKeyName: "homework_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_exam_section_subject_setup"
             referencedColumns: ["section_id"]
           },
@@ -7437,6 +7701,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_row_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "import_row_enrolment_id_fkey"
@@ -7967,6 +8238,13 @@ export type Database = {
             foreignKeyName: "mark_entry_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -7983,6 +8261,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "exam_subject"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
           },
           {
             foreignKeyName: "mark_entry_exam_subject_id_fkey"
@@ -8048,6 +8333,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "exam_subject"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_batch_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
           },
           {
             foreignKeyName: "mark_entry_batch_exam_subject_id_fkey"
@@ -8124,6 +8416,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "marketing_gallery_export_section_id_fkey"
@@ -8741,6 +9040,13 @@ export type Database = {
             foreignKeyName: "roll_number_change_log_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "roll_number_change_log_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -8859,6 +9165,13 @@ export type Database = {
             foreignKeyName: "section_class_teacher_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "section_class_teacher_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_exam_section_subject_setup"
             referencedColumns: ["section_id"]
           },
@@ -8949,6 +9262,13 @@ export type Database = {
             foreignKeyName: "section_membership_history_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "section_membership_history_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -8965,6 +9285,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "section_membership_history_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "section_membership_history_section_id_fkey"
@@ -9053,6 +9380,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "section_subject_teacher_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "section_subject_teacher_section_id_fkey"
@@ -9225,6 +9559,13 @@ export type Database = {
             foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
             columns: ["new_enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
+            columns: ["new_enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -9241,6 +9582,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_source_enrolment_id_fkey"
+            columns: ["source_enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "session_rollover_decision_source_enrolment_id_fkey"
@@ -9290,6 +9638,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "session_rollover_decision_target_section_id_fkey"
@@ -11283,6 +11638,13 @@ export type Database = {
             foreignKeyName: "timetable_parallel_group_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_exam_section_subject_setup"
             referencedColumns: ["section_id"]
           },
@@ -11381,6 +11743,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_publish_exception_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "timetable_publish_exception_section_id_fkey"
@@ -11592,6 +11961,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "timetable_slot_section_id_fkey"
@@ -11982,6 +12358,13 @@ export type Database = {
             foreignKeyName: "certificate_issue_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -12357,6 +12740,13 @@ export type Database = {
             foreignKeyName: "fee_ledger_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -12412,6 +12802,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "timetable_slot_section_id_fkey"
@@ -12482,6 +12879,117 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      v_exam_result_input: {
+        Row: {
+          absence_reason:
+            | Database["public"]["Enums"]["exam_absence_reason"]
+            | null
+          attendance_status:
+            | Database["public"]["Enums"]["exam_attendance_status"]
+            | null
+          blocks_result: boolean | null
+          campus_id: string | null
+          class_level_id: string | null
+          denominator_marks: number | null
+          enrolment_id: string | null
+          exam_subject_id: string | null
+          exam_term_id: string | null
+          obtained_marks: number | null
+          paper_max_marks: number | null
+          report_symbol: string | null
+          section_id: string | null
+          stream_id: string | null
+          student_id: string | null
+          subject_id: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_subject_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subject_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "class_subject_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "stream"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subject_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "exam_subject_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "exam_subject_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -12948,6 +13456,13 @@ export type Database = {
             foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
             columns: ["new_enrolment_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
+            columns: ["new_enrolment_id"]
+            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -12999,6 +13514,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rollover_decision_target_section_id_fkey"
+            columns: ["target_section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "session_rollover_decision_target_section_id_fkey"
@@ -13101,6 +13623,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "homework_section_id_fkey"
@@ -13239,6 +13768,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_exam_section_subject_setup"
             referencedColumns: ["section_id"]
           },
@@ -13356,6 +13892,13 @@ export type Database = {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
             referencedRelation: "v_exam_section_subject_setup"
             referencedColumns: ["section_id"]
           },
@@ -13432,6 +13975,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "homework_section_id_fkey"
@@ -13566,6 +14116,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_section"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
           },
           {
             foreignKeyName: "timetable_slot_section_id_fkey"
@@ -14710,6 +15267,10 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_exam_result_blocked: {
+        Args: { p_enrolment_id: string; p_exam_term_id: string }
+        Returns: boolean
+      }
       fn_exam_subject_total_max: {
         Args: { p_exam_subject_id: string }
         Returns: number
@@ -15635,6 +16196,16 @@ export type Database = {
         }
         Returns: string
       }
+      set_exam_attendance: {
+        Args: {
+          p_enrolment_id: string
+          p_exam_subject_id: string
+          p_note?: string
+          p_reason?: Database["public"]["Enums"]["exam_absence_reason"]
+          p_status: Database["public"]["Enums"]["exam_attendance_status"]
+        }
+        Returns: string
+      }
       set_exam_term_weight: {
         Args: { p_exam_term_id: string; p_weight_pct: number }
         Returns: undefined
@@ -16097,6 +16668,14 @@ export type Database = {
       enquiry_source: "walk_in" | "phone" | "web" | "referral" | "other"
       enquiry_status: "open" | "converted" | "lost" | "merged"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
+      exam_absence_reason:
+        | "medical"
+        | "unauthorised"
+        | "fee_default"
+        | "religious_exemption"
+        | "board_exemption"
+        | "disciplinary"
+      exam_attendance_status: "present" | "absent" | "exempt" | "debarred"
       exam_term_status: "draft" | "active" | "locked"
       expense_approval_decision: "approved" | "rejected" | "escalated"
       expense_voucher_status:
@@ -16500,6 +17079,15 @@ export const Constants = {
       enquiry_source: ["walk_in", "phone", "web", "referral", "other"],
       enquiry_status: ["open", "converted", "lost", "merged"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
+      exam_absence_reason: [
+        "medical",
+        "unauthorised",
+        "fee_default",
+        "religious_exemption",
+        "board_exemption",
+        "disciplinary",
+      ],
+      exam_attendance_status: ["present", "absent", "exempt", "debarred"],
       exam_term_status: ["draft", "active", "locked"],
       expense_approval_decision: ["approved", "rejected", "escalated"],
       expense_voucher_status: [

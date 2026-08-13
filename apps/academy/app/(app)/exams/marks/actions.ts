@@ -3,7 +3,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { markEntryError } from '@/lib/exams/errors';
 import type { MarkEntrySheet } from '@/lib/exams/mark-query';
-import { upsertMarksSchema } from '@/lib/validation';
+import { setExamAttendanceSchema, upsertMarksSchema } from '@/lib/validation';
 
 /**
  * FR-I12. mark_entry has a SELECT policy and no write policy, so
@@ -56,4 +56,31 @@ export async function saveMarks(input: unknown): Promise<SaveMarksState> {
 
   const result = (data ?? {}) as { saved?: number; replayed?: boolean };
   return { error: null, saved: result.saved ?? 0, replayed: result.replayed ?? false };
+}
+
+/**
+ * FR-I11. Absent, exempt and debarred are a status on the paper, never a
+ * value in the marks column, so this is a separate write from saveMarks() and
+ * goes nowhere near the autosave queue: a status change is a deliberate act,
+ * not something typed under one's fingers.
+ *
+ * The reason code is mandatory for every non-present status and forbidden for
+ * 'present' — chk_exam_attendance_reason enforces both, and
+ * set_exam_attendance() raises the named errors ahead of it.
+ */
+export async function setExamAttendance(input: unknown): Promise<SaveMarksState> {
+  const parsed = setExamAttendanceSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_exam_attendance', {
+    p_exam_subject_id: parsed.data.examSubjectId,
+    p_enrolment_id: parsed.data.enrolmentId,
+    p_status: parsed.data.status,
+    ...(parsed.data.reason ? { p_reason: parsed.data.reason } : {}),
+    ...(parsed.data.note ? { p_note: parsed.data.note } : {}),
+  });
+  if (error) return { error: markEntryError(error.message) };
+
+  return { error: null };
 }
