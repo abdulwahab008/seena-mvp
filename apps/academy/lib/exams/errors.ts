@@ -302,3 +302,27 @@ export function subjectResultError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not have permission to compute results.';
   return 'Could not compute those results.';
 }
+
+/**
+ * FR-J03. Two refusals are sentences the database composes from rows the
+ * screen does not have — which paper is open under a break-glass window, and
+ * why an annual result cannot be published — so they pass through verbatim,
+ * the same call FR-J02 made about its three.
+ */
+const ANNUAL_PASS_THROUGH = [
+  /^marks are open under a break-glass window on /,
+  /^annual result is provisional/,
+  /^annual result is stale/,
+];
+
+export function annualResultError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (ANNUAL_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('CLASS_LEVEL_NOT_FOUND')) return 'That class is not part of this school.';
+  if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
+  if (message.includes('SESSION_NOT_FOUND')) return 'Academic session not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to compute annual results.';
+  return 'Could not compute the annual results.';
+}

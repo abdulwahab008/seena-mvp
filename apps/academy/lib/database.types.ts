@@ -1572,6 +1572,212 @@ export type Database = {
           },
         ]
       }
+      annual_result: {
+        Row: {
+          campus_id: string
+          class_level_id: string
+          computed_at: string
+          computed_by: string | null
+          enrolment_id: string
+          gpa_point: number | null
+          grade_label: string | null
+          grading_scheme_id: string | null
+          id: string
+          is_blocked: boolean
+          is_pass: boolean | null
+          prorated_terms: number
+          proration_note: string | null
+          section_id: string
+          session_id: string
+          status: Database["public"]["Enums"]["annual_result_status"]
+          subject_id: string
+          tenant_id: string
+          terms_counted: number
+          terms_total: number
+          weighted_pct: number | null
+        }
+        Insert: {
+          campus_id: string
+          class_level_id: string
+          computed_at?: string
+          computed_by?: string | null
+          enrolment_id: string
+          gpa_point?: number | null
+          grade_label?: string | null
+          grading_scheme_id?: string | null
+          id?: string
+          is_blocked?: boolean
+          is_pass?: boolean | null
+          prorated_terms: number
+          proration_note?: string | null
+          section_id: string
+          session_id: string
+          status: Database["public"]["Enums"]["annual_result_status"]
+          subject_id: string
+          tenant_id: string
+          terms_counted: number
+          terms_total: number
+          weighted_pct?: number | null
+        }
+        Update: {
+          campus_id?: string
+          class_level_id?: string
+          computed_at?: string
+          computed_by?: string | null
+          enrolment_id?: string
+          gpa_point?: number | null
+          grade_label?: string | null
+          grading_scheme_id?: string | null
+          id?: string
+          is_blocked?: boolean
+          is_pass?: boolean | null
+          prorated_terms?: number
+          proration_note?: string | null
+          section_id?: string
+          session_id?: string
+          status?: Database["public"]["Enums"]["annual_result_status"]
+          subject_id?: string
+          tenant_id?: string
+          terms_counted?: number
+          terms_total?: number
+          weighted_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annual_result_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "annual_result_computed_by_fkey"
+            columns: ["computed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "annual_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "annual_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "annual_result_grading_scheme_id_fkey"
+            columns: ["grading_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_grading_scheme_id_fkey"
+            columns: ["grading_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "v_grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_user: {
         Row: {
           app_role: Database["public"]["Enums"]["app_role"]
@@ -13723,6 +13929,167 @@ export type Database = {
           },
         ]
       }
+      v_annual_result: {
+        Row: {
+          board: Database["public"]["Enums"]["board"] | null
+          campus_id: string | null
+          class_level_id: string | null
+          computed_at: string | null
+          enrolment_id: string | null
+          gpa_point: number | null
+          gr_number: string | null
+          grade_label: string | null
+          grading_scheme_id: string | null
+          grading_scheme_name: string | null
+          grading_scheme_version: number | null
+          id: string | null
+          is_blocked: boolean | null
+          is_pass: boolean | null
+          is_stale: boolean | null
+          prorated_terms: number | null
+          proration_note: string | null
+          roll_no: number | null
+          section_id: string | null
+          session_id: string | null
+          status: Database["public"]["Enums"]["annual_result_status"] | null
+          student_name: string | null
+          subject_id: string | null
+          subject_name: string | null
+          subject_name_ur: string | null
+          tenant_id: string | null
+          terms_counted: number | null
+          terms_total: number | null
+          weighted_pct: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annual_result_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "annual_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "annual_result_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "annual_result_grading_scheme_id_fkey"
+            columns: ["grading_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_grading_scheme_id_fkey"
+            columns: ["grading_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "v_grading_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "annual_result_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_certificate_register: {
         Row: {
           academic_year: number | null
@@ -17421,6 +17788,10 @@ export type Database = {
         Args: { p_application_id: string; p_sitting_id: string }
         Returns: number
       }
+      fn_annual_result_sheet: {
+        Args: { p_section_id: string; p_session_id: string }
+        Returns: Json
+      }
       fn_application_docs_complete: {
         Args: { p_application_id: string }
         Returns: boolean
@@ -17428,6 +17799,10 @@ export type Database = {
       fn_approve_marks: {
         Args: { p_exam_subject_id: string; p_section_id: string }
         Returns: Json
+      }
+      fn_assert_annual_result_publishable: {
+        Args: { p_enrolment_id: string; p_session_id: string }
+        Returns: undefined
       }
       fn_assign_next_roll_no: {
         Args: { p_enrolment_id: string }
@@ -17495,6 +17870,10 @@ export type Database = {
           p_outcome_note?: string
         }
         Returns: undefined
+      }
+      fn_compute_annual_result: {
+        Args: { p_class_id: string; p_session_id: string }
+        Returns: number
       }
       fn_compute_subject_result: {
         Args: { p_exam_term_id: string; p_section_id: string }
@@ -17779,6 +18158,10 @@ export type Database = {
       }
       fn_reassign_followups: {
         Args: { p_from_user: string; p_to_user: string }
+        Returns: number
+      }
+      fn_recompute_stale_annual_results: {
+        Args: { p_session_id?: string }
         Returns: number
       }
       fn_record_ocr_review: {
@@ -18947,6 +19330,7 @@ export type Database = {
         | "arts"
       admission_fee_payment_status: "provisional" | "reconciled"
       allocation_role: "primary" | "assistant"
+      annual_result_status: "provisional" | "final"
       app_role:
         | "super_admin"
         | "owner"
@@ -19362,6 +19746,7 @@ export const Constants = {
       ],
       admission_fee_payment_status: ["provisional", "reconciled"],
       allocation_role: ["primary", "assistant"],
+      annual_result_status: ["provisional", "final"],
       app_role: [
         "super_admin",
         "owner",

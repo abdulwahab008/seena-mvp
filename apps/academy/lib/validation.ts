@@ -1801,3 +1801,15 @@ export const computeSubjectResultSchema = z.object({
   sectionId: z.string().uuid(),
 });
 export type ComputeSubjectResultInput = z.infer<typeof computeSubjectResultSchema>;
+
+// FR-J03: weighted aggregation across terms. Mirrors
+// supabase/migrations/20260731997000_weighted_annual_aggregation.sql.
+//
+// The recompute is per CLASS, not per section: an annual result spans every
+// section of the class, because FR-I02's exam_subject is per class and only
+// the class has one answer for what a subject was worth this year.
+export const computeAnnualResultSchema = z.object({
+  sessionId: z.string().uuid(),
+  classLevelId: z.string().uuid(),
+});
+export type ComputeAnnualResultInput = z.infer<typeof computeAnnualResultSchema>;

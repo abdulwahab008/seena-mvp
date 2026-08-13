@@ -51,6 +51,7 @@ const LINKS = [
   { href: '/exams/unlocks', label: 'Break-Glass Unlocks' },
   { href: '/exams/grading', label: 'Grading Schemes' },
   { href: '/exams/results', label: 'Term Results' },
+  { href: '/exams/annual', label: 'Annual Results' },
   { href: '/expenses/vouchers', label: 'Expense Vouchers' },
   { href: '/expenses/approvals', label: 'Voucher Approvals' },
   { href: '/certificates/templates', label: 'Certificate Templates' },
