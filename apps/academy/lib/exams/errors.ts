@@ -74,3 +74,38 @@ export function examSubjectError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not have permission to do that.';
   return 'Could not complete that action.';
 }
+
+/**
+ * FR-I12. trg_mark_range_check raises the three sentences a teacher reads in
+ * a cell — "max 65", "whole numbers only", "marks cannot be negative" — so
+ * those pass through verbatim: the grid shows the same wording before the
+ * round trip, and the two disagreeing would be worse than either.
+ */
+const MARK_PASS_THROUGH = [
+  /^max \d+$/,
+  /^whole numbers only$/,
+  /^at most \d decimal places?$/,
+  /^marks cannot be negative$/,
+  /^marks are locked by approval/,
+];
+
+export function markEntryError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (MARK_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('MARK_COMPONENT_NOT_CONFIGURED')) {
+    return 'That component is not part of this paper — reload the grid.';
+  }
+  if (message.includes('MARK_ENROLMENT_MISMATCH')) {
+    return 'That candidate is not in the class this paper is set for.';
+  }
+  if (message.includes('MARK_PAYLOAD_INVALID')) return 'Could not read those marks — reload the grid.';
+  if (message.includes('MARK_PRECISION_OUT_OF_RANGE')) return 'Mark precision must be 0, 1 or 2 decimal places.';
+  if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
+  if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'This paper has no exam setup yet.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not teach this class subject.';
+  return 'Could not save those marks.';
+}

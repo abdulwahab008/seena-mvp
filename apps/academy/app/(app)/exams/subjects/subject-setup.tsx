@@ -1,14 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { checkExamEntryReadiness, deleteExamSubject, upsertExamSubject } from './actions';
-import type {
-  ClassSubjectOption,
-  ExamEntryReadiness,
-  ExamSubjectRow,
-  SectionOption,
-} from '@/lib/exams/subject-query';
+import { deleteExamSubject, upsertExamSubject } from './actions';
+import type { ClassSubjectOption, ExamSubjectRow } from '@/lib/exams/subject-query';
 import {
   MARK_COMPONENT_CODES,
   PASS_EXCEEDS_MAX,
@@ -27,7 +23,6 @@ type Props = {
   canWrite: boolean;
   configured: ExamSubjectRow[];
   options: ClassSubjectOption[];
-  sections: SectionOption[];
 };
 
 const BLANK: ComponentDraft[] = [{ component: 'theory', maxMarks: '', passMarks: '' }];
@@ -35,14 +30,10 @@ const BLANK: ComponentDraft[] = [{ component: 'theory', maxMarks: '', passMarks:
 const describe = (o: ClassSubjectOption) =>
   `${o.className}${o.streamName ? ` ${o.streamName}` : ''} — ${o.subjectName}`;
 
-export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, options, sections }: Props) {
+export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, options }: Props) {
   const [pending, startTransition] = useTransition();
   const [classSubjectId, setClassSubjectId] = useState('');
   const [drafts, setDrafts] = useState<ComponentDraft[]>(BLANK);
-
-  const [previewSection, setPreviewSection] = useState('');
-  const [previewSubject, setPreviewSubject] = useState('');
-  const [readiness, setReadiness] = useState<ExamEntryReadiness | null>(null);
 
   // AC1: the total the Controller sees before saving. examSubjectTotalMax is
   // the same sum fn_exam_subject_total_max() computes in SQL.
@@ -55,15 +46,6 @@ export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, 
   const passExceedsMax = drafts.some(
     (d) => d.maxMarks !== '' && d.passMarks !== '' && Number(d.passMarks) > Number(d.maxMarks),
   );
-
-  const subjectsForSection = useMemo(() => {
-    const section = sections.find((s) => s.id === previewSection);
-    if (!section) return [];
-    const seen = new Set<string>();
-    return options
-      .filter((o) => o.classLevelId === section.classLevelId)
-      .filter((o) => (seen.has(o.subjectId) ? false : (seen.add(o.subjectId), true)));
-  }, [options, sections, previewSection]);
 
   const setDraft = (i: number, patch: Partial<ComponentDraft>) =>
     setDrafts((prev) => prev.map((d, n) => (n === i ? { ...d, ...patch } : d)));
@@ -103,22 +85,6 @@ export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, 
       const result = await deleteExamSubject(fd);
       if (result.error) toast.error(result.error);
       else toast.success('Exam setup removed.');
-    });
-  };
-
-  const onPreview = () => {
-    if (!previewSection || !previewSubject) {
-      toast.error('Choose a section and a subject.');
-      return;
-    }
-    startTransition(async () => {
-      const result = await checkExamEntryReadiness(examTermId, previewSection, previewSubject);
-      if (result.error || !result.readiness) {
-        toast.error(result.error ?? 'Could not check the exam setup.');
-        setReadiness(null);
-      } else {
-        setReadiness(result.readiness);
-      }
     });
   };
 
@@ -279,118 +245,14 @@ export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, 
         </section>
       )}
 
-      <section className="space-y-3 rounded-lg border p-4">
-        <h2 className="text-lg font-medium">Mark entry readiness</h2>
-        <p className="text-xs text-muted-foreground">
-          A read-only preview of what a teacher opening mark entry would see. Teacher mark entry itself is FR-I12 and is
-          not built yet, so nothing here saves a mark — the columns and the disabled state come from the same
-          <code className="mx-1">fn_exam_entry_readiness()</code>
-          that grid will call.
-        </p>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="space-y-1">
-            <Label htmlFor="previewSection">Section</Label>
-            <select
-              id="previewSection"
-              className="h-9 rounded-md border bg-background px-3 text-sm"
-              value={previewSection}
-              data-testid="preview-section-select"
-              onChange={(e) => {
-                setPreviewSection(e.target.value);
-                setPreviewSubject('');
-                setReadiness(null);
-              }}
-            >
-              <option value="">Choose a section…</option>
-              {sections.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="previewSubject">Subject</Label>
-            <select
-              id="previewSubject"
-              className="h-9 rounded-md border bg-background px-3 text-sm"
-              value={previewSubject}
-              data-testid="preview-subject-select"
-              onChange={(e) => {
-                setPreviewSubject(e.target.value);
-                setReadiness(null);
-              }}
-            >
-              <option value="">Choose a subject…</option>
-              {subjectsForSection.map((o) => (
-                <option key={o.subjectId} value={o.subjectId}>
-                  {o.subjectName}
-                </option>
-              ))}
-            </select>
-          </div>
-          <Button variant="outline" disabled={pending} data-testid="open-mark-entry" onClick={onPreview}>
-            Open mark entry
-          </Button>
-        </div>
-
-        {readiness && !readiness.ready && (
-          <div className="rounded-md border border-dashed p-4" data-testid="mark-entry-disabled">
-            <table className="w-full text-sm opacity-50">
-              <thead className="border-b text-left">
-                <tr>
-                  <th className="p-2 font-medium">Student</th>
-                  <th className="p-2 font-medium">Marks</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="p-2 text-muted-foreground">—</td>
-                  <td className="p-2">
-                    <Input disabled placeholder="—" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="mt-3 text-sm text-destructive" data-testid="mark-entry-pending-message">
-              {readiness.message}
-            </p>
-          </div>
-        )}
-
-        {readiness && readiness.ready && (
-          <div className="rounded-md border p-4" data-testid="mark-entry-grid">
-            <p className="mb-2 text-sm">
-              Total max{' '}
-              <span className="font-semibold tabular-nums" data-testid="mark-entry-total-max">
-                {readiness.total_max_marks}
-              </span>
-            </p>
-            <table className="w-full text-sm">
-              <thead className="border-b text-left">
-                <tr>
-                  <th className="p-2 font-medium">Student</th>
-                  {readiness.components.map((c) => (
-                    <th key={c.component} className="p-2 font-medium" data-testid={`mark-entry-column-${c.component}`}>
-                      {c.component} (max {c.max_marks} / pass {c.pass_marks})
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="p-2 text-muted-foreground">Sample row — FR-I12 fills this in</td>
-                  {readiness.components.map((c) => (
-                    <td key={c.component} className="p-2">
-                      <Input disabled placeholder={`0–${c.max_marks}`} />
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+      <p className="text-sm text-muted-foreground" data-testid="mark-entry-link">
+        Entering marks against this setup is{' '}
+        <Link href="/exams/marks" className="underline">
+          Mark entry
+        </Link>
+        {' '}(FR-I12). The read-only preview that used to sit here was a stub for that grid and is gone now that the
+        grid is real — one surface, not two.
+      </p>
     </div>
   );
 }

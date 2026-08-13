@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
 import { examSubjectError } from '@/lib/exams/errors';
-import type { ExamEntryReadiness } from '@/lib/exams/subject-query';
 import { examSubjectIdSchema, upsertExamSubjectSchema } from '@/lib/validation';
 
 /**
@@ -16,7 +15,6 @@ import { examSubjectIdSchema, upsertExamSubjectSchema } from '@/lib/validation';
 const PATH = '/exams/subjects';
 
 export type ExamSubjectState = { error: string | null };
-export type ReadinessState = { error: string | null; readiness?: ExamEntryReadiness };
 
 export async function upsertExamSubject(_prev: ExamSubjectState, formData: FormData): Promise<ExamSubjectState> {
   let components: unknown;
@@ -59,24 +57,4 @@ export async function deleteExamSubject(formData: FormData): Promise<ExamSubject
 
   revalidatePath(PATH);
   return { error: null };
-}
-
-/**
- * AC4. The question FR-I12's mark entry grid will ask before it renders
- * anything; until that grid exists, the read-only preview on this screen is
- * the only caller.
- */
-export async function checkExamEntryReadiness(
-  examTermId: string,
-  sectionId: string,
-  subjectId: string,
-): Promise<ReadinessState> {
-  const supabase = await supabaseServer();
-  const { data, error } = await supabase.rpc('fn_exam_entry_readiness', {
-    p_exam_term_id: examTermId,
-    p_section_id: sectionId,
-    p_subject_id: subjectId,
-  });
-  if (error || !data) return { error: error ? examSubjectError(error.message) : 'Could not check the exam setup.' };
-  return { error: null, readiness: data as unknown as ExamEntryReadiness };
 }

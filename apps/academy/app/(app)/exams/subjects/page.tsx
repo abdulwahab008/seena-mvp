@@ -63,7 +63,7 @@ export default async function ExamSubjectsPage({ searchParams }: { searchParams:
     );
   }
 
-  const { configured, options, sections } = await readExamSubjectSetup(supabase, campus.id, session.id, term.id);
+  const { configured, options } = await readExamSubjectSetup(supabase, campus.id, session.id, term.id);
 
   return (
     <div className="space-y-6">
@@ -85,7 +85,6 @@ export default async function ExamSubjectsPage({ searchParams }: { searchParams:
         canWrite={SETUP_ROLES.includes(role)}
         configured={configured}
         options={options}
-        sections={sections}
       />
     </div>
   );

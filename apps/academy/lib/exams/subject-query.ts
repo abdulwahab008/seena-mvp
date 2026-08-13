@@ -29,8 +29,6 @@ export type ClassSubjectOption = {
   isConfigured: boolean;
 };
 
-export type SectionOption = { id: string; label: string; classLevelId: string; streamId: string | null };
-
 /** The shape fn_exam_entry_readiness() returns. AC4's answer. */
 export type ExamEntryReadiness = {
   ready: boolean;
@@ -46,8 +44,8 @@ export async function readExamSubjectSetup(
   campusId: string,
   sessionId: string,
   examTermId: string,
-): Promise<{ configured: ExamSubjectRow[]; options: ClassSubjectOption[]; sections: SectionOption[] }> {
-  const [{ data: classSubjects }, { data: examSubjects }, { data: sections }] = await Promise.all([
+): Promise<{ configured: ExamSubjectRow[]; options: ClassSubjectOption[] }> {
+  const [{ data: classSubjects }, { data: examSubjects }] = await Promise.all([
     supabase
       .from('class_subject')
       .select('id, class_level_id, subject_id, stream_id, class_level(name_en, ordinal), subject(name_en, is_examinable), stream(name_en)')
@@ -57,12 +55,6 @@ export async function readExamSubjectSetup(
       .from('exam_subject')
       .select('id, class_subject_id, exam_subject_component(component, max_marks, pass_marks, sequence)')
       .eq('exam_term_id', examTermId),
-    supabase
-      .from('class_section')
-      .select('id, name, class_level_id, stream_id, class_level(name_en, ordinal)')
-      .eq('campus_id', campusId)
-      .eq('session_id', sessionId)
-      .eq('is_active', true),
   ]);
 
   const byClassSubject = new Map((examSubjects ?? []).map((e) => [e.class_subject_id, e]));
@@ -108,16 +100,5 @@ export async function readExamSubjectSetup(
       };
     });
 
-  const sectionOptions: SectionOption[] = (sections ?? [])
-    .map((s) => ({
-      id: s.id,
-      label: `${s.class_level?.name_en ?? ''} — ${s.name}`,
-      classLevelId: s.class_level_id,
-      streamId: s.stream_id,
-      ordinal: s.class_level?.ordinal ?? 0,
-    }))
-    .sort((a, b) => a.ordinal - b.ordinal || a.label.localeCompare(b.label))
-    .map(({ id, label, classLevelId, streamId }) => ({ id, label, classLevelId, streamId }));
-
-  return { configured, options, sections: sectionOptions };
+  return { configured, options };
 }

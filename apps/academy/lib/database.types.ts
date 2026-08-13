@@ -7905,6 +7905,173 @@ export type Database = {
         }
         Relationships: []
       }
+      mark_entry: {
+        Row: {
+          campus_id: string
+          client_batch_id: string | null
+          component_code: Database["public"]["Enums"]["mark_component_code"]
+          enrolment_id: string
+          entered_at: string
+          entered_by: string | null
+          exam_subject_id: string
+          id: string
+          marks_obtained: number
+          status: Database["public"]["Enums"]["mark_status"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          campus_id: string
+          client_batch_id?: string | null
+          component_code: Database["public"]["Enums"]["mark_component_code"]
+          enrolment_id: string
+          entered_at?: string
+          entered_by?: string | null
+          exam_subject_id: string
+          id?: string
+          marks_obtained: number
+          status?: Database["public"]["Enums"]["mark_status"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string
+          client_batch_id?: string | null
+          component_code?: Database["public"]["Enums"]["mark_component_code"]
+          enrolment_id?: string
+          entered_at?: string
+          entered_by?: string | null
+          exam_subject_id?: string
+          id?: string
+          marks_obtained?: number
+          status?: Database["public"]["Enums"]["mark_status"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mark_entry_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_entered_by_fkey"
+            columns: ["entered_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mark_entry_batch: {
+        Row: {
+          campus_id: string
+          client_batch_id: string
+          exam_subject_id: string
+          id: string
+          payload: Json
+          received_at: string
+          response: Json
+          submitted_by: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          client_batch_id: string
+          exam_subject_id: string
+          id?: string
+          payload: Json
+          received_at?: string
+          response: Json
+          submitted_by?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          client_batch_id?: string
+          exam_subject_id?: string
+          id?: string
+          payload?: Json
+          received_at?: string
+          response?: Json
+          submitted_by?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mark_entry_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_batch_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_batch_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_batch_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_batch_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_gallery_export: {
         Row: {
           campus_id: string
@@ -14668,6 +14835,14 @@ export type Database = {
         Args: { p_leave_type_id: string; p_staff_id: string }
         Returns: number
       }
+      fn_mark_entry_sheet: {
+        Args: {
+          p_exam_term_id: string
+          p_section_id: string
+          p_subject_id: string
+        }
+        Returns: Json
+      }
       fn_merge_enquiry: {
         Args: { p_loser_id: string; p_survivor_id: string }
         Returns: undefined
@@ -14798,6 +14973,10 @@ export type Database = {
       fn_unlock_test_scores: {
         Args: { p_sitting_id: string }
         Returns: undefined
+      }
+      fn_upsert_marks: {
+        Args: { p_client_batch_id?: string; p_payload: Json }
+        Returns: Json
       }
       fn_upsert_student_medical: {
         Args: {
@@ -15503,6 +15682,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_mark_precision: {
+        Args: { p_campus_id: string; p_precision: number }
+        Returns: undefined
+      }
       set_rollover_decision: {
         Args: {
           p_decision: Database["public"]["Enums"]["rollover_decision"]
@@ -15998,6 +16181,7 @@ export type Database = {
         | "internal"
         | "project"
         | "viva"
+      mark_status: "draft" | "submitted" | "moderated" | "approved" | "locked"
       notification_channel: "sms" | "whatsapp" | "push"
       notification_language: "en" | "ur"
       notification_status:
@@ -16410,6 +16594,7 @@ export const Constants = {
         "project",
         "viva",
       ],
+      mark_status: ["draft", "submitted", "moderated", "approved", "locked"],
       notification_channel: ["sms", "whatsapp", "push"],
       notification_language: ["en", "ur"],
       notification_status: [

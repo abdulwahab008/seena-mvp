@@ -1410,3 +1410,66 @@ export const examSubjectTotalMax = (components: { maxMarks: number }[]): number 
   components.reduce((sum, c) => sum + (Number.isFinite(c.maxMarks) ? c.maxMarks : 0), 0);
 
 export const examSubjectIdSchema = z.object({ examSubjectId: z.string().uuid() });
+
+// FR-I12: teacher mark entry. Mirrors
+// supabase/migrations/20260731970000_teacher_mark_entry.sql — the trigger
+// trg_mark_range_check is the real gate for every one of these rules; this is
+// the copy the grid shows in the cell, before any round trip, which is what
+// AC1's "keyboard focus stays in the cell" needs.
+export const MARK_STATUSES = ['draft', 'submitted', 'moderated', 'approved', 'locked'] as const;
+export type MarkStatus = (typeof MARK_STATUSES)[number];
+
+// AC2's wording, and its own default: a campus that never set mark_precision
+// awards whole marks.
+export const DEFAULT_MARK_PRECISION = 0;
+export const WHOLE_NUMBERS_ONLY = 'whole numbers only';
+export const MARKS_NEGATIVE = 'marks cannot be negative';
+export const MARKS_NOT_A_NUMBER = 'numbers only';
+
+// AC1's wording. The database raises exactly this too.
+export const markMaxMessage = (maxMarks: number): string => `max ${maxMarks}`;
+export const markPrecisionMessage = (precision: number): string =>
+  precision === 0 ? WHOLE_NUMBERS_ONLY : `at most ${precision} decimal place${precision === 1 ? '' : 's'}`;
+
+/**
+ * AC1 and AC2 in one place. Returns the message to show in the cell, or null
+ * when the value may be saved. An empty cell is valid — it means "no mark
+ * yet", which is a delete, not a zero.
+ */
+export function validateMarkCell(raw: string, maxMarks: number, precision: number): string | null {
+  const value = raw.trim();
+  if (value === '') return null;
+  if (!/^-?\d+(\.\d+)?$/.test(value)) return MARKS_NOT_A_NUMBER;
+
+  const n = Number(value);
+  if (n < 0) return MARKS_NEGATIVE;
+  if (n > maxMarks) return markMaxMessage(maxMarks);
+  // By value, not by typing: 45.00 is a whole number, 45.5 is not.
+  const scaled = Math.round(n * 10 ** precision) / 10 ** precision;
+  if (scaled !== n) return markPrecisionMessage(precision);
+  return null;
+}
+
+export const markCellSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  component: z.enum(MARK_COMPONENT_CODES),
+  // null clears the cell — fn_upsert_marks deletes the row rather than
+  // storing a null, because marks_obtained has no "no mark" value.
+  marksObtained: z.number().min(0).max(1000).nullable(),
+});
+
+export const upsertMarksSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  cells: z.array(markCellSchema).min(1),
+  // Minted once per queued submission by the offline queue and reused across
+  // every retry of that submission, never regenerated — the same discipline
+  // as collectCashPaymentSchema's clientIdempotencyKey.
+  clientBatchId: z.string().uuid().optional(),
+});
+export type UpsertMarksInput = z.infer<typeof upsertMarksSchema>;
+
+export const setMarkPrecisionSchema = z.object({
+  campusId: z.string().uuid(),
+  precision: z.coerce.number().int().min(0).max(2),
+});
+export type SetMarkPrecisionInput = z.infer<typeof setMarkPrecisionSchema>;

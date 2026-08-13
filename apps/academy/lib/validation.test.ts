@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { markEntryError } from '@/lib/exams/errors';
 import {
+  validateMarkCell,
+  markMaxMessage,
+  markPrecisionMessage,
+  upsertMarksSchema,
+  WHOLE_NUMBERS_ONLY,
   examComponentSchema,
   upsertExamSubjectSchema,
   examSubjectTotalMax,
@@ -1675,5 +1681,100 @@ describe('upsertExamSubjectSchema', () => {
 
   it('rejects a configuration with no exam term', () => {
     expect(upsertExamSubjectSchema.safeParse({ ...base, examTermId: '' }).success).toBe(false);
+  });
+});
+
+describe('FR-I12 validateMarkCell', () => {
+  it('AC1: 70 into a paper out of 65 is refused with "max 65"', () => {
+    expect(validateMarkCell('70', 65, 0)).toBe('max 65');
+  });
+
+  it('AC1: 65 exactly is accepted — "max 65" means at most', () => {
+    expect(validateMarkCell('65', 65, 0)).toBeNull();
+  });
+
+  it('AC2: 45.5 at precision 0 is refused with "whole numbers only"', () => {
+    expect(validateMarkCell('45.5', 65, 0)).toBe('whole numbers only');
+  });
+
+  it('AC2: 45.00 IS a whole number — the rule is about the value, not the typing', () => {
+    expect(validateMarkCell('45.00', 65, 0)).toBeNull();
+  });
+
+  it('AC2: the same 45.5 passes once the campus allows one decimal', () => {
+    expect(validateMarkCell('45.5', 65, 1)).toBeNull();
+    expect(validateMarkCell('45.55', 65, 1)).toBe('at most 1 decimal place');
+    expect(validateMarkCell('45.55', 65, 2)).toBeNull();
+  });
+
+  it('refuses a negative mark', () => {
+    expect(validateMarkCell('-1', 65, 0)).toBe('marks cannot be negative');
+  });
+
+  it('refuses something that is not a number at all', () => {
+    expect(validateMarkCell('abs', 65, 0)).toBe('numbers only');
+  });
+
+  it('treats an empty cell as valid — no mark yet is a delete, not a zero', () => {
+    expect(validateMarkCell('', 65, 0)).toBeNull();
+    expect(validateMarkCell('  ', 65, 0)).toBeNull();
+  });
+
+  it('agrees with the message helpers the database raises', () => {
+    expect(markMaxMessage(65)).toBe('max 65');
+    expect(markPrecisionMessage(0)).toBe(WHOLE_NUMBERS_ONLY);
+    expect(markPrecisionMessage(1)).toBe('at most 1 decimal place');
+    expect(markPrecisionMessage(2)).toBe('at most 2 decimal places');
+  });
+});
+
+describe('FR-I12 markEntryError', () => {
+  it('passes the cell sentences through verbatim — the grid must not disagree with the database', () => {
+    expect(markEntryError('max 65')).toBe('max 65');
+    expect(markEntryError('whole numbers only')).toBe('whole numbers only');
+    expect(markEntryError('at most 1 decimal place')).toBe('at most 1 decimal place');
+    expect(markEntryError('marks cannot be negative')).toBe('marks cannot be negative');
+  });
+
+  it('passes the approval freeze through, because it already says what to do next', () => {
+    expect(markEntryError('marks are locked by approval — raise a result-recompute request')).toBe(
+      'marks are locked by approval — raise a result-recompute request',
+    );
+  });
+
+  it('translates the codes a teacher should never read raw', () => {
+    expect(markEntryError('FORBIDDEN')).toBe('You do not teach this class subject.');
+    expect(markEntryError('MARK_ENROLMENT_MISMATCH')).toBe(
+      'That candidate is not in the class this paper is set for.',
+    );
+  });
+
+  it('falls back rather than leaking an unknown database message', () => {
+    expect(markEntryError('some pg internal detail')).toBe('Could not save those marks.');
+  });
+});
+
+describe('FR-I12 upsertMarksSchema', () => {
+  const cell = { enrolmentId: '11111111-1111-4111-8111-111111111111', component: 'theory' as const, marksObtained: 45 };
+  const base = { examSubjectId: '22222222-2222-4222-8222-222222222222', cells: [cell] };
+
+  it('accepts a batch of cells', () => {
+    expect(upsertMarksSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a null mark — clearing a cell is a delete', () => {
+    expect(upsertMarksSchema.safeParse({ ...base, cells: [{ ...cell, marksObtained: null }] }).success).toBe(true);
+  });
+
+  it('rejects an empty batch — there is nothing to send', () => {
+    expect(upsertMarksSchema.safeParse({ ...base, cells: [] }).success).toBe(false);
+  });
+
+  it('rejects a negative mark before it reaches the trigger', () => {
+    expect(upsertMarksSchema.safeParse({ ...base, cells: [{ ...cell, marksObtained: -1 }] }).success).toBe(false);
+  });
+
+  it('rejects a client batch id that is not a uuid — an idempotency key has to be one', () => {
+    expect(upsertMarksSchema.safeParse({ ...base, clientBatchId: 'not-a-uuid' }).success).toBe(false);
   });
 });

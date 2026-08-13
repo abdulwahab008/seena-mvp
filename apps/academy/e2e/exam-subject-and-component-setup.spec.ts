@@ -6,11 +6,11 @@ import { randomUUID } from 'node:crypto';
 //
 // AC1's "total max 85 is displayed and the grid renders TWO component
 // columns" and AC4's "grid is DISABLED with 'exam setup pending — contact
-// the exam office'" are both statements about a screen, so both are asserted
-// on one. The grid in question is a READ-ONLY preview: teacher mark entry is
-// FR-I12 and does not exist, so nothing here saves a mark. What it does is
-// call the same fn_exam_entry_readiness() FR-I12's grid will call, and
-// render exactly what comes back.
+// the exam office'" are statements about the MARK ENTRY grid, so they are
+// asserted on the real one at /exams/marks. Until FR-I12 that grid did not
+// exist and this spec drove a read-only preview panel on the setup screen
+// instead; the panel is gone and the assertions moved rather than being
+// duplicated across two surfaces.
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -160,11 +160,16 @@ test('an Exam Controller configures Class 9 Pre-Medical Biology as theory plus p
 
   // AC4 first, so "pending" is demonstrably the state BEFORE any setup
   // exists rather than a message that only ever shows for one subject.
-  await page.getByTestId('preview-section-select').selectOption({ label: 'Class 9 — PM' });
-  await page.getByTestId('preview-subject-select').selectOption({ label: 'Biology' });
+  await page.goto('/exams/marks');
+  await page.waitForLoadState('networkidle');
+  await page.getByTestId('mark-section-select').selectOption({ label: 'Class 9 — PM' });
+  await page.getByTestId('mark-subject-select').selectOption({ label: 'Biology' });
   await page.getByTestId('open-mark-entry').click();
   await expect(page.getByTestId('mark-entry-disabled')).toBeVisible();
   await expect(page.getByTestId('mark-entry-pending-message')).toHaveText(SETUP_PENDING);
+
+  await page.goto('/exams/subjects');
+  await page.waitForLoadState('networkidle');
 
   // AC2: practical pass 7 out of a maximum of 5 is refused.
   await page.getByTestId('class-subject-select').selectOption({ label: 'Class 9 Pre-Medical — Biology' });
@@ -198,8 +203,10 @@ test('an Exam Controller configures Class 9 Pre-Medical Biology as theory plus p
   await expect(page.getByTestId('exam-subject-row-Biology')).toContainText('theory 65/23, practical 20/7');
 
   // AC1: the mark entry grid now renders TWO component columns.
-  await page.getByTestId('preview-section-select').selectOption({ label: 'Class 9 — PM' });
-  await page.getByTestId('preview-subject-select').selectOption({ label: 'Biology' });
+  await page.goto('/exams/marks');
+  await page.waitForLoadState('networkidle');
+  await page.getByTestId('mark-section-select').selectOption({ label: 'Class 9 — PM' });
+  await page.getByTestId('mark-subject-select').selectOption({ label: 'Biology' });
   await page.getByTestId('open-mark-entry').click();
   await expect(page.getByTestId('mark-entry-grid')).toBeVisible();
   await expect(page.getByTestId('mark-entry-total-max')).toHaveText('85');
@@ -209,7 +216,7 @@ test('an Exam Controller configures Class 9 Pre-Medical Biology as theory plus p
 
   // AC4: Computer Science, which nobody configured, is still disabled with
   // the exact message — in the same term, for the same section.
-  await page.getByTestId('preview-subject-select').selectOption({ label: 'Computer Science' });
+  await page.getByTestId('mark-subject-select').selectOption({ label: 'Computer Science' });
   await page.getByTestId('open-mark-entry').click();
   await expect(page.getByTestId('mark-entry-grid')).toHaveCount(0);
   await expect(page.getByTestId('mark-entry-disabled')).toBeVisible();
