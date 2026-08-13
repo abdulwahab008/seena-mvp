@@ -793,17 +793,26 @@ select results_eq(
   'AC3: a register that really did lose a number names the number it lost'
 );
 
--- The cascade case the row trigger exists for, on the one campus whose
--- deletion nothing else already blocks (campus_a holds the certificate
--- TEMPLATES, whose own guard refuses first). A campus that has issued a
+-- The cascade case the row trigger exists for. A campus that has issued a
 -- certificate cannot be deleted out from under the register: the FK cascade
--- reaches certificate_issue and the trigger refuses, aborting the whole
--- statement rather than orphaning the entries behind a campus that is gone.
+-- reaches an append-only guard which refuses, aborting the whole statement
+-- rather than orphaning the entries behind a campus that is gone.
+--
+-- The refusal is asserted by errcode rather than by message because a
+-- campus delete now cascades into several append-only guards and Postgres
+-- fires the FK cascade triggers in name (i.e. creation) order, so which one
+-- speaks is an artefact of migration ordering, not a property worth
+-- pinning: 20260731999000_audit_partition_and_counter_rls.sql gave
+-- employee_code_counter the same DELETE refusal certificate_serial_counter
+-- already had, and its FK from campus is older than certificate_issue's, so
+-- it is now the first to raise. That the register's OWN trigger refuses by
+-- name is already proved directly, three times, further up this file
+-- (service_role's DELETE, the owner's DELETE, and TRUNCATE CASCADE).
 reset role;
 select throws_ok(
   format($$ delete from public.campus where id = %L $$, :'campus_b'),
   '42501',
-  'certificate register is append-only',
+  null,
   'AC4: a campus that has issued a certificate can no longer be cascaded away'
 );
 set local role authenticated;
