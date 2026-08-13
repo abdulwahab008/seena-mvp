@@ -8250,6 +8250,8 @@ export type Database = {
           exam_subject_id: string
           id: string
           marks_obtained: number
+          ocr_job_id: string | null
+          source: Database["public"]["Enums"]["mark_source"]
           status: Database["public"]["Enums"]["mark_status"]
           tenant_id: string
           updated_at: string
@@ -8264,6 +8266,8 @@ export type Database = {
           exam_subject_id: string
           id?: string
           marks_obtained: number
+          ocr_job_id?: string | null
+          source?: Database["public"]["Enums"]["mark_source"]
           status?: Database["public"]["Enums"]["mark_status"]
           tenant_id: string
           updated_at?: string
@@ -8278,6 +8282,8 @@ export type Database = {
           exam_subject_id?: string
           id?: string
           marks_obtained?: number
+          ocr_job_id?: string | null
+          source?: Database["public"]["Enums"]["mark_source"]
           status?: Database["public"]["Enums"]["mark_status"]
           tenant_id?: string
           updated_at?: string
@@ -8345,6 +8351,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_exam_subject_section"
             referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "mark_entry_ocr_job_id_fkey"
+            columns: ["ocr_job_id"]
+            isOneToOne: false
+            referencedRelation: "ocr_mark_job"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "mark_entry_tenant_id_fkey"
@@ -9250,6 +9263,365 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "message_template_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ocr_mark_job: {
+        Row: {
+          campus_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_reason: string | null
+          component_code: Database["public"]["Enums"]["mark_component_code"]
+          created_at: string
+          created_by: string | null
+          engine: string | null
+          exam_subject_id: string
+          exam_term_id: string
+          id: string
+          promoted_at: string | null
+          promoted_by: string | null
+          section_id: string
+          status: Database["public"]["Enums"]["ocr_job_status"]
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_reason?: string | null
+          component_code: Database["public"]["Enums"]["mark_component_code"]
+          created_at?: string
+          created_by?: string | null
+          engine?: string | null
+          exam_subject_id: string
+          exam_term_id: string
+          id?: string
+          promoted_at?: string | null
+          promoted_by?: string | null
+          section_id: string
+          status?: Database["public"]["Enums"]["ocr_job_status"]
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_reason?: string | null
+          component_code?: Database["public"]["Enums"]["mark_component_code"]
+          created_at?: string
+          created_by?: string | null
+          engine?: string | null
+          exam_subject_id?: string
+          exam_term_id?: string
+          id?: string
+          promoted_at?: string | null
+          promoted_by?: string | null
+          section_id?: string
+          status?: Database["public"]["Enums"]["ocr_job_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocr_mark_job_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_promoted_by_fkey"
+            columns: ["promoted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ocr_mark_suggestion: {
+        Row: {
+          campus_id: string
+          confidence: number | null
+          created_at: string
+          enrolment_id: string
+          id: string
+          job_id: string
+          ocr_value: number
+          question_no: number
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          confidence?: number | null
+          created_at?: string
+          enrolment_id: string
+          id?: string
+          job_id: string
+          ocr_value: number
+          question_no: number
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          confidence?: number | null
+          created_at?: string
+          enrolment_id?: string
+          id?: string
+          job_id?: string
+          ocr_value?: number
+          question_no?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocr_mark_suggestion_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_suggestion_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_suggestion_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_suggestion_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_suggestion_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "ocr_mark_job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_suggestion_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ocr_review_action: {
+        Row: {
+          acted_at: string
+          actor_id: string | null
+          campus_id: string
+          enrolment_id: string
+          final_value: number
+          id: string
+          job_id: string
+          ocr_value: number
+          question_no: number
+          tenant_id: string
+        }
+        Insert: {
+          acted_at?: string
+          actor_id?: string | null
+          campus_id: string
+          enrolment_id: string
+          final_value: number
+          id?: string
+          job_id: string
+          ocr_value: number
+          question_no: number
+          tenant_id: string
+        }
+        Update: {
+          acted_at?: string
+          actor_id?: string | null
+          campus_id?: string
+          enrolment_id?: string
+          final_value?: number
+          id?: string
+          job_id?: string
+          ocr_value?: number
+          question_no?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocr_review_action_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "ocr_mark_job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -14459,6 +14831,186 @@ export type Database = {
           },
         ]
       }
+      v_ocr_mark_audit: {
+        Row: {
+          acted_at: string | null
+          actor_id: string | null
+          actor_name: string | null
+          campus_id: string | null
+          class_name: string | null
+          component_code:
+            | Database["public"]["Enums"]["mark_component_code"]
+            | null
+          confidence: number | null
+          engine: string | null
+          enrolment_id: string | null
+          exam_subject_id: string | null
+          exam_term_id: string | null
+          final_value: number | null
+          gr_number: string | null
+          job_id: string | null
+          job_status: Database["public"]["Enums"]["ocr_job_status"] | null
+          ocr_value: number | null
+          question_no: number | null
+          review_action_id: string | null
+          roll_no: number | null
+          section_id: string | null
+          section_name: string | null
+          student_name: string | null
+          subject_name: string | null
+          tenant_id: string | null
+          was_overridden: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocr_mark_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "ocr_mark_job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_onboarding_summary: {
         Row: {
           completed_at: string | null
@@ -16308,6 +16860,10 @@ export type Database = {
         Args: { p_sitting_id: string }
         Returns: Json
       }
+      fn_cancel_ocr_job: {
+        Args: { p_job_id: string; p_reason: string }
+        Returns: Json
+      }
       fn_change_student_status: {
         Args: {
           p_effective_date?: string
@@ -16529,6 +17085,16 @@ export type Database = {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: string
       }
+      fn_open_ocr_job: {
+        Args: {
+          p_component: Database["public"]["Enums"]["mark_component_code"]
+          p_engine?: string
+          p_exam_subject_id: string
+          p_section_id: string
+          p_suggestions: Json
+        }
+        Returns: Json
+      }
       fn_preview_checklist: {
         Args: {
           p_board?: Database["public"]["Enums"]["board"]
@@ -16557,6 +17123,7 @@ export type Database = {
         }
       }
       fn_process_sms_fallbacks: { Args: never; Returns: number }
+      fn_promote_ocr_marks: { Args: { p_job_id: string }; Returns: Json }
       fn_promote_waitlist: {
         Args: {
           p_campus_id: string
@@ -16580,6 +17147,10 @@ export type Database = {
       fn_reassign_followups: {
         Args: { p_from_user: string; p_to_user: string }
         Returns: number
+      }
+      fn_record_ocr_review: {
+        Args: { p_job_id: string; p_reviews: Json }
+        Returns: Json
       }
       fn_reinstate_offer: { Args: { p_offer_id: string }; Returns: undefined }
       fn_relock_expired_unlocks: { Args: { p_as_of?: string }; Returns: number }
@@ -17890,6 +18461,7 @@ export type Database = {
         | "internal"
         | "project"
         | "viva"
+      mark_source: "manual" | "ocr_confirmed" | "ocr_overridden"
       mark_status: "draft" | "submitted" | "moderated" | "approved" | "locked"
       mark_unlock_state: "locked" | "unlocked"
       mark_unlock_status: "pending" | "approved" | "expired" | "rejected"
@@ -17901,6 +18473,7 @@ export type Database = {
         | "failed"
         | "skipped_no_contact"
         | "skipped_optout"
+      ocr_job_status: "pending" | "ready" | "promoted" | "cancelled"
       offer_decline_reason:
         | "fee_too_high"
         | "chose_other_school"
@@ -18319,6 +18892,7 @@ export const Constants = {
         "project",
         "viva",
       ],
+      mark_source: ["manual", "ocr_confirmed", "ocr_overridden"],
       mark_status: ["draft", "submitted", "moderated", "approved", "locked"],
       mark_unlock_state: ["locked", "unlocked"],
       mark_unlock_status: ["pending", "approved", "expired", "rejected"],
@@ -18331,6 +18905,7 @@ export const Constants = {
         "skipped_no_contact",
         "skipped_optout",
       ],
+      ocr_job_status: ["pending", "ready", "promoted", "cancelled"],
       offer_decline_reason: [
         "fee_too_high",
         "chose_other_school",

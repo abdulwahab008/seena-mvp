@@ -175,6 +175,15 @@ export function ApprovalBoard({ examTermId, termName, sections }: Props) {
                   )}
                 </div>
 
+                {/* FR-I14. Listed first, in the order fn_approve_marks() would
+                    refuse in — and it is the only one of the three that fires
+                    on a set whose marks were all keyed by hand. */}
+                {!subject.is_locked && c.ocr_unreviewed.length > 0 && (
+                  <p className="text-sm text-destructive" data-testid={`approval-ocr-unreviewed-${subject.subject_name}`}>
+                    {c.ocr_unreviewed.length} candidate{c.ocr_unreviewed.length === 1 ? ' has' : 's have'} an OCR mark no
+                    teacher has confirmed: {c.ocr_unreviewed.map((s) => s.gr_number).join(', ')}
+                  </p>
+                )}
                 {!subject.is_locked && c.not_started.length > 0 && (
                   <p className="text-sm text-destructive" data-testid={`approval-not-started-${subject.subject_name}`}>
                     {c.not_started.length} candidate{c.not_started.length === 1 ? ' has' : 's have'} neither a mark nor an

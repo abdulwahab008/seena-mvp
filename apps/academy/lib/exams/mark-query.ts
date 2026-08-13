@@ -1,7 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
 import type { ExamEntryReadiness } from '@/lib/exams/subject-query';
-import type { ExamAbsenceReason, ExamAttendanceStatus, MarkComponentCode, MarkStatus } from '@/lib/validation';
+import type {
+  ExamAbsenceReason,
+  ExamAttendanceStatus,
+  MarkComponentCode,
+  MarkSource,
+  MarkStatus,
+} from '@/lib/validation';
 
 /**
  * FR-I12. The shape fn_mark_entry_sheet() returns: FR-I02's readiness answer
@@ -16,6 +22,11 @@ export type MarkEntryStudent = {
   gr_number: string;
   /** Keyed by component. A component with no entry is simply absent here. */
   marks: Partial<Record<MarkComponentCode, number>>;
+  /**
+   * FR-I14. Keyed the same way: who produced each of those numbers. A machine
+   * mark is visibly not a typed one in the cell itself, not in a tooltip.
+   */
+  mark_sources: Partial<Record<MarkComponentCode, MarkSource>>;
   status: MarkStatus | null;
   /**
    * FR-I11. Always one of the four values — 'present' when nothing was
@@ -25,6 +36,42 @@ export type MarkEntryStudent = {
   absence_reason: ExamAbsenceReason | null;
   /** 'AB' / 'EX' / 'DEB', or null for a candidate who sat the paper. */
   report_symbol: string | null;
+  /**
+   * FR-I14. One entry per question the machine read on this candidate's script,
+   * empty when there is no open batch. `reviewed` false is the whole
+   * requirement: until it is true for every question of every script, nothing
+   * here is a mark.
+   */
+  ocr_questions: OcrQuestion[];
+};
+
+/** FR-I14. What the machine read, and what a human has said about it. */
+export type OcrQuestion = {
+  question_no: number;
+  ocr_value: number;
+  /** Recorded, never load-bearing — it grants no fast path past review. */
+  confidence: number | null;
+  /** Null until a teacher confirms or amends. */
+  final_value: number | null;
+  reviewed: boolean;
+  actor_name: string | null;
+  acted_at: string | null;
+};
+
+/**
+ * FR-I14. The open batch for this (paper, section), or null. At most one, by
+ * uq_ocr_job_open — two machines' opinions of one pile of scripts is not
+ * something a teacher can review.
+ */
+export type OcrJobSummary = {
+  job_id: string;
+  status: 'pending' | 'ready';
+  component: MarkComponentCode;
+  engine: string | null;
+  script_count: number;
+  reviewed_count: number;
+  /** True only when every script has a review action for every question. */
+  can_promote: boolean;
 };
 
 /** FR-I16. Null until the set is approved. */
@@ -68,6 +115,8 @@ export type MarkEntrySheet = ExamEntryReadiness & {
   lock: MarkLockInfo | null;
   /** FR-I17. Non-null means is_locked is true AND the grid is writable anyway. */
   break_glass: BreakGlassWindow | null;
+  /** FR-I14. Non-null means machine-read values are waiting for a human. */
+  ocr: OcrJobSummary | null;
   can_approve: boolean;
   students: MarkEntryStudent[];
 };
@@ -87,6 +136,19 @@ export type MarkCompleteness = {
     roll_no: number | null;
     student_name: string;
     missing: MarkComponentCode[];
+  }[];
+  /**
+   * FR-I14. Candidates whose script a machine has read and no teacher has
+   * confirmed. Reported ahead of not_started because it is the sharper
+   * diagnosis, and because it is the ONLY one of the three that fires on a set
+   * whose marks were all keyed by hand.
+   */
+  ocr_unreviewed: {
+    gr_number: string;
+    roll_no: number | null;
+    student_name: string;
+    job_id: string;
+    component: MarkComponentCode;
   }[];
   complete: boolean;
 };

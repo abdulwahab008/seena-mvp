@@ -1,9 +1,15 @@
 'use server';
 
 import { supabaseServer } from '@/lib/supabase/server';
-import { markEntryError } from '@/lib/exams/errors';
+import { markEntryError, ocrReviewError } from '@/lib/exams/errors';
 import type { MarkEntrySheet } from '@/lib/exams/mark-query';
-import { setExamAttendanceSchema, upsertMarksSchema } from '@/lib/validation';
+import {
+  cancelOcrJobSchema,
+  promoteOcrMarksSchema,
+  recordOcrReviewSchema,
+  setExamAttendanceSchema,
+  upsertMarksSchema,
+} from '@/lib/validation';
 
 /**
  * FR-I12. mark_entry has a SELECT policy and no write policy, so
@@ -81,6 +87,82 @@ export async function setExamAttendance(input: unknown): Promise<SaveMarksState>
     ...(parsed.data.note ? { p_note: parsed.data.note } : {}),
   });
   if (error) return { error: markEntryError(error.message) };
+
+  return { error: null };
+}
+
+/**
+ * FR-I14. The affirmation. Nothing here decides anything — the counts come back
+ * from the database, which is also the only thing that can refuse a promotion,
+ * because the FR's Notes put that guard below the UI on purpose.
+ *
+ * AC3's bulk accept is this action with ten entries in it. There is no "accept
+ * the page" call, because ocr_review_action has no row that could mean a page.
+ */
+export type OcrReviewState = {
+  error: string | null;
+  reviewedCount?: number;
+  scriptCount?: number;
+  canPromote?: boolean;
+};
+
+export async function recordOcrReviews(input: unknown): Promise<OcrReviewState> {
+  const parsed = recordOcrReviewSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_record_ocr_review', {
+    p_job_id: parsed.data.jobId,
+    p_reviews: parsed.data.reviews.map((r) => ({
+      enrolment_id: r.enrolmentId,
+      question_no: r.questionNo,
+      ...(r.finalValue === undefined ? {} : { final_value: r.finalValue }),
+    })),
+  });
+  if (error) return { error: ocrReviewError(error.message) };
+
+  const result = (data ?? {}) as { reviewed_count?: number; script_count?: number; can_promote?: boolean };
+  return {
+    error: null,
+    reviewedCount: result.reviewed_count ?? 0,
+    scriptCount: result.script_count ?? 0,
+    canPromote: result.can_promote ?? false,
+  };
+}
+
+export type PromoteOcrState = {
+  error: string | null;
+  confirmedCount?: number;
+  overriddenCount?: number;
+};
+
+export async function promoteOcrMarks(input: unknown): Promise<PromoteOcrState> {
+  const parsed = promoteOcrMarksSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_promote_ocr_marks', { p_job_id: parsed.data.jobId });
+  if (error) return { error: ocrReviewError(error.message) };
+
+  const result = (data ?? {}) as { confirmed_count?: number; overridden_count?: number };
+  return {
+    error: null,
+    confirmedCount: result.confirmed_count ?? 0,
+    overriddenCount: result.overridden_count ?? 0,
+  };
+}
+
+/** The way out of a scan that came back unusable. See the migration header. */
+export async function cancelOcrJob(input: unknown): Promise<{ error: string | null }> {
+  const parsed = cancelOcrJobSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_cancel_ocr_job', {
+    p_job_id: parsed.data.jobId,
+    p_reason: parsed.data.reason,
+  });
+  if (error) return { error: ocrReviewError(error.message) };
 
   return { error: null };
 }

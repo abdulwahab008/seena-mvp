@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { readMarkEntrySheet, saveMarks, setExamAttendance } from './actions';
+import { OcrReviewPanel } from './ocr-review-panel';
 import type { MarkEntrySheet, MarkSectionOption, MarkSubjectOption } from '@/lib/exams/mark-query';
 import {
   ABSENCE_REASONS_BY_STATUS,
   EXAM_ATTENDANCE_STATUSES,
   examReportSymbol,
+  markSourceLabel,
   unlockMinutesLeft,
   validateMarkCell,
   type ExamAbsenceReason,
@@ -400,6 +402,23 @@ export function MarkGrid({ examTermId, sections, subjects }: Props) {
             </div>
           )}
 
+          {/* FR-I14. Above the grid, because until every script is confirmed
+              these are not marks and the grid below has nothing to show for
+              them. Reloading the whole sheet after each action is deliberate:
+              the reviewed count, can_promote and the cells the promotion fills
+              all come from the same round trip, so the screen cannot drift out
+              of step with what the server would allow. */}
+          {sheet.ocr && (
+            <OcrReviewPanel
+              job={sheet.ocr}
+              students={sheet.students}
+              maxMarks={sheet.components.find((c) => c.component === sheet.ocr!.component)?.max_marks ?? 0}
+              precision={sheet.mark_precision}
+              canEnter={sheet.can_enter}
+              onChanged={open}
+            />
+          )}
+
           {/* FR-I16 AC2. Read-only because the set was signed off is a
               different fact from read-only because you do not teach it, and
               the second sentence would be a lie on a locked grid. */}
@@ -520,6 +539,17 @@ export function MarkGrid({ examTermId, sections, subjects }: Props) {
                             data-testid={`mark-cell-error-${rowKey(student)}-${c.component}`}
                           >
                             {errors[key]}
+                          </p>
+                        )}
+                        {/* FR-I14. A mark a machine produced is not a mark
+                            somebody typed, and the difference belongs in the
+                            cell rather than in a tooltip nobody opens. */}
+                        {markSourceLabel(student.mark_sources[c.component]) && (
+                          <p
+                            className="mt-1 text-xs font-medium text-amber-700"
+                            data-testid={`mark-source-badge-${rowKey(student)}-${c.component}`}
+                          >
+                            {markSourceLabel(student.mark_sources[c.component])}
                           </p>
                         )}
                       </td>

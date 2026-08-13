@@ -1593,3 +1593,56 @@ export function unlockMinutesLeft(expiresAt: string | null | undefined, now: num
   if (!expiresAt) return null;
   return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - now) / 60_000));
 }
+
+// FR-I14: mandatory teacher override of OCR marks. Mirrors
+// supabase/migrations/20260731992000_mandatory_ocr_mark_override.sql.
+//
+// The three values mark_entry.source can hold. There is deliberately no
+// "suggested" or "pending" value: an unreviewed machine mark is not a
+// mark_entry row at all, it is an ocr_mark_suggestion, and only
+// fn_promote_ocr_marks() can move it across.
+export const MARK_SOURCES = ['manual', 'ocr_confirmed', 'ocr_overridden'] as const;
+export type MarkSource = (typeof MARK_SOURCES)[number];
+
+/** What the cell badge says. Null for a mark somebody typed. */
+export const markSourceLabel = (source: MarkSource | undefined): string | null =>
+  source === 'ocr_confirmed' ? 'OCR confirmed' : source === 'ocr_overridden' ? 'OCR amended' : null;
+
+export const OCR_CANCEL_REASON_MIN = 10;
+
+/**
+ * AC1's sentence, built here so the button can say what the refusal would say
+ * before anyone presses it. fn_promote_ocr_marks() raises exactly this.
+ */
+export const ocrReviewProgressMessage = (reviewed: number, total: number): string =>
+  `${reviewed} of ${total} scripts reviewed`;
+
+export const ocrReviewEntrySchema = z.object({
+  enrolmentId: z.string().uuid(),
+  questionNo: z.number().int().min(1),
+  // Omitted means "accept what the machine said". The value the machine
+  // actually read is never sent from the client — fn_record_ocr_review() copies
+  // it from the suggestion, so "the teacher changed it" stays falsifiable.
+  finalValue: z.number().min(0).max(1000).optional(),
+});
+
+export const recordOcrReviewSchema = z.object({
+  jobId: z.string().uuid(),
+  // AC3: a bulk accept of a page sends one entry per script, and one review row
+  // lands per entry. There is no payload shape that means "a page".
+  reviews: z.array(ocrReviewEntrySchema).min(1),
+});
+export type RecordOcrReviewInput = z.infer<typeof recordOcrReviewSchema>;
+
+export const promoteOcrMarksSchema = z.object({ jobId: z.string().uuid() });
+export type PromoteOcrMarksInput = z.infer<typeof promoteOcrMarksSchema>;
+
+export const cancelOcrJobSchema = z.object({
+  jobId: z.string().uuid(),
+  reason: z
+    .string()
+    .trim()
+    .min(OCR_CANCEL_REASON_MIN, `Say why in at least ${OCR_CANCEL_REASON_MIN} characters`)
+    .max(2000),
+});
+export type CancelOcrJobInput = z.infer<typeof cancelOcrJobSchema>;

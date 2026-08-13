@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { markApprovalError, markEntryError, markUnlockError } from '@/lib/exams/errors';
+import { markApprovalError, markEntryError, markUnlockError, ocrReviewError } from '@/lib/exams/errors';
 import {
+  cancelOcrJobSchema,
+  markSourceLabel,
+  ocrReviewProgressMessage,
+  recordOcrReviewSchema,
   ABSENCE_REASONS_BY_STATUS,
   breakGlassUnlockSchema,
   DEFAULT_UNLOCK_WINDOW_MINUTES,
@@ -1940,6 +1944,75 @@ describe('FR-I17 markUnlockError', () => {
   it('and the append-only refusal, which is the whole evidentiary point', () => {
     expect(markUnlockError('break-glass request is append-only')).toBe(
       'A break-glass request records what was asked, by whom and why. None of those is editable afterwards.',
+    );
+  });
+});
+
+describe('FR-I14 OCR review', () => {
+  const jobId = '44444444-4444-4444-8444-444444444444';
+  const enrolmentId = '55555555-5555-4555-8555-555555555555';
+
+  it('AC1: the progress sentence is the one fn_promote_ocr_marks() refuses with, word for word', () => {
+    expect(ocrReviewProgressMessage(0, 40)).toBe('0 of 40 scripts reviewed');
+    expect(ocrReviewProgressMessage(10, 40)).toBe('10 of 40 scripts reviewed');
+  });
+
+  it('AC1: and it passes through the error mapper untranslated, counts and all', () => {
+    expect(ocrReviewError('0 of 40 scripts reviewed')).toBe('0 of 40 scripts reviewed');
+    expect(ocrReviewError('10 of 40 scripts reviewed')).toBe('10 of 40 scripts reviewed');
+  });
+
+  it('AC3: a bulk accept is one entry per script — there is no payload that means "a page"', () => {
+    const page = Array.from({ length: 10 }, (_, i) => ({
+      enrolmentId: `5555555${i}-5555-4555-8555-555555555555`,
+      questionNo: 1,
+    }));
+    const parsed = recordOcrReviewSchema.safeParse({ jobId, reviews: page });
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.reviews).toHaveLength(10);
+  });
+
+  it('AC3: and an empty review confirms nothing, so it is not a review', () => {
+    expect(recordOcrReviewSchema.safeParse({ jobId, reviews: [] }).success).toBe(false);
+  });
+
+  it('AC2: omitting finalValue means "accept what the machine said" — the client never echoes it back', () => {
+    const accepted = recordOcrReviewSchema.parse({ jobId, reviews: [{ enrolmentId, questionNo: 1 }] });
+    expect(accepted.reviews[0]!.finalValue).toBeUndefined();
+    const amended = recordOcrReviewSchema.parse({
+      jobId,
+      reviews: [{ enrolmentId, questionNo: 1, finalValue: 55 }],
+    });
+    expect(amended.reviews[0]!.finalValue).toBe(55);
+  });
+
+  it('AC2: the cell badge tells a machine mark from a typed one, and says which kind', () => {
+    expect(markSourceLabel('ocr_confirmed')).toBe('OCR confirmed');
+    expect(markSourceLabel('ocr_overridden')).toBe('OCR amended');
+    expect(markSourceLabel('manual')).toBeNull();
+    expect(markSourceLabel(undefined)).toBeNull();
+  });
+
+  it('abandoning a batch needs a written reason, and whitespace does not pad it out', () => {
+    expect(cancelOcrJobSchema.safeParse({ jobId, reason: 'bad scan' }).success).toBe(false);
+    expect(cancelOcrJobSchema.safeParse({ jobId, reason: '   bad     ' }).success).toBe(false);
+    expect(cancelOcrJobSchema.safeParse({ jobId, reason: 'Scanner fed two scripts together' }).success).toBe(true);
+  });
+
+  it('the provenance refusal reads as what it is rather than as a trigger name', () => {
+    expect(ocrReviewError('a machine mark needs a named teacher')).toBe(
+      'An OCR mark reaches a report card only through a teacher who confirmed it.',
+    );
+    expect(ocrReviewError('an OCR review action is append-only')).toBe(
+      'A confirmation is a signature. It is written once and it stays.',
+    );
+  });
+
+  it('FR-I16 approval: the unreviewed-batch refusal passes through with its GR numbers', () => {
+    const refusal = '2 candidates have an OCR mark no teacher has confirmed: GR-0001, GR-0040';
+    expect(markApprovalError(refusal)).toBe(refusal);
+    expect(markApprovalError('1 candidate has an OCR mark no teacher has confirmed: GR-0007')).toBe(
+      '1 candidate has an OCR mark no teacher has confirmed: GR-0007',
     );
   });
 });

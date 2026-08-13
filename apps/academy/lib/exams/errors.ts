@@ -137,6 +137,9 @@ export function markEntryError(message: string): string {
 const APPROVAL_PASS_THROUGH = [
   /^\d+ candidates? (has|have) neither a mark nor an exam status: /,
   /^\d+ candidates? (is|are) missing a component mark: /,
+  // FR-I14, in the same shape and for the same reason: the refusal names the
+  // candidates whose scripts a machine read and nobody checked.
+  /^\d+ candidates? (has|have) an OCR mark no teacher has confirmed: /,
 ];
 
 export function markApprovalError(message: string): string {
@@ -189,4 +192,51 @@ export function markUnlockError(message: string): string {
   }
   if (message.includes('FORBIDDEN')) return 'You do not have permission to do that.';
   return 'Could not complete that action.';
+}
+
+/**
+ * FR-I14. "0 of 40 scripts reviewed" is the one message the acceptance criteria
+ * assert word for word, and fn_promote_ocr_marks() composes it from counts only
+ * the database has — so it passes through untranslated, exactly as FR-I16's two
+ * completeness sentences do. Everything else on this path is a named code,
+ * because there is nothing in it the database knows and the screen does not.
+ */
+const OCR_PASS_THROUGH = [/^\d+ of \d+ scripts reviewed$/, /^max \d+$/, /^whole numbers only$/];
+
+export function ocrReviewError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (OCR_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (line === 'marks_locked') {
+    return 'These marks were approved and signed off — a correction needs a break-glass unlock.';
+  }
+  if (message.includes('a machine mark needs a named teacher')) {
+    return 'An OCR mark reaches a report card only through a teacher who confirmed it.';
+  }
+  if (message.includes('an OCR review action is append-only')) {
+    return 'A confirmation is a signature. It is written once and it stays.';
+  }
+  if (message.includes('an OCR suggestion is append-only')) return 'What the machine read cannot be rewritten.';
+  if (message.includes('an OCR batch is append-only')) return 'A batch is promoted once, or abandoned once.';
+  if (message.includes('OCR_CANCEL_REASON_REQUIRED')) {
+    return 'Say why in at least 10 characters — abandoning a scan is on the record.';
+  }
+  if (message.includes('OCR_JOB_ALREADY_OPEN')) return 'This paper already has a batch waiting for review.';
+  if (message.includes('OCR_JOB_NOT_OPEN')) return 'That batch has already been promoted or abandoned.';
+  if (message.includes('OCR_SUGGESTION_NOT_FOUND')) {
+    return 'That question is not one this batch read — reload the grid.';
+  }
+  if (message.includes('OCR_ENROLMENT_MISMATCH')) {
+    return 'Every scanned script must belong to a candidate in this section.';
+  }
+  if (message.includes('OCR_SUGGESTIONS_REQUIRED')) return 'A batch with nothing to review is not a batch.';
+  if (message.includes('OCR_REVIEW_EMPTY')) return 'Nothing was selected to confirm.';
+  if (message.includes('OCR_JOB_NOT_FOUND')) return 'That batch no longer exists.';
+  if (message.includes('MARK_COMPONENT_NOT_CONFIGURED')) return 'That component is not part of this paper.';
+  if (message.includes('SECTION_NOT_IN_EXAM_SUBJECT')) {
+    return 'That section does not sit this paper — check the class and stream.';
+  }
+  if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'This paper has no exam setup yet.';
+  if (message.includes('FORBIDDEN')) return 'You do not teach this class subject.';
+  return 'Could not complete that review.';
 }
