@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildCertificateHtml, collectCertificateStrings, type CertificatePreviewPayload } from './html';
+import {
+  buildCertificateHtml,
+  collectCertificateStrings,
+  snapshotToPayload,
+  type CertificatePreviewPayload,
+  type CertificateSnapshot,
+} from './html';
 import { NASTALIQ_FONT_FAMILY } from '@/lib/pdf/font';
 
 function payload(over: Partial<CertificatePreviewPayload['template']> = {}): CertificatePreviewPayload {
@@ -90,6 +96,76 @@ describe('buildCertificateHtml', () => {
     expect(buildCertificateHtml(p, null, { letterheadDataUri: null, logoDataUri: null }).html).toContain(
       'A &amp; B &lt;School&gt;',
     );
+  });
+});
+
+// FR-T03. The snapshot is what an issued certificate reprints from; these
+// are the properties that make "no previously issued certificate ever
+// re-renders against a later template version" true rather than aspirational.
+describe('an issued certificate rendered from payload_snapshot', () => {
+  const snapshot: CertificateSnapshot = {
+    template: {
+      id: 'tpl-v1',
+      certificate_type: 'transfer',
+      board_code: 'FBISE',
+      language: 'en',
+      version: 1,
+      status: 'issued',
+      title: 'School Leaving Certificate',
+      body_html:
+        '<p>{{student.name_en}}, GR {{student.gr_number}}, born {{student.dob}} ({{student.dob_words}}), ' +
+        'left on {{enrolment.left_on}}. Conduct {{transfer.conduct}}. Dues {{transfer.dues_cleared}}. ' +
+        'Serial {{issue.serial_no}}.</p>',
+      page_size: 'A4',
+    },
+    tenant: { name: 'Seena Model High School', name_ur: 'سینا ماڈل ہائی اسکول' },
+    campus: { name: 'Main Campus', name_ur: 'مرکزی کیمپس', code: 'MAIN', city: 'Lahore' },
+    letterhead_storage_path: null,
+    logo_storage_path: null,
+    values: {
+      'student.name_en': 'Ali Raza',
+      'student.gr_number': '2019-0442',
+      'student.dob': '04-03-2011',
+      'student.dob_words': 'Fourth March Two Thousand Eleven',
+      'enrolment.left_on': '30-06-2026',
+      'transfer.conduct': 'Good',
+      'transfer.dues_cleared': null,
+      'issue.serial_no': 'TC-2026-000147',
+    },
+  };
+
+  const doc = () =>
+    buildCertificateHtml(snapshotToPayload(snapshot), null, { letterheadDataUri: null, logoDataUri: null });
+
+  it('AC3: prints the date of birth in figures and in words', () => {
+    expect(doc().html).toContain('born 04-03-2011 (Fourth March Two Thousand Eleven)');
+  });
+
+  it('prints the frozen serial, GR number and leaving date', () => {
+    const html = doc().html;
+    expect(html).toContain('Ali Raza, GR 2019-0442');
+    expect(html).toContain('left on 30-06-2026');
+    expect(html).toContain('Serial TC-2026-000147');
+  });
+
+  it('carries no PREVIEW or DRAFT watermark — this one is the real document', () => {
+    const html = doc().html;
+    expect(html).not.toContain('PREVIEW');
+    expect(html).not.toContain('class="watermark"');
+  });
+
+  it('renders the wording the snapshot froze, not whatever the template says now', () => {
+    // The same template has since forked to v2 with different wording; the
+    // snapshot is the only input, so the reprint cannot see it.
+    expect(doc().html).toContain('School Leaving Certificate');
+    expect(doc().html).toContain('left on 30-06-2026. Conduct Good.');
+  });
+
+  it('leaves a deliberately blank field visibly blank rather than silently empty', () => {
+    // transfer.dues_cleared is null because the fee module has not answered
+    // it; a visible gap on a statutory page beats a sentence that reads as
+    // though the dues were cleared.
+    expect(doc().html).toContain('Dues [transfer.dues_cleared]');
   });
 });
 

@@ -3325,6 +3325,163 @@ export type Database = {
           },
         ]
       }
+      certificate_issue: {
+        Row: {
+          campus_id: string
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          created_at: string
+          enrolment_id: string | null
+          id: string
+          issued_at: string
+          issued_by: string | null
+          language: Database["public"]["Enums"]["certificate_language"]
+          original_issue_id: string | null
+          payload_snapshot: Json
+          pdf_path: string
+          replaced_by_issue_id: string | null
+          revoke_reason: string | null
+          revoked_at: string | null
+          serial_no: string
+          session_id: string
+          status: Database["public"]["Enums"]["certificate_issue_status"]
+          student_id: string
+          template_id: string
+          template_version: number
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          certificate_type: Database["public"]["Enums"]["certificate_type"]
+          created_at?: string
+          enrolment_id?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          language: Database["public"]["Enums"]["certificate_language"]
+          original_issue_id?: string | null
+          payload_snapshot: Json
+          pdf_path: string
+          replaced_by_issue_id?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          serial_no: string
+          session_id: string
+          status?: Database["public"]["Enums"]["certificate_issue_status"]
+          student_id: string
+          template_id: string
+          template_version: number
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          certificate_type?: Database["public"]["Enums"]["certificate_type"]
+          created_at?: string
+          enrolment_id?: string | null
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          language?: Database["public"]["Enums"]["certificate_language"]
+          original_issue_id?: string | null
+          payload_snapshot?: Json
+          pdf_path?: string
+          replaced_by_issue_id?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          serial_no?: string
+          session_id?: string
+          status?: Database["public"]["Enums"]["certificate_issue_status"]
+          student_id?: string
+          template_id?: string
+          template_version?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_issue_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_original_issue_id_fkey"
+            columns: ["original_issue_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_issue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_replaced_by_issue_id_fkey"
+            columns: ["replaced_by_issue_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_issue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_template"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificate_serial_counter: {
         Row: {
           academic_year: number
@@ -4291,6 +4448,8 @@ export type Database = {
           session_id: string
           status: Database["public"]["Enums"]["enrolment_status"]
           student_id: string
+          tc_certificate_issue_id: string | null
+          tc_issued_at: string | null
           tenant_id: string
         }
         Insert: {
@@ -4315,6 +4474,8 @@ export type Database = {
           session_id: string
           status?: Database["public"]["Enums"]["enrolment_status"]
           student_id: string
+          tc_certificate_issue_id?: string | null
+          tc_issued_at?: string | null
           tenant_id: string
         }
         Update: {
@@ -4339,6 +4500,8 @@ export type Database = {
           session_id?: string
           status?: Database["public"]["Enums"]["enrolment_status"]
           student_id?: string
+          tc_certificate_issue_id?: string | null
+          tc_issued_at?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -4467,6 +4630,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_sibling_rank"
             referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "enrolment_tc_certificate_issue_id_fkey"
+            columns: ["tc_certificate_issue_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_issue"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "enrolment_tenant_id_fkey"
@@ -12282,6 +12452,10 @@ export type Database = {
         Args: { p_campus_id: string; p_date?: string }
         Returns: Json
       }
+      dob_to_words: {
+        Args: { p_date: string; p_lang?: string }
+        Returns: string
+      }
       edit_concession_award: {
         Args: { p_award_id: string; p_new_value: number }
         Returns: undefined
@@ -12770,6 +12944,17 @@ export type Database = {
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       issue_otp: { Args: { p_phone: string }; Returns: Json }
+      issue_transfer_certificate: {
+        Args: {
+          p_board_code?: string
+          p_conduct?: string
+          p_enrolment_id: string
+          p_language?: Database["public"]["Enums"]["certificate_language"]
+          p_leaving_date: string
+          p_reason?: string
+        }
+        Returns: Json
+      }
       join_waitlist: { Args: { p_application_id: string }; Returns: string }
       link_enrolment_promotion: {
         Args: { p_new_enrolment_id: string; p_old_enrolment_id: string }
@@ -13556,6 +13741,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      void_certificate_issue: {
+        Args: { p_issue_id: string; p_reason: string }
+        Returns: Json
+      }
       waive_admission_fee: {
         Args: { p_offer_id: string; p_reason: string }
         Returns: string
@@ -13622,6 +13811,7 @@ export type Database = {
         | "CAMBRIDGE"
       branding_asset_type: "logo" | "letterhead" | "signature" | "stamp"
       campus_status: "active" | "archived"
+      certificate_issue_status: "issued" | "void" | "cancelled"
       certificate_language: "en" | "ur"
       certificate_page_size: "A4" | "A5" | "Legal"
       certificate_template_status: "draft" | "active" | "retired"
@@ -14007,6 +14197,7 @@ export const Constants = {
       ],
       branding_asset_type: ["logo", "letterhead", "signature", "stamp"],
       campus_status: ["active", "archived"],
+      certificate_issue_status: ["issued", "void", "cancelled"],
       certificate_language: ["en", "ur"],
       certificate_page_size: ["A4", "A5", "Legal"],
       certificate_template_status: ["draft", "active", "retired"],

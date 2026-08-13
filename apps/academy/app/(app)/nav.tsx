@@ -46,6 +46,7 @@ const LINKS = [
   { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
   { href: '/certificates/templates', label: 'Certificate Templates' },
   { href: '/certificates/serials', label: 'Certificate Serials' },
+  { href: '/certificates/issue', label: 'Issue Certificate' },
   { href: '/audit-export', label: 'Audit Export' },
 ];
 

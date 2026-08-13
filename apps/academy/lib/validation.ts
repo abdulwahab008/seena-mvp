@@ -1141,3 +1141,19 @@ export const saveCertificateTemplateSchema = z.object({
   pageSize: z.enum(CERTIFICATE_PAGE_SIZES),
 });
 export type SaveCertificateTemplateInput = z.infer<typeof saveCertificateTemplateSchema>;
+
+// FR-T03: mirrors issue_transfer_certificate()'s signature in
+// supabase/migrations/20260731880000_transfer_certificate_issuance.sql. The
+// database re-checks every one of these — the leaving date against the date
+// of admission, the enrolment's state, the campus scope — so this exists
+// only to keep an obviously incomplete form out of a transaction that would
+// consume nothing but still raise.
+export const issueTransferCertificateSchema = z.object({
+  enrolmentId: z.string().uuid('Choose a student'),
+  leavingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a leaving date'),
+  reason: z.string().max(500).optional(),
+  conduct: z.string().max(120).optional(),
+  boardCode: boardCodeSchema.optional(),
+  language: z.enum(CERTIFICATE_LANGUAGES),
+});
+export type IssueTransferCertificateInput = z.infer<typeof issueTransferCertificateSchema>;

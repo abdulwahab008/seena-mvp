@@ -35,10 +35,27 @@ export type CertificatePreviewPayload = {
   campus: { name: string; name_ur: string | null; code: string; city: string | null } | null;
   letterhead_storage_path: string | null;
   logo_storage_path: string | null;
-  sample_values: Record<string, string>;
+  sample_values: Record<string, string | null>;
 };
 
 export type CertificateAssets = { letterheadDataUri: string | null; logoDataUri: string | null };
+
+/**
+ * FR-T03: what issue_transfer_certificate() freezes onto
+ * certificate_issue.payload_snapshot. Same shape as a preview payload
+ * except that the values are the resolved, frozen ones rather than the
+ * catalogue's samples — which is the whole point of the snapshot: an
+ * issued certificate reprints from the wording and the values it was
+ * issued with, never from whatever the template says today.
+ */
+export type CertificateSnapshot = Omit<CertificatePreviewPayload, 'sample_values'> & {
+  values: Record<string, string | null>;
+};
+
+export function snapshotToPayload(snapshot: CertificateSnapshot): CertificatePreviewPayload {
+  const { values, ...rest } = snapshot;
+  return { ...rest, sample_values: values };
+}
 
 /** CSS `@page size` keyword for each stored page size. */
 const PAGE_SIZE_KEYWORD: Record<PageFormat, string> = { A3: 'A3', A4: 'A4', A5: 'A5', Legal: 'legal' };
@@ -49,7 +66,7 @@ const PAGE_SIZE_KEYWORD: Record<PageFormat, string> = { A3: 'A3', A4: 'A4', A5: 
  * template, so an Urdu sample value in an otherwise English template is
  * still checked.
  */
-export function collectCertificateStrings(payload: CertificatePreviewPayload): string[] {
+export function collectCertificateStrings(payload: CertificatePreviewPayload): (string | null)[] {
   return [
     payload.template.title,
     applyMergeFields(payload.template.body_html, payload.sample_values),
@@ -121,12 +138,15 @@ export function buildCertificateHtml(
   const stampLabel = rtl ? 'مہر' : 'School stamp';
 
   // A preview is never an issued document; saying so on the page itself is
-  // what stops one being handed over a counter. FR-T03 renders the same
-  // HTML without it.
-  const watermark = template.status === 'active' ? 'PREVIEW' : `DRAFT v${template.version} — PREVIEW`;
+  // what stops one being handed over a counter. FR-T03's snapshot carries
+  // status 'issued' — a value certificate_template_status cannot hold — so
+  // the real thing prints with no watermark at all, and nothing else had to
+  // change to let it.
+  const watermark =
+    template.status === 'issued' ? null : template.status === 'active' ? 'PREVIEW' : `DRAFT v${template.version} — PREVIEW`;
 
   const html = `<!doctype html><html lang="${rtl ? 'ur' : 'en'}" dir="${rtl ? 'rtl' : 'ltr'}"><head><meta charset="utf-8"><title>${escapeHtml(template.title)}</title><style>${css(payload, font)}</style></head><body>
-<div class="watermark">${escapeHtml(watermark)}</div>
+${watermark ? `<div class="watermark">${escapeHtml(watermark)}</div>` : ''}
 ${letterheadHtml(payload, assets)}
 <h1 class="doc-title">${escapeHtml(template.title)}</h1>
 <div class="body">${body}</div>
