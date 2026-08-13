@@ -1276,3 +1276,52 @@ export const buildGalleryExportSchema = z.object({
   sectionId: z.union([z.string().uuid(), z.literal('')]).optional(),
 });
 export type BuildGalleryExportInput = z.infer<typeof buildGalleryExportSchema>;
+
+// FR-L11: mirrors submit_expense_voucher(), decide_expense_voucher() and
+// mark_expense_voucher_paid() in
+// supabase/migrations/20260731940000_expense_voucher_approval_chain.sql.
+// Every one of these is re-checked there — the role, the campus scope, the
+// head, the future date, the ten-character rejection reason — and the
+// status guard refuses anything those functions did not do, so this only
+// keeps an obviously incomplete form out of a transaction that would raise.
+//
+// Amounts are entered in RUPEES and sent as PAISA: the database stores paisa
+// as bigint everywhere (fee_ledger.amount_paisa), and a form that posted
+// rupees would be one rounding decision away from disagreeing with it.
+export const rupeesToPaisa = (rupees: number): number => Math.round(rupees * 100);
+export const formatPaisa = (paisa: number): string => (paisa / 100).toLocaleString('en-PK');
+
+export const submitExpenseVoucherSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  headId: z.string().uuid('Choose an expense head'),
+  payeeName: z.string().trim().min(1, 'Name who is being paid').max(200),
+  payeeNtn: z.string().trim().max(30).optional(),
+  amountRupees: z.coerce.number().positive('Enter an amount above zero').max(99999999),
+  voucherDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a full date'),
+  narrative: z.string().trim().max(500).optional(),
+});
+export type SubmitExpenseVoucherInput = z.infer<typeof submitExpenseVoucherSchema>;
+
+export const EXPENSE_DECISIONS = ['approved', 'rejected'] as const;
+export type ExpenseDecision = (typeof EXPENSE_DECISIONS)[number];
+
+// AC2's ten characters. chk_expense_approval_reason enforces the same bound
+// as a CHECK constraint, so a short reason cannot be written by any path;
+// this is the message somebody reads before they get there.
+export const decideExpenseVoucherSchema = z
+  .object({
+    voucherId: z.string().uuid(),
+    decision: z.enum(EXPENSE_DECISIONS),
+    reason: z.string().trim().max(1000).optional(),
+  })
+  .refine((v) => v.decision !== 'rejected' || (v.reason ?? '').length >= 10, {
+    message: 'A rejection has to say why, in at least 10 characters',
+    path: ['reason'],
+  });
+export type DecideExpenseVoucherInput = z.infer<typeof decideExpenseVoucherSchema>;
+
+export const markExpenseVoucherPaidSchema = z.object({
+  voucherId: z.string().uuid(),
+  paidReference: z.string().trim().max(100).optional(),
+});
+export type MarkExpenseVoucherPaidInput = z.infer<typeof markExpenseVoucherPaidSchema>;

@@ -44,6 +44,8 @@ const LINKS = [
   { href: '/fees/reports', label: 'Collection Reports' },
   { href: '/fees/late-fee-rules', label: 'Late Fee Rules' },
   { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
+  { href: '/expenses/vouchers', label: 'Expense Vouchers' },
+  { href: '/expenses/approvals', label: 'Voucher Approvals' },
   { href: '/certificates/templates', label: 'Certificate Templates' },
   { href: '/certificates/serials', label: 'Certificate Serials' },
   { href: '/certificates/signing', label: 'Certificate Signing' },

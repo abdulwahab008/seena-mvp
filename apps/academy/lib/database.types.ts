@@ -1611,6 +1611,51 @@ export type Database = {
           },
         ]
       }
+      approval_threshold: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          max_amount_paisa: number | null
+          min_amount_paisa: number
+          required_role: Database["public"]["Enums"]["app_role"] | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          max_amount_paisa?: number | null
+          min_amount_paisa: number
+          required_role?: Database["public"]["Enums"]["app_role"] | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          max_amount_paisa?: number | null
+          min_amount_paisa?: number
+          required_role?: Database["public"]["Enums"]["app_role"] | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_threshold_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_threshold_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_audit: {
         Row: {
           approved_at: string
@@ -4935,6 +4980,228 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_head: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name_en: string
+          name_ur: string
+          requires_approval: boolean
+          tenant_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name_en: string
+          name_ur: string
+          requires_approval?: boolean
+          tenant_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name_en?: string
+          name_ur?: string
+          requires_approval?: boolean
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_head_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "expense_head_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_voucher: {
+        Row: {
+          amount_paisa: number
+          attachment_path: string | null
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          head_id: string
+          id: string
+          narrative: string | null
+          paid_at: string | null
+          paid_by: string | null
+          paid_reference: string | null
+          payee_key: string
+          payee_name: string
+          payee_ntn: string | null
+          possible_threshold_split: boolean
+          required_approver_role: Database["public"]["Enums"]["app_role"] | null
+          status: Database["public"]["Enums"]["expense_voucher_status"]
+          tenant_id: string
+          voucher_date: string
+        }
+        Insert: {
+          amount_paisa: number
+          attachment_path?: string | null
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          head_id: string
+          id?: string
+          narrative?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          paid_reference?: string | null
+          payee_key: string
+          payee_name: string
+          payee_ntn?: string | null
+          possible_threshold_split?: boolean
+          required_approver_role?:
+            | Database["public"]["Enums"]["app_role"]
+            | null
+          status?: Database["public"]["Enums"]["expense_voucher_status"]
+          tenant_id: string
+          voucher_date: string
+        }
+        Update: {
+          amount_paisa?: number
+          attachment_path?: string | null
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          head_id?: string
+          id?: string
+          narrative?: string | null
+          paid_at?: string | null
+          paid_by?: string | null
+          paid_reference?: string | null
+          payee_key?: string
+          payee_name?: string
+          payee_ntn?: string | null
+          possible_threshold_split?: boolean
+          required_approver_role?:
+            | Database["public"]["Enums"]["app_role"]
+            | null
+          status?: Database["public"]["Enums"]["expense_voucher_status"]
+          tenant_id?: string
+          voucher_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_voucher_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_head_id_fkey"
+            columns: ["head_id"]
+            isOneToOne: false
+            referencedRelation: "expense_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_paid_by_fkey"
+            columns: ["paid_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_voucher_approval: {
+        Row: {
+          approver_id: string | null
+          approver_role: Database["public"]["Enums"]["app_role"] | null
+          decided_at: string
+          decision: Database["public"]["Enums"]["expense_approval_decision"]
+          id: string
+          reason: string | null
+          request_ip: unknown
+          tenant_id: string
+          voucher_id: string
+        }
+        Insert: {
+          approver_id?: string | null
+          approver_role?: Database["public"]["Enums"]["app_role"] | null
+          decided_at?: string
+          decision: Database["public"]["Enums"]["expense_approval_decision"]
+          id?: string
+          reason?: string | null
+          request_ip?: unknown
+          tenant_id: string
+          voucher_id: string
+        }
+        Update: {
+          approver_id?: string | null
+          approver_role?: Database["public"]["Enums"]["app_role"] | null
+          decided_at?: string
+          decision?: Database["public"]["Enums"]["expense_approval_decision"]
+          id?: string
+          reason?: string | null
+          request_ip?: unknown
+          tenant_id?: string
+          voucher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_voucher_approval_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_approval_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_approval_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "expense_voucher"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_approval_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "v_expense_voucher"
             referencedColumns: ["id"]
           },
         ]
@@ -11724,6 +11991,112 @@ export type Database = {
           },
         ]
       }
+      v_expense_voucher: {
+        Row: {
+          amount_paisa: number | null
+          attachment_path: string | null
+          campus_code: string | null
+          campus_id: string | null
+          campus_name: string | null
+          created_at: string | null
+          created_by: string | null
+          head_code: string | null
+          head_id: string | null
+          head_name: string | null
+          id: string | null
+          narrative: string | null
+          paid_at: string | null
+          paid_by_name: string | null
+          paid_reference: string | null
+          payee_key: string | null
+          payee_name: string | null
+          payee_ntn: string | null
+          possible_threshold_split: boolean | null
+          required_approver_role: Database["public"]["Enums"]["app_role"] | null
+          split_group_total_paisa: number | null
+          split_sibling_count: number | null
+          status: Database["public"]["Enums"]["expense_voucher_status"] | null
+          submitted_by_name: string | null
+          tenant_id: string | null
+          voucher_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_voucher_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_head_id_fkey"
+            columns: ["head_id"]
+            isOneToOne: false
+            referencedRelation: "expense_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_expense_voucher_approval: {
+        Row: {
+          approver_id: string | null
+          approver_name: string | null
+          approver_role: Database["public"]["Enums"]["app_role"] | null
+          decided_at: string | null
+          decision:
+            | Database["public"]["Enums"]["expense_approval_decision"]
+            | null
+          id: string | null
+          reason: string | null
+          request_ip: string | null
+          tenant_id: string | null
+          voucher_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_voucher_approval_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_approval_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_approval_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "expense_voucher"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_approval_voucher_id_fkey"
+            columns: ["voucher_id"]
+            isOneToOne: false
+            referencedRelation: "v_expense_voucher"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_guardian_children: {
         Row: {
           campus_id: string | null
@@ -13138,6 +13511,15 @@ export type Database = {
         }
         Returns: string
       }
+      create_expense_head: {
+        Args: {
+          p_code: string
+          p_name_en: string
+          p_name_ur: string
+          p_requires_approval?: boolean
+        }
+        Returns: string
+      }
       create_fee_head: {
         Args: {
           p_carry_forward_on_arrears?: boolean
@@ -13415,6 +13797,15 @@ export type Database = {
           p_rejection_reason?: string
         }
         Returns: undefined
+      }
+      decide_expense_voucher: {
+        Args: {
+          p_decision: string
+          p_reason?: string
+          p_request_ip?: string
+          p_voucher_id: string
+        }
+        Returns: Json
       }
       decide_fee_plan_override: {
         Args: { p_approve: boolean; p_line_id: string }
@@ -13815,6 +14206,10 @@ export type Database = {
         Returns: number
       }
       fn_reinstate_offer: { Args: { p_offer_id: string }; Returns: undefined }
+      fn_required_approver_role: {
+        Args: { p_amount_paisa: number; p_campus_id: string; p_head_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       fn_resequence_roll_numbers: {
         Args: {
           p_section_id: string
@@ -14014,6 +14409,10 @@ export type Database = {
       }
       lookup_challan_for_counter: {
         Args: { p_challan_no: string }
+        Returns: Json
+      }
+      mark_expense_voucher_paid: {
+        Args: { p_paid_reference?: string; p_voucher_id: string }
         Returns: Json
       }
       mark_outbound_message_failed: {
@@ -14232,6 +14631,15 @@ export type Database = {
         }
         Returns: string
       }
+      reserve_expense_attachment_path: {
+        Args: {
+          p_campus_id: string
+          p_file_ext: string
+          p_file_size: number
+          p_mime_type: string
+        }
+        Returns: string
+      }
       resolve_attendance_holiday: {
         Args: { p_campus_id: string; p_date: string }
         Returns: string
@@ -14407,6 +14815,10 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: undefined
       }
+      seed_default_expense_heads: {
+        Args: { p_tenant_id: string }
+        Returns: undefined
+      }
       seed_default_fee_heads: {
         Args: { p_tenant_id: string }
         Returns: undefined
@@ -14427,6 +14839,15 @@ export type Database = {
       set_academic_terms: {
         Args: { p_session_id: string; p_terms: Json }
         Returns: undefined
+      }
+      set_approval_threshold: {
+        Args: {
+          p_campus_id: string
+          p_max_amount_paisa: number
+          p_min_amount_paisa: number
+          p_required_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: string
       }
       set_attendance_policy: {
         Args: {
@@ -14647,6 +15068,20 @@ export type Database = {
       student_balance: { Args: { p_enrolment_id: string }; Returns: number }
       student_timetable: {
         Args: { p_date: string; p_enrolment_id: string }
+        Returns: Json
+      }
+      submit_expense_voucher: {
+        Args: {
+          p_amount_paisa: number
+          p_attachment_path?: string
+          p_campus_id: string
+          p_head_id: string
+          p_narrative?: string
+          p_payee_name: string
+          p_payee_ntn?: string
+          p_request_ip?: string
+          p_voucher_date: string
+        }
         Returns: Json
       }
       submit_interview_scorecard: {
@@ -14922,6 +15357,12 @@ export type Database = {
       enquiry_source: "walk_in" | "phone" | "web" | "referral" | "other"
       enquiry_status: "open" | "converted" | "lost" | "merged"
       enrolment_status: "active" | "transferred" | "left" | "graduated"
+      expense_approval_decision: "approved" | "rejected" | "escalated"
+      expense_voucher_status:
+        | "pending_approval"
+        | "approved"
+        | "rejected"
+        | "paid"
       fee_challan_line_type: "charge" | "concession" | "arrears" | "late_fee"
       fee_challan_status: "unpaid" | "part_paid" | "paid" | "cancelled"
       fee_frequency: "monthly" | "quarterly" | "annual" | "one_time"
@@ -15311,6 +15752,13 @@ export const Constants = {
       enquiry_source: ["walk_in", "phone", "web", "referral", "other"],
       enquiry_status: ["open", "converted", "lost", "merged"],
       enrolment_status: ["active", "transferred", "left", "graduated"],
+      expense_approval_decision: ["approved", "rejected", "escalated"],
+      expense_voucher_status: [
+        "pending_approval",
+        "approved",
+        "rejected",
+        "paid",
+      ],
       fee_challan_line_type: ["charge", "concession", "arrears", "late_fee"],
       fee_challan_status: ["unpaid", "part_paid", "paid", "cancelled"],
       fee_frequency: ["monthly", "quarterly", "annual", "one_time"],
