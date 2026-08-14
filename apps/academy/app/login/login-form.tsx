@@ -16,7 +16,7 @@ const LoginSchema = z.object({
 });
 type LoginValues = z.infer<typeof LoginSchema>;
 
-export function LoginForm() {
+export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -37,7 +37,7 @@ export function LoginForm() {
         setServerError(result.error);
         return;
       }
-      router.push('/campuses');
+      router.push(redirectTo ?? '/dashboard');
       router.refresh();
     });
   });
