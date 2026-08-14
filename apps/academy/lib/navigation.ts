@@ -186,6 +186,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/certificates/templates', label: 'Templates' },
       { href: '/certificates/serials', label: 'Serial Numbers' },
       { href: '/certificates/signing', label: 'Signing Identities' },
+      { href: '/certificates/board-export', label: 'Board Registration Export' },
     ],
   },
   {

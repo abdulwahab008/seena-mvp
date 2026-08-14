@@ -438,7 +438,8 @@ export type FailureReportRow = {
 
 const FAILURE_REPORT_COLUMNS = ['row', 'gr_number', 'name_en', 'class', 'column', 'code', 'message'] as const;
 
-function csvCell(value: string): string {
+/** RFC 4180 quoting. Exported because FR-T11's board export writes CSV too. */
+export function csvCell(value: string): string {
   return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 

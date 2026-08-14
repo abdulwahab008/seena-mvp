@@ -3464,6 +3464,266 @@ export type Database = {
           },
         ]
       }
+      board_export_row_error: {
+        Row: {
+          created_at: string
+          current_value: string | null
+          expected: string | null
+          field_path: string
+          id: string
+          normalisable: boolean
+          rule_code: string
+          run_id: string
+          severity: Database["public"]["Enums"]["board_export_severity"]
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: string | null
+          expected?: string | null
+          field_path: string
+          id?: string
+          normalisable?: boolean
+          rule_code: string
+          run_id: string
+          severity: Database["public"]["Enums"]["board_export_severity"]
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: string | null
+          expected?: string | null
+          field_path?: string
+          id?: string
+          normalisable?: boolean
+          rule_code?: string
+          run_id?: string
+          severity?: Database["public"]["Enums"]["board_export_severity"]
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_export_row_error_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "board_export_run"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_export_row_error_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_export_row_error_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "board_export_row_error_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+        ]
+      }
+      board_export_run: {
+        Row: {
+          board_code: Database["public"]["Enums"]["board"]
+          campus_id: string
+          checksum: string | null
+          class_level_id: string
+          error: string | null
+          export_kind: string
+          file_path: string | null
+          generated_at: string | null
+          generated_by: string | null
+          id: string
+          normalise_applied: boolean
+          normalised_at: string | null
+          normalised_by: string | null
+          profile_id: string
+          requested_at: string
+          requested_by: string | null
+          row_count: number | null
+          session_id: string
+          status: Database["public"]["Enums"]["board_export_status"]
+          tenant_id: string
+          validated_at: string | null
+        }
+        Insert: {
+          board_code: Database["public"]["Enums"]["board"]
+          campus_id: string
+          checksum?: string | null
+          class_level_id: string
+          error?: string | null
+          export_kind?: string
+          file_path?: string | null
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          normalise_applied?: boolean
+          normalised_at?: string | null
+          normalised_by?: string | null
+          profile_id: string
+          requested_at?: string
+          requested_by?: string | null
+          row_count?: number | null
+          session_id: string
+          status?: Database["public"]["Enums"]["board_export_status"]
+          tenant_id: string
+          validated_at?: string | null
+        }
+        Update: {
+          board_code?: Database["public"]["Enums"]["board"]
+          campus_id?: string
+          checksum?: string | null
+          class_level_id?: string
+          error?: string | null
+          export_kind?: string
+          file_path?: string | null
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          normalise_applied?: boolean
+          normalised_at?: string | null
+          normalised_by?: string | null
+          profile_id?: string
+          requested_at?: string
+          requested_by?: string | null
+          row_count?: number | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["board_export_status"]
+          tenant_id?: string
+          validated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_export_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_export_run_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_export_run_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "board_export_run_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "board_export_run_normalised_by_fkey"
+            columns: ["normalised_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "board_export_run_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "board_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_export_run_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "board_export_run_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_export_run_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      board_profile: {
+        Row: {
+          board_code: Database["public"]["Enums"]["board"]
+          byte_order_mark: boolean
+          code_map: Json
+          column_spec: Json
+          created_at: string
+          date_format: string
+          effective_from: string
+          export_kind: string
+          id: string
+          is_active: boolean
+          label: string
+          tenant_id: string | null
+          validation_rules: Json
+        }
+        Insert: {
+          board_code: Database["public"]["Enums"]["board"]
+          byte_order_mark?: boolean
+          code_map?: Json
+          column_spec: Json
+          created_at?: string
+          date_format?: string
+          effective_from?: string
+          export_kind?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          tenant_id?: string | null
+          validation_rules?: Json
+        }
+        Update: {
+          board_code?: Database["public"]["Enums"]["board"]
+          byte_order_mark?: boolean
+          code_map?: Json
+          column_spec?: Json
+          created_at?: string
+          date_format?: string
+          effective_from?: string
+          export_kind?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          tenant_id?: string | null
+          validation_rules?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_profile_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branding_asset: {
         Row: {
           asset_type: Database["public"]["Enums"]["branding_asset_type"]
@@ -17972,6 +18232,16 @@ export type Database = {
         }
         Returns: number
       }
+      begin_board_export_run: {
+        Args: {
+          p_board?: Database["public"]["Enums"]["board"]
+          p_campus_id: string
+          p_class_level_id: string
+          p_export_kind?: string
+          p_session_id: string
+        }
+        Returns: string
+      }
       begin_report_card: {
         Args: {
           p_enrolment_id: string
@@ -18119,6 +18389,15 @@ export type Database = {
           p_manifest: Json
           p_row_count: number
           p_storage_prefix: string
+        }
+        Returns: undefined
+      }
+      complete_board_export_run: {
+        Args: {
+          p_checksum: string
+          p_file_path: string
+          p_row_count: number
+          p_run_id: string
         }
         Returns: undefined
       }
@@ -18701,6 +18980,10 @@ export type Database = {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
       }
+      fail_board_export_run: {
+        Args: { p_error: string; p_run_id: string }
+        Returns: undefined
+      }
       fail_report_card_batch: {
         Args: { p_batch_id: string; p_error: string }
         Returns: Json
@@ -18787,6 +19070,15 @@ export type Database = {
           p_student_ids: string[]
         }
         Returns: Json
+      }
+      fn_board_export_headers: { Args: { p_run_id: string }; Returns: string[] }
+      fn_board_export_readiness: { Args: { p_run_id: string }; Returns: Json }
+      fn_board_export_rows: {
+        Args: { p_run_id: string }
+        Returns: {
+          cells: string[]
+          student_id: string
+        }[]
       }
       fn_break_glass_unlock: {
         Args: { p_request_id: string; p_window_minutes?: number }
@@ -19454,6 +19746,10 @@ export type Database = {
       next_challan_no: {
         Args: { p_campus_id: string; p_session_id: string; p_tenant_id: string }
         Returns: string
+      }
+      normalise_board_export_run: {
+        Args: { p_run_id: string }
+        Returns: number
       }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
       outstanding_balance_as_of: {
@@ -20342,6 +20638,27 @@ export type Database = {
         }
         Returns: string
       }
+      validate_board_export: {
+        Args: { p_run_id: string }
+        Returns: {
+          created_at: string
+          current_value: string | null
+          expected: string | null
+          field_path: string
+          id: string
+          normalisable: boolean
+          rule_code: string
+          run_id: string
+          severity: Database["public"]["Enums"]["board_export_severity"]
+          student_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "board_export_row_error"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       validate_certificate_template: {
         Args: { p_template_id: string }
         Returns: Json
@@ -20438,6 +20755,8 @@ export type Database = {
         | "BALOCHISTAN"
         | "AKU_EB"
         | "CAMBRIDGE"
+      board_export_severity: "blocking" | "warning"
+      board_export_status: "draft" | "completed" | "failed"
       branding_asset_type: "logo" | "letterhead" | "signature" | "stamp"
       campus_status: "active" | "archived"
       certificate_issue_status: "issued" | "void" | "cancelled"
@@ -20869,6 +21188,8 @@ export const Constants = {
         "AKU_EB",
         "CAMBRIDGE",
       ],
+      board_export_severity: ["blocking", "warning"],
+      board_export_status: ["draft", "completed", "failed"],
       branding_asset_type: ["logo", "letterhead", "signature", "stamp"],
       campus_status: ["active", "archived"],
       certificate_issue_status: ["issued", "void", "cancelled"],
