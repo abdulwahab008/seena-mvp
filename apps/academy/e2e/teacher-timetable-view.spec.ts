@@ -87,19 +87,15 @@ async function seedTenant() {
     .single();
   if (e8 || !campusB) throw e8 ?? new Error('campus B creation failed');
 
-  // FR-A12's campus gate: a campus-scoped role with zero active user_campus
-  // rows is shown the "No campus assigned" screen instead of any /(app)
-  // page. Both campuses, not just A: teacher_timetable() resolves each
-  // slot's real bell time through resolve_bell_template(), which
-  // 20260731770000_security_definer_campus_scope_audit.sql hardened to
-  // return NULL for a campus outside app.auth_campus_ids() — so a teacher
-  // scoped to A only still sees her campus B period, but with blank times,
-  // and this spec's "each resolving its own campus's real bell time"
-  // assertion would fail for a reason that has nothing to do with FR-F12.
-  const { error: e8b } = await admin.from('user_campus').insert([
-    { user_id: ayeshaUser.user.id, tenant_id: tenantId as string, campus_id: campusA!.id },
-    { user_id: ayeshaUser.user.id, tenant_id: tenantId as string, campus_id: campusB.id },
-  ]);
+  // Campus A ONLY, deliberately — this is the case FR-F12 exists for: Ms
+  // Ayesha's own campus_ids claim does not cover every campus she teaches
+  // at, and her campus B period still has to render with campus B's real
+  // bell time. (One campus is also the minimum FR-A12's campus gate
+  // needs: a campus-scoped role with zero active user_campus rows is shown
+  // the "No campus assigned" screen instead of any /(app) page.)
+  const { error: e8b } = await admin
+    .from('user_campus')
+    .insert({ user_id: ayeshaUser.user.id, tenant_id: tenantId as string, campus_id: campusA!.id });
   if (e8b) throw e8b;
 
   const { data: session } = await admin.from('academic_session').select('id, starts_on').eq('tenant_id', tenantId as string).single();
@@ -257,7 +253,9 @@ test('a teacher sees her own cross-campus week with resolved times and today\'s 
   await page.waitForLoadState('networkidle');
 
   // AC1/cross-campus: campus A and campus B both appear in the SAME
-  // weekly view, each resolving its own campus's real bell time.
+  // weekly view, each resolving its own campus's real bell time — and
+  // campus B's 09:00 is the assertion that catches a regression of the
+  // blank-times bug, since her claim covers campus A only.
   const cellA = page.getByTestId(`my-timetable-cell-${WEEKDAY_A}-1`);
   await expect(cellA).toContainText('Physics');
   await expect(cellA).toContainText(campusACode);
