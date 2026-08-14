@@ -8,6 +8,13 @@ const EnvSchema = z.object({
   // super_admin auth surface exists. Upgrade path: once staff accounts with
   // app_role='super_admin' exist, gate on that role instead and drop this.
   ADMIN_SETUP_TOKEN: z.string().min(16),
+  // Transactional email + the base URL reset links point at. All optional so
+  // an existing deploy that has never set them still boots — the features
+  // that need them degrade with a clear message instead (see
+  // emailConfigured() and app/forgot-password/actions.ts).
+  RESEND_API_KEY: z.string().min(1).optional(),
+  EMAIL_FROM: z.string().min(1).optional(),
+  NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 
