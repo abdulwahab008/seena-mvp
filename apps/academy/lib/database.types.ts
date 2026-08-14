@@ -10138,6 +10138,30 @@ export type Database = {
           },
         ]
       }
+      password_reset_request: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          email: string
+          id: string
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
       permission: {
         Row: {
           code: string
@@ -17795,6 +17819,10 @@ export type Database = {
           section_label: string
         }[]
       }
+      classify_password_reset_token: {
+        Args: { p_token_hash: string }
+        Returns: string
+      }
       clear_timetable_slot: {
         Args: {
           p_period_no: number
@@ -17887,6 +17915,10 @@ export type Database = {
           reconsent_required: boolean
           requires_explicit_grant: boolean
         }[]
+      }
+      consume_password_reset: {
+        Args: { p_token_hash: string }
+        Returns: undefined
       }
       copy_class_subject_map: {
         Args: {
@@ -19021,6 +19053,10 @@ export type Database = {
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
+      is_password_reset_throttled: {
+        Args: { p_email: string }
+        Returns: boolean
+      }
       issue_character_certificate: {
         Args: {
           p_board_code?: string
@@ -19256,6 +19292,10 @@ export type Database = {
       }
       register_otp_attempt: {
         Args: { p_kind: string; p_phone: string }
+        Returns: undefined
+      }
+      register_password_reset: {
+        Args: { p_email: string; p_token_hash: string }
         Returns: undefined
       }
       reject_admission_document: {
