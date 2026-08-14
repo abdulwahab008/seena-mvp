@@ -2,9 +2,18 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { generateReportCard, readReportCardSheet } from './actions';
+import {
+  advanceReportCardBatch,
+  generateReportCard,
+  readReportCardBatch,
+  readReportCardSheet,
+  retryReportCardBatch,
+  startReportCardBatch,
+} from './actions';
 import type { MarkSectionOption } from '@/lib/exams/mark-query';
 import type { ReportCardSheet } from '@/lib/exams/report-card-query';
+import { reportCardBatchDownloadPath, type ReportCardBatch } from '@/lib/exams/report-card-batch-query';
+import type { REPORT_CARD_BATCH_SCOPES } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
@@ -26,22 +35,49 @@ import { Label } from '@/components/ui/label';
  *     the card; leaving it blank on a regeneration carries the previous
  *     revision's words forward rather than silently erasing them.
  */
+type BatchScope = (typeof REPORT_CARD_BATCH_SCOPES)[number];
+
 type Props = {
   examTermId: string;
   termName: string;
+  campusId: string;
   sections: MarkSectionOption[];
 };
 
-export function ReportCardBoard({ examTermId, termName, sections }: Props) {
+/**
+ * FR-J12 AC2's reason codes, as a Principal reads them. The sentence beside
+ * each one is the database's own — the same sentence the single-card refusal
+ * raises — so the batch's list and the print list above it cannot explain the
+ * same fact two different ways.
+ */
+const SKIP_LABEL: Record<string, string> = {
+  result_withheld: 'Result withheld',
+  term_provisional: 'Term provisional',
+  result_not_computed: 'No result computed',
+  result_stale: 'Result stale',
+  position_stale: 'Position stale',
+  remark_missing: 'No remark',
+  render_failed: 'Could not be rendered',
+};
+
+export function ReportCardBoard({ examTermId, termName, campusId, sections }: Props) {
   const [sectionId, setSectionId] = useState('');
   const [sheet, setSheet] = useState<ReportCardSheet | null>(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [remarks, setRemarks] = useState<Record<string, string>>({});
+  const [scope, setScope] = useState<BatchScope>('section');
+  const [requireRemark, setRequireRemark] = useState(true);
+  const [batch, setBatch] = useState<ReportCardBatch | null>(null);
+  const [running, setRunning] = useState(false);
+
+  const section = sections.find((s) => s.id === sectionId);
+  const targetId = scope === 'section' ? sectionId : scope === 'class' ? (section?.classLevelId ?? '') : campusId;
 
   const load = async (id: string) => {
     if (!id) {
       setSheet(null);
+      setBatch(null);
       return;
     }
     setLoading(true);
@@ -53,6 +89,73 @@ export function ReportCardBoard({ examTermId, termName, sections }: Props) {
       return;
     }
     setSheet(result.sheet);
+  };
+
+  /**
+   * The driver, from the browser. Each round is one server action that claims,
+   * renders and reports a slice, so the progress row moves while the run is
+   * still going and a closed tab costs at most the slice in flight — the batch
+   * itself is in the database and is picked up again where it stopped.
+   */
+  const drive = async (batchId: string) => {
+    setRunning(true);
+    for (;;) {
+      const result = await advanceReportCardBatch({ batchId });
+      if (result.error || !result.batch) {
+        toast.error(result.error ?? 'The batch stopped.');
+        if (result.batch) setBatch(result.batch);
+        break;
+      }
+      setBatch(result.batch);
+      if (result.batch.pending === 0) {
+        toast.success(
+          `${result.batch.succeeded} of ${result.batch.total} produced` +
+            (result.batch.skipped + result.batch.failed > 0
+              ? `, ${result.batch.skipped + result.batch.failed} skipped.`
+              : '.'),
+        );
+        break;
+      }
+    }
+    setRunning(false);
+    await load(sectionId);
+  };
+
+  const onStartBatch = async () => {
+    if (!targetId) return;
+    const result = await startReportCardBatch({
+      examTermId,
+      scope,
+      targetId,
+      remarks,
+      requireRemark,
+    });
+    if (result.error || !result.batch) {
+      toast.error(result.error ?? 'Could not start the batch.');
+      return;
+    }
+    setBatch(result.batch);
+    await drive(result.batch.batch_id);
+  };
+
+  const onRetryBatch = async () => {
+    if (!batch) return;
+    const result = await retryReportCardBatch({ batchId: batch.batch_id, remarks });
+    if (result.error || !result.batch) {
+      toast.error(result.error ?? 'Could not re-run the batch.');
+      return;
+    }
+    setBatch(result.batch);
+    await drive(result.batch.batch_id);
+  };
+
+  const onLoadBatch = async (next: BatchScope) => {
+    setScope(next);
+    setBatch(null);
+    const target = next === 'section' ? sectionId : next === 'class' ? (section?.classLevelId ?? '') : campusId;
+    if (!target) return;
+    const result = await readReportCardBatch({ examTermId, scope: next, targetId: target });
+    if (!result.error && result.batch) setBatch(result.batch);
   };
 
   const onGenerate = async (enrolmentId: string) => {
@@ -91,7 +194,12 @@ export function ReportCardBoard({ examTermId, termName, sections }: Props) {
             ))}
           </select>
         </div>
-        <Button variant="outline" disabled={loading} data-testid="open-report-cards" onClick={() => void load(sectionId)}>
+        <Button
+          variant="outline"
+          disabled={loading}
+          data-testid="open-report-cards"
+          onClick={() => void load(sectionId).then(() => onLoadBatch(scope))}
+        >
           {loading ? 'Opening…' : 'Open report cards'}
         </Button>
       </section>
@@ -175,6 +283,124 @@ export function ReportCardBoard({ examTermId, termName, sections }: Props) {
                 ))}
               </tbody>
             </table>
+          )}
+
+          {sheet.can_print && (
+            <section className="space-y-3 rounded-lg border p-4" data-testid="report-card-batch">
+              <div>
+                <h3 className="font-semibold">Print the whole {scope === 'section' ? 'section' : scope}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  FR-J12 — one action produces every card in scope plus a single merged file ordered by section then
+                  roll number, with each card starting on its own sheet so duplex printing cannot put two children on
+                  one page. A candidate who cannot be printed does not stop the run: they are listed below with the
+                  reason, and re-running renders only them while the merged file is rebuilt in full.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="report-card-batch-scope">Scope</Label>
+                  <select
+                    id="report-card-batch-scope"
+                    className="h-9 rounded-md border bg-background px-3 text-sm"
+                    value={scope}
+                    data-testid="report-card-batch-scope"
+                    disabled={running}
+                    onChange={(e) => void onLoadBatch(e.target.value as BatchScope)}
+                  >
+                    <option value="section">This section</option>
+                    <option value="class">Whole class</option>
+                    <option value="campus">Whole campus</option>
+                  </select>
+                </div>
+                <label className="flex h-9 items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={requireRemark}
+                    data-testid="report-card-batch-require-remark"
+                    disabled={running}
+                    onChange={(e) => setRequireRemark(e.target.checked)}
+                  />
+                  Skip candidates with no class teacher&rsquo;s remark
+                </label>
+                <Button
+                  disabled={running || !targetId}
+                  data-testid="start-report-card-batch"
+                  onClick={() => void onStartBatch()}
+                >
+                  {running ? 'Producing…' : 'Produce all cards'}
+                </Button>
+                {batch && !running && (batch.skipped > 0 || batch.failed > 0) && (
+                  <Button variant="outline" data-testid="retry-report-card-batch" onClick={() => void onRetryBatch()}>
+                    Re-run the {batch.skipped + batch.failed} skipped
+                  </Button>
+                )}
+              </div>
+
+              {batch && (
+                <div className="space-y-3" data-testid="report-card-batch-progress">
+                  <p className="text-sm">
+                    <span data-testid="report-card-batch-status">{batch.status}</span> &middot;{' '}
+                    <span data-testid="report-card-batch-counts">
+                      {batch.succeeded} produced, {batch.skipped} skipped, {batch.failed} failed, of {batch.total}
+                    </span>
+                    {batch.pending > 0 && <span data-testid="report-card-batch-pending"> &middot; {batch.pending} to go</span>}
+                  </p>
+
+                  {batch.checksum && (
+                    <a
+                      className="inline-block underline"
+                      href={reportCardBatchDownloadPath(batch.batch_id)}
+                      target="_blank"
+                      rel="noreferrer"
+                      data-testid="download-report-card-batch"
+                    >
+                      Download the merged file ({batch.page_count} pages)
+                    </a>
+                  )}
+                  {batch.error && (
+                    <p className="text-sm text-destructive" data-testid="report-card-batch-error">
+                      {batch.error}
+                    </p>
+                  )}
+
+                  {batch.items.some((i) => i.status === 'skipped' || i.status === 'failed') && (
+                    <table className="w-full text-sm" data-testid="report-card-batch-skips">
+                      <thead className="text-left text-muted-foreground">
+                        <tr>
+                          <th className="py-1">Not produced</th>
+                          <th className="py-1">Reason</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {batch.items
+                          .filter((i) => i.status === 'skipped' || i.status === 'failed')
+                          .map((i) => (
+                            <tr key={i.item_id} data-testid={`batch-skip-${i.gr_number}`} className="align-top">
+                              <td className="py-1 font-medium">
+                                {i.roll_no !== null ? `${i.roll_no}. ` : ''}
+                                {i.student_name}
+                                <span className="ml-2 text-xs text-muted-foreground">{i.section_name}</span>
+                              </td>
+                              <td className="py-1">
+                                <span
+                                  className="font-medium text-destructive"
+                                  data-testid={`batch-skip-code-${i.gr_number}`}
+                                >
+                                  {SKIP_LABEL[i.error_code ?? ''] ?? i.error_code}
+                                </span>
+                                {i.error_detail && (
+                                  <p className="text-xs text-muted-foreground">{i.error_detail}</p>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              )}
+            </section>
           )}
         </div>
       )}

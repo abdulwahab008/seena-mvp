@@ -8,15 +8,21 @@ import type { PositionSheet } from '@/lib/exams/position-query';
 import type { WithholdSheet, WithholdSyncResult } from '@/lib/exams/withhold-query';
 import type { ReportCardSheet } from '@/lib/exams/report-card-query';
 import { renderAndStoreReportCard, type ReservedReportCard } from '@/lib/report-cards/render';
+import { advanceReportCardBatch as advanceBatch } from '@/lib/report-cards/batch';
+import type { ReportCardBatch } from '@/lib/exams/report-card-batch-query';
 import {
   computePositionsSchema,
   computeSubjectResultSchema,
   generateReportCardSchema,
+  latestReportCardBatchSchema,
   raiseWithholdSchema,
   releaseWithholdSchema,
+  reportCardBatchSchema,
   reportCardSheetSchema,
+  retryReportCardBatchSchema,
   setRankPolicySchema,
   setWithholdThresholdSchema,
+  startReportCardBatchSchema,
   syncFeeWithholdsSchema,
   withholdSheetSchema,
 } from '@/lib/validation';
@@ -263,4 +269,81 @@ export async function generateReportCard(input: unknown): Promise<GenerateReport
 
   revalidatePath('/exams/results');
   return { error: null, downloadUrl: stored.downloadUrl, revisionNo: stored.revisionNo, checksum: stored.checksum };
+}
+
+/**
+ * FR-J12. Four calls, and the split is the resumability model:
+ *
+ *   startReportCardBatch()    enumerates who is in scope and returns. AC1's
+ *                             progress row, before a single page is rendered.
+ *   advanceReportCardBatch()  one slice of "claim, render, report", then the
+ *                             progress again. The screen calls it until
+ *                             nothing is pending, and so could a worker.
+ *   readReportCardBatch()     the run as it stands, including AC2's list of
+ *                             who was skipped and why.
+ *   retryReportCardBatch()    AC4. Only the skipped and failed candidates go
+ *                             back in the queue; the merged file is rebuilt in
+ *                             full over everyone who succeeded.
+ *
+ * Nothing here decides anything: the outcome of every candidate is written by
+ * the database, and this module only moves bytes between Chromium and the
+ * bucket in between.
+ */
+export type ReportCardBatchState = { error: string | null; batch?: ReportCardBatch };
+
+export async function startReportCardBatch(input: unknown): Promise<ReportCardBatchState> {
+  const parsed = startReportCardBatchSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('start_report_card_batch', {
+    p_exam_term_id: parsed.data.examTermId,
+    p_scope: parsed.data.scope,
+    p_target_id: parsed.data.targetId,
+    p_remarks: parsed.data.remarks ?? {},
+    p_require_remark: parsed.data.requireRemark ?? true,
+  });
+  if (error || !data) {
+    return { error: error ? reportCardError(error.message) : 'Could not start the batch.' };
+  }
+  return { error: null, batch: data as unknown as ReportCardBatch };
+}
+
+export async function advanceReportCardBatch(input: unknown): Promise<ReportCardBatchState> {
+  const parsed = reportCardBatchSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const result = await advanceBatch(supabase, parsed.data.batchId);
+  if (result.batch && result.batch.pending === 0) revalidatePath('/exams/results');
+  return result;
+}
+
+export async function readReportCardBatch(input: unknown): Promise<ReportCardBatchState> {
+  const parsed = latestReportCardBatchSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_latest_report_card_batch', {
+    p_exam_term_id: parsed.data.examTermId,
+    p_scope: parsed.data.scope,
+    p_target_id: parsed.data.targetId,
+  });
+  if (error) return { error: reportCardError(error.message) };
+  return { error: null, batch: (data as unknown as ReportCardBatch | null) ?? undefined };
+}
+
+export async function retryReportCardBatch(input: unknown): Promise<ReportCardBatchState> {
+  const parsed = retryReportCardBatchSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('retry_report_card_batch', {
+    p_batch_id: parsed.data.batchId,
+    p_remarks: parsed.data.remarks ?? {},
+  });
+  if (error || !data) {
+    return { error: error ? reportCardError(error.message) : 'Could not re-run the batch.' };
+  }
+  return { error: null, batch: data as unknown as ReportCardBatch };
 }

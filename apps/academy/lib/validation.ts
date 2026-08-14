@@ -1889,3 +1889,35 @@ export const generateReportCardSchema = z.object({
   remark: z.string().trim().max(500).optional(),
 });
 export type GenerateReportCardInput = z.infer<typeof generateReportCardSchema>;
+
+// FR-J12. The remarks travel WITH the batch rather than being typed into each
+// card afterwards: AC2 counts a candidate with no remark among the skipped, so
+// the map the screen has already collected is what decides which six they are.
+export const REPORT_CARD_BATCH_SCOPES = ['section', 'class', 'campus'] as const;
+
+const batchRemarks = z.record(z.string().uuid(), z.string().trim().max(500)).optional();
+
+export const startReportCardBatchSchema = z.object({
+  examTermId: z.string().uuid(),
+  scope: z.enum(REPORT_CARD_BATCH_SCOPES),
+  targetId: z.string().uuid(),
+  remarks: batchRemarks,
+  requireRemark: z.boolean().optional(),
+});
+export type StartReportCardBatchInput = z.infer<typeof startReportCardBatchSchema>;
+
+export const reportCardBatchSchema = z.object({ batchId: z.string().uuid() });
+export type ReportCardBatchInput = z.infer<typeof reportCardBatchSchema>;
+
+export const retryReportCardBatchSchema = z.object({
+  batchId: z.string().uuid(),
+  remarks: batchRemarks,
+});
+export type RetryReportCardBatchInput = z.infer<typeof retryReportCardBatchSchema>;
+
+export const latestReportCardBatchSchema = z.object({
+  examTermId: z.string().uuid(),
+  scope: z.enum(REPORT_CARD_BATCH_SCOPES),
+  targetId: z.string().uuid(),
+});
+export type LatestReportCardBatchInput = z.infer<typeof latestReportCardBatchSchema>;

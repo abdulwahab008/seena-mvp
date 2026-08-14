@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   attendanceLine,
   attendanceRange,
+  buildMergedReportCardHtml,
   buildReportCardHtml,
   classPositionLine,
   collectReportCardStrings,
@@ -223,5 +224,60 @@ describe('the document', () => {
   it('collects every Arabic-script string for the glyph coverage check', () => {
     expect(collectReportCardStrings(snapshot())).toContain('عائشہ نور');
     expect(collectReportCardStrings(snapshot())).toContain('انگریزی');
+  });
+});
+
+/**
+ * FR-J12 AC3. "each card begins on a new sheet so duplex printing does not mix
+ * students" — a sheet, not a page. A one-page card followed only by a page
+ * break puts the next child on side 2 of the same sheet, so the collation pads
+ * an odd-page card with a blank side, off the page count read from its own
+ * rendered bytes rather than off an assumption about the layout.
+ */
+describe('merged report cards', () => {
+  const cards = [
+    { snapshot: snapshot({ student: { ...snapshot().student, gr_number: 'MAIN-000001' } }), pageCount: 1 },
+    { snapshot: snapshot({ student: { ...snapshot().student, gr_number: 'MAIN-000002' } }), pageCount: 1 },
+    { snapshot: snapshot({ student: { ...snapshot().student, gr_number: 'MAIN-000003' } }), pageCount: 1 },
+  ];
+
+  it('keeps the order it was given, which the batch froze at enumeration', () => {
+    const html = buildMergedReportCardHtml(cards, null, noAssets, 'Class 5').html;
+    const order = [...html.matchAll(/data-gr="([^"]+)"/g)].map((m) => m[1]);
+    expect(order).toEqual(['MAIN-000001', 'MAIN-000002', 'MAIN-000003']);
+  });
+
+  it('AC3: pads an odd-page card so the next child starts on a new sheet', () => {
+    const html = buildMergedReportCardHtml(cards, null, noAssets, 'Class 5').html;
+    // Two fillers, not three: nothing follows the last card onto its back.
+    expect([...html.matchAll(/class="sheet-filler"/g)]).toHaveLength(2);
+  });
+
+  it('does not pad a card that already ends on a whole sheet', () => {
+    const html = buildMergedReportCardHtml(
+      [{ ...cards[0]!, pageCount: 2 }, cards[1]!],
+      null,
+      noAssets,
+      'Class 5',
+    ).html;
+    expect([...html.matchAll(/class="sheet-filler"/g)]).toHaveLength(0);
+  });
+
+  it('is one document with one embedded stylesheet, not three concatenated files', () => {
+    const html = buildMergedReportCardHtml(cards, null, noAssets, 'Class 5').html;
+    expect([...html.matchAll(/<!doctype html>/gi)]).toHaveLength(1);
+    expect([...html.matchAll(/@page \{ size: A4 portrait/g)]).toHaveLength(1);
+  });
+
+  it('takes the stamp out of position:fixed so it does not repeat on every sheet of the run', () => {
+    const html = buildMergedReportCardHtml(cards, null, noAssets, 'Class 5').html;
+    expect(html).toContain('.card .stamp { position: absolute; }');
+  });
+
+  it('renders each card through the same builder as the single card', () => {
+    const single = buildReportCardHtml(cards[0]!.snapshot, null, noAssets).html;
+    const merged = buildMergedReportCardHtml([cards[0]!], null, noAssets, 'Class 5').html;
+    const marksTable = single.slice(single.indexOf('<table class="marks">'), single.indexOf('</table>'));
+    expect(merged).toContain(marksTable);
   });
 });

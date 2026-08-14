@@ -391,15 +391,26 @@ const REPORT_CARD_PASS_THROUGH = [
   /^term result is stale/,
   /^position is stale/,
   /^no term result has been computed/,
+  // FR-J12's scope guards name the campus mismatch the screen cannot see.
+  /^that section is not in this term/,
+  /^that campus is not this term/,
 ];
 
 export function reportCardError(message: string): string {
   const line = message.split('\n')[0]?.trim() ?? message;
   if (REPORT_CARD_PASS_THROUGH.some((p) => p.test(line))) return line;
 
+  if (message.includes('REPORT_CARD_BATCH_NOT_FOUND')) return 'That batch no longer exists.';
+  if (message.includes('REPORT_CARD_BATCH_ITEM_NOT_CLAIMED')) return 'That candidate is not being rendered right now.';
+  if (message.includes('REPORT_CARD_BATCH_ITEM_NOT_FOUND')) return 'That candidate is no longer in the batch.';
+  if (message.includes('REPORT_CARD_BATCH_NOT_RUNNING')) return 'That batch is still running.';
+  if (message.includes('REPORT_CARD_BATCH_UNFINISHED')) return 'The batch still has candidates to render.';
+  if (message.includes('REPORT_CARD_BATCH_DIGEST_INVALID')) return 'The merged file could not be sealed.';
+  if (message.includes('REPORT_CARD_NOT_ISSUED')) return 'That card was not issued, so the batch did not count it.';
   if (message.includes('REPORT_CARD_NOT_PENDING')) return 'That report card has already been issued or voided.';
   if (message.includes('REPORT_CARD_NOT_FOUND')) return 'That report card no longer exists.';
   if (message.includes('REPORT_CARD_DIGEST_INVALID')) return 'The report card could not be sealed.';
+  if (message.includes('CLASS_NOT_FOUND')) return 'Class not found.';
   if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
   if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
   if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';

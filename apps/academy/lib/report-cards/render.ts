@@ -1,8 +1,13 @@
 import type { supabaseServer } from '@/lib/supabase/server';
 import { checkGlyphCoverage, parseCmapRanges, resolveNastaliqFont } from '@/lib/pdf/font';
-import { RendererUnavailableError, renderPdf, stampPdfTimestamps } from '@/lib/pdf/render';
+import { RendererUnavailableError, pdfPageCount, renderPdf, stampPdfTimestamps } from '@/lib/pdf/render';
 import { sha256Hex } from '@/lib/certificates/seal';
-import { buildReportCardHtml, collectReportCardStrings, type ReportCardSnapshot } from './html';
+import {
+  buildReportCardHtml,
+  collectReportCardStrings,
+  type ReportCardAssets,
+  type ReportCardSnapshot,
+} from './html';
 
 /**
  * FR-J09: everything that happens after begin_report_card() has committed.
@@ -34,7 +39,18 @@ export type ReservedReportCard = {
   payload_snapshot: ReportCardSnapshot;
 };
 
-export type StoredReportCard = { error: string | null; downloadUrl?: string; checksum?: string; revisionNo?: number };
+export type StoredReportCard = {
+  error: string | null;
+  downloadUrl?: string;
+  checksum?: string;
+  revisionNo?: number;
+  /**
+   * FR-J12 AC3 reads the merged document's sheet padding off this, so it is
+   * the page count of the bytes that were actually stored rather than the one
+   * page FR-J09's layout aims for.
+   */
+  pageCount?: number;
+};
 
 async function assetDataUri(supabase: ServerClient, bucket: string, storagePath: string | null): Promise<string | null> {
   if (!storagePath) return null;
@@ -42,6 +58,31 @@ async function assetDataUri(supabase: ServerClient, bucket: string, storagePath:
   if (!data) return null;
   const mime = MIME_BY_EXT[storagePath.split('.').pop()?.toLowerCase() ?? ''] ?? 'image/png';
   return `data:${mime};base64,${Buffer.from(await data.arrayBuffer()).toString('base64')}`;
+}
+
+/**
+ * The four branding images a card draws, inlined. Exported for FR-J12, whose
+ * merged document embeds one set for the whole run: a batch is bounded to a
+ * single campus, so there is exactly one letterhead to fetch no matter how
+ * many children are in it.
+ */
+export async function reportCardAssets(
+  supabase: ServerClient,
+  snapshot: ReportCardSnapshot,
+): Promise<ReportCardAssets> {
+  return {
+    letterheadDataUri: await assetDataUri(supabase, 'branding', snapshot.branding.letterhead_storage_path),
+    logoDataUri: await assetDataUri(supabase, 'branding', snapshot.branding.logo_storage_path),
+    signatureDataUri: await assetDataUri(supabase, 'branding', snapshot.branding.signature_storage_path),
+    stampDataUri: await assetDataUri(supabase, 'branding', snapshot.branding.stamp_storage_path),
+    // The requirement text names the student's photograph, and student.photo_path
+    // is carried in the snapshot for it — but that column has had no writer and
+    // no bucket since it was created (FR-T06 recorded the same finding), so
+    // there is nothing to fetch and inventing a bucket here would be a photo
+    // upload feature smuggled into a print FR. The card prints the ruled box
+    // instead, which is what a school pastes a photograph into today.
+    photoDataUri: null,
+  };
 }
 
 /**
@@ -74,19 +115,7 @@ export async function renderReportCardPdf(
     };
   }
 
-  const doc = buildReportCardHtml(snapshot, font, {
-    letterheadDataUri: await assetDataUri(supabase, 'branding', snapshot.branding.letterhead_storage_path),
-    logoDataUri: await assetDataUri(supabase, 'branding', snapshot.branding.logo_storage_path),
-    signatureDataUri: await assetDataUri(supabase, 'branding', snapshot.branding.signature_storage_path),
-    stampDataUri: await assetDataUri(supabase, 'branding', snapshot.branding.stamp_storage_path),
-    // The requirement text names the student's photograph, and student.photo_path
-    // is carried in the snapshot for it — but that column has had no writer and
-    // no bucket since it was created (FR-T06 recorded the same finding), so
-    // there is nothing to fetch and inventing a bucket here would be a photo
-    // upload feature smuggled into a print FR. The card prints the ruled box
-    // instead, which is what a school pastes a photograph into today.
-    photoDataUri: null,
-  });
+  const doc = buildReportCardHtml(snapshot, font, await reportCardAssets(supabase, snapshot));
 
   let pdf: Buffer;
   try {
@@ -143,5 +172,6 @@ export async function renderAndStoreReportCard(
     downloadUrl: reportCardDownloadPath(reserved.report_card_id),
     checksum,
     revisionNo: reserved.revision_no,
+    pageCount: pdfPageCount(storedBytes),
   };
 }

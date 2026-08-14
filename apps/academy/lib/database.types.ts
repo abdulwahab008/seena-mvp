@@ -10467,6 +10467,257 @@ export type Database = {
           },
         ]
       }
+      report_card_batch: {
+        Row: {
+          campus_id: string
+          checksum: string | null
+          completed_at: string | null
+          error: string | null
+          exam_term_id: string
+          failed: number
+          file_path: string | null
+          id: string
+          page_count: number | null
+          requested_at: string
+          requested_by: string | null
+          require_remark: boolean
+          scope: Database["public"]["Enums"]["report_card_batch_scope"]
+          skipped: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["report_card_batch_status"]
+          succeeded: number
+          target_id: string
+          tenant_id: string
+          total: number
+        }
+        Insert: {
+          campus_id: string
+          checksum?: string | null
+          completed_at?: string | null
+          error?: string | null
+          exam_term_id: string
+          failed?: number
+          file_path?: string | null
+          id?: string
+          page_count?: number | null
+          requested_at?: string
+          requested_by?: string | null
+          require_remark?: boolean
+          scope: Database["public"]["Enums"]["report_card_batch_scope"]
+          skipped?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["report_card_batch_status"]
+          succeeded?: number
+          target_id: string
+          tenant_id: string
+          total?: number
+        }
+        Update: {
+          campus_id?: string
+          checksum?: string | null
+          completed_at?: string | null
+          error?: string | null
+          exam_term_id?: string
+          failed?: number
+          file_path?: string | null
+          id?: string
+          page_count?: number | null
+          requested_at?: string
+          requested_by?: string | null
+          require_remark?: boolean
+          scope?: Database["public"]["Enums"]["report_card_batch_scope"]
+          skipped?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["report_card_batch_status"]
+          succeeded?: number
+          target_id?: string
+          tenant_id?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_card_batch_item: {
+        Row: {
+          attempts: number
+          batch_id: string
+          claimed_at: string | null
+          enrolment_id: string
+          error_code: string | null
+          error_detail: string | null
+          id: string
+          page_count: number | null
+          remark: string | null
+          report_card_id: string | null
+          resolved_at: string | null
+          roll_no: number | null
+          section_id: string
+          seq: number
+          status: Database["public"]["Enums"]["report_card_batch_item_status"]
+        }
+        Insert: {
+          attempts?: number
+          batch_id: string
+          claimed_at?: string | null
+          enrolment_id: string
+          error_code?: string | null
+          error_detail?: string | null
+          id?: string
+          page_count?: number | null
+          remark?: string | null
+          report_card_id?: string | null
+          resolved_at?: string | null
+          roll_no?: number | null
+          section_id: string
+          seq: number
+          status?: Database["public"]["Enums"]["report_card_batch_item_status"]
+        }
+        Update: {
+          attempts?: number
+          batch_id?: string
+          claimed_at?: string | null
+          enrolment_id?: string
+          error_code?: string | null
+          error_detail?: string | null
+          id?: string
+          page_count?: number | null
+          remark?: string | null
+          report_card_id?: string | null
+          resolved_at?: string | null
+          roll_no?: number | null
+          section_id?: string
+          seq?: number
+          status?: Database["public"]["Enums"]["report_card_batch_item_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_batch_item_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "report_card_batch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_report_card_id_fkey"
+            columns: ["report_card_id"]
+            isOneToOne: false
+            referencedRelation: "report_card"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_item_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+        ]
+      }
       result_position: {
         Row: {
           campus_id: string
@@ -17819,6 +18070,10 @@ export type Database = {
           section_label: string
         }[]
       }
+      claim_report_card_batch_item: {
+        Args: { p_batch_id: string }
+        Returns: Json
+      }
       classify_password_reset_token: {
         Args: { p_token_hash: string }
         Returns: string
@@ -17873,6 +18128,10 @@ export type Database = {
           p_step_key: Database["public"]["Enums"]["onboarding_step_key"]
         }
         Returns: undefined
+      }
+      complete_report_card_batch: {
+        Args: { p_batch_id: string; p_page_count?: number; p_sha256?: string }
+        Returns: Json
       }
       complete_timetable_export: {
         Args: {
@@ -18442,6 +18701,10 @@ export type Database = {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
       }
+      fail_report_card_batch: {
+        Args: { p_batch_id: string; p_error: string }
+        Returns: Json
+      }
       fail_timetable_export: {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
@@ -18467,6 +18730,15 @@ export type Database = {
         }
       }
       finalise_import_batch: { Args: { p_batch_id: string }; Returns: Json }
+      finish_report_card_batch_item: {
+        Args: {
+          p_error_code?: string
+          p_item_id: string
+          p_ok: boolean
+          p_page_count?: number
+        }
+        Returns: Json
+      }
       fn_allocate_test_seat: {
         Args: { p_application_id: string; p_sitting_id: string }
         Returns: number
@@ -18764,6 +19036,14 @@ export type Database = {
         }
         Returns: string
       }
+      fn_latest_report_card_batch: {
+        Args: {
+          p_exam_term_id: string
+          p_scope: Database["public"]["Enums"]["report_card_batch_scope"]
+          p_target_id: string
+        }
+        Returns: Json
+      }
       fn_leave_balance: {
         Args: { p_leave_type_id: string; p_staff_id: string }
         Returns: number
@@ -18881,6 +19161,14 @@ export type Database = {
       }
       fn_reinstate_offer: { Args: { p_offer_id: string }; Returns: undefined }
       fn_relock_expired_unlocks: { Args: { p_as_of?: string }; Returns: number }
+      fn_report_card_batch_manifest: {
+        Args: { p_batch_id: string }
+        Returns: Json
+      }
+      fn_report_card_batch_status: {
+        Args: { p_batch_id: string }
+        Returns: Json
+      }
       fn_report_card_sheet: {
         Args: { p_exam_term_id: string; p_section_id: string }
         Returns: Json
@@ -19459,6 +19747,10 @@ export type Database = {
         Args: { p_identity_id: string; p_valid_to?: string }
         Returns: Json
       }
+      retry_report_card_batch: {
+        Args: { p_batch_id: string; p_remarks?: Json }
+        Returns: Json
+      }
       reverse_ledger_entry: {
         Args: { p_ledger_id: string; p_reason: string }
         Returns: string
@@ -19846,6 +20138,16 @@ export type Database = {
       stage_import_rows: {
         Args: { p_batch_id: string; p_rows: Json }
         Returns: number
+      }
+      start_report_card_batch: {
+        Args: {
+          p_exam_term_id: string
+          p_remarks?: Json
+          p_require_remark?: boolean
+          p_scope: Database["public"]["Enums"]["report_card_batch_scope"]
+          p_target_id: string
+        }
+        Returns: Json
       }
       start_session_rollover: {
         Args: {
@@ -20309,6 +20611,14 @@ export type Database = {
       qualification_verification_status: "pending" | "verified" | "rejected"
       rank_policy: "exclude_absentees" | "include_all"
       reminder_kind: "followup_officer" | "appointment_parent"
+      report_card_batch_item_status:
+        | "pending"
+        | "rendering"
+        | "succeeded"
+        | "skipped"
+        | "failed"
+      report_card_batch_scope: "section" | "class" | "campus"
+      report_card_batch_status: "queued" | "running" | "completed" | "failed"
       report_card_status: "pending" | "issued" | "superseded" | "void"
       result_withhold_reason: "fee_default" | "discipline" | "document_pending"
       result_withhold_release: "paid" | "hardship"
@@ -20750,6 +21060,15 @@ export const Constants = {
       qualification_verification_status: ["pending", "verified", "rejected"],
       rank_policy: ["exclude_absentees", "include_all"],
       reminder_kind: ["followup_officer", "appointment_parent"],
+      report_card_batch_item_status: [
+        "pending",
+        "rendering",
+        "succeeded",
+        "skipped",
+        "failed",
+      ],
+      report_card_batch_scope: ["section", "class", "campus"],
+      report_card_batch_status: ["queued", "running", "completed", "failed"],
       report_card_status: ["pending", "issued", "superseded", "void"],
       result_withhold_reason: ["fee_default", "discipline", "document_pending"],
       result_withhold_release: ["paid", "hardship"],

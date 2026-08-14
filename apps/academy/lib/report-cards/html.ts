@@ -237,6 +237,28 @@ table.marks tr.total td { font-weight: 700; background: #f4f4f4; }
 .revised { font-weight: 700; color: #a00; }`;
 }
 
+/**
+ * FR-J12. What the merged document adds to the single card's stylesheet, and
+ * nothing else — the cards themselves must paginate identically in both, or
+ * the sheet a parent is handed and the sheet in the Principal's print run
+ * would be two different documents.
+ *
+ * `.stamp` is the one rule that cannot carry over. On a single card it is
+ * `position: fixed`, which Chromium repeats on every page of the document —
+ * correct for a one-page card, and in a 120-card collation it would stamp the
+ * blank duplex fillers too. Inside a merged card it is absolute within the
+ * card's own box.
+ */
+function mergedCss(): string {
+  return `
+.card { position: relative; break-after: page; page-break-after: always; }
+.card:last-of-type { break-after: auto; page-break-after: auto; }
+.card .stamp { position: absolute; }
+/* AC3: a card that ended on an odd page gets a blank side, so the next card
+   starts on a new SHEET rather than on the back of this one. */
+.sheet-filler { break-after: page; page-break-after: always; height: 100%; }`;
+}
+
 function subjectRow(s: ReportCardSubject): string {
   const failed = (s.failed_components ?? []).map((c) => c.component).join(', ');
   const marks = s.report_symbol
@@ -253,11 +275,13 @@ function subjectRow(s: ReportCardSubject): string {
 </tr>`;
 }
 
-export function buildReportCardHtml(
-  snapshot: ReportCardSnapshot,
-  font: ResolvedFont | null,
-  assets: ReportCardAssets,
-): PrintDocument {
+/**
+ * The card itself, without the document around it. Extracted by FR-J12 so the
+ * merged print run and the single card are the same page — a second builder
+ * would be a second document, and a parent's copy would stop matching the
+ * copy in the Principal's pile.
+ */
+function reportCardBody(snapshot: ReportCardSnapshot, assets: ReportCardAssets): string {
   const { student, term, aggregate, attendance } = snapshot;
   const revised = revisionFooter(snapshot);
   const range = attendanceRange(attendance);
@@ -265,10 +289,7 @@ export function buildReportCardHtml(
   const field = (label: string, value: string) =>
     `<div class="field"><span class="label">${escapeHtml(label)}</span><span class="value">${escapeHtml(value)}</span></div>`;
 
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(
-    `${student.name_en} — ${term.name}`,
-  )}</title><style>${css(font)}</style></head><body>
-${assets.stampDataUri ? `<img class="stamp" src="${assets.stampDataUri}" alt="" />` : ''}
+  return `${assets.stampDataUri ? `<img class="stamp" src="${assets.stampDataUri}" alt="" />` : ''}
 ${letterheadHtml(snapshot, assets)}
 <h1 class="doc-title">Report Card — ${escapeHtml(term.name)} ${escapeHtml(term.session_name)}</h1>
 
@@ -348,7 +369,64 @@ ${letterheadHtml(snapshot, assets)}
   <span${revised ? ' class="revised" data-revision-note' : ''}>${escapeHtml(
     revised ?? `Revision ${snapshot.revision_no}`,
   )}</span>
-</div>
+</div>`;
+}
+
+export function buildReportCardHtml(
+  snapshot: ReportCardSnapshot,
+  font: ResolvedFont | null,
+  assets: ReportCardAssets,
+): PrintDocument {
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(
+    `${snapshot.student.name_en} — ${snapshot.term.name}`,
+  )}</title><style>${css(font)}</style></head><body>
+${reportCardBody(snapshot, assets)}
+</body></html>`;
+
+  return { html, pageFormat: 'A4', landscape: false };
+}
+
+/**
+ * FR-J12 AC3: the print-ready collation.
+ *
+ * The cards arrive already ordered — the batch froze the order into
+ * item.seq at enumeration, so a section renamed halfway through results day
+ * cannot reorder a document that is already half printed — and each carries
+ * the page count read off its own rendered bytes.
+ *
+ * `pageCount` is what makes "a new sheet" true rather than hoped for. A
+ * one-page card followed only by a page break puts the next child on side 2
+ * of the same sheet, which under duplex is exactly the mixing the AC forbids,
+ * so a card that ended on an odd page is followed by a blank side.
+ *
+ * Branding is one set of assets for the whole document, not one per card: a
+ * batch is bounded to a single campus (the term's), so there is exactly one
+ * logo, one signature and one stamp to embed — and embedding them once is
+ * also why a 120-card merge is not 120 copies of the same PNG.
+ */
+export type MergedReportCard = { snapshot: ReportCardSnapshot; pageCount: number };
+
+export function buildMergedReportCardHtml(
+  cards: MergedReportCard[],
+  font: ResolvedFont | null,
+  assets: ReportCardAssets,
+  title: string,
+): PrintDocument {
+  const body = cards
+    .map(({ snapshot, pageCount }, index) => {
+      // No filler after the last card: nothing follows it that could land on
+      // the back of its sheet, and a trailing blank page is just waste.
+      const filler = pageCount % 2 === 1 && index < cards.length - 1 ? '<div class="sheet-filler">&nbsp;</div>' : '';
+      return `<section class="card" data-gr="${escapeHtml(snapshot.student.gr_number)}">
+${reportCardBody(snapshot, assets)}
+</section>${filler}`;
+    })
+    .join('\n');
+
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(
+    title,
+  )}</title><style>${css(font)}${mergedCss()}</style></head><body>
+${body}
 </body></html>`;
 
   return { html, pageFormat: 'A4', landscape: false };
