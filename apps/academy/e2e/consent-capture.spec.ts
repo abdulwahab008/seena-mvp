@@ -69,13 +69,19 @@ async function seedTenant() {
   return { tenantId: tenantId as string, ownerEmail, parentEmail, parentUserId: parentUser.user.id };
 }
 
-async function signIn(page: import('@playwright/test').Page, email: string) {
+// Staff land on the dashboard; a guardian has no app_user row and is sent to
+// their own portal instead, so the caller says which of the two it expects.
+async function signIn(
+  page: import('@playwright/test').Page,
+  email: string,
+  lands: 'staff' | 'portal' = 'staff',
+) {
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(lands === 'portal' ? /\/portal\// : /\/dashboard$/);
 }
 
 // Admit + enrol through the real UI: enrolment's AFTER INSERT trigger needs
@@ -225,7 +231,7 @@ test('consent is captured on paper, contradicted by a second guardian, enforced 
 
   // ── The parent withdraws from the portal, and the gallery follows ─────
   await page.context().clearCookies();
-  await signIn(page, parentEmail);
+  await signIn(page, parentEmail, 'portal');
   await page.goto('/portal/consent');
   await page.waitForLoadState('networkidle');
   await expect(page.getByTestId('portal-consent-status-student_photo_marketing')).toContainText('granted');
