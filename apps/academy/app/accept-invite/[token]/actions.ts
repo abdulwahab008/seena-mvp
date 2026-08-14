@@ -36,9 +36,26 @@ export async function acceptInvite(
   const { error: signUpError } = await supabase.auth.signUp({ email, password: parsed.data.password });
   if (signUpError) {
     if (signUpError.message.toLowerCase().includes('already registered')) {
-      return { error: 'An account with this email already exists. Try signing in instead.', ok: false };
+      // Since /sign-up exists, "I made an account, then my school invited me"
+      // is a normal order of events — and it used to dead-end here, because
+      // the invitation can only be redeemed with a session and this action
+      // only ever created one via signUp(). Sign the existing account in with
+      // the password they just typed and carry on to accept_invitation()
+      // below; a wrong password still fails closed.
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: parsed.data.password,
+      });
+      if (signInError) {
+        return {
+          error:
+            'An account with this email already exists. Enter its password to accept this invitation, or sign in and reset it.',
+          ok: false,
+        };
+      }
+    } else {
+      return { error: 'Could not create your account.', ok: false };
     }
-    return { error: 'Could not create your account.', ok: false };
   }
 
   const { error: acceptError } = await supabase.rpc('accept_invitation', { p_token: parsed.data.token });

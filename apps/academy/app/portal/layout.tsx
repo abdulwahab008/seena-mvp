@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { supabaseServer } from '@/lib/supabase/server';
+import { requireSession } from '@/lib/auth/require-session';
 
 const PORTAL_LINKS = [
   { href: '/portal/homework', label: 'Homework' },
@@ -14,11 +13,10 @@ const PORTAL_LINKS = [
 // parent's own RLS would mostly return empty on; this is the one guardians
 // (FR-C11) actually land in.
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  // Guardians reach the portal through their own activation flow, which
+  // creates no app_user row, so this intentionally checks only for a session
+  // — the /no-school membership rule belongs to the staff app, not here.
+  await requireSession();
 
   return (
     <div className="mx-auto max-w-2xl p-6">
