@@ -3,6 +3,7 @@ import { Building2 } from 'lucide-react';
 import { supabaseServer } from '@/lib/supabase/server';
 import { requireSession } from '@/lib/auth/require-session';
 import { hasNoCampusAssigned } from '@/lib/campus-scope';
+import { logFeatureResolveFailure, resolveFeatureSet } from '@/lib/features';
 import { EmptyState } from '@/components/ui/empty-state';
 import { AppHeader } from './app-header';
 import { Sidebar } from './sidebar';
@@ -66,11 +67,24 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { data: tenant } = await supabase.from('tenant').select('name').limit(1).single();
   const schoolName = tenant?.name ?? 'Your school';
 
+  // FR-A17: the resolved flag set travels with the session bootstrap, and a
+  // failed resolve falls back to the last-known-good set rather than blacking
+  // out every optional module. Hiding a nav item is presentation only — each
+  // gated module is enforced by its own RLS policy and write trigger.
+  const { data: resolved, error: featureError } = await supabase.rpc('resolved_features');
+  const { features, stale } = resolveFeatureSet(appUser.tenant_id, resolved, featureError);
+  if (stale) logFeatureResolveFailure(appUser.tenant_id, featureError);
+
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar schoolName={schoolName} />
+      <Sidebar schoolName={schoolName} features={features} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader email={user.email ?? 'Signed in'} role={appUser.app_role} schoolName={schoolName} />
+        <AppHeader
+          email={user.email ?? 'Signed in'}
+          role={appUser.app_role}
+          schoolName={schoolName}
+          features={features}
+        />
         <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {children}
         </main>

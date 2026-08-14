@@ -23,6 +23,12 @@ export type NavItem = {
   label: string;
   /** Extra path prefixes that should also light this item up. */
   match?: string[];
+  /**
+   * FR-A17 feature code. The item is hidden when the tenant's resolved flag
+   * set says the module is off — presentation only; the route and its RPCs
+   * are gated in the database.
+   */
+  feature?: string;
 };
 
 export type NavSection = {
@@ -100,7 +106,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/academic-setup/curriculum', label: 'Curriculum' },
       { href: '/academic-setup/rooms', label: 'Rooms' },
-      { href: '/homework', label: 'Homework' },
+      { href: '/homework', label: 'Homework', feature: 'module.homework' },
       { href: '/academic-setup/rollover', label: 'Session Rollover' },
     ],
   },
@@ -171,8 +177,8 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Expenses',
     icon: Receipt,
     items: [
-      { href: '/expenses/vouchers', label: 'Vouchers' },
-      { href: '/expenses/approvals', label: 'Approvals' },
+      { href: '/expenses/vouchers', label: 'Vouchers', feature: 'module.expenses' },
+      { href: '/expenses/approvals', label: 'Approvals', feature: 'module.expenses' },
     ],
   },
   {
@@ -204,6 +210,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/sessions', label: 'Academic Sessions' },
       { href: '/branding', label: 'Branding' },
       { href: '/roles', label: 'Roles' },
+      { href: '/feature-flags', label: 'Modules' },
     ],
   },
 ];

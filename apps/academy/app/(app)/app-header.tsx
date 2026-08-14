@@ -7,6 +7,7 @@ import { ChevronRight, LogOut, Menu, User, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { breadcrumbsFor } from '@/lib/navigation';
+import type { FeatureSet } from '@/lib/features';
 import { SidebarContent } from './sidebar';
 
 function Breadcrumbs() {
@@ -119,10 +120,12 @@ export function AppHeader({
   email,
   role,
   schoolName,
+  features,
 }: {
   email: string;
   role: string;
   schoolName: string;
+  features?: FeatureSet;
 }) {
   const [drawer, setDrawer] = React.useState(false);
   const pathname = usePathname();
@@ -180,6 +183,7 @@ export function AppHeader({
             </Button>
             <SidebarContent
               schoolName={schoolName}
+              features={features}
               onNavigate={() => setDrawer(false)}
               reserveCloseSpace
             />

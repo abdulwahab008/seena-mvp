@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { ChevronDown, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NAV_SECTIONS, findActiveItem, type NavSection } from '@/lib/navigation';
+import { visibleNavSections, type FeatureSet } from '@/lib/features';
 
 function SectionGroup({
   section,
@@ -105,15 +106,23 @@ function SectionGroup({
 
 export function SidebarContent({
   schoolName,
+  features,
   onNavigate,
   /** Leaves room for the drawer's close button so it never sits on the name. */
   reserveCloseSpace = false,
 }: {
   schoolName: string;
+  /**
+   * FR-A17: the tenant's resolved flag set. Filtering happens here rather
+   * than in the server layout because NavSection carries a React component
+   * as its icon, which cannot cross the server/client boundary.
+   */
+  features?: FeatureSet;
   onNavigate?: () => void;
   reserveCloseSpace?: boolean;
 }) {
   const pathname = usePathname();
+  const sections = features ? visibleNavSections(NAV_SECTIONS, features) : NAV_SECTIONS;
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
@@ -133,7 +142,7 @@ export function SidebarContent({
       </div>
 
       <nav aria-label="Main" className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {NAV_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <SectionGroup key={section.id} section={section} pathname={pathname} onNavigate={onNavigate} />
         ))}
       </nav>
@@ -142,11 +151,11 @@ export function SidebarContent({
 }
 
 /** Fixed rail on desktop; the mobile drawer renders the same content in a sheet. */
-export function Sidebar({ schoolName }: { schoolName: string }) {
+export function Sidebar({ schoolName, features }: { schoolName: string; features?: FeatureSet }) {
   return (
     <aside className="hidden w-64 shrink-0 border-r border-sidebar-border lg:block">
       <div className="fixed inset-y-0 left-0 w-64">
-        <SidebarContent schoolName={schoolName} />
+        <SidebarContent schoolName={schoolName} features={features} />
       </div>
     </aside>
   );

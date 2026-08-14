@@ -6269,6 +6269,30 @@ export type Database = {
           },
         ]
       }
+      feature_flag: {
+        Row: {
+          code: string
+          default_enabled: boolean
+          description: string | null
+          is_beta: boolean
+          label: string
+        }
+        Insert: {
+          code: string
+          default_enabled?: boolean
+          description?: string | null
+          is_beta?: boolean
+          label: string
+        }
+        Update: {
+          code?: string
+          default_enabled?: boolean
+          description?: string | null
+          is_beta?: boolean
+          label?: string
+        }
+        Relationships: []
+      }
       fee_challan: {
         Row: {
           arrears_paisa: number
@@ -10503,6 +10527,57 @@ export type Database = {
           },
         ]
       }
+      plan: {
+        Row: {
+          code: string
+          name: string
+          rank: number
+        }
+        Insert: {
+          code: string
+          name: string
+          rank?: number
+        }
+        Update: {
+          code?: string
+          name?: string
+          rank?: number
+        }
+        Relationships: []
+      }
+      plan_feature: {
+        Row: {
+          enabled: boolean
+          feature_code: string
+          plan_code: string
+        }
+        Insert: {
+          enabled: boolean
+          feature_code: string
+          plan_code: string
+        }
+        Update: {
+          enabled?: boolean
+          feature_code?: string
+          plan_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_feature_feature_code_fkey"
+            columns: ["feature_code"]
+            isOneToOne: false
+            referencedRelation: "feature_flag"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "plan_feature_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plan"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       public_enquiry_attempt: {
         Row: {
           created_at: string
@@ -14047,6 +14122,45 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_feature_override: {
+        Row: {
+          enabled: boolean
+          feature_code: string
+          set_at: string
+          set_by: string | null
+          tenant_id: string
+        }
+        Insert: {
+          enabled: boolean
+          feature_code: string
+          set_at?: string
+          set_by?: string | null
+          tenant_id: string
+        }
+        Update: {
+          enabled?: boolean
+          feature_code?: string
+          set_at?: string
+          set_by?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_feature_override_feature_code_fkey"
+            columns: ["feature_code"]
+            isOneToOne: false
+            referencedRelation: "feature_flag"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "tenant_feature_override_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_invitation: {
         Row: {
           accepted_at: string | null
@@ -14133,6 +14247,48 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tenant_setting_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_subscription: {
+        Row: {
+          created_at: string
+          id: string
+          plan_code: string
+          tenant_id: string
+          valid_from: string
+          valid_to: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          plan_code: string
+          tenant_id: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          plan_code?: string
+          tenant_id?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_subscription_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plan"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "tenant_subscription_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -20111,6 +20267,7 @@ export type Database = {
         Args: { p_campus_id: string; p_date: string; p_session_id: string }
         Returns: string
       }
+      resolved_features: { Args: { p_tenant_id?: string }; Returns: Json }
       restore_record: {
         Args: { p_id: string; p_table: string }
         Returns: undefined
@@ -20475,6 +20632,14 @@ export type Database = {
           p_board_code: string
           p_subject_id: string
         }
+        Returns: undefined
+      }
+      set_tenant_feature: {
+        Args: { p_code: string; p_enabled?: boolean; p_tenant_id: string }
+        Returns: undefined
+      }
+      set_tenant_plan: {
+        Args: { p_plan_code: string; p_tenant_id: string }
         Returns: undefined
       }
       set_tenant_theme: {
