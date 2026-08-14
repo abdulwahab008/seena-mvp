@@ -17,10 +17,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('user_id', user.id)
     .maybeSingle();
 
-  // A session with no membership (e.g. straight from /sign-up, or an invite
-  // that was never redeemed) would otherwise render this whole shell around
-  // an app where every RLS-scoped query legitimately returns nothing.
-  if (!appUser) redirect('/no-school');
+  // A session with no app_user row would otherwise render this whole shell
+  // around an app where every RLS-scoped query legitimately returns nothing.
+  // Two very different people land here, so they are told apart before being
+  // sent anywhere:
+  //
+  //  - an activated guardian, who has no app_user row by design (they are
+  //    linked through guardian.auth_user_id, and custom_access_token_hook
+  //    gives them app_role 'parent'). They have a home — it is the portal.
+  //  - anyone else: credentials but no school, e.g. straight from /sign-up.
+  if (!appUser) {
+    const { data: guardian } = await supabase
+      .from('guardian')
+      .select('id')
+      .eq('auth_user_id', user.id)
+      .maybeSingle();
+    redirect(guardian ? '/portal/homework' : '/no-school');
+  }
 
   // FR-A12 AC4: a campus-scoped role (i.e. not owner/super_admin, whose
   // access is role-based, not user_campus-based) with zero active

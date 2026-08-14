@@ -50,7 +50,10 @@ export function ActivateForm({ token, phoneE164 }: { token: string; phoneE164: s
       // a success message. Same reasoning as accept-form.tsx's own
       // router.push after accept_invitation().
       toast.success('Account activated.');
-      router.push('/campuses');
+      // Straight to the parent portal. A guardian has no app_user row, so
+      // sending them to a staff route only bounces them through
+      // (app)/layout.tsx to get here anyway.
+      router.push('/portal/homework');
       router.refresh();
     });
   });
