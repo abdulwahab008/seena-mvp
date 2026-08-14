@@ -64,14 +64,16 @@ select is(
 
 -- role_permission's RLS is tenant-scoped, so tenant_id must ride along with
 -- role_id in the claims here exactly as the real hook always issues them
--- together.
+-- together. app_role rides along too since FR-A11 (20260801100000): a role's
+-- effective permissions are intersected with the base app_role's, so the
+-- fixture has to carry the same claim triple the real hook always issues.
 set local role authenticated;
-select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_id', 'role_id', :'owner_role_id')::text, true);
+select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_id', 'app_role', 'owner', 'role_id', :'owner_role_id')::text, true);
 select is(app.has_permission('fee.waiver.approve'), true, 'has_permission is true for a role that was granted the code');
 select is(app.has_permission('not.a.real.permission'), false, 'has_permission is false for a code the role was never granted');
 
 select id as teacher_role_id from public.role where tenant_id = :'tenant_id' and code = 'subject_teacher' \gset
-select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_id', 'role_id', :'teacher_role_id')::text, true);
+select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_id', 'app_role', 'subject_teacher', 'role_id', :'teacher_role_id')::text, true);
 select is(app.has_permission('fee.waiver.approve'), false, 'has_permission is false for a different role that was not granted the code');
 
 select * from finish();

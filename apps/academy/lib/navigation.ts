@@ -203,6 +203,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/campuses', label: 'Campuses' },
       { href: '/sessions', label: 'Academic Sessions' },
       { href: '/branding', label: 'Branding' },
+      { href: '/roles', label: 'Roles' },
     ],
   },
 ];

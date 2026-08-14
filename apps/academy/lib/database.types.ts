@@ -1783,6 +1783,7 @@ export type Database = {
           app_role: Database["public"]["Enums"]["app_role"]
           claims_version: number
           created_at: string
+          custom_role_id: string | null
           full_name: string
           phone_e164: string | null
           status: Database["public"]["Enums"]["user_status"]
@@ -1793,6 +1794,7 @@ export type Database = {
           app_role: Database["public"]["Enums"]["app_role"]
           claims_version?: number
           created_at?: string
+          custom_role_id?: string | null
           full_name: string
           phone_e164?: string | null
           status?: Database["public"]["Enums"]["user_status"]
@@ -1803,6 +1805,7 @@ export type Database = {
           app_role?: Database["public"]["Enums"]["app_role"]
           claims_version?: number
           created_at?: string
+          custom_role_id?: string | null
           full_name?: string
           phone_e164?: string | null
           status?: Database["public"]["Enums"]["user_status"]
@@ -1810,6 +1813,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "app_user_custom_role_id_fkey"
+            columns: ["custom_role_id"]
+            isOneToOne: false
+            referencedRelation: "role"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "app_user_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -11312,6 +11322,7 @@ export type Database = {
           name: string
           name_ur: string | null
           tenant_id: string | null
+          updated_at: string | null
         }
         Insert: {
           code: string
@@ -11322,6 +11333,7 @@ export type Database = {
           name: string
           name_ur?: string | null
           tenant_id?: string | null
+          updated_at?: string | null
         }
         Update: {
           code?: string
@@ -11332,10 +11344,59 @@ export type Database = {
           name?: string
           name_ur?: string | null
           tenant_id?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "role_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_change_log: {
+        Row: {
+          action: string
+          added: Json
+          changed_by: string | null
+          created_at: string
+          id: string
+          removed: Json
+          role_id: string
+          tenant_id: string
+        }
+        Insert: {
+          action: string
+          added?: Json
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          removed?: Json
+          role_id: string
+          tenant_id: string
+        }
+        Update: {
+          action?: string
+          added?: Json
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          removed?: Json
+          role_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_change_log_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_change_log_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -18194,6 +18255,10 @@ export type Database = {
         }
         Returns: Json
       }
+      assign_custom_role: {
+        Args: { p_role_id: string; p_user_id: string }
+        Returns: undefined
+      }
       assign_subject_teacher: {
         Args: {
           p_effective_from: string
@@ -18566,6 +18631,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_custom_role: {
+        Args: { p_name: string; p_permission_codes: string[] }
+        Returns: string
+      }
       create_draft_structure: {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: string
@@ -18858,6 +18927,7 @@ export type Database = {
         }
       }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      custom_role_holder_count: { Args: { p_role_id: string }; Returns: number }
       daily_collection_report: {
         Args: { p_campus_id: string; p_from: string; p_to: string }
         Returns: {
@@ -18907,6 +18977,7 @@ export type Database = {
         Returns: undefined
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
+      delete_custom_role: { Args: { p_role_id: string }; Returns: undefined }
       delete_exam_subject: {
         Args: { p_exam_subject_id: string }
         Returns: undefined
@@ -19715,6 +19786,7 @@ export type Database = {
         Args: { p_campus_id: string; p_date: string; p_rows: Json }
         Returns: Json
       }
+      my_effective_permissions: { Args: never; Returns: string[] }
       my_overdue_followups: {
         Args: never
         Returns: {
@@ -19831,6 +19903,10 @@ export type Database = {
           p_reason: Database["public"]["Enums"]["result_withhold_reason"]
         }
         Returns: string
+      }
+      reassign_role_holders: {
+        Args: { p_from_role_id: string; p_to_role_id?: string }
+        Returns: number
       }
       reconcile_admission_fee_payment: {
         Args: { p_payment_id: string }
@@ -20580,6 +20656,14 @@ export type Database = {
       }
       update_bell_period_time: {
         Args: { p_end_time: string; p_period_id: string; p_start_time: string }
+        Returns: undefined
+      }
+      update_custom_role: {
+        Args: {
+          p_name: string
+          p_permission_codes: string[]
+          p_role_id: string
+        }
         Returns: undefined
       }
       update_structure_line_amount: {
