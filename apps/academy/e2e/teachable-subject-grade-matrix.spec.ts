@@ -91,7 +91,7 @@ test('an owner manages teachable-subject approvals and overrides a scope violati
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // AC-adjacent: the approvals list shows the seeded grade-9-only grant.
   await page.goto('/academic-setup/teachable-subjects');

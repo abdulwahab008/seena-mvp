@@ -117,7 +117,7 @@ test('FR-G10: a reason under 15 characters is refused, and a second request whil
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/students');
   await page.waitForLoadState('networkidle');
@@ -146,7 +146,7 @@ test('FR-G10: a reason under 15 characters is refused, and a second request whil
   await teacherPage.getByLabel('Email').fill(teacherEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/attendance/register');
   await teacherPage.waitForLoadState('networkidle');

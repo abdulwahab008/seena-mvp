@@ -77,7 +77,7 @@ test('an owner previews a session rollover, then confirms it, and a second confi
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/rollover');
   await page.waitForLoadState('networkidle');

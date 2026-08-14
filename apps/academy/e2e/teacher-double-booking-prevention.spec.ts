@@ -102,7 +102,7 @@ test('an owner sees a named clash naming the section and time when double-bookin
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto(`/academic-setup/timetable?version=${versionId}&section=${sectionIds[0]}`);
   await page.waitForLoadState('networkidle');

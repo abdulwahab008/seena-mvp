@@ -93,7 +93,7 @@ test('a teacher searching the staff directory never sees a colleague\'s mobile n
   await page.getByLabel('Email').fill(teacherEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/staff/directory');
   await page.waitForLoadState('networkidle');
@@ -122,7 +122,7 @@ test('a teacher searching the staff directory never sees a colleague\'s mobile n
   await hrPage.getByLabel('Email').fill(hrEmail);
   await hrPage.getByLabel('Password').fill(password);
   await hrPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(hrPage).toHaveURL(/\/campuses$/);
+  await expect(hrPage).toHaveURL(/\/dashboard$/);
 
   await hrPage.goto('/staff/directory');
   await hrPage.waitForLoadState('networkidle');

@@ -128,7 +128,7 @@ test('an owner reviews the decision list, overrides two students, and drives a r
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/students/promotion');
   await page.waitForLoadState('networkidle');

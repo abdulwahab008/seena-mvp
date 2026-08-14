@@ -59,7 +59,7 @@ test('an owner takes an enquiry through application, offer, and acceptance', asy
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // Capture the enquiry (FR-B01). Campus/session/source all default to the
   // tenant's only campus/session and 'walk_in' — only class is required.

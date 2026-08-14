@@ -83,7 +83,7 @@ async function login(page: import('@playwright/test').Page, email: string, passw
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 }
 
 test('FR-A12 AC2: an accountant scoped to 4 campuses sees 4 campus options plus "All campuses" on the fee dashboard', async ({

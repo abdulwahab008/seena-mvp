@@ -40,7 +40,7 @@ test('a visitor submits a public enquiry in Urdu, and it appears live on the sta
   await staffPage.getByLabel('Email').fill(email);
   await staffPage.getByLabel('Password').fill(password);
   await staffPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(staffPage).toHaveURL(/\/campuses$/);
+  await expect(staffPage).toHaveURL(/\/dashboard$/);
   await staffPage.goto('/admissions/enquiries');
   await staffPage.waitForLoadState('networkidle');
   // The realtime subscription's auth handshake is async — wait for it to

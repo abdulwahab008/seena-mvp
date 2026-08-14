@@ -107,7 +107,7 @@ test('a zero-touch submit writes every active student present in one round trip'
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   for (const name of ['Bulk Kid One', 'Bulk Kid Two', 'Bulk Kid Three']) {
     await admitAndEnrol(page, name);
@@ -120,7 +120,7 @@ test('a zero-touch submit writes every active student present in one round trip'
   await teacherPage.getByLabel('Email').fill(teacherEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/attendance/register');
   await teacherPage.waitForLoadState('networkidle');
@@ -151,7 +151,7 @@ test('the register is usable at a 360x640 mobile viewport with real tap targets'
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await admitAndEnrol(page, 'Mobile Kid');
 
   const teacherContext = await browser.newContext({ viewport: { width: 360, height: 640 }, hasTouch: true });
@@ -161,7 +161,7 @@ test('the register is usable at a 360x640 mobile viewport with real tap targets'
   await teacherPage.getByLabel('Email').fill(teacherEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/attendance/register');
   await teacherPage.waitForLoadState('networkidle');

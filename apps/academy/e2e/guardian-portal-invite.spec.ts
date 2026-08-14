@@ -61,7 +61,7 @@ test('an owner sends a print invite and the guardian activates their portal acco
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // Admit and enrol through the real UI — enrolment's own AFTER INSERT
   // trigger (fee-plan auto-build) needs a JWT, same gotcha every e2e spec
@@ -123,7 +123,7 @@ test('an owner sends a print invite and the guardian activates their portal acco
   await page.getByLabel('6-digit code').fill(TEST_CODE);
   await page.getByTestId('activate-verify-code').click();
   await expect(page.getByText('Account activated.')).toBeVisible();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/portal\/homework$/);
 
   // Re-visiting the same (now-consumed) link must not activate a second time.
   await page.goto(activationUrl);

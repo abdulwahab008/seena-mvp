@@ -161,7 +161,7 @@ test('an owner builds a parallel elective block, sees both members share the cel
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto(`/academic-setup/timetable?version=${versionId}&section=${sectionId}`);
   await page.waitForLoadState('networkidle');
@@ -283,7 +283,7 @@ test('AC3: a student picks one elective per bucket on their profile, and the cho
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // create_student()/enrol_student() both need a real JWT — a service-role
   // seed insert can't carry the tenant claim they check, so the student is

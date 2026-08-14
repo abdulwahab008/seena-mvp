@@ -99,7 +99,7 @@ test('an owner joins a waitlisted applicant to the queue, and a lapsed offer aut
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // The second applicant, taken through the real enquiry -> application UI.
   await page.goto('/admissions/enquiries');

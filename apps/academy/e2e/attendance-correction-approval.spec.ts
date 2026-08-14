@@ -124,7 +124,7 @@ test('a class teacher requests a correction on a locked date; an owner approves 
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/students');
   await page.waitForLoadState('networkidle');
@@ -153,7 +153,7 @@ test('a class teacher requests a correction on a locked date; an owner approves 
   await teacherPage.getByLabel('Email').fill(teacherEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/attendance/register');
   await teacherPage.waitForLoadState('networkidle');

@@ -43,7 +43,7 @@ test('an owner maps a subject onto class 9 and sees the weekly-period total upda
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/curriculum');
   await page.waitForLoadState('networkidle');
@@ -72,7 +72,7 @@ test('submitting with no subject chosen shows a field error instead of silently 
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/curriculum');
   await page.waitForLoadState('networkidle');
@@ -98,7 +98,7 @@ test('weekly periods over 12 is rejected with a visible error, not silently save
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/curriculum');
   await page.waitForLoadState('networkidle');

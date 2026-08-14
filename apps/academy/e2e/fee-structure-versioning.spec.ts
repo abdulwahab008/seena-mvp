@@ -60,7 +60,7 @@ test('an owner revises a published fee structure into a new version without touc
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/fees/structure');
   await page.waitForLoadState('networkidle');

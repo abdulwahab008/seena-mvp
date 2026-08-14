@@ -79,7 +79,7 @@ test('an owner commits a validated register atomically, keeps the school GR numb
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/students/import');
   await page.waitForLoadState('networkidle');

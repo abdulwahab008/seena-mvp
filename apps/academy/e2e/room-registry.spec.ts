@@ -35,7 +35,7 @@ test('an owner adds a room, a duplicate code at the same campus is rejected, and
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/rooms');
   await page.waitForLoadState('networkidle');

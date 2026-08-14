@@ -205,7 +205,7 @@ test('an owner covers an absent teacher\'s period, then a cancelled leave flags 
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/substitutions');
   await page.waitForLoadState('networkidle');
@@ -262,7 +262,7 @@ test('an owner covers an absent teacher\'s period, then a cancelled leave flags 
   await teacherPage.getByLabel('Email').fill(absentEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/leave');
   await teacherPage.waitForLoadState('networkidle');

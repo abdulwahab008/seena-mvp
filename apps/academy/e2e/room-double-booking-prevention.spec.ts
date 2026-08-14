@@ -135,7 +135,7 @@ test('a different subject clashes with an occupied room, but the same subject co
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // Section A books Islamiyat in the Hall.
   await page.goto(`/academic-setup/timetable?version=${versionId}&section=${sectionAId}`);

@@ -90,7 +90,7 @@ test('an owner caps stacked concessions and the monthly challan job honours it',
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // Set the tenant-wide stacking cap to 50%.
   await page.goto('/fees/concessions');

@@ -42,7 +42,7 @@ test('an owner builds a bell template, sees correct period numbering, and overla
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/bell-templates');
   await page.waitForLoadState('networkidle');
@@ -108,7 +108,7 @@ test('an owner shortens Friday with a calendar rule, and a duplicate weekday+pre
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/bell-templates');
   await page.waitForLoadState('networkidle');

@@ -113,7 +113,7 @@ test('an owner builds a draft timetable slot with prefill, sees SUBJECT_NOT_OFFE
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/academic-setup/timetable');
   await page.waitForLoadState('networkidle');
@@ -161,7 +161,7 @@ test('an owner builds a draft timetable slot with prefill, sees SUBJECT_NOT_OFFE
   await coBuilderPage.getByLabel('Email').fill(owner2Email);
   await coBuilderPage.getByLabel('Password').fill(password);
   await coBuilderPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(coBuilderPage).toHaveURL(/\/campuses$/);
+  await expect(coBuilderPage).toHaveURL(/\/dashboard$/);
 
   await coBuilderPage.goto('/academic-setup/timetable');
   await coBuilderPage.waitForLoadState('networkidle');

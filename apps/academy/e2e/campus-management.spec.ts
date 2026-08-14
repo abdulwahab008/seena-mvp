@@ -53,7 +53,10 @@ test('owner logs in and manages campuses (FR-A01 seed + FR-A02 create/archive)',
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
 
-  await expect(page).toHaveURL(/\/campuses$/);
+  // Signing in with no requested destination lands on the dashboard — this
+  // test is about /campuses, so navigate there.
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto('/campuses');
   await expect(page.getByRole('heading', { name: 'Campuses' })).toBeVisible();
 
   // The seeded MAIN campus from provision_tenant should already be listed.
@@ -85,5 +88,6 @@ test('owner logs in and manages campuses (FR-A01 seed + FR-A02 create/archive)',
 
 test('unauthenticated visitor is redirected to /login', async ({ page }) => {
   await page.goto('/campuses');
-  await expect(page).toHaveURL(/\/login$/);
+  // The requested page is preserved so signing in returns the visitor to it.
+  await expect(page).toHaveURL('/login?redirectTo=%2Fcampuses');
 });

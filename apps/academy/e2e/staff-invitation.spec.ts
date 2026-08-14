@@ -37,7 +37,7 @@ test('owner invites a teacher, who accepts and reaches /campuses', async ({ page
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(ownerPassword);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/staff');
   await page.waitForLoadState('networkidle');

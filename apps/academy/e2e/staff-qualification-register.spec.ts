@@ -44,7 +44,7 @@ test('an owner records two qualifications for a teacher, then verifies one and r
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/staff/qualifications');
   await page.waitForLoadState('networkidle');

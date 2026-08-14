@@ -35,7 +35,7 @@ test('an owner seeds default fee heads, adds a custom one, and deactivates it', 
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/fees/heads');
   await page.waitForLoadState('networkidle');
@@ -71,7 +71,7 @@ test('a duplicate code differing only in case is rejected', async ({ page }) => 
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/fees/heads');
   await page.waitForLoadState('networkidle');

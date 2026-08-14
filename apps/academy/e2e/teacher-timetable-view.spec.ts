@@ -212,7 +212,7 @@ test('a teacher sees her own cross-campus week with resolved times and today\'s 
   await page.getByLabel('Email').fill(ayeshaEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto(`/my-timetable?week=${REF_DATE}`);
   await page.waitForLoadState('networkidle');

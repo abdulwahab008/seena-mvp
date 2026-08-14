@@ -86,7 +86,7 @@ test('a teacher applies for half-day leave and the owner approves it', async ({ 
   await page.getByLabel('Email').fill(teacherEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/leave');
   await page.waitForLoadState('networkidle');
@@ -118,7 +118,7 @@ test('a teacher applies for half-day leave and the owner approves it', async ({ 
   await ownerPage.getByLabel('Email').fill(ownerEmail);
   await ownerPage.getByLabel('Password').fill(password);
   await ownerPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(ownerPage).toHaveURL(/\/campuses$/);
+  await expect(ownerPage).toHaveURL(/\/dashboard$/);
 
   await ownerPage.goto('/leave');
   await ownerPage.waitForLoadState('networkidle');

@@ -54,7 +54,7 @@ test('an owner gates enrolment on the admission fee — a shortfall is refused, 
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/admissions/enquiries');
   await page.waitForLoadState('networkidle');

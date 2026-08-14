@@ -100,7 +100,7 @@ test('a parent sees their child\'s Published timetable, and a Draft revision sta
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/students');
   await page.waitForLoadState('networkidle');
@@ -184,7 +184,7 @@ test('a parent sees their child\'s Published timetable, and a Draft revision sta
   await page.getByLabel('Email').fill(guardianEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/portal/timetable');
   await page.waitForLoadState('networkidle');

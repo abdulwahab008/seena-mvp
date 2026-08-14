@@ -71,7 +71,7 @@ test('an owner schedules a test sitting, allocates seats, and a full sitting rej
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // The second candidate, taken through the real enquiry -> application UI.
   await page.goto('/admissions/enquiries');

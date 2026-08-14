@@ -74,7 +74,7 @@ test('an owner runs absentee notifications and sees a queued message plus a no-c
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   // Two students: one with a contactable guardian, one without — admit
   // both through the real UI (enrolment's own AFTER INSERT trigger needs

@@ -35,7 +35,7 @@ test('an owner admits a student, links a guardian, and enrols them into a sectio
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/students');
   await page.waitForLoadState('networkidle');

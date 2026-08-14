@@ -82,7 +82,7 @@ test('a class teacher marks a student late (auto-filled or explicit arrival time
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   for (const name of ['Auto Late Kid', 'Explicit Late Kid']) {
     await page.goto('/students');
@@ -123,7 +123,7 @@ test('a class teacher marks a student late (auto-filled or explicit arrival time
   await teacherPage.getByLabel('Email').fill(teacherEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/attendance/register');
   await teacherPage.waitForLoadState('networkidle');

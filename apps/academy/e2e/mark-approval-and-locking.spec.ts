@@ -234,7 +234,7 @@ async function signIn(page: import('@playwright/test').Page, email: string) {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 }
 
 async function openQueue(page: import('@playwright/test').Page) {

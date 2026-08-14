@@ -110,7 +110,7 @@ test('a register marked with the network down is saved on device and uploads on 
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   for (const name of ['Offline Kid One', 'Offline Kid Two']) {
     await admitAndEnrol(page, name);
@@ -123,7 +123,7 @@ test('a register marked with the network down is saved on device and uploads on 
   await teacherPage.getByLabel('Email').fill(teacherEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/attendance/register');
   await teacherPage.waitForLoadState('networkidle');
@@ -196,7 +196,7 @@ test('a register captured offline for a date locked before the sync becomes corr
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await admitAndEnrol(page, 'Locked Out Kid');
 
   const teacherContext = await browser.newContext();
@@ -206,7 +206,7 @@ test('a register captured offline for a date locked before the sync becomes corr
   await teacherPage.getByLabel('Email').fill(teacherEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/attendance/register');
   await teacherPage.waitForLoadState('networkidle');

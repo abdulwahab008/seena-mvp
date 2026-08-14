@@ -108,7 +108,7 @@ test('a teacher publishing past the daily section cap sees a non-blocking warnin
   await page.getByLabel('Email').fill(teacherEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/homework');
   await page.waitForLoadState('networkidle');

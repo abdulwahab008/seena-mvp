@@ -121,7 +121,7 @@ test('a teacher publishes homework and a parent sees it live in the portal feed,
   await page.getByLabel('Email').fill(ownerEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 
   await page.goto('/students');
   await page.waitForLoadState('networkidle');
@@ -158,7 +158,7 @@ test('a teacher publishes homework and a parent sees it live in the portal feed,
   await teacherPage.getByLabel('Email').fill(teacherEmail);
   await teacherPage.getByLabel('Password').fill(password);
   await teacherPage.getByRole('button', { name: 'Sign in' }).click();
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
 
   await teacherPage.goto('/homework');
   await teacherPage.waitForLoadState('networkidle');
@@ -199,10 +199,11 @@ test('a teacher publishes homework and a parent sees it live in the portal feed,
   await guardianPage.getByLabel('Email').fill(guardianEmail);
   await guardianPage.getByLabel('Password').fill(password);
   await guardianPage.getByRole('button', { name: 'Sign in' }).click();
-  // login-form.tsx always redirects to /campuses regardless of role — a
-  // parent lands there too (per this FR's own "don't gate login" cousin
-  // reasoning in FR-A03) before navigating on to the portal.
-  await expect(guardianPage).toHaveURL(/\/campuses$/);
+  // Sign-in has no role-specific destination, so a parent is aimed at the
+  // staff dashboard like anyone else; (app)/layout.tsx recognises a session
+  // with no app_user row but a linked guardian row and forwards it to the
+  // portal rather than to /no-school.
+  await expect(guardianPage).toHaveURL(/\/portal\/homework$/);
 
   await guardianPage.goto('/portal/homework');
   await guardianPage.waitForLoadState('networkidle');
