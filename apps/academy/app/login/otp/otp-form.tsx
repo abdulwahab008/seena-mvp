@@ -44,7 +44,7 @@ export function OtpForm() {
         setServerError(result.error);
         return;
       }
-      router.push('/campuses');
+      router.push('/dashboard');
       router.refresh();
     });
   });

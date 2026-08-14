@@ -201,7 +201,7 @@ async function signIn(page: import('@playwright/test').Page, email: string) {
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Sign in' }).click();
     try {
-      await expect(page).toHaveURL(/\/campuses$/, { timeout: 10_000 });
+      await expect(page).toHaveURL(/\/dashboard$/, { timeout: 10_000 });
       return;
     } catch {
       if (attempt === 1) throw new Error(`sign-in failed twice for ${email}`);

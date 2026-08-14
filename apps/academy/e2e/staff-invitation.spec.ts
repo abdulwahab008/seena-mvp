@@ -27,7 +27,7 @@ async function seedOwner() {
   return { email, password, runId, admin };
 }
 
-test('owner invites a teacher, who accepts and reaches /campuses', async ({ page, context }) => {
+test('owner invites a teacher, who accepts and reaches the dashboard', async ({ page, context }) => {
   const { email: ownerEmail, password: ownerPassword, runId, admin } = await seedOwner();
   const teacherEmail = `teacher-${runId}@invite-e2e.test`;
 
@@ -65,7 +65,13 @@ test('owner invites a teacher, who accepts and reaches /campuses', async ({ page
   await teacherPage.getByLabel('Choose a password').fill('teacher-password-123!');
   await teacherPage.getByRole('button', { name: 'Accept invitation' }).click();
 
-  await expect(teacherPage).toHaveURL(/\/campuses$/);
+  await expect(teacherPage).toHaveURL(/\/dashboard$/);
+
+  // The campus the invitation granted is reachable — asserted on the campuses
+  // page, which is where campus cards live now that sign-in lands on the
+  // dashboard rather than dropping everyone into a settings screen.
+  await teacherPage.goto('/campuses');
+  await teacherPage.waitForLoadState('networkidle');
   await expect(teacherPage.getByTestId('campus-card-MAIN')).toBeVisible();
 });
 

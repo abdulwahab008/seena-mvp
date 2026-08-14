@@ -59,5 +59,5 @@ test('a wrong code is rejected, then the correct code signs the user in', async 
 
   await page.getByLabel('6-digit code').fill(TEST_CODE);
   await page.getByRole('button', { name: 'Verify and sign in' }).click();
-  await expect(page).toHaveURL(/\/campuses$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 });

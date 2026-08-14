@@ -34,7 +34,7 @@ export function AcceptForm({ token, email }: { token: string; email: string }) {
         setServerError(result.error);
         return;
       }
-      router.push('/campuses');
+      router.push('/dashboard');
       router.refresh();
     });
   });

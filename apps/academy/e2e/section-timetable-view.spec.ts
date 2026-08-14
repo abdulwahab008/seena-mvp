@@ -184,7 +184,9 @@ test('a parent sees their child\'s Published timetable, and a Draft revision sta
   await page.getByLabel('Email').fill(guardianEmail);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  // A guardian has no app_user row, so the staff shell sends them to their own
+  // home rather than rendering an empty console around them.
+  await expect(page).toHaveURL(/\/portal\//);
 
   await page.goto('/portal/timetable');
   await page.waitForLoadState('networkidle');
