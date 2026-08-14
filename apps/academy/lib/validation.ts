@@ -1872,3 +1872,20 @@ export const setWithholdThresholdSchema = z.object({
   rupees: z.coerce.number().int().min(0).max(100_000_000),
 });
 export type SetWithholdThresholdInput = z.infer<typeof setWithholdThresholdSchema>;
+
+// FR-J09. A report card is per (candidate, term); the screen that prints them
+// is per section, because that is the pile a class teacher hands out.
+export const reportCardSheetSchema = z.object({
+  examTermId: z.string().uuid(),
+  sectionId: z.string().uuid(),
+});
+export type ReportCardSheetInput = z.infer<typeof reportCardSheetSchema>;
+
+// The remark is optional: a regeneration after a marks correction carries the
+// previous revision's words forward rather than silently dropping them.
+export const generateReportCardSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examTermId: z.string().uuid(),
+  remark: z.string().trim().max(500).optional(),
+});
+export type GenerateReportCardInput = z.infer<typeof generateReportCardSchema>;

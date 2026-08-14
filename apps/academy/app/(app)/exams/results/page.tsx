@@ -4,6 +4,7 @@ import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { ResultBoard } from './result-board';
 import { PositionBoard } from './position-board';
 import { WithholdBoard } from './withhold-board';
+import { ReportCardBoard } from './report-card-board';
 
 /**
  * FR-J02. The computed per-subject results for one section of one term.
@@ -117,6 +118,21 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
         </p>
         <div className="mt-4">
           <WithholdBoard examTermId={term.id} termName={term.name} campusId={campus.id} classes={classes} />
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <h2 className="text-xl font-semibold" id="report-cards">
+          Report cards
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          FR-J09 — one branded A4 page per candidate, collecting the subject results above, the position beside them,
+          the term&rsquo;s attendance summary with the dates it actually covers, and the campus&rsquo;s own letterhead
+          and signature. A card refuses to print while the term is provisional, while a mark has moved under it, or
+          while the result is withheld; a correction issues the next revision rather than editing the last one.
+        </p>
+        <div className="mt-4">
+          <ReportCardBoard examTermId={term.id} termName={term.name} sections={sections} />
         </div>
       </div>
     </div>

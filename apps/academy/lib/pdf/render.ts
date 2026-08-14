@@ -96,6 +96,35 @@ export function pdfPageCount(bytes: Uint8Array): number {
   return matches ? matches.length : 0;
 }
 
+/**
+ * FR-J09. Rewrite the document's CreationDate/ModDate to a fixed instant.
+ *
+ * Two renders of one identical document differ in exactly two places —
+ * Chromium writes wall-clock time into `/CreationDate` and `/ModDate` and
+ * nothing else varies (verified byte-for-byte against Skia/PDF m151). That
+ * is enough to make a report card's digest unreproducible, which would in
+ * turn make the checksum on its register a statement about a moment rather
+ * than about a document.
+ *
+ * Substitution is length-preserving, so every byte offset in the xref table
+ * stays valid: `D:YYYYMMDDHHMMSS+00'00'` is a fixed 23 characters for any
+ * date this function can be given. The length is re-checked anyway and a
+ * mismatch leaves the bytes alone — a future renderer that writes a
+ * different date format should cost reproducibility, never a corrupt file.
+ */
+export function stampPdfTimestamps(bytes: Uint8Array, at: Date): Uint8Array {
+  const p = (n: number, w = 2) => String(n).padStart(w, '0');
+  const stamp =
+    `D:${p(at.getUTCFullYear(), 4)}${p(at.getUTCMonth() + 1)}${p(at.getUTCDate())}` +
+    `${p(at.getUTCHours())}${p(at.getUTCMinutes())}${p(at.getUTCSeconds())}+00'00'`;
+
+  const text = Buffer.from(bytes).toString('latin1');
+  const rewritten = text.replace(/\/(CreationDate|ModDate) \(([^)]*)\)/g, (match, key: string, existing: string) =>
+    existing.length === stamp.length ? `/${key} (${stamp})` : match,
+  );
+  return new Uint8Array(Buffer.from(rewritten, 'latin1'));
+}
+
 export function isPdf(bytes: Uint8Array): boolean {
   return Buffer.from(bytes.subarray(0, 5)).toString('latin1') === '%PDF-';
 }

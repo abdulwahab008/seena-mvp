@@ -10276,6 +10276,173 @@ export type Database = {
           },
         ]
       }
+      report_card: {
+        Row: {
+          campus_id: string
+          checksum: string | null
+          enrolment_id: string
+          exam_term_id: string
+          id: string
+          payload_snapshot: Json
+          rendered_at: string
+          rendered_by: string | null
+          revision_no: number
+          section_id: string
+          status: Database["public"]["Enums"]["report_card_status"]
+          storage_path: string
+          supersedes_revision: number | null
+          tenant_id: string
+          void_reason: string | null
+        }
+        Insert: {
+          campus_id: string
+          checksum?: string | null
+          enrolment_id: string
+          exam_term_id: string
+          id?: string
+          payload_snapshot: Json
+          rendered_at?: string
+          rendered_by?: string | null
+          revision_no: number
+          section_id: string
+          status?: Database["public"]["Enums"]["report_card_status"]
+          storage_path: string
+          supersedes_revision?: number | null
+          tenant_id: string
+          void_reason?: string | null
+        }
+        Update: {
+          campus_id?: string
+          checksum?: string | null
+          enrolment_id?: string
+          exam_term_id?: string
+          id?: string
+          payload_snapshot?: Json
+          rendered_at?: string
+          rendered_by?: string | null
+          revision_no?: number
+          section_id?: string
+          status?: Database["public"]["Enums"]["report_card_status"]
+          storage_path?: string
+          supersedes_revision?: number | null
+          tenant_id?: string
+          void_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "report_card_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "report_card_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "report_card_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_rendered_by_fkey"
+            columns: ["rendered_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "report_card_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "report_card_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       result_position: {
         Row: {
           campus_id: string
@@ -17506,6 +17673,10 @@ export type Database = {
         Args: { p_issue_id: string; p_sha256: string }
         Returns: Json
       }
+      attach_report_card_pdf: {
+        Args: { p_report_card_id: string; p_sha256: string }
+        Returns: undefined
+      }
       attach_staff_campus: {
         Args: { p_campus_id: string; p_staff_id: string }
         Returns: undefined
@@ -17525,6 +17696,14 @@ export type Database = {
           p_session_id: string
         }
         Returns: number
+      }
+      begin_report_card: {
+        Args: {
+          p_enrolment_id: string
+          p_exam_term_id: string
+          p_remark?: string
+        }
+        Returns: Json
       }
       book_interview: {
         Args: {
@@ -18276,6 +18455,10 @@ export type Database = {
         Args: { p_enrolment_id: string; p_session_id: string }
         Returns: undefined
       }
+      fn_assert_report_card_printable: {
+        Args: { p_enrolment_id: string; p_exam_term_id: string }
+        Returns: undefined
+      }
       fn_assert_result_disclosable: {
         Args: { p_enrolment_id: string; p_exam_term_id: string }
         Returns: undefined
@@ -18666,6 +18849,10 @@ export type Database = {
       }
       fn_reinstate_offer: { Args: { p_offer_id: string }; Returns: undefined }
       fn_relock_expired_unlocks: { Args: { p_as_of?: string }; Returns: number }
+      fn_report_card_sheet: {
+        Args: { p_exam_term_id: string; p_section_id: string }
+        Returns: Json
+      }
       fn_required_approver_role: {
         Args: { p_amount_paisa: number; p_campus_id: string; p_head_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -19840,6 +20027,10 @@ export type Database = {
         Args: { p_issue_id: string; p_reason: string }
         Returns: Json
       }
+      void_report_card: {
+        Args: { p_reason: string; p_report_card_id: string }
+        Returns: undefined
+      }
       waive_admission_fee: {
         Args: { p_offer_id: string; p_reason: string }
         Returns: string
@@ -20078,6 +20269,7 @@ export type Database = {
       qualification_verification_status: "pending" | "verified" | "rejected"
       rank_policy: "exclude_absentees" | "include_all"
       reminder_kind: "followup_officer" | "appointment_parent"
+      report_card_status: "pending" | "issued" | "superseded" | "void"
       result_withhold_reason: "fee_default" | "discipline" | "document_pending"
       result_withhold_release: "paid" | "hardship"
       rollover_decision: "promote" | "retain" | "pass_out" | "hold"
@@ -20518,6 +20710,7 @@ export const Constants = {
       qualification_verification_status: ["pending", "verified", "rejected"],
       rank_policy: ["exclude_absentees", "include_all"],
       reminder_kind: ["followup_officer", "appointment_parent"],
+      report_card_status: ["pending", "issued", "superseded", "void"],
       result_withhold_reason: ["fee_default", "discipline", "document_pending"],
       result_withhold_release: ["paid", "hardship"],
       rollover_decision: ["promote", "retain", "pass_out", "hold"],

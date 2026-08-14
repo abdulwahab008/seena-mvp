@@ -378,3 +378,31 @@ export function withholdError(message: string): string {
   if (message.includes('FORBIDDEN')) return 'You do not have permission to change result withholds.';
   return 'Could not update the result withholds.';
 }
+
+/**
+ * FR-J09. The refusals a report card can hit all name something the screen
+ * does not hold — which paper is still being marked, which classmate's mark
+ * moved, how much is outstanding as at which cut-off — so they pass through
+ * verbatim, the call every FR in this module has made about its own.
+ */
+const REPORT_CARD_PASS_THROUGH = [
+  /^result withheld/,
+  /^term result is provisional/,
+  /^term result is stale/,
+  /^position is stale/,
+  /^no term result has been computed/,
+];
+
+export function reportCardError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (REPORT_CARD_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('REPORT_CARD_NOT_PENDING')) return 'That report card has already been issued or voided.';
+  if (message.includes('REPORT_CARD_NOT_FOUND')) return 'That report card no longer exists.';
+  if (message.includes('REPORT_CARD_DIGEST_INVALID')) return 'The report card could not be sealed.';
+  if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to print report cards.';
+  return 'Could not produce the report card.';
+}

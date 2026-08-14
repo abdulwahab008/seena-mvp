@@ -1,15 +1,20 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
-import { positionError, subjectResultError, withholdError } from '@/lib/exams/errors';
+import { positionError, reportCardError, subjectResultError, withholdError } from '@/lib/exams/errors';
 import type { SubjectResultSheet } from '@/lib/exams/result-query';
 import type { PositionSheet } from '@/lib/exams/position-query';
 import type { WithholdSheet, WithholdSyncResult } from '@/lib/exams/withhold-query';
+import type { ReportCardSheet } from '@/lib/exams/report-card-query';
+import { renderAndStoreReportCard, type ReservedReportCard } from '@/lib/report-cards/render';
 import {
   computePositionsSchema,
   computeSubjectResultSchema,
+  generateReportCardSchema,
   raiseWithholdSchema,
   releaseWithholdSchema,
+  reportCardSheetSchema,
   setRankPolicySchema,
   setWithholdThresholdSchema,
   syncFeeWithholdsSchema,
@@ -198,4 +203,64 @@ export async function setWithholdThreshold(input: unknown): Promise<{ error: str
   if (error) return { error: withholdError(error.message) };
 
   return { error: null };
+}
+
+/**
+ * FR-J09. Two calls, and the split is the same one FR-J02 and FR-J05 made:
+ *
+ *   readReportCardSheet()  who has a card, at which revision, and — for
+ *                          anyone who has not — the sentence saying why not;
+ *   generateReportCard()   AC3 and AC4. It reserves a revision in one
+ *                          transaction, renders and uploads outside it, and
+ *                          seals the digest. A withheld candidate is refused
+ *                          before the revision is reserved, so no file and no
+ *                          number are consumed.
+ */
+export type ReportCardSheetState = { error: string | null; sheet?: ReportCardSheet };
+export type GenerateReportCardState = {
+  error: string | null;
+  /** 'result_withheld' is AC3's own word, handed over as the DETAIL of the refusal. */
+  code?: string;
+  downloadUrl?: string;
+  revisionNo?: number;
+  checksum?: string;
+};
+
+export async function readReportCardSheet(input: unknown): Promise<ReportCardSheetState> {
+  const parsed = reportCardSheetSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_report_card_sheet', {
+    p_exam_term_id: parsed.data.examTermId,
+    p_section_id: parsed.data.sectionId,
+  });
+  if (error || !data) {
+    return { error: error ? reportCardError(error.message) : 'Could not read the report cards.' };
+  }
+  return { error: null, sheet: data as unknown as ReportCardSheet };
+}
+
+export async function generateReportCard(input: unknown): Promise<GenerateReportCardState> {
+  const parsed = generateReportCardSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('begin_report_card', {
+    p_enrolment_id: parsed.data.enrolmentId,
+    p_exam_term_id: parsed.data.examTermId,
+    p_remark: parsed.data.remark ?? undefined,
+  });
+  if (error || !data) {
+    return {
+      error: error ? reportCardError(error.message) : 'Could not produce the report card.',
+      code: error?.details ?? undefined,
+    };
+  }
+
+  const stored = await renderAndStoreReportCard(supabase, data as unknown as ReservedReportCard);
+  if (stored.error) return { error: stored.error };
+
+  revalidatePath('/exams/results');
+  return { error: null, downloadUrl: stored.downloadUrl, revisionNo: stored.revisionNo, checksum: stored.checksum };
 }
