@@ -5,11 +5,32 @@ import { randomUUID } from 'node:crypto';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// A fixed week, never "today" — every slot's weekday is derived from this
-// same reference date (and +1/+2 day offsets, still inside the same
-// Monday-Saturday week), so the seeded data and the `?week=` URL param
-// always agree on which calendar week they mean.
-const REF_DATE = '2026-08-03';
+// The reference week is computed from today, never a literal: this spec has
+// to keep meaning the same thing next week and next year, and a hardcoded
+// week silently drifts into "some week in the past" that nobody re-reads.
+// Every slot's weekday is still derived from this same reference date (and
+// +1/+2 day offsets, still inside the same Monday-Saturday week), so the
+// seeded data and the `?week=` URL param always agree on which calendar
+// week they mean.
+//
+// Anchored to a MONDAY, and Monday specifically for three reasons:
+//   * teacher_timetable() normalises p_week_start with date_trunc('week',
+//     ...) and only returns weekdays 1-6, and its substitution arm filters
+//     sub_date to [monday, monday+5] — a Sunday anchor would quietly mean
+//     the week that just ended.
+//   * the +1/+2 offsets have to stay inside that same week, which they do
+//     from Monday (Tuesday, Wednesday) but would not from Friday/Saturday.
+//   * Tuesday/Wednesday keep every slot clear of FR-F02's Friday shortened
+//     schedule, which resolves a *different* bell template for the same
+//     slot and would change the times this spec asserts.
+function mondayOfCurrentWeek(): string {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+const REF_DATE = mondayOfCurrentWeek();
 const WEEKDAY_A = new Date(`${REF_DATE}T00:00:00Z`).getUTCDay();
 const REF_DATE_B = new Date(`${REF_DATE}T00:00:00Z`);
 REF_DATE_B.setUTCDate(REF_DATE_B.getUTCDate() + 1);
@@ -66,7 +87,22 @@ async function seedTenant() {
     .single();
   if (e8 || !campusB) throw e8 ?? new Error('campus B creation failed');
 
-  const { data: session } = await admin.from('academic_session').select('id').eq('tenant_id', tenantId as string).single();
+  // FR-A12's campus gate: a campus-scoped role with zero active user_campus
+  // rows is shown the "No campus assigned" screen instead of any /(app)
+  // page. Both campuses, not just A: teacher_timetable() resolves each
+  // slot's real bell time through resolve_bell_template(), which
+  // 20260731770000_security_definer_campus_scope_audit.sql hardened to
+  // return NULL for a campus outside app.auth_campus_ids() — so a teacher
+  // scoped to A only still sees her campus B period, but with blank times,
+  // and this spec's "each resolving its own campus's real bell time"
+  // assertion would fail for a reason that has nothing to do with FR-F12.
+  const { error: e8b } = await admin.from('user_campus').insert([
+    { user_id: ayeshaUser.user.id, tenant_id: tenantId as string, campus_id: campusA!.id },
+    { user_id: ayeshaUser.user.id, tenant_id: tenantId as string, campus_id: campusB.id },
+  ]);
+  if (e8b) throw e8b;
+
+  const { data: session } = await admin.from('academic_session').select('id, starts_on').eq('tenant_id', tenantId as string).single();
   const { data: classLevel } = await admin.from('class_level').select('id').eq('tenant_id', tenantId as string).eq('code', '1').single();
 
   const { data: sectionA, error: e9 } = await admin
@@ -128,7 +164,10 @@ async function seedTenant() {
       name: 'North v1',
       status: 'PUBLISHED',
       version_no: 1,
-      effective_from: '2026-01-01',
+      // The session provision_tenant() seeds always runs Jan 1 - Dec 31 of
+      // the CURRENT year, so its own starts_on is the only "published from
+      // the beginning of this session" date that stays true next year.
+      effective_from: session!.starts_on,
     })
     .select('id')
     .single();
@@ -143,7 +182,7 @@ async function seedTenant() {
       name: 'South v1',
       status: 'PUBLISHED',
       version_no: 1,
-      effective_from: '2026-01-01',
+      effective_from: session!.starts_on,
     })
     .select('id')
     .single();

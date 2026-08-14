@@ -5,6 +5,28 @@ import { randomUUID } from 'node:crypto';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// The applied-for date is computed from today, never a literal: this spec
+// has to keep meaning the same thing next week and next year. It is also
+// the key in three data-testids (leave-app-row-*, leave-app-status-*,
+// approval-row-*), all of which the app builds from
+// leave_application.from_date — so they are interpolated from this same
+// value rather than spelled out, and cannot drift apart from it again.
+//
+// The next Monday, strictly in the future: a leave application is a
+// request about a day that has not happened yet, and approving it writes
+// staff_attendance rows for that day. Monday is unambiguously a full
+// working day (FR-F02 shortens Friday; Sunday is the weekly off day), so
+// nothing about the calendar can change what the 0.5-day half-day hold or
+// the approval is expected to do.
+function nextMonday(): string {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  d.setUTCDate(d.getUTCDate() + ((8 - d.getUTCDay()) % 7 || 7));
+  return d.toISOString().slice(0, 10);
+}
+
+const LEAVE_DATE = nextMonday();
+
 async function seedOwnerWithTeacherOnLeave() {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const runId = randomUUID().slice(0, 8);
@@ -39,6 +61,14 @@ async function seedOwnerWithTeacherOnLeave() {
     .from('app_user')
     .insert({ user_id: teacherUser.user.id, tenant_id: tenantId as string, app_role: 'subject_teacher', full_name: teacherName });
   if (e5) throw e5;
+
+  // FR-A12's campus gate: a campus-scoped role with zero active
+  // user_campus rows never reaches any /(app) page at all — the layout
+  // replaces the whole shell with the "No campus assigned" screen.
+  const { error: e5b } = await admin
+    .from('user_campus')
+    .insert({ user_id: teacherUser.user.id, tenant_id: tenantId as string, campus_id: campus.id });
+  if (e5b) throw e5b;
 
   // Seeded directly (not via create_staff/create_leave_type/fn_grant_leave_balance's
   // RPCs), the same way other e2e specs seed prerequisite data: those
@@ -95,16 +125,16 @@ test('a teacher applies for half-day leave and the owner approves it', async ({ 
   await page.getByTestId('leave-type-trigger').click();
   await page.getByRole('option', { name: 'Casual Leave' }).click();
   await page.getByLabel('Half day').check();
-  await page.getByLabel('From').fill('2026-08-10');
+  await page.getByLabel('From').fill(LEAVE_DATE);
   await page.getByRole('button', { name: 'Apply for leave' }).click();
 
   await expect(page.getByText('Leave application submitted.')).toBeVisible();
   // apply_for_leave() holds the days immediately, before any decision — the
   // balance must reflect that hold right away, not only after approval.
   await expect(page.getByTestId('leave-balance-CASUAL')).toContainText('9.50d left');
-  const teacherRow = page.getByTestId('leave-app-row-CASUAL-2026-08-10');
+  const teacherRow = page.getByTestId(`leave-app-row-CASUAL-${LEAVE_DATE}`);
   await expect(teacherRow).toBeVisible();
-  await expect(page.getByTestId('leave-app-status-CASUAL-2026-08-10')).toHaveText('pending');
+  await expect(page.getByTestId(`leave-app-status-CASUAL-${LEAVE_DATE}`)).toHaveText('pending');
 
   // Owner signs in, in a genuinely separate browser context (not just a new
   // tab — a new page in the teacher's own context would share her session
@@ -122,18 +152,18 @@ test('a teacher applies for half-day leave and the owner approves it', async ({ 
 
   await ownerPage.goto('/leave');
   await ownerPage.waitForLoadState('networkidle');
-  const queueRow = ownerPage.getByTestId(`approval-row-${teacherName}-2026-08-10`);
+  const queueRow = ownerPage.getByTestId(`approval-row-${teacherName}-${LEAVE_DATE}`);
   await expect(queueRow).toBeVisible();
   await expect(queueRow).toContainText('Casual Leave');
   await queueRow.getByRole('button', { name: 'Approve' }).click();
 
   await expect(ownerPage.getByText('Application approved.')).toBeVisible();
-  await expect(ownerPage.getByTestId(`approval-row-${teacherName}-2026-08-10`)).not.toBeVisible();
+  await expect(ownerPage.getByTestId(`approval-row-${teacherName}-${LEAVE_DATE}`)).not.toBeVisible();
 
   // Back on the teacher's side: reload to pick up the owner's decision.
   await page.reload();
   await page.waitForLoadState('networkidle');
-  await expect(page.getByTestId('leave-app-status-CASUAL-2026-08-10')).toHaveText('approved');
+  await expect(page.getByTestId(`leave-app-status-CASUAL-${LEAVE_DATE}`)).toHaveText('approved');
   // hold_release + consumption net to the same balance as the original
   // hold — approval must not double-deduct or silently refund the days.
   await expect(page.getByTestId('leave-balance-CASUAL')).toContainText('9.50d left');

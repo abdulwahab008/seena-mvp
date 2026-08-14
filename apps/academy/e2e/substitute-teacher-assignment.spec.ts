@@ -5,10 +5,29 @@ import { randomUUID } from 'node:crypto';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// A fixed date, never treated as "today" — its actual weekday is derived
-// (never hand-picked) so the seeded timetable_slot rows and the date typed
-// into the UI always agree on which weekday they represent.
-const SUB_DATE = '2026-08-03';
+// The substitution date is computed from today, never a literal: this spec
+// has to keep meaning the same thing next week and next year. Its actual
+// weekday is still derived (never hand-picked) so the seeded
+// timetable_slot rows, the staff_attendance/leave_application rows and the
+// date typed into the UI always agree on which weekday they represent —
+// create_substitution() and suggest_substitutes() both reject a
+// SUB_DATE_WEEKDAY_MISMATCH outright.
+//
+// Anchored to the Monday of the current week: suggest_substitutes() and
+// create_substitution() resolve the period's clock time through
+// resolve_bell_template_for_weekday(), so the weekday is load-bearing for
+// the busy-vs-free ranking this spec asserts. Monday keeps it clear of
+// FR-F02's Friday shortened schedule (a different template, so different
+// times, so a different overlap answer) and of Sunday, which is not a
+// school day at all.
+function mondayOfCurrentWeek(): string {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+const SUB_DATE = mondayOfCurrentWeek();
 const WEEKDAY = new Date(`${SUB_DATE}T00:00:00Z`).getUTCDay();
 
 async function seedTenant() {
@@ -46,6 +65,15 @@ async function seedTenant() {
     .from('app_user')
     .insert({ user_id: absentUser.user.id, tenant_id: tenantId as string, app_role: 'subject_teacher', full_name: absentName });
   if (e5) throw e5;
+  // FR-A12's campus gate: the absent teacher is the only seeded teacher who
+  // signs in, and a campus-scoped role with zero active user_campus rows is
+  // shown the "No campus assigned" screen instead of any /(app) page. The
+  // busy/free teachers never sign in and suggest_substitutes() ranks by
+  // tenant + app_role, so neither needs one.
+  const { error: e5b } = await admin
+    .from('user_campus')
+    .insert({ user_id: absentUser.user.id, tenant_id: tenantId as string, campus_id: campus!.id });
+  if (e5b) throw e5b;
 
   const { data: busyUser, error: e6 } = await admin.auth.admin.createUser({ email: busyEmail, password, email_confirm: true });
   if (e6 || !busyUser.user) throw e6 ?? new Error('busy teacher creation failed');
@@ -266,10 +294,10 @@ test('an owner covers an absent teacher\'s period, then a cancelled leave flags 
 
   await teacherPage.goto('/leave');
   await teacherPage.waitForLoadState('networkidle');
-  await expect(teacherPage.getByTestId('leave-app-status-CASUAL-2026-08-03')).toHaveText('approved');
+  await expect(teacherPage.getByTestId(`leave-app-status-CASUAL-${SUB_DATE}`)).toHaveText('approved');
   await teacherPage.getByTestId(`leave-cancel-${leaveAppId}`).click();
   await expect(teacherPage.getByText('Application cancelled.')).toBeVisible();
-  await expect(teacherPage.getByTestId('leave-app-status-CASUAL-2026-08-03')).toHaveText('cancelled');
+  await expect(teacherPage.getByTestId(`leave-app-status-CASUAL-${SUB_DATE}`)).toHaveText('cancelled');
 
   // AC4: the substitution built against that date is never deleted — it
   // surfaces on the review worklist instead.
