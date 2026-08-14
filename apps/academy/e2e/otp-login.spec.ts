@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import { deleteAuthUserByPhone } from './fixtures/auth-users';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -10,16 +11,26 @@ const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // this suite runs as a single seed + journey rather than per-scenario
 // fixtures — a second concurrent user can't claim the same phone.
 const TEST_PHONE = '923001234567';
+// FR-A08's own otp_attempt ledger stores the +92 E.164 form, not GoTrue's.
+const TEST_PHONE_E164 = '+923001234567';
 const TEST_CODE = '123456';
 
 async function seedOwnerWithPhone() {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
   // Idempotent across repeated local runs: only one auth.users row can ever
-  // hold TEST_PHONE, so a prior run's leftover user must be cleared first.
-  const { data: existing } = await admin.auth.admin.listUsers();
-  const stale = existing?.users.find((u) => u.phone === TEST_PHONE);
-  if (stale) await admin.auth.admin.deleteUser(stale.id);
+  // hold TEST_PHONE, so a prior run's leftover user must be cleared first —
+  // and the search has to cover EVERY page, not just the first 50 users.
+  await deleteAuthUserByPhone(admin, TEST_PHONE);
+
+  // The other leftover that outlives a run: issue_otp() refuses a 7th code
+  // for the same number within an hour (FR-A08), and otp_attempt rows are
+  // keyed by phone, not by auth user, so deleting the user above does not
+  // clear them. Without this the spec passes six times an hour and then
+  // fails on "Too many codes requested" — a rate limit it never meant to
+  // exercise. Only this fixture's own number is touched.
+  const { error: e0 } = await admin.from('otp_attempt').delete().eq('phone_e164', TEST_PHONE_E164);
+  if (e0) throw e0;
 
   const runId = randomUUID().slice(0, 8);
   const email = `owner-${runId}@otp-e2e.test`;
