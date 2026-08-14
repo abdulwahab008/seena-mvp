@@ -8,6 +8,7 @@ import {
   FileBarChart,
   GraduationCap,
   LayoutDashboard,
+  ListChecks,
   Receipt,
   ScrollText,
   ShieldCheck,
@@ -44,6 +45,15 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Overview',
     icon: LayoutDashboard,
     items: [{ href: '/dashboard', label: 'Dashboard' }],
+  },
+  // Top level rather than inside Settings: a school that has not finished
+  // setting up needs this to be the most findable thing in the product, and a
+  // collapsed section hides it exactly when it matters most.
+  {
+    id: 'setup',
+    label: 'Setup',
+    icon: ListChecks,
+    items: [{ href: '/onboarding', label: 'Setup' }],
   },
   {
     id: 'admissions',
@@ -189,7 +199,6 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Settings',
     icon: Building2,
     items: [
-      { href: '/onboarding', label: 'Setup Checklist' },
       { href: '/campuses', label: 'Campuses' },
       { href: '/sessions', label: 'Academic Sessions' },
       { href: '/branding', label: 'Branding' },

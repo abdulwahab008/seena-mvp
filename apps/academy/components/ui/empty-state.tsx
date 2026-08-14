@@ -11,12 +11,16 @@ export function EmptyState({
   description,
   action,
   className,
+  titleTestId,
+  descriptionTestId,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & {
   icon?: React.ComponentType<{ className?: string }>;
   title: string;
   description?: string;
   action?: React.ReactNode;
+  titleTestId?: string;
+  descriptionTestId?: string;
 }) {
   return (
     <div
@@ -33,9 +37,13 @@ export function EmptyState({
         </span>
       ) : null}
       <div className="space-y-1">
-        <p className="font-medium">{title}</p>
+        <p className="font-medium" data-testid={titleTestId}>
+          {title}
+        </p>
         {description ? (
-          <p className="mx-auto max-w-sm text-sm text-muted-foreground">{description}</p>
+          <p className="mx-auto max-w-sm text-sm text-muted-foreground" data-testid={descriptionTestId}>
+            {description}
+          </p>
         ) : null}
       </div>
       {action}

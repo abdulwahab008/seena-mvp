@@ -56,6 +56,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           title="No campus assigned"
           description="Your account isn't assigned to any campus yet. Ask your school's Owner or Principal to grant you access to one."
           data-testid="no-campus-assigned"
+          titleTestId="no-campus-assigned-heading"
+          descriptionTestId="no-campus-assigned-message"
         />
       </div>
     );
