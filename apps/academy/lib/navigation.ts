@@ -199,7 +199,10 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'compliance',
     label: 'Compliance',
     icon: ShieldCheck,
-    items: [{ href: '/audit-export', label: 'Audit Trail Export' }],
+    items: [
+      { href: '/audit-export', label: 'Audit Trail Export' },
+      { href: '/impersonation', label: 'Support Access' },
+    ],
   },
   {
     id: 'settings',

@@ -2,6 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
+import {
+  IMPERSONATION_WRITE_BLOCKED_MESSAGE,
+  isImpersonationWriteBlocked,
+  recordBlockedWrite,
+} from '@/lib/impersonation';
 import { positionError, reportCardError, subjectResultError, withholdError } from '@/lib/exams/errors';
 import type { SubjectResultSheet } from '@/lib/exams/result-query';
 import type { PositionSheet } from '@/lib/exams/position-query';
@@ -63,6 +68,12 @@ export async function computeSubjectResults(input: unknown): Promise<ComputeResu
     p_exam_term_id: parsed.data.examTermId,
     p_section_id: parsed.data.sectionId,
   });
+  // FR-A16 AC3, same shape as the cash counter's: the refusal aborts the
+  // transaction, so the security_event is written by a second call from here.
+  if (error && isImpersonationWriteBlocked(error.message)) {
+    await recordBlockedWrite(supabase, 'subject_result', 'fn_compute_subject_result');
+    return { error: IMPERSONATION_WRITE_BLOCKED_MESSAGE };
+  }
   if (error) return { error: subjectResultError(error.message) };
 
   return { error: null, rows: data ?? 0 };

@@ -151,10 +151,19 @@ export function SidebarContent({
 }
 
 /** Fixed rail on desktop; the mobile drawer renders the same content in a sheet. */
-export function Sidebar({ schoolName, features }: { schoolName: string; features?: FeatureSet }) {
+export function Sidebar({
+  schoolName,
+  features,
+  /** FR-A16: the impersonation banner owns the top 2.75rem of the viewport. */
+  impersonating = false,
+}: {
+  schoolName: string;
+  features?: FeatureSet;
+  impersonating?: boolean;
+}) {
   return (
     <aside className="hidden w-64 shrink-0 border-r border-sidebar-border lg:block">
-      <div className="fixed inset-y-0 left-0 w-64">
+      <div className={cn('fixed bottom-0 left-0 w-64', impersonating ? 'top-11' : 'top-0')}>
         <SidebarContent schoolName={schoolName} features={features} />
       </div>
     </aside>

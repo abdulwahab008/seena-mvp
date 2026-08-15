@@ -1921,3 +1921,25 @@ export const latestReportCardBatchSchema = z.object({
   targetId: z.string().uuid(),
 });
 export type LatestReportCardBatchInput = z.infer<typeof latestReportCardBatchSchema>;
+
+// FR-A16. Both bounds mirror table CHECKs (chk_consent_window,
+// chk_impersonation_window) rather than standing in for them — the database
+// refuses a 30-day consent or a 90-minute session for service_role too.
+export const grantImpersonationConsentSchema = z.object({
+  /** Absent means tenant scope: any eligible user, for a school that cannot yet say which login is broken. */
+  targetUserId: z.string().uuid().optional(),
+  hours: z.coerce.number().int().min(1, 'Between 1 and 24 hours').max(24, 'Between 1 and 24 hours'),
+});
+export type GrantImpersonationConsentInput = z.infer<typeof grantImpersonationConsentSchema>;
+
+export const revokeImpersonationConsentSchema = z.object({ consentId: z.string().uuid() });
+export type RevokeImpersonationConsentInput = z.infer<typeof revokeImpersonationConsentSchema>;
+
+export const startImpersonationSchema = z.object({
+  targetUserId: z.string().uuid(),
+  minutes: z.coerce.number().int().min(1, 'Between 1 and 60 minutes').max(60, 'Between 1 and 60 minutes'),
+});
+export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
+
+export const endImpersonationSchema = z.object({ sessionId: z.string().uuid().optional() });
+export type EndImpersonationInput = z.infer<typeof endImpersonationSchema>;

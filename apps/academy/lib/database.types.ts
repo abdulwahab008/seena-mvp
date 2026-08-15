@@ -3060,7 +3060,9 @@ export type Database = {
           before: Json | null
           campus_id: string | null
           changed_columns: string[] | null
+          effective_actor_user_id: string | null
           id: string
+          impersonation_session_id: string | null
           occurred_at: string
           prev_hash: string | null
           row_hash: string | null
@@ -3076,7 +3078,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3092,7 +3096,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3111,7 +3117,9 @@ export type Database = {
           before: Json | null
           campus_id: string | null
           changed_columns: string[] | null
+          effective_actor_user_id: string | null
           id: string
+          impersonation_session_id: string | null
           occurred_at: string
           prev_hash: string | null
           row_hash: string | null
@@ -3127,7 +3135,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3143,7 +3153,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3162,7 +3174,9 @@ export type Database = {
           before: Json | null
           campus_id: string | null
           changed_columns: string[] | null
+          effective_actor_user_id: string | null
           id: string
+          impersonation_session_id: string | null
           occurred_at: string
           prev_hash: string | null
           row_hash: string | null
@@ -3178,7 +3192,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3194,7 +3210,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3213,7 +3231,9 @@ export type Database = {
           before: Json | null
           campus_id: string | null
           changed_columns: string[] | null
+          effective_actor_user_id: string | null
           id: string
+          impersonation_session_id: string | null
           occurred_at: string
           prev_hash: string | null
           row_hash: string | null
@@ -3229,7 +3249,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3245,7 +3267,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3264,7 +3288,9 @@ export type Database = {
           before: Json | null
           campus_id: string | null
           changed_columns: string[] | null
+          effective_actor_user_id: string | null
           id: string
+          impersonation_session_id: string | null
           occurred_at: string
           prev_hash: string | null
           row_hash: string | null
@@ -3280,7 +3306,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -3296,7 +3324,9 @@ export type Database = {
           before?: Json | null
           campus_id?: string | null
           changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
           id?: string
+          impersonation_session_id?: string | null
           occurred_at?: string
           prev_hash?: string | null
           row_hash?: string | null
@@ -8207,6 +8237,158 @@ export type Database = {
           },
           {
             foreignKeyName: "homework_load_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      impersonation_consent: {
+        Row: {
+          expires_at: string
+          granted_at: string
+          granted_by: string
+          id: string
+          revoked_at: string | null
+          revoked_by: string | null
+          scope: string
+          target_user_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          expires_at: string
+          granted_at?: string
+          granted_by: string
+          id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          scope?: string
+          target_user_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          expires_at?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          scope?: string
+          target_user_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impersonation_consent_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "impersonation_consent_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "impersonation_consent_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "impersonation_consent_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      impersonation_session: {
+        Row: {
+          blocked_write_count: number
+          consent_granted_by: string
+          consent_id: string
+          end_reason: string | null
+          ended_at: string | null
+          ends_at: string
+          id: string
+          read_count: number
+          started_at: string
+          support_user_id: string
+          target_role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+          tenant_id: string
+          write_count: number
+        }
+        Insert: {
+          blocked_write_count?: number
+          consent_granted_by: string
+          consent_id: string
+          end_reason?: string | null
+          ended_at?: string | null
+          ends_at: string
+          id?: string
+          read_count?: number
+          started_at?: string
+          support_user_id: string
+          target_role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+          tenant_id: string
+          write_count?: number
+        }
+        Update: {
+          blocked_write_count?: number
+          consent_granted_by?: string
+          consent_id?: string
+          end_reason?: string | null
+          ended_at?: string | null
+          ends_at?: string
+          id?: string
+          read_count?: number
+          started_at?: string
+          support_user_id?: string
+          target_role?: Database["public"]["Enums"]["app_role"]
+          target_user_id?: string
+          tenant_id?: string
+          write_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impersonation_session_consent_granted_by_fkey"
+            columns: ["consent_granted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "impersonation_session_consent_id_fkey"
+            columns: ["consent_id"]
+            isOneToOne: false
+            referencedRelation: "impersonation_consent"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "impersonation_session_support_user_id_fkey"
+            columns: ["support_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "impersonation_session_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "impersonation_session_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -19190,6 +19372,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      end_impersonation: { Args: { p_session_id?: string }; Returns: Json }
       enrol_student: {
         Args: {
           p_override_reason?: string
@@ -19203,6 +19386,10 @@ export type Database = {
         Returns: Json
       }
       expire_due_concessions: { Args: { p_as_of?: string }; Returns: number }
+      expire_impersonation_sessions: {
+        Args: { p_as_of?: string }
+        Returns: number
+      }
       fail_audit_export: {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
@@ -19838,10 +20025,16 @@ export type Database = {
           valid: boolean
         }[]
       }
+      grant_impersonation_consent: {
+        Args: { p_hours?: number; p_target_user_id?: string }
+        Returns: string
+      }
       has_consent: {
         Args: { p_purpose: string; p_student_id: string }
         Returns: boolean
       }
+      impersonation_blocked_tables: { Args: never; Returns: string[] }
+      impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
       invite_user: {
         Args: {
           p_campus_ids?: string[]
@@ -20088,6 +20281,10 @@ export type Database = {
         }
         Returns: Json
       }
+      record_impersonation_block: {
+        Args: { p_action?: string; p_table: string }
+        Returns: string
+      }
       record_payment: {
         Args: {
           p_amount_paisa: number
@@ -20291,6 +20488,10 @@ export type Database = {
           p_replacement_issue_id?: string
         }
         Returns: Json
+      }
+      revoke_impersonation_consent: {
+        Args: { p_consent_id: string }
+        Returns: number
       }
       revoke_staff_teachable_subject: {
         Args: { p_id: string }
@@ -20675,6 +20876,10 @@ export type Database = {
       stage_import_rows: {
         Args: { p_batch_id: string; p_rows: Json }
         Returns: number
+      }
+      start_impersonation: {
+        Args: { p_minutes?: number; p_target_user_id: string }
+        Returns: Json
       }
       start_report_card_batch: {
         Args: {

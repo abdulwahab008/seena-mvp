@@ -4,6 +4,11 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
 import { clientIpFromHeaders } from '@/lib/request-ip';
+import {
+  IMPERSONATION_WRITE_BLOCKED_MESSAGE,
+  isImpersonationWriteBlocked,
+  recordBlockedWrite,
+} from '@/lib/impersonation';
 import { expenseError } from '@/lib/expenses/errors';
 import {
   ALLOWED_DOCUMENT_MIME_TYPES,
@@ -98,6 +103,13 @@ export async function submitExpenseVoucher(
     p_attachment_path: attachmentPath ?? undefined,
     p_request_ip: (await requestIp()) ?? undefined,
   });
+  // FR-A16 AC3. app.tg_block_impersonated_write() raised and took the whole
+  // transaction with it, so the durable record has to be written by a second
+  // one — this error path is the only place that knows the attempt happened.
+  if (error && isImpersonationWriteBlocked(error.message)) {
+    await recordBlockedWrite(supabase, 'expense_voucher', 'submit_expense_voucher');
+    return { error: IMPERSONATION_WRITE_BLOCKED_MESSAGE };
+  }
   if (error || !data) return { error: error ? expenseError(error.message) : 'Could not submit the voucher.' };
 
   const result = data as unknown as {

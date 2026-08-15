@@ -1,22 +1,39 @@
 import { redirect } from 'next/navigation';
 import { Building2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { supabaseServer } from '@/lib/supabase/server';
 import { requireSession } from '@/lib/auth/require-session';
 import { hasNoCampusAssigned } from '@/lib/campus-scope';
 import { logFeatureResolveFailure, resolveFeatureSet } from '@/lib/features';
+import { isImpersonationSessionEnded, parseImpersonationClaim } from '@/lib/impersonation';
 import { EmptyState } from '@/components/ui/empty-state';
 import { AppHeader } from './app-header';
+import { ImpersonationBanner } from './impersonation-banner';
+import { ImpersonationEnded } from './impersonation-ended';
 import { Sidebar } from './sidebar';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireSession();
   const supabase = await supabaseServer();
 
-  const { data: appUser } = await supabase
+  // FR-A16. Read off the verified token rather than off a route or a cookie:
+  // this is the same claim the database is reading when it decides what the
+  // request may see, so the banner cannot disagree with the enforcement.
+  const { data: verified } = await supabase.auth.getClaims();
+  const imp = parseImpersonationClaim(verified?.claims);
+
+  const { data: appUser, error: appUserError } = await supabase
     .from('app_user')
     .select('app_role, tenant_id')
     .eq('user_id', user.id)
     .maybeSingle();
+
+  // AC4: app.auth_tenant_id() re-checks the session and the consent on every
+  // RLS-mediated read, so a withdrawal lands here — on the next request —
+  // rather than at the next token refresh.
+  if (imp && appUserError && isImpersonationSessionEnded(appUserError.message)) {
+    return <ImpersonationEnded />;
+  }
 
   // A session with no app_user row would otherwise render this whole shell
   // around an app where every RLS-scoped query legitimately returns nothing.
@@ -36,6 +53,28 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(guardian ? '/portal/homework' : '/no-school');
   }
 
+  // The banner is built before the campus gate below so it renders on that
+  // screen too — an engineer who lands on a dead end must still be told, and
+  // still be given the way out.
+  let banner: React.ReactNode = null;
+  if (imp) {
+    const { data: target } = await supabase
+      .from('app_user')
+      .select('full_name')
+      .eq('user_id', imp.sub)
+      .maybeSingle();
+
+    banner = (
+      <ImpersonationBanner
+        sessionId={imp.sid}
+        targetName={target?.full_name ?? 'this user'}
+        targetRole={String(verified?.claims.app_role ?? appUser.app_role)}
+        engineerEmail={user.email ?? 'your support account'}
+        endsAt={imp.exp}
+      />
+    );
+  }
+
   // FR-A12 AC4: a campus-scoped role (i.e. not owner/super_admin, whose
   // access is role-based, not user_campus-based) with zero active
   // user_campus rows has nothing to see anywhere — every campus-scoped RLS
@@ -50,7 +89,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (hasNoCampusAssigned(appUser.app_role, activeCampuses?.length ?? 0)) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-6">
+      <div className={cn('flex min-h-screen items-center justify-center p-6', imp && 'pt-16')}>
+        {banner}
         <EmptyState
           icon={Building2}
           className="max-w-md bg-card"
@@ -76,14 +116,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (stale) logFeatureResolveFailure(appUser.tenant_id, featureError);
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar schoolName={schoolName} features={features} />
+    <div className={cn('flex min-h-screen bg-background', imp && 'pt-11')}>
+      {banner}
+      <Sidebar schoolName={schoolName} features={features} impersonating={!!imp} />
       <div className="flex min-w-0 flex-1 flex-col">
         <AppHeader
           email={user.email ?? 'Signed in'}
           role={appUser.app_role}
           schoolName={schoolName}
           features={features}
+          impersonating={!!imp}
         />
         <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {children}

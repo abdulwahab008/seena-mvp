@@ -121,11 +121,14 @@ export function AppHeader({
   role,
   schoolName,
   features,
+  /** FR-A16: the impersonation banner is fixed to the top, so the header sticks below it. */
+  impersonating = false,
 }: {
   email: string;
   role: string;
   schoolName: string;
   features?: FeatureSet;
+  impersonating?: boolean;
 }) {
   const [drawer, setDrawer] = React.useState(false);
   const pathname = usePathname();
@@ -142,7 +145,12 @@ export function AppHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-surface/90 px-4 backdrop-blur supports-[backdrop-filter]:bg-surface/75 sm:px-6">
+      <header
+        className={cn(
+          'sticky z-30 flex h-14 items-center gap-3 border-b bg-surface/90 px-4 backdrop-blur supports-[backdrop-filter]:bg-surface/75 sm:px-6',
+          impersonating ? 'top-11' : 'top-0',
+        )}
+      >
         <Button
           type="button"
           variant="ghost"

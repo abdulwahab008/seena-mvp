@@ -3,6 +3,11 @@
 import { revalidatePath } from 'next/cache';
 import { lookupChallanSchema, collectCashPaymentSchema, printReceiptSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
+import {
+  IMPERSONATION_WRITE_BLOCKED_MESSAGE,
+  isImpersonationWriteBlocked,
+  recordBlockedWrite,
+} from '@/lib/impersonation';
 
 export type LookupResult = {
   error: string | null;
@@ -72,6 +77,14 @@ export async function collectCashPayment(_prev: CollectResult, formData: FormDat
     p_reference_no: parsed.data.referenceNo,
   });
   if (error) {
+    // FR-A16 AC3. The BEFORE trigger raised and took the whole transaction
+    // with it, so nothing it wrote survived — the durable security_event has
+    // to come from a second call, and this error path is the only place that
+    // knows the attempt happened. See §5 of the FR-A16 migration header.
+    if (isImpersonationWriteBlocked(error.message)) {
+      await recordBlockedWrite(supabase, 'fee_payment', 'collect_cash_payment');
+      return { error: IMPERSONATION_WRITE_BLOCKED_MESSAGE };
+    }
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to collect payments.' };
     if (error.message.includes('CHALLAN_NOT_FOUND')) return { error: 'Challan not found.' };
     return { error: 'Could not collect the payment.' };
