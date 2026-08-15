@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { breadcrumbsFor } from '@/lib/navigation';
 import type { FeatureSet } from '@/lib/features';
 import { SidebarContent } from './sidebar';
+import { GlobalSearch } from './global-search';
 
 function Breadcrumbs() {
   const pathname = usePathname();
@@ -165,7 +166,8 @@ export function AppHeader({
 
         <Breadcrumbs />
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-2">
+          <GlobalSearch />
           <UserMenu email={email} role={role} />
         </div>
       </header>

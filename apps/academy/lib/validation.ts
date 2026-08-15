@@ -1094,6 +1094,16 @@ export const searchStaffSchema = z.object({
 });
 export type SearchStaffInput = z.infer<typeof searchStaffSchema>;
 
+// Mirrors global_search()'s own signature in
+// supabase/migrations/20260801130000_system_wide_search.sql. The
+// 2-character floor mirrors that function's own guard: one character
+// trigram-matches most of the school.
+export const globalSearchSchema = z.object({
+  q: z.string().trim().min(2, 'Type at least 2 characters.').max(200),
+  limit: z.coerce.number().int().min(1).max(50).optional(),
+});
+export type GlobalSearchInput = z.infer<typeof globalSearchSchema>;
+
 // Mirrors set_attendance_status_weight()'s own signature in
 // supabase/migrations/20260731730000_attendance_status_weight.sql.
 export const setAttendanceStatusWeightSchema = z.object({

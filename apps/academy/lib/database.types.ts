@@ -6330,6 +6330,7 @@ export type Database = {
           batch_id: string | null
           billing_period: string
           campus_id: string
+          challan_digits: string | null
           challan_no: string
           concession_paisa: number
           created_at: string
@@ -6352,6 +6353,7 @@ export type Database = {
           batch_id?: string | null
           billing_period: string
           campus_id: string
+          challan_digits?: string | null
           challan_no: string
           concession_paisa?: number
           created_at?: string
@@ -6374,6 +6376,7 @@ export type Database = {
           batch_id?: string | null
           billing_period?: string
           campus_id?: string
+          challan_digits?: string | null
           challan_no?: string
           concession_paisa?: number
           created_at?: string
@@ -7871,41 +7874,53 @@ export type Database = {
       guardian: {
         Row: {
           alt_phone: string | null
+          alt_phone_last10: string | null
           auth_user_id: string | null
           cnic: string | null
+          cnic_digits: string | null
           created_at: string
           email: string | null
           id: string
           name_en: string
           name_ur: string | null
+          name_ur_roman: string | null
           occupation: string | null
           phone_e164: string | null
+          phone_last10: string | null
           tenant_id: string
         }
         Insert: {
           alt_phone?: string | null
+          alt_phone_last10?: string | null
           auth_user_id?: string | null
           cnic?: string | null
+          cnic_digits?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name_en: string
           name_ur?: string | null
+          name_ur_roman?: string | null
           occupation?: string | null
           phone_e164?: string | null
+          phone_last10?: string | null
           tenant_id: string
         }
         Update: {
           alt_phone?: string | null
+          alt_phone_last10?: string | null
           auth_user_id?: string | null
           cnic?: string | null
+          cnic_digits?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name_en?: string
           name_ur?: string | null
+          name_ur_roman?: string | null
           occupation?: string | null
           phone_e164?: string | null
+          phone_last10?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -12685,6 +12700,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           id: string
           id_document_type: Database["public"]["Enums"]["id_document_type"]
+          name_ur_roman: string | null
           passport_no: string | null
           tenant_id: string
           user_id: string | null
@@ -12706,6 +12722,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           id?: string
           id_document_type?: Database["public"]["Enums"]["id_document_type"]
+          name_ur_roman?: string | null
           passport_no?: string | null
           tenant_id: string
           user_id?: string | null
@@ -12727,6 +12744,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender"]
           id?: string
           id_document_type?: Database["public"]["Enums"]["id_document_type"]
+          name_ur_roman?: string | null
           passport_no?: string | null
           tenant_id?: string
           user_id?: string | null
@@ -13259,6 +13277,7 @@ export type Database = {
         Row: {
           address: Json
           b_form_no: string | null
+          bform_digits: string | null
           bform_override_reason: string | null
           blood_group: string | null
           campus_id: string
@@ -13270,11 +13289,13 @@ export type Database = {
           father_name_en: string | null
           father_name_ur: string | null
           gender: Database["public"]["Enums"]["gender"]
+          gr_digits: string | null
           gr_number: string
           house_id: string | null
           id: string
           name_en: string
           name_ur: string | null
+          name_ur_roman: string | null
           nationality: string
           no_readmission_flag: boolean
           photo_path: string | null
@@ -13285,6 +13306,7 @@ export type Database = {
         Insert: {
           address?: Json
           b_form_no?: string | null
+          bform_digits?: string | null
           bform_override_reason?: string | null
           blood_group?: string | null
           campus_id: string
@@ -13296,11 +13318,13 @@ export type Database = {
           father_name_en?: string | null
           father_name_ur?: string | null
           gender: Database["public"]["Enums"]["gender"]
+          gr_digits?: string | null
           gr_number: string
           house_id?: string | null
           id?: string
           name_en: string
           name_ur?: string | null
+          name_ur_roman?: string | null
           nationality?: string
           no_readmission_flag?: boolean
           photo_path?: string | null
@@ -13311,6 +13335,7 @@ export type Database = {
         Update: {
           address?: Json
           b_form_no?: string | null
+          bform_digits?: string | null
           bform_override_reason?: string | null
           blood_group?: string | null
           campus_id?: string
@@ -13322,11 +13347,13 @@ export type Database = {
           father_name_en?: string | null
           father_name_ur?: string | null
           gender?: Database["public"]["Enums"]["gender"]
+          gr_digits?: string | null
           gr_number?: string
           house_id?: string | null
           id?: string
           name_en?: string
           name_ur?: string | null
+          name_ur_roman?: string | null
           nationality?: string
           no_readmission_flag?: boolean
           photo_path?: string | null
@@ -20023,6 +20050,20 @@ export type Database = {
           email: string
           tenant_name: string
           valid: boolean
+        }[]
+      }
+      global_search: {
+        Args: { p_limit?: number; p_q: string }
+        Returns: {
+          campus_id: string
+          display_label: string
+          entity_id: string
+          entity_type: string
+          href: string
+          match_field: string
+          rank: number
+          subtitle: string
+          truncated: boolean
         }[]
       }
       grant_impersonation_consent: {
