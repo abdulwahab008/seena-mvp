@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { CreateBellTemplateForm } from './create-bell-template-form';
 import { BellTemplateList, type BellTemplateRow } from './bell-template-list';
 import { BellCalendarRules, type CalendarRuleRow } from './bell-calendar-rules';
+import { RamadanOverrides, type DateRangeRuleRow } from './ramadan-overrides';
 
 const SHIFTS = ['MORNING', 'AFTERNOON'] as const;
 
@@ -23,14 +24,18 @@ export default async function BellTemplatesPage() {
   const { data: rules } = campusId
     ? await supabase
         .from('bell_calendar_rule')
-        .select('id, shift, weekday, precedence, note, bell_template(code, name)')
+        .select('id, shift, weekday, date_from, date_to, precedence, note, bell_template(code, name)')
         .eq('campus_id', campusId)
         .order('shift')
         .order('weekday')
     : { data: [] as never[] };
 
   const rows = (templates ?? []) as unknown as BellTemplateRow[];
-  const ruleRows = (rules ?? []) as unknown as CalendarRuleRow[];
+  // A rule with a date_from is FR-F03's date-range override; everything
+  // else is FR-F02's plain weekday rule. Two lists, one table.
+  const allRules = (rules ?? []) as unknown as (CalendarRuleRow & { date_from: string | null; date_to: string | null })[];
+  const ruleRows = allRules.filter((r) => r.date_from === null) as CalendarRuleRow[];
+  const dateRuleRows = allRules.filter((r) => r.date_from !== null) as DateRangeRuleRow[];
   const shiftsWithoutDefault = SHIFTS.filter((s) => !rows.some((t) => t.shift === s && t.is_default));
 
   return (
@@ -54,6 +59,7 @@ export default async function BellTemplatesPage() {
           <CreateBellTemplateForm campusId={campusId} />
           <BellTemplateList templates={rows} />
           <BellCalendarRules campusId={campusId} templates={rows} rules={ruleRows} />
+          <RamadanOverrides campusId={campusId} templates={rows} rules={dateRuleRows} />
         </>
       )}
     </div>

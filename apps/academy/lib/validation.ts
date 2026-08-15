@@ -1003,6 +1003,45 @@ export const createBellCalendarRuleSchema = z.object({
 });
 export type CreateBellCalendarRuleInput = z.infer<typeof createBellCalendarRuleSchema>;
 
+// FR-F03: the date-range half of the same DB function. Separate schema
+// rather than making weekday optional on the one above, because the two
+// forms are genuinely different shapes — a weekday rule has no dates and
+// a Ramadan override has no required weekday — and merging them would
+// make every field on both conditionally required.
+//
+// weekday IS accepted here, and optional: a rule carrying both is the
+// "Ramadan Friday" case, shorter still than an ordinary Ramadan day.
+const bellRuleDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
+const optionalBellRuleDate = z.preprocess(
+  (v) => (v === '' || v === null || v === undefined ? undefined : v),
+  bellRuleDate.optional(),
+);
+
+export const createDateRangeBellRuleSchema = z
+  .object({
+    shift: z.enum(BELL_SHIFTS),
+    bellTemplateId: z.string().uuid('Choose a template'),
+    weekday: z.preprocess(
+      (v) => (v === '' || v === null || v === undefined || v === 'ANY' ? undefined : v),
+      z.coerce.number().int().min(0).max(6).optional(),
+    ),
+    dateFrom: bellRuleDate,
+    dateTo: optionalBellRuleDate,
+    // Above FR-F02's weekday rules (50), matching the DB function's own
+    // default for a date-range rule.
+    precedence: z.coerce.number().int().min(0).max(1000).default(100),
+    note: z.string().max(500).optional(),
+  })
+  .refine((v) => !v.dateTo || v.dateTo >= v.dateFrom, { message: 'End date must not precede the start date', path: ['dateTo'] });
+export type CreateDateRangeBellRuleInput = z.infer<typeof createDateRangeBellRuleSchema>;
+
+// The moon-sighting correction: the only fields a Principal ever edits
+// on an already-activated Ramadan rule.
+export const updateBellRuleDatesSchema = z
+  .object({ dateFrom: bellRuleDate, dateTo: optionalBellRuleDate })
+  .refine((v) => !v.dateTo || v.dateTo >= v.dateFrom, { message: 'End date must not precede the start date', path: ['dateTo'] });
+export type UpdateBellRuleDatesInput = z.infer<typeof updateBellRuleDatesSchema>;
+
 // Mirrors create_timetable_version()'s own signature in
 // supabase/migrations/20260731600000_timetable_draft_slot_assignment.sql.
 export const createTimetableVersionSchema = z.object({

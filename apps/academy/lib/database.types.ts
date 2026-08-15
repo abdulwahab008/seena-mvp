@@ -21065,6 +21065,10 @@ export type Database = {
         Args: { p_guardian_id: string; p_student_id: string }
         Returns: undefined
       }
+      update_bell_calendar_rule_dates: {
+        Args: { p_date_from: string; p_date_to?: string; p_id: string }
+        Returns: undefined
+      }
       update_bell_period_time: {
         Args: { p_end_time: string; p_period_id: string; p_start_time: string }
         Returns: undefined

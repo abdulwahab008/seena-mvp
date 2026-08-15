@@ -114,9 +114,17 @@ export default async function MyTimetablePage({ searchParams }: { searchParams: 
                       <td key={w} data-testid={`my-timetable-cell-${w}-${periodNo}`} className="p-2 align-top">
                         {cell ? (
                           <div className="space-y-0.5">
-                            {(cell.start_time || cell.end_time) && (
+                            {cell.start_time || cell.end_time ? (
                               <p className="text-xs text-muted-foreground">
                                 {fmtTime(cell.start_time)}–{fmtTime(cell.end_time)}
+                              </p>
+                            ) : (
+                              // FR-F03: the day resolved to a shorter bell
+                              // template (Ramadan) that has no period this
+                              // high. The slot is still published — it just
+                              // isn't held today.
+                              <p className="text-xs font-medium text-amber-700" data-testid={`my-timetable-not-held-${w}-${periodNo}`}>
+                                Not held today
                               </p>
                             )}
                             <p className="font-medium">{cell.subject_name_en}</p>
