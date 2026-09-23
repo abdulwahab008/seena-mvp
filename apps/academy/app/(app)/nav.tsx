@@ -69,6 +69,7 @@ const LINKS = [
   { href: '/audit-export', label: 'Audit Export' },
   { href: '/consent', label: 'Consent' },
   { href: '/communication/outbox', label: 'Message Outbox' },
+  { href: '/communication/templates', label: 'Message Templates' },
 ];
 
 export function AppNav() {
