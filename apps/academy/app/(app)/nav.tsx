@@ -54,6 +54,12 @@ const LINKS = [
   { href: '/exams/annual', label: 'Annual Results' },
   { href: '/expenses/vouchers', label: 'Expense Vouchers' },
   { href: '/expenses/approvals', label: 'Voucher Approvals' },
+  { href: '/expenses/chart', label: 'Expense Chart & Budgets' },
+  { href: '/payroll/runs', label: 'Payroll Runs' },
+  { href: '/payroll/components', label: 'Salary Components' },
+  { href: '/payroll/structures', label: 'Salary Structures' },
+  { href: '/payroll/loans', label: 'Staff Loans' },
+  { href: '/payroll/tax-slabs', label: 'Tax Slabs' },
   { href: '/certificates/templates', label: 'Certificate Templates' },
   { href: '/certificates/serials', label: 'Certificate Serials' },
   { href: '/certificates/signing', label: 'Certificate Signing' },
@@ -62,6 +68,7 @@ const LINKS = [
   { href: '/certificates/register', label: 'Certificate Register' },
   { href: '/audit-export', label: 'Audit Export' },
   { href: '/consent', label: 'Consent' },
+  { href: '/communication/outbox', label: 'Message Outbox' },
 ];
 
 export function AppNav() {

@@ -3351,6 +3351,30 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_file_format: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+          specs: Json
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          specs?: Json
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          specs?: Json
+        }
+        Relationships: []
+      }
       bell_calendar_rule: {
         Row: {
           bell_template_id: string
@@ -4041,6 +4065,9 @@ export type Database = {
           issued_by: string | null
           language: Database["public"]["Enums"]["certificate_language"]
           original_issue_id: string | null
+          override_at: string | null
+          override_by: string | null
+          override_reason: string | null
           payload_snapshot: Json
           pdf_path: string
           pdf_sha256: string | null
@@ -4068,6 +4095,9 @@ export type Database = {
           issued_by?: string | null
           language: Database["public"]["Enums"]["certificate_language"]
           original_issue_id?: string | null
+          override_at?: string | null
+          override_by?: string | null
+          override_reason?: string | null
           payload_snapshot: Json
           pdf_path: string
           pdf_sha256?: string | null
@@ -4095,6 +4125,9 @@ export type Database = {
           issued_by?: string | null
           language?: Database["public"]["Enums"]["certificate_language"]
           original_issue_id?: string | null
+          override_at?: string | null
+          override_by?: string | null
+          override_reason?: string | null
           payload_snapshot?: Json
           pdf_path?: string
           pdf_sha256?: string | null
@@ -4821,6 +4854,93 @@ export type Database = {
           },
         ]
       }
+      comm_provider: {
+        Row: {
+          channel: Database["public"]["Enums"]["comm_channel"]
+          code: string
+          config_schema: Json
+          created_at: string
+          default_priority: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["comm_channel"]
+          code: string
+          config_schema?: Json
+          created_at?: string
+          default_priority?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["comm_channel"]
+          code?: string
+          config_schema?: Json
+          created_at?: string
+          default_priority?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      comm_provider_credential: {
+        Row: {
+          config: Json
+          created_at: string
+          credential_vault_ref: string
+          id: string
+          is_active: boolean
+          provider_id: string
+          sender_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          credential_vault_ref: string
+          id?: string
+          is_active?: boolean
+          provider_id: string
+          sender_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          credential_vault_ref?: string
+          id?: string
+          is_active?: boolean
+          provider_id?: string
+          sender_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comm_provider_credential_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "comm_provider"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comm_provider_credential_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       concession_award: {
         Row: {
           approved_at: string | null
@@ -5313,6 +5433,79 @@ export type Database = {
           },
         ]
       }
+      employee_bank_detail: {
+        Row: {
+          account_number: string
+          account_title: string
+          bank_name: string
+          branch_code: string | null
+          campus_id: string
+          created_at: string
+          iban: string | null
+          id: string
+          is_verified: boolean
+          staff_id: string
+          tenant_id: string
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          account_number: string
+          account_title: string
+          bank_name: string
+          branch_code?: string | null
+          campus_id: string
+          created_at?: string
+          iban?: string | null
+          id?: string
+          is_verified?: boolean
+          staff_id: string
+          tenant_id: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          account_number?: string
+          account_title?: string
+          bank_name?: string
+          branch_code?: string | null
+          campus_id?: string
+          created_at?: string
+          iban?: string | null
+          id?: string
+          is_verified?: boolean
+          staff_id?: string
+          tenant_id?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_bank_detail_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_bank_detail_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: true
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_bank_detail_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_code_counter: {
         Row: {
           campus_id: string
@@ -5332,6 +5525,70 @@ export type Database = {
             columns: ["campus_id"]
             isOneToOne: true
             referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_salary_structure: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          basic_paisa: number
+          campus_id: string
+          component_overrides: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          staff_id: string
+          tenant_id: string
+          validity: unknown
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          basic_paisa: number
+          campus_id: string
+          component_overrides?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          staff_id: string
+          tenant_id: string
+          validity: unknown
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          basic_paisa?: number
+          campus_id?: string
+          component_overrides?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          staff_id?: string
+          tenant_id?: string
+          validity?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_salary_structure_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_salary_structure_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_salary_structure_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
         ]
@@ -6025,6 +6282,91 @@ export type Database = {
           },
         ]
       }
+      expense_budget: {
+        Row: {
+          amount_paisa: number
+          budget_month: string
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          head_id: string
+          id: string
+          session_id: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount_paisa: number
+          budget_month: string
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          head_id: string
+          id?: string
+          session_id: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount_paisa?: number
+          budget_month?: string
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          head_id?: string
+          id?: string
+          session_id?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_budget_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "expense_budget_head_id_fkey"
+            columns: ["head_id"]
+            isOneToOne: false
+            referencedRelation: "expense_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       expense_head: {
         Row: {
           code: string
@@ -6032,8 +6374,11 @@ export type Database = {
           created_by: string | null
           id: string
           is_active: boolean
+          is_leaf: boolean
+          level: number
           name_en: string
           name_ur: string
+          parent_id: string | null
           requires_approval: boolean
           tenant_id: string
         }
@@ -6043,8 +6388,11 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_active?: boolean
+          is_leaf?: boolean
+          level?: number
           name_en: string
           name_ur: string
+          parent_id?: string | null
           requires_approval?: boolean
           tenant_id: string
         }
@@ -6054,8 +6402,11 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_active?: boolean
+          is_leaf?: boolean
+          level?: number
           name_en?: string
           name_ur?: string
+          parent_id?: string | null
           requires_approval?: boolean
           tenant_id?: string
         }
@@ -6068,10 +6419,47 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
+            foreignKeyName: "expense_head_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "expense_head"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "expense_head_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_head_campus: {
+        Row: {
+          campus_id: string
+          head_id: string
+        }
+        Insert: {
+          campus_id: string
+          head_id: string
+        }
+        Update: {
+          campus_id?: string
+          head_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_head_campus_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_head_campus_head_id_fkey"
+            columns: ["head_id"]
+            isOneToOne: false
+            referencedRelation: "expense_head"
             referencedColumns: ["id"]
           },
         ]
@@ -6345,6 +6733,7 @@ export type Database = {
           net_paisa: number
           session_id: string
           status: Database["public"]["Enums"]["fee_challan_status"]
+          student_id: string | null
           tenant_id: string
         }
         Insert: {
@@ -6368,6 +6757,7 @@ export type Database = {
           net_paisa: number
           session_id: string
           status?: Database["public"]["Enums"]["fee_challan_status"]
+          student_id?: string | null
           tenant_id: string
         }
         Update: {
@@ -6391,6 +6781,7 @@ export type Database = {
           net_paisa?: number
           session_id?: string
           status?: Database["public"]["Enums"]["fee_challan_status"]
+          student_id?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -6449,6 +6840,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "academic_session"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
           },
           {
             foreignKeyName: "fee_challan_tenant_id_fkey"
@@ -10067,6 +10479,223 @@ export type Database = {
           },
         ]
       }
+      message: {
+        Row: {
+          batch_id: string | null
+          body: string
+          campus_id: string
+          channel: Database["public"]["Enums"]["comm_channel"]
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          metadata: Json
+          recipient_email: string | null
+          recipient_id: string | null
+          recipient_phone: string | null
+          recipient_type: Database["public"]["Enums"]["comm_recipient_type"]
+          scheduled_at: string
+          sender_id: string | null
+          status: Database["public"]["Enums"]["message_status"]
+          subject: string | null
+          template_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id?: string | null
+          body: string
+          campus_id: string
+          channel?: Database["public"]["Enums"]["comm_channel"]
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          metadata?: Json
+          recipient_email?: string | null
+          recipient_id?: string | null
+          recipient_phone?: string | null
+          recipient_type?: Database["public"]["Enums"]["comm_recipient_type"]
+          scheduled_at?: string
+          sender_id?: string | null
+          status?: Database["public"]["Enums"]["message_status"]
+          subject?: string | null
+          template_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string | null
+          body?: string
+          campus_id?: string
+          channel?: Database["public"]["Enums"]["comm_channel"]
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          metadata?: Json
+          recipient_email?: string | null
+          recipient_id?: string | null
+          recipient_phone?: string | null
+          recipient_type?: Database["public"]["Enums"]["comm_recipient_type"]
+          scheduled_at?: string
+          sender_id?: string | null
+          status?: Database["public"]["Enums"]["message_status"]
+          subject?: string | null
+          template_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "message_batch"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_attempt: {
+        Row: {
+          attempt_number: number
+          completed_at: string | null
+          created_at: string
+          dispatched_at: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          message_id: string
+          provider_id: string | null
+          provider_ref: string | null
+          raw_response: Json | null
+          status: Database["public"]["Enums"]["attempt_status"]
+        }
+        Insert: {
+          attempt_number?: number
+          completed_at?: string | null
+          created_at?: string
+          dispatched_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          message_id: string
+          provider_id?: string | null
+          provider_ref?: string | null
+          raw_response?: Json | null
+          status?: Database["public"]["Enums"]["attempt_status"]
+        }
+        Update: {
+          attempt_number?: number
+          completed_at?: string | null
+          created_at?: string
+          dispatched_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          message_id?: string
+          provider_id?: string | null
+          provider_ref?: string | null
+          raw_response?: Json | null
+          status?: Database["public"]["Enums"]["attempt_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_attempt_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "message"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_attempt_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "comm_provider"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_batch: {
+        Row: {
+          campus_id: string
+          channel: Database["public"]["Enums"]["comm_channel"]
+          created_at: string
+          created_by: string | null
+          failed_count: number
+          id: string
+          metadata: Json
+          queued_count: number
+          sent_count: number
+          tenant_id: string
+          title: string
+          total_count: number
+          updated_at: string
+        }
+        Insert: {
+          campus_id: string
+          channel: Database["public"]["Enums"]["comm_channel"]
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number
+          id?: string
+          metadata?: Json
+          queued_count?: number
+          sent_count?: number
+          tenant_id: string
+          title: string
+          total_count?: number
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string
+          channel?: Database["public"]["Enums"]["comm_channel"]
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number
+          id?: string
+          metadata?: Json
+          queued_count?: number
+          sent_count?: number
+          tenant_id?: string
+          title?: string
+          total_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_batch_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_template: {
         Row: {
           body_preview: string | null
@@ -10652,6 +11281,333 @@ export type Database = {
           token_hash?: string
         }
         Relationships: []
+      }
+      payroll_adjustment: {
+        Row: {
+          adjustment_type: string
+          amount_paisa: number
+          created_at: string
+          created_by: string | null
+          id: string
+          line_id: string
+          reason: string
+        }
+        Insert: {
+          adjustment_type: string
+          amount_paisa: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          line_id: string
+          reason: string
+        }
+        Update: {
+          adjustment_type?: string
+          amount_paisa?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          line_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_adjustment_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_run_line"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_arrear: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          reason: string
+          source_period: string
+          staff_id: string
+          status: string
+          target_run_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason: string
+          source_period: string
+          staff_id: string
+          status?: string
+          target_run_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: string
+          source_period?: string
+          staff_id?: string
+          status?: string
+          target_run_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_arrear_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_arrear_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_arrear_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_config: {
+        Row: {
+          campus_id: string
+          late_marks_per_absence: number
+          net_pay_floor_pct: number
+          payable_day_basis: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          campus_id: string
+          late_marks_per_absence?: number
+          net_pay_floor_pct?: number
+          payable_day_basis?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          campus_id?: string
+          late_marks_per_absence?: number
+          net_pay_floor_pct?: number
+          payable_day_basis?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_config_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_config_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_run: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          campus_id: string
+          employee_count: number
+          generated_at: string
+          generated_by: string | null
+          id: string
+          locked_at: string | null
+          locked_by: string | null
+          period_month: string
+          status: Database["public"]["Enums"]["payroll_run_status"]
+          tenant_id: string
+          total_deductions_paisa: number
+          total_gross_paisa: number
+          total_net_paisa: number
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          campus_id: string
+          employee_count?: number
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          locked_at?: string | null
+          locked_by?: string | null
+          period_month: string
+          status?: Database["public"]["Enums"]["payroll_run_status"]
+          tenant_id: string
+          total_deductions_paisa?: number
+          total_gross_paisa?: number
+          total_net_paisa?: number
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          campus_id?: string
+          employee_count?: number
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          locked_at?: string | null
+          locked_by?: string | null
+          period_month?: string
+          status?: Database["public"]["Enums"]["payroll_run_status"]
+          tenant_id?: string
+          total_deductions_paisa?: number
+          total_gross_paisa?: number
+          total_net_paisa?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_run_line: {
+        Row: {
+          attendance_deduction_paisa: number
+          basic_paisa: number
+          gross_paisa: number
+          id: string
+          loan_recovery_paisa: number
+          net_paisa: number
+          other_deductions_paisa: number
+          payable_days: number
+          payroll_run_id: string
+          staff_id: string
+          status: string
+          tax_withholding_paisa: number
+          unpaid_days: number
+        }
+        Insert: {
+          attendance_deduction_paisa?: number
+          basic_paisa: number
+          gross_paisa: number
+          id?: string
+          loan_recovery_paisa?: number
+          net_paisa: number
+          other_deductions_paisa?: number
+          payable_days?: number
+          payroll_run_id: string
+          staff_id: string
+          status?: string
+          tax_withholding_paisa?: number
+          unpaid_days?: number
+        }
+        Update: {
+          attendance_deduction_paisa?: number
+          basic_paisa?: number
+          gross_paisa?: number
+          id?: string
+          loan_recovery_paisa?: number
+          net_paisa?: number
+          other_deductions_paisa?: number
+          payable_days?: number
+          payroll_run_id?: string
+          staff_id?: string
+          status?: string
+          tax_withholding_paisa?: number
+          unpaid_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_run_line_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_run"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_line_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_run_line_component: {
+        Row: {
+          amount_paisa: number
+          code: string
+          component_id: string | null
+          component_type: string
+          id: string
+          is_taxable: boolean
+          line_id: string
+          name_en: string
+        }
+        Insert: {
+          amount_paisa?: number
+          code: string
+          component_id?: string | null
+          component_type: string
+          id?: string
+          is_taxable?: boolean
+          line_id: string
+          name_en: string
+        }
+        Update: {
+          amount_paisa?: number
+          code?: string
+          component_id?: string | null
+          component_type?: string
+          id?: string
+          is_taxable?: boolean
+          line_id?: string
+          name_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_run_line_component_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "salary_component"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_line_component_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_run_line"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permission: {
         Row: {
@@ -11815,6 +12771,71 @@ export type Database = {
           },
           {
             foreignKeyName: "room_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_component: {
+        Row: {
+          calc_method: Database["public"]["Enums"]["salary_calc_method"]
+          calc_pct: number
+          calc_value_paisa: number
+          code: string
+          component_type: Database["public"]["Enums"]["salary_component_type"]
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          effective_to: string | null
+          exemption_cap_pct: number
+          id: string
+          is_taxable: boolean
+          name_en: string
+          name_ur: string | null
+          prorates_on_absence: boolean
+          tenant_id: string
+        }
+        Insert: {
+          calc_method?: Database["public"]["Enums"]["salary_calc_method"]
+          calc_pct?: number
+          calc_value_paisa?: number
+          code: string
+          component_type?: Database["public"]["Enums"]["salary_component_type"]
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          exemption_cap_pct?: number
+          id?: string
+          is_taxable?: boolean
+          name_en: string
+          name_ur?: string | null
+          prorates_on_absence?: boolean
+          tenant_id: string
+        }
+        Update: {
+          calc_method?: Database["public"]["Enums"]["salary_calc_method"]
+          calc_pct?: number
+          calc_value_paisa?: number
+          code?: string
+          component_type?: Database["public"]["Enums"]["salary_component_type"]
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          exemption_cap_pct?: number
+          id?: string
+          is_taxable?: boolean
+          name_en?: string
+          name_ur?: string | null
+          prorates_on_absence?: boolean
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_component_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -13030,6 +14051,124 @@ export type Database = {
           },
         ]
       }
+      staff_loan: {
+        Row: {
+          approved_by: string | null
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          disbursed_at: string
+          id: string
+          installment_paisa: number
+          loan_type: string
+          notes: string | null
+          principal_paisa: number
+          repayment_start_month: string
+          staff_id: string
+          status: string
+          tenant_id: string
+          total_repaid_paisa: number
+        }
+        Insert: {
+          approved_by?: string | null
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          disbursed_at?: string
+          id?: string
+          installment_paisa: number
+          loan_type?: string
+          notes?: string | null
+          principal_paisa: number
+          repayment_start_month: string
+          staff_id: string
+          status?: string
+          tenant_id: string
+          total_repaid_paisa?: number
+        }
+        Update: {
+          approved_by?: string | null
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          disbursed_at?: string
+          id?: string
+          installment_paisa?: number
+          loan_type?: string
+          notes?: string | null
+          principal_paisa?: number
+          repayment_start_month?: string
+          staff_id?: string
+          status?: string
+          tenant_id?: string
+          total_repaid_paisa?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_loan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_loan_recovery: {
+        Row: {
+          amount_paisa: number
+          id: string
+          loan_id: string
+          notes: string | null
+          payroll_run_id: string | null
+          recovered_at: string
+        }
+        Insert: {
+          amount_paisa: number
+          id?: string
+          loan_id: string
+          notes?: string | null
+          payroll_run_id?: string | null
+          recovered_at?: string
+        }
+        Update: {
+          amount_paisa?: number
+          id?: string
+          loan_id?: string
+          notes?: string | null
+          payroll_run_id?: string | null
+          recovered_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_loan_recovery_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "staff_loan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_recovery_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_loan_summary"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_private_contact: {
         Row: {
           address: string | null
@@ -13863,7 +15002,7 @@ export type Database = {
           is_active: boolean
           is_examinable: boolean
           name_en: string
-          name_ur: string
+          name_ur: string | null
           subject_type: Database["public"]["Enums"]["subject_type"]
           tenant_id: string
         }
@@ -13876,7 +15015,7 @@ export type Database = {
           is_active?: boolean
           is_examinable?: boolean
           name_en: string
-          name_ur: string
+          name_ur?: string | null
           subject_type?: Database["public"]["Enums"]["subject_type"]
           tenant_id: string
         }
@@ -13889,7 +15028,7 @@ export type Database = {
           is_active?: boolean
           is_examinable?: boolean
           name_en?: string
-          name_ur?: string
+          name_ur?: string | null
           subject_type?: Database["public"]["Enums"]["subject_type"]
           tenant_id?: string
         }
@@ -14166,6 +15305,74 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tax_slab: {
+        Row: {
+          fixed_amount_paisa: number
+          id: string
+          lower_bound_paisa: number
+          rate_pct: number
+          rebate_pct: number
+          sort_order: number
+          upper_bound_paisa: number | null
+          version_id: string
+        }
+        Insert: {
+          fixed_amount_paisa?: number
+          id?: string
+          lower_bound_paisa: number
+          rate_pct?: number
+          rebate_pct?: number
+          sort_order?: number
+          upper_bound_paisa?: number | null
+          version_id: string
+        }
+        Update: {
+          fixed_amount_paisa?: number
+          id?: string
+          lower_bound_paisa?: number
+          rate_pct?: number
+          rebate_pct?: number
+          sort_order?: number
+          upper_bound_paisa?: number | null
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_slab_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "tax_slab_version"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_slab_version: {
+        Row: {
+          created_at: string
+          effective_from: string
+          id: string
+          is_active: boolean
+          published_by: string | null
+          tax_year: string
+        }
+        Insert: {
+          created_at?: string
+          effective_from: string
+          id?: string
+          is_active?: boolean
+          published_by?: string | null
+          tax_year: string
+        }
+        Update: {
+          created_at?: string
+          effective_from?: string
+          id?: string
+          is_active?: boolean
+          published_by?: string | null
+          tax_year?: string
+        }
+        Relationships: []
       }
       teach_scope_override: {
         Row: {
@@ -14537,6 +15744,61 @@ export type Database = {
           },
           {
             foreignKeyName: "tenant_theme_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      timetable_constraint: {
+        Row: {
+          campus_id: string
+          id: string
+          int_value: number | null
+          is_enabled: boolean
+          key: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          campus_id: string
+          id?: string
+          int_value?: number | null
+          is_enabled?: boolean
+          key: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          campus_id?: string
+          id?: string
+          int_value?: number | null
+          is_enabled?: boolean
+          key?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_constraint_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_constraint_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_constraint_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "app_user"
@@ -16512,6 +17774,63 @@ export type Database = {
           },
         ]
       }
+      v_expense_budget_vs_actual: {
+        Row: {
+          actual_paisa: number | null
+          budget_id: string | null
+          budget_month: string | null
+          budget_paisa: number | null
+          campus_id: string | null
+          head_code: string | null
+          head_id: string | null
+          head_name_en: string | null
+          head_name_ur: string | null
+          is_leaf: boolean | null
+          is_overspent: boolean | null
+          level: number | null
+          parent_id: string | null
+          remaining_paisa: number | null
+          session_id: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_budget_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_head_id_fkey"
+            columns: ["head_id"]
+            isOneToOne: false
+            referencedRelation: "expense_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_head_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "expense_head"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_expense_voucher: {
         Row: {
           amount_paisa: number | null
@@ -17968,6 +19287,50 @@ export type Database = {
           },
         ]
       }
+      v_staff_loan_summary: {
+        Row: {
+          approved_by: string | null
+          campus_id: string | null
+          created_at: string | null
+          disbursed_at: string | null
+          employee_code: string | null
+          id: string | null
+          installment_paisa: number | null
+          loan_type: string | null
+          notes: string | null
+          outstanding_paisa: number | null
+          principal_paisa: number | null
+          repayment_start_month: string | null
+          staff_id: string | null
+          staff_name: string | null
+          status: string | null
+          tenant_id: string | null
+          total_repaid_paisa: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_loan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_student_homework_feed: {
         Row: {
           assigned_date: string | null
@@ -18407,6 +19770,37 @@ export type Database = {
           },
         ]
       }
+      v_teacher_daily_load: {
+        Row: {
+          period_count: number | null
+          staff_id: string | null
+          version_id: string | null
+          weekday: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_slot_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_version"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_timetable_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["timetable_version_id"]
+          },
+        ]
+      }
       v_unallocated_section_subject: {
         Row: {
           campus_id: string | null
@@ -18624,6 +20018,10 @@ export type Database = {
         Args: { p_role_id: string; p_user_id: string }
         Returns: undefined
       }
+      assign_staff_department: {
+        Args: { p_department_id?: string; p_staff_id: string }
+        Returns: Json
+      }
       assign_subject_teacher: {
         Args: {
           p_effective_from: string
@@ -18769,6 +20167,43 @@ export type Database = {
           section_id: string
           section_label: string
         }[]
+      }
+      claim_message_batch: {
+        Args: {
+          p_channel?: Database["public"]["Enums"]["comm_channel"]
+          p_limit?: number
+          p_tenant_id?: string
+          p_worker_id: string
+        }
+        Returns: {
+          batch_id: string | null
+          body: string
+          campus_id: string
+          channel: Database["public"]["Enums"]["comm_channel"]
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          metadata: Json
+          recipient_email: string | null
+          recipient_id: string | null
+          recipient_phone: string | null
+          recipient_type: Database["public"]["Enums"]["comm_recipient_type"]
+          scheduled_at: string
+          sender_id: string | null
+          status: Database["public"]["Enums"]["message_status"]
+          subject: string | null
+          template_id: string | null
+          tenant_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "message"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       claim_report_card_batch_item: {
         Args: { p_batch_id: string }
@@ -18996,6 +20431,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_custom_leave_policy: {
+        Args: {
+          p_code: string
+          p_doc_required_after_days?: number
+          p_entitlement_days: number
+          p_grant_active_staff?: boolean
+          p_is_paid?: boolean
+          p_name_en: string
+        }
+        Returns: Json
+      }
       create_custom_role: {
         Args: { p_name: string; p_permission_codes: string[] }
         Returns: string
@@ -19220,7 +20666,7 @@ export type Database = {
           p_default_max_marks?: number
           p_is_examinable?: boolean
           p_name_en: string
-          p_name_ur: string
+          p_name_ur?: string
           p_subject_type?: Database["public"]["Enums"]["subject_type"]
         }
         Returns: string
@@ -19342,7 +20788,9 @@ export type Database = {
         Returns: undefined
       }
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
+      delete_class_subject: { Args: { p_id: string }; Returns: undefined }
       delete_custom_role: { Args: { p_role_id: string }; Returns: undefined }
+      delete_department: { Args: { p_id: string }; Returns: boolean }
       delete_exam_subject: {
         Args: { p_exam_subject_id: string }
         Returns: undefined
@@ -19463,6 +20911,36 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_accrue_loan_recovery: {
+        Args: {
+          p_payroll_run_id: string
+          p_period_month: string
+          p_staff_id: string
+        }
+        Returns: number
+      }
+      fn_active_salary_structure: {
+        Args: { p_on_date?: string; p_staff_id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          basic_paisa: number
+          campus_id: string
+          component_overrides: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          staff_id: string
+          tenant_id: string
+          validity: unknown
+        }
+        SetofOptions: {
+          from: "*"
+          to: "employee_salary_structure"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       fn_allocate_test_seat: {
         Args: { p_application_id: string; p_sitting_id: string }
         Returns: number
@@ -19470,6 +20948,10 @@ export type Database = {
       fn_annual_result_sheet: {
         Args: { p_section_id: string; p_session_id: string }
         Returns: Json
+      }
+      fn_annual_tax_paisa: {
+        Args: { p_annual_taxable_paisa: number; p_tax_year?: string }
+        Returns: number
       }
       fn_application_docs_complete: {
         Args: { p_application_id: string }
@@ -19479,6 +20961,7 @@ export type Database = {
         Args: { p_exam_subject_id: string; p_section_id: string }
         Returns: Json
       }
+      fn_approve_payroll_run: { Args: { p_run_id: string }; Returns: undefined }
       fn_assert_annual_result_publishable: {
         Args: { p_enrolment_id: string; p_session_id: string }
         Returns: undefined
@@ -19503,6 +20986,16 @@ export type Database = {
           p_section_id: string
         }
         Returns: undefined
+      }
+      fn_attendance_deduction_paisa: {
+        Args: {
+          p_basic_paisa: number
+          p_payable_days?: number
+          p_period_end: string
+          p_period_start: string
+          p_staff_id: string
+        }
+        Returns: number
       }
       fn_auto_balance_sections: {
         Args: {
@@ -19609,6 +21102,19 @@ export type Database = {
         Returns: Json
       }
       fn_escalate_overdue_steps: { Args: never; Returns: number }
+      fn_evaluate_component: {
+        Args: {
+          p_basic_paisa: number
+          p_calc_method: Database["public"]["Enums"]["salary_calc_method"]
+          p_calc_pct: number
+          p_calc_value_paisa: number
+          p_gross_paisa?: number
+          p_payable_days?: number
+          p_prorates_on_absence?: boolean
+          p_unpaid_days?: number
+        }
+        Returns: number
+      }
       fn_exam_entry_readiness: {
         Args: {
           p_exam_term_id: string
@@ -19625,6 +21131,7 @@ export type Database = {
         Args: { p_exam_subject_id: string }
         Returns: number
       }
+      fn_expense_head_is_leaf: { Args: { p_head_id: string }; Returns: boolean }
       fn_expire_offers: { Args: never; Returns: number }
       fn_extend_offer: {
         Args: { p_new_expires_at: string; p_offer_id: string; p_reason: string }
@@ -19781,6 +21288,7 @@ export type Database = {
         Args: { p_leave_type_id: string; p_staff_id: string }
         Returns: number
       }
+      fn_lock_payroll_run: { Args: { p_run_id: string }; Returns: undefined }
       fn_mark_approval_queue: {
         Args: { p_exam_term_id: string; p_section_id: string }
         Returns: Json
@@ -19800,6 +21308,14 @@ export type Database = {
       fn_merge_family_groups: {
         Args: { p_keep_id: string; p_merge_id: string }
         Returns: undefined
+      }
+      fn_monthly_withholding_paisa: {
+        Args: {
+          p_monthly_taxable_paisa: number
+          p_staff_id: string
+          p_tax_year?: string
+        }
+        Returns: number
       }
       fn_next_enquiry_no: {
         Args: { p_campus_id: string; p_session_id: string }
@@ -19868,6 +21384,25 @@ export type Database = {
       fn_publish_merit_list: { Args: { p_sitting_id: string }; Returns: Json }
       fn_queue_appointment_reminders: { Args: never; Returns: number }
       fn_queue_followup_reminders: { Args: never; Returns: number }
+      fn_quick_admission: {
+        Args: {
+          p_admission_fee?: number
+          p_b_form_no?: string
+          p_campus_id: string
+          p_child_name: string
+          p_class_level_id: string
+          p_dob: string
+          p_father_name_en?: string
+          p_gender: Database["public"]["Enums"]["gender"]
+          p_parent_name: string
+          p_payment_mode?: string
+          p_payment_reference?: string
+          p_phone: string
+          p_section_id: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
       fn_readmit_student: {
         Args: {
           p_override_reason?: string
@@ -19926,6 +21461,25 @@ export type Database = {
         }
         Returns: undefined
       }
+      fn_salary_for_period: {
+        Args: {
+          p_payable_days?: number
+          p_period_end: string
+          p_period_start: string
+          p_staff_id: string
+          p_unpaid_days?: number
+        }
+        Returns: {
+          amount_paisa: number
+          calc_method: Database["public"]["Enums"]["salary_calc_method"]
+          code: string
+          component_id: string
+          component_type: Database["public"]["Enums"]["salary_component_type"]
+          is_taxable: boolean
+          name_en: string
+          taxable_paisa: number
+        }[]
+      }
       fn_scorecard_summary: {
         Args: { p_application_id: string }
         Returns: Json
@@ -19964,6 +21518,10 @@ export type Database = {
         }
         Returns: string
       }
+      fn_submit_payroll_for_approval: {
+        Args: { p_run_id: string }
+        Returns: undefined
+      }
       fn_suggest_family_group: {
         Args: { p_cnic: string }
         Returns: {
@@ -19983,6 +21541,14 @@ export type Database = {
       fn_unlock_test_scores: {
         Args: { p_sitting_id: string }
         Returns: undefined
+      }
+      fn_unpaid_days: {
+        Args: {
+          p_period_end: string
+          p_period_start: string
+          p_staff_id: string
+        }
+        Returns: number
       }
       fn_upsert_marks: {
         Args: { p_client_batch_id?: string; p_payload: Json }
@@ -20006,6 +21572,7 @@ export type Database = {
         Args: { p_scheme_id: string }
         Returns: boolean
       }
+      fn_validate_iban: { Args: { p_iban: string }; Returns: boolean }
       fn_validate_term_weightage: {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: undefined
@@ -20032,6 +21599,38 @@ export type Database = {
           p_session_id: string
         }
         Returns: Json
+      }
+      generate_payroll_run: {
+        Args: { p_campus_id: string; p_period_date: string }
+        Returns: string
+      }
+      get_clearance_summary: {
+        Args: { p_student_id: string }
+        Returns: {
+          amount: number
+          days_outstanding: number
+          description: string
+          source: string
+        }[]
+      }
+      get_expense_chart: {
+        Args: { p_campus_id?: string; p_month?: string; p_session_id?: string }
+        Returns: {
+          actual_paisa: number
+          budget_paisa: number
+          code: string
+          id: string
+          is_active: boolean
+          is_leaf: boolean
+          is_overspent: boolean
+          level: number
+          name_en: string
+          name_ur: string
+          parent_id: string
+          remaining_paisa: number
+          requires_approval: boolean
+          tenant_id: string
+        }[]
       }
       get_guardian_invite_preview: {
         Args: { p_token: string }
@@ -20076,6 +21675,7 @@ export type Database = {
       }
       impersonation_blocked_tables: { Args: never; Returns: string[] }
       impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
+      initialize_school_leave_policies: { Args: never; Returns: Json }
       invite_user: {
         Args: {
           p_campus_ids?: string[]
@@ -20118,6 +21718,7 @@ export type Database = {
           p_enrolment_id: string
           p_language?: Database["public"]["Enums"]["certificate_language"]
           p_leaving_date: string
+          p_override_reason?: string
           p_reason?: string
         }
         Returns: Json
@@ -20326,6 +21927,37 @@ export type Database = {
         Args: { p_action?: string; p_table: string }
         Returns: string
       }
+      record_message_attempt: {
+        Args: {
+          p_error_code?: string
+          p_error_message?: string
+          p_message_id: string
+          p_provider_id: string
+          p_provider_ref?: string
+          p_raw_response?: Json
+          p_status: Database["public"]["Enums"]["attempt_status"]
+        }
+        Returns: {
+          attempt_number: number
+          completed_at: string | null
+          created_at: string
+          dispatched_at: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          message_id: string
+          provider_id: string | null
+          provider_ref: string | null
+          raw_response: Json | null
+          status: Database["public"]["Enums"]["attempt_status"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "message_attempt"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       record_payment: {
         Args: {
           p_amount_paisa: number
@@ -20351,6 +21983,28 @@ export type Database = {
       register_password_reset: {
         Args: { p_email: string; p_token_hash: string }
         Returns: undefined
+      }
+      register_staff_member: {
+        Args: {
+          p_address?: string
+          p_alt_mobile?: string
+          p_campus_id: string
+          p_cnic?: string
+          p_contract_type?: string
+          p_department_id?: string
+          p_dob?: string
+          p_doj?: string
+          p_email?: string
+          p_emergency_contact?: string
+          p_full_name: string
+          p_full_name_ur?: string
+          p_gender: Database["public"]["Enums"]["gender"]
+          p_id_document_type?: Database["public"]["Enums"]["id_document_type"]
+          p_mobile?: string
+          p_passport_no?: string
+          p_role?: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: Json
       }
       reject_admission_document: {
         Args: { p_document_id: string; p_reason: string }
@@ -20505,6 +22159,34 @@ export type Database = {
         Args: { p_campus_id: string; p_date: string; p_session_id: string }
         Returns: string
       }
+      resolve_unknown_attempt: {
+        Args: {
+          p_attempt_id: string
+          p_provider_ref?: string
+          p_raw_response?: Json
+          p_resolved_status: Database["public"]["Enums"]["attempt_status"]
+        }
+        Returns: {
+          attempt_number: number
+          completed_at: string | null
+          created_at: string
+          dispatched_at: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          message_id: string
+          provider_id: string | null
+          provider_ref: string | null
+          raw_response: Json | null
+          status: Database["public"]["Enums"]["attempt_status"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "message_attempt"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       resolved_features: { Args: { p_tenant_id?: string }; Returns: Json }
       restore_record: {
         Args: { p_id: string; p_table: string }
@@ -20645,6 +22327,10 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: undefined
       }
+      seed_default_salary_components: {
+        Args: { p_tenant_id: string }
+        Returns: undefined
+      }
       seed_onboarding_progress: {
         Args: { p_tenant_id: string }
         Returns: undefined
@@ -20762,6 +22448,16 @@ export type Database = {
       set_exam_term_weight: {
         Args: { p_exam_term_id: string; p_weight_pct: number }
         Returns: undefined
+      }
+      set_expense_budget: {
+        Args: {
+          p_amount_paisa: number
+          p_budget_month: string
+          p_campus_id: string
+          p_head_id: string
+          p_session_id: string
+        }
+        Returns: string
       }
       set_fee_head_active: {
         Args: { p_id: string; p_is_active: boolean }
@@ -20901,6 +22597,15 @@ export type Database = {
           p_obtained: number
           p_subject_code: string
           p_total: number
+        }
+        Returns: string
+      }
+      set_timetable_constraint: {
+        Args: {
+          p_campus_id: string
+          p_int_value?: number
+          p_is_enabled?: boolean
+          p_key: string
         }
         Returns: string
       }
@@ -21060,6 +22765,10 @@ export type Database = {
       }
       timemultirange: { Args: never; Returns: unknown }
       timetable_export_payload: { Args: { p_job_id: string }; Returns: Json }
+      toggle_leave_policy_status: {
+        Args: { p_id: string; p_is_active: boolean }
+        Returns: boolean
+      }
       undo_import_batch: { Args: { p_batch_id: string }; Returns: Json }
       unlink_guardian: {
         Args: { p_guardian_id: string; p_student_id: string }
@@ -21081,8 +22790,55 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_expense_head: {
+        Args: {
+          p_id: string
+          p_is_active?: boolean
+          p_name_en?: string
+          p_name_ur?: string
+          p_parent_id?: string
+          p_requires_approval?: boolean
+          p_set_parent?: boolean
+        }
+        Returns: undefined
+      }
+      update_room: {
+        Args: {
+          p_block_label?: string
+          p_capacity: number
+          p_code: string
+          p_id: string
+          p_name: string
+          p_room_type: Database["public"]["Enums"]["room_type_enum"]
+        }
+        Returns: undefined
+      }
+      update_school_leave_policy: {
+        Args: {
+          p_doc_required_after_days?: number
+          p_entitlement_days: number
+          p_id: string
+          p_is_active?: boolean
+          p_is_paid: boolean
+          p_name_en: string
+          p_sync_active_staff?: boolean
+        }
+        Returns: Json
+      }
       update_structure_line_amount: {
         Args: { p_amount_paisa: number; p_line_id: string }
+        Returns: undefined
+      }
+      update_subject: {
+        Args: {
+          p_code: string
+          p_default_max_marks?: number
+          p_id: string
+          p_is_examinable: boolean
+          p_name_en: string
+          p_name_ur?: string
+          p_subject_type: Database["public"]["Enums"]["subject_type"]
+        }
         Returns: undefined
       }
       upsert_class_subject: {
@@ -21099,6 +22855,15 @@ export type Database = {
           p_weekly_periods: number
         }
         Returns: string
+      }
+      upsert_department: {
+        Args: {
+          p_code: string
+          p_id?: string
+          p_name_en: string
+          p_name_ur?: string
+        }
+        Returns: Json
       }
       upsert_exam_subject: {
         Args: {
@@ -21161,6 +22926,19 @@ export type Database = {
       validate_certificate_template: {
         Args: { p_template_id: string }
         Returns: Json
+      }
+      validate_timetable_version: {
+        Args: { p_version_id: string }
+        Returns: {
+          code: string
+          detail: string
+          period_no: number
+          room_id: string
+          section_id: string
+          severity: string
+          staff_id: string
+          weekday: number
+        }[]
       }
       verify_admission_document: {
         Args: { p_document_id: string }
@@ -21237,6 +23015,13 @@ export type Database = {
         | "rejected"
         | "test_absent"
       approval_decision: "pending" | "approved" | "rejected" | "escalated"
+      attempt_status:
+        | "sending"
+        | "sent"
+        | "delivered"
+        | "failed"
+        | "unknown"
+        | "timeout"
       attendance_correction_status: "pending" | "approved" | "rejected"
       attendance_lock_source: "cron" | "manual"
       attendance_source: "manual" | "biometric" | "leave"
@@ -21263,6 +23048,13 @@ export type Database = {
       certificate_page_size: "A4" | "A5" | "Legal"
       certificate_template_status: "draft" | "active" | "retired"
       certificate_type: "transfer" | "character" | "bonafide"
+      comm_channel: "sms" | "whatsapp" | "email" | "push"
+      comm_recipient_type:
+        | "parent"
+        | "guardian"
+        | "student"
+        | "staff"
+        | "custom"
       competency_source_enum: "DECLARED" | "INFERRED" | "VERIFIED"
       concession_award_status: "pending" | "approved" | "rejected" | "expired"
       concession_calc_type: "percentage" | "fixed_amount"
@@ -21391,6 +23183,14 @@ export type Database = {
       mark_status: "draft" | "submitted" | "moderated" | "approved" | "locked"
       mark_unlock_state: "locked" | "unlocked"
       mark_unlock_status: "pending" | "approved" | "expired" | "rejected"
+      message_status:
+        | "queued"
+        | "claimed"
+        | "sending"
+        | "delivered"
+        | "failed"
+        | "cancelled"
+        | "unknown"
       notification_channel: "sms" | "whatsapp" | "push"
       notification_language: "en" | "ur"
       notification_status:
@@ -21417,6 +23217,12 @@ export type Database = {
         | "first_student"
       onboarding_step_status: "pending" | "skipped" | "done"
       outbound_status: "queued" | "sent" | "failed" | "rate_capped"
+      payroll_run_status:
+        | "draft"
+        | "pending_approval"
+        | "locked"
+        | "paid"
+        | "cancelled"
       qualification_level:
         | "matric"
         | "intermediate"
@@ -21449,6 +23255,8 @@ export type Database = {
         | "HALL"
         | "LIBRARY"
         | "PRAYER_AREA"
+      salary_calc_method: "fixed_paisa" | "pct_of_basic" | "pct_of_gross"
+      salary_component_type: "earning" | "deduction" | "employer_contribution"
       section_medium: "ENGLISH" | "URDU"
       section_shift: "MORNING" | "AFTERNOON"
       session_status: "planned" | "active" | "closed" | "archived"
@@ -21669,6 +23477,14 @@ export const Constants = {
         "test_absent",
       ],
       approval_decision: ["pending", "approved", "rejected", "escalated"],
+      attempt_status: [
+        "sending",
+        "sent",
+        "delivered",
+        "failed",
+        "unknown",
+        "timeout",
+      ],
       attendance_correction_status: ["pending", "approved", "rejected"],
       attendance_lock_source: ["cron", "manual"],
       attendance_source: ["manual", "biometric", "leave"],
@@ -21696,6 +23512,8 @@ export const Constants = {
       certificate_page_size: ["A4", "A5", "Legal"],
       certificate_template_status: ["draft", "active", "retired"],
       certificate_type: ["transfer", "character", "bonafide"],
+      comm_channel: ["sms", "whatsapp", "email", "push"],
+      comm_recipient_type: ["parent", "guardian", "student", "staff", "custom"],
       competency_source_enum: ["DECLARED", "INFERRED", "VERIFIED"],
       concession_award_status: ["pending", "approved", "rejected", "expired"],
       concession_calc_type: ["percentage", "fixed_amount"],
@@ -21838,6 +23656,15 @@ export const Constants = {
       mark_status: ["draft", "submitted", "moderated", "approved", "locked"],
       mark_unlock_state: ["locked", "unlocked"],
       mark_unlock_status: ["pending", "approved", "expired", "rejected"],
+      message_status: [
+        "queued",
+        "claimed",
+        "sending",
+        "delivered",
+        "failed",
+        "cancelled",
+        "unknown",
+      ],
       notification_channel: ["sms", "whatsapp", "push"],
       notification_language: ["en", "ur"],
       notification_status: [
@@ -21867,6 +23694,13 @@ export const Constants = {
       ],
       onboarding_step_status: ["pending", "skipped", "done"],
       outbound_status: ["queued", "sent", "failed", "rate_capped"],
+      payroll_run_status: [
+        "draft",
+        "pending_approval",
+        "locked",
+        "paid",
+        "cancelled",
+      ],
       qualification_level: [
         "matric",
         "intermediate",
@@ -21902,6 +23736,8 @@ export const Constants = {
         "LIBRARY",
         "PRAYER_AREA",
       ],
+      salary_calc_method: ["fixed_paisa", "pct_of_basic", "pct_of_gross"],
+      salary_component_type: ["earning", "deduction", "employer_contribution"],
       section_medium: ["ENGLISH", "URDU"],
       section_shift: ["MORNING", "AFTERNOON"],
       session_status: ["planned", "active", "closed", "archived"],
