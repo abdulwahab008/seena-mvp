@@ -70,6 +70,7 @@ const LINKS = [
   { href: '/consent', label: 'Consent' },
   { href: '/communication/outbox', label: 'Message Outbox' },
   { href: '/communication/templates', label: 'Message Templates' },
+  { href: '/communication/fallback-chains', label: 'Fallback Chains' },
 ];
 
 export function AppNav() {
