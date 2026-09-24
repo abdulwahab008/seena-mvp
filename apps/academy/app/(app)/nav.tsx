@@ -69,6 +69,7 @@ const LINKS = [
   { href: '/audit-export', label: 'Audit Export' },
   { href: '/consent', label: 'Consent' },
   { href: '/communication/outbox', label: 'Message Outbox' },
+  { href: '/communication/scheduled', label: 'Scheduled Sends' },
   { href: '/communication/segments', label: 'Audience Segments' },
   { href: '/communication/templates', label: 'Message Templates' },
   { href: '/communication/fallback-chains', label: 'Fallback Chains' },

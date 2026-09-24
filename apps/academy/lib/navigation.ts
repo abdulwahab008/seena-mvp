@@ -215,6 +215,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: MessageSquare,
     items: [
       { href: '/communication/outbox', label: 'Message Outbox' },
+      { href: '/communication/scheduled', label: 'Scheduled Sends' },
       { href: '/communication/segments', label: 'Audience Segments' },
       { href: '/communication/templates', label: 'Template Library' },
       { href: '/communication/fallback-chains', label: 'Fallback Chains' },
