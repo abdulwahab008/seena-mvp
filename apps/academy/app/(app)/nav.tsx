@@ -71,6 +71,7 @@ const LINKS = [
   { href: '/communication/outbox', label: 'Message Outbox' },
   { href: '/communication/templates', label: 'Message Templates' },
   { href: '/communication/fallback-chains', label: 'Fallback Chains' },
+  { href: '/communication/whatsapp', label: 'WhatsApp Compliance' },
 ];
 
 export function AppNav() {

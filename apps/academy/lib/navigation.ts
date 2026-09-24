@@ -15,6 +15,7 @@ import {
   UserCog,
   Users,
   Wallet,
+  MessageSquare,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -66,6 +67,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Admissions',
     icon: ClipboardCheck,
     items: [
+      { href: '/admissions/walk-in', label: 'Walk-in Desk' },
       { href: '/admissions/enquiries', label: 'Enquiries' },
       { href: '/admissions/applications', label: 'Applications' },
       { href: '/admissions/checklist', label: 'Document Checklist' },
@@ -93,6 +95,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/staff', label: 'All Staff' },
       { href: '/staff/directory', label: 'Directory' },
+      { href: '/staff/departments', label: 'Departments' },
       { href: '/staff/qualifications', label: 'Qualifications' },
       { href: '/leave', label: 'Leave' },
       { href: '/academic-setup/competency', label: 'Teacher Competency' },
@@ -104,6 +107,8 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Academics',
     icon: BookOpen,
     items: [
+      { href: '/academic-setup/subjects', label: 'Subjects' },
+      { href: '/academic-setup/classes-sections', label: 'Classes & Sections' },
       { href: '/academic-setup/curriculum', label: 'Curriculum' },
       { href: '/academic-setup/rooms', label: 'Rooms' },
       { href: '/homework', label: 'Homework', feature: 'module.homework' },
@@ -202,6 +207,17 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/audit-export', label: 'Audit Trail Export' },
       { href: '/impersonation', label: 'Support Access' },
+    ],
+  },
+  {
+    id: 'communication',
+    label: 'Communication',
+    icon: MessageSquare,
+    items: [
+      { href: '/communication/outbox', label: 'Message Outbox' },
+      { href: '/communication/templates', label: 'Template Library' },
+      { href: '/communication/fallback-chains', label: 'Fallback Chains' },
+      { href: '/communication/whatsapp', label: 'WhatsApp Compliance' },
     ],
   },
   {
