@@ -70,6 +70,7 @@ const LINKS = [
   { href: '/consent', label: 'Consent' },
   { href: '/communication/outbox', label: 'Message Outbox' },
   { href: '/communication/scheduled', label: 'Scheduled Sends' },
+  { href: '/communication/triggers', label: 'Trigger Rules' },
   { href: '/communication/segments', label: 'Audience Segments' },
   { href: '/communication/templates', label: 'Message Templates' },
   { href: '/communication/fallback-chains', label: 'Fallback Chains' },
