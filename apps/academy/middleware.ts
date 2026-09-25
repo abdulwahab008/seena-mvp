@@ -51,6 +51,7 @@ const PUBLIC_PREFIXES = [
   '/admin/provision',
   '/api/public-enquiry/',
   '/api/branding-asset/',
+  '/api/webhooks/',
 ];
 
 function isPublic(pathname: string) {

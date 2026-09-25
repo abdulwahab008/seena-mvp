@@ -71,6 +71,7 @@ const LINKS = [
   { href: '/communication/outbox', label: 'Message Outbox' },
   { href: '/communication/scheduled', label: 'Scheduled Sends' },
   { href: '/communication/triggers', label: 'Trigger Rules' },
+  { href: '/communication/receipts', label: 'Delivery Receipts' },
   { href: '/communication/segments', label: 'Audience Segments' },
   { href: '/communication/templates', label: 'Message Templates' },
   { href: '/communication/fallback-chains', label: 'Fallback Chains' },
