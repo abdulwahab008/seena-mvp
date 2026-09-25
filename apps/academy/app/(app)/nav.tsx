@@ -74,6 +74,7 @@ const LINKS = [
   { href: '/communication/receipts', label: 'Delivery Receipts' },
   { href: '/communication/wallet', label: 'Credit & Wallet' },
   { href: '/communication/opt-outs', label: 'Opt-Outs & Suppression' },
+  { href: '/communication/circulars', label: 'Circulars' },
   { href: '/communication/segments', label: 'Audience Segments' },
   { href: '/communication/templates', label: 'Message Templates' },
   { href: '/communication/fallback-chains', label: 'Fallback Chains' },

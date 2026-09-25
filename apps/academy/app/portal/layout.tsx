@@ -2,10 +2,13 @@ import Link from 'next/link';
 import { requireSession } from '@/lib/auth/require-session';
 
 const PORTAL_LINKS = [
+  { href: '/portal/attendance', label: 'Attendance' },
+  { href: '/portal/fees', label: 'Fees' },
   { href: '/portal/homework', label: 'Homework' },
   { href: '/portal/timetable', label: 'Timetable' },
   { href: '/portal/results', label: 'Results' },
   { href: '/portal/consent', label: 'Consent' },
+  { href: '/portal/circulars', label: 'Circulars' },
 ];
 
 // The parent/guardian portal. Deliberately separate from (app)'s layout —
