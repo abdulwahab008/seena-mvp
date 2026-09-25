@@ -9,6 +9,7 @@ const PORTAL_LINKS = [
   { href: '/portal/results', label: 'Results' },
   { href: '/portal/consent', label: 'Consent' },
   { href: '/portal/circulars', label: 'Circulars' },
+  { href: '/portal/calendar', label: 'Calendar' },
 ];
 
 // The parent/guardian portal. Deliberately separate from (app)'s layout —
