@@ -218,6 +218,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/communication/scheduled', label: 'Scheduled Sends' },
       { href: '/communication/triggers', label: 'Trigger Rules' },
       { href: '/communication/receipts', label: 'Delivery Receipts' },
+      { href: '/communication/wallet', label: 'Credit & Wallet' },
       { href: '/communication/segments', label: 'Audience Segments' },
       { href: '/communication/templates', label: 'Template Library' },
       { href: '/communication/fallback-chains', label: 'Fallback Chains' },
