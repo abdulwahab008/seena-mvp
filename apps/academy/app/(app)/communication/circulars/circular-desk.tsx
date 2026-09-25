@@ -5,6 +5,8 @@ import {
   createCircularAction,
   publishCircularAction,
   unpublishCircularAction,
+  fetchCircularStatsAction,
+  exportUnreadSegmentAction,
   CircularAttachmentInput,
 } from './actions';
 import { Button } from '@/components/ui/button';
@@ -26,6 +28,13 @@ interface CircularItem {
   expires_at: string | null;
   status: 'draft' | 'published' | 'unpublished' | 'archived';
   created_at: string;
+  stats?: {
+    total_targeted_guardians: number;
+    read_guardians_count: number;
+    unread_guardians_count: number;
+    read_percentage: number;
+    formatted_stats: string;
+  } | null;
   circular_attachment: {
     id: string;
     file_name: string;
@@ -72,6 +81,51 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
   const [selectedSegmentIds, setSelectedSegmentIds] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<CircularAttachmentInput[]>([]);
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
+
+  // Stats Modal State (FR-M13)
+  const [selectedStatsCircular, setSelectedStatsCircular] = useState<CircularItem | null>(null);
+  const [statsData, setStatsData] = useState<{ stats: any; unreadGuardians: any[] } | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
+  const [exportSegmentName, setExportSegmentName] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportFeedback, setExportFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const handleOpenStats = async (circ: CircularItem) => {
+    setSelectedStatsCircular(circ);
+    setIsLoadingStats(true);
+    setStatsData(null);
+    setExportFeedback(null);
+    setExportSegmentName(`Unread: ${circ.title}`);
+    try {
+      const data = await fetchCircularStatsAction(circ.id);
+      setStatsData(data);
+    } catch (e: any) {
+      setExportFeedback({ type: 'error', message: e.message || 'Failed to load read stats.' });
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
+  const handleExportUnread = async () => {
+    if (!selectedStatsCircular) return;
+    setIsExporting(true);
+    setExportFeedback(null);
+    try {
+      const res = await exportUnreadSegmentAction(selectedStatsCircular.id, exportSegmentName);
+      if (res.success) {
+        setExportFeedback({
+          type: 'success',
+          message: `Unread follow-up segment "${exportSegmentName}" created successfully! You can now use it in SMS/Campaign dispatch.`,
+        });
+      } else {
+        setExportFeedback({ type: 'error', message: res.error || 'Failed to export segment.' });
+      }
+    } catch (e: any) {
+      setExportFeedback({ type: 'error', message: e.message || 'Export error.' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const filteredCirculars = circulars.filter((c) => {
     const matchesStatus = filterStatus === 'all' || c.status === filterStatus;
@@ -260,6 +314,7 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
               <th className="px-4 py-3">Target Audience</th>
               <th className="px-4 py-3">Publish Date</th>
               <th className="px-4 py-3">Attachments</th>
+              <th className="px-4 py-3">Read Stats</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -267,7 +322,7 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
           <tbody className="divide-y divide-border">
             {filteredCirculars.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                   No circulars found matching the filter criteria.
                 </td>
               </tr>
@@ -321,6 +376,23 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
                         <span className="text-xs text-muted-foreground">None</span>
                       )}
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {circ.stats ? (
+                        <div className="space-y-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-primary/10 text-primary">
+                            {circ.stats.formatted_stats}
+                          </span>
+                          <div className="w-24 bg-muted rounded-full h-1.5 overflow-hidden">
+                            <div
+                              className="bg-primary h-1.5 rounded-full"
+                              style={{ width: `${Math.min(circ.stats.read_percentage || 0, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
@@ -337,25 +409,36 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {circ.status === 'published' ? (
+                      <div className="flex items-center justify-end gap-2">
                         <Button
+                          id={`btn-view-stats-${circ.id}`}
                           variant="outline"
                           size="sm"
-                          onClick={() => handleTogglePublish(circ)}
-                          className="text-xs text-orange-600 hover:text-orange-700"
+                          onClick={() => handleOpenStats(circ)}
+                          className="text-xs"
                         >
-                          Unpublish
+                          View Stats
                         </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleTogglePublish(circ)}
-                          className="text-xs text-green-600 hover:text-green-700"
-                        >
-                          Publish Now
-                        </Button>
-                      )}
+                        {circ.status === 'published' ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTogglePublish(circ)}
+                            className="text-xs text-orange-600 hover:text-orange-700"
+                          >
+                            Unpublish
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTogglePublish(circ)}
+                            className="text-xs text-green-600 hover:text-green-700"
+                          >
+                            Publish Now
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -562,6 +645,140 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Saving...' : 'Publish Circular'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Read Receipts & Stats Modal (FR-M13) */}
+      {selectedStatsCircular && (
+        <div id="circular-stats-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-card p-6 shadow-xl border">
+            <div className="flex items-center justify-between pb-3 border-b mb-4">
+              <h2 className="text-xl font-bold text-foreground">
+                Read Receipts & Stats
+              </h2>
+              <button
+                onClick={() => setSelectedStatsCircular(null)}
+                className="text-muted-foreground hover:text-foreground text-sm font-semibold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-sm font-medium text-foreground mb-4">
+              Circular: <span className="font-bold">{selectedStatsCircular.title}</span>
+            </p>
+
+            {isLoadingStats ? (
+              <div className="py-8 text-center text-sm text-muted-foreground">Loading read stats...</div>
+            ) : statsData ? (
+              <div className="space-y-6">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                  <div className="p-3 bg-muted/40 rounded-lg border">
+                    <div className="text-xs text-muted-foreground font-medium">Targeted Guardians</div>
+                    <div id="stat-total-targeted" className="text-lg font-bold text-foreground mt-1">
+                      {statsData.stats?.total_targeted_guardians ?? 0}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="text-xs text-green-700 dark:text-green-300 font-medium">Read Receipts</div>
+                    <div id="stat-read-count" className="text-lg font-bold text-green-700 dark:text-green-300 mt-1">
+                      {statsData.stats?.read_guardians_count ?? 0}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <div className="text-xs text-amber-700 dark:text-amber-300 font-medium">Unread</div>
+                    <div id="stat-unread-count" className="text-lg font-bold text-amber-700 dark:text-amber-300 mt-1">
+                      {statsData.stats?.unread_guardians_count ?? 0}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                    <div className="text-xs text-primary font-medium">Open Rate</div>
+                    <div id="stat-open-rate" className="text-lg font-bold text-primary mt-1">
+                      {statsData.stats?.read_percentage ?? 0}%
+                    </div>
+                  </div>
+                </div>
+
+                <div id="stat-formatted-summary" className="p-3 bg-muted/30 rounded text-sm text-center font-medium">
+                  {statsData.stats?.formatted_stats ?? '0 of 0 read (0%)'}
+                </div>
+
+                {/* Export Unread Follow-up Section (AC 2) */}
+                <div className="p-4 rounded-lg border bg-muted/20 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground">Follow-up with Unread Guardians</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Export unread guardians into an audience segment for targeted SMS or campaign dispatch (FR-M06).
+                      </p>
+                    </div>
+                  </div>
+
+                  {exportFeedback && (
+                    <div
+                      id="export-feedback-message"
+                      className={`p-2.5 rounded text-xs ${
+                        exportFeedback.type === 'success'
+                          ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
+                          : 'bg-destructive/10 text-destructive border border-destructive/20'
+                      }`}
+                    >
+                      {exportFeedback.message}
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      id="export-segment-name-input"
+                      placeholder="Segment Name (e.g. Sports Day Unread Follow-up)"
+                      value={exportSegmentName}
+                      onChange={(e) => setExportSegmentName(e.target.value)}
+                      className="text-xs"
+                    />
+                    <Button
+                      id="btn-confirm-export-unread"
+                      size="sm"
+                      onClick={handleExportUnread}
+                      disabled={isExporting || (statsData.stats?.unread_guardians_count ?? 0) === 0}
+                      className="whitespace-nowrap text-xs"
+                    >
+                      {isExporting ? 'Exporting...' : 'Export Unread Segment'}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Unread Guardians List */}
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    Unread Guardians List ({statsData.unreadGuardians.length})
+                  </h4>
+                  {statsData.unreadGuardians.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-muted-foreground border rounded bg-card">
+                      All targeted guardians have opened this circular!
+                    </div>
+                  ) : (
+                    <div id="unread-guardians-list" className="max-h-48 overflow-y-auto border rounded divide-y divide-border text-xs bg-card">
+                      {statsData.unreadGuardians.map((ug) => (
+                        <div key={ug.guardian_id} className="p-2.5 flex items-center justify-between">
+                          <div>
+                            <span className="font-semibold text-foreground">{ug.guardian_name}</span>
+                          </div>
+                          <span className="text-muted-foreground font-mono">{ug.phone_e164 || ug.alt_phone || 'No Phone'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mt-6 flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setSelectedStatsCircular(null)}>
+                Close
               </Button>
             </div>
           </div>

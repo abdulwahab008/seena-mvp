@@ -30,7 +30,7 @@ export async function fetchCircularsDashboardData() {
 
   const client = supabase as any;
 
-  const [circularsRes, segmentsRes, campusesRes] = await Promise.all([
+  const [circularsRes, segmentsRes, campusesRes, statsRes] = await Promise.all([
     client
       .from('circular')
       .select(`
@@ -72,10 +72,19 @@ export async function fetchCircularsDashboardData() {
       .from('campus')
       .select('id, name')
       .order('name'),
+    client
+      .from('v_circular_read_stats')
+      .select('*'),
   ]);
 
+  const statsMap = new Map((statsRes.data || []).map((s: any) => [s.circular_id, s]));
+  const circularsWithStats = (circularsRes.data || []).map((c: any) => ({
+    ...c,
+    stats: statsMap.get(c.id) || null,
+  }));
+
   return {
-    circulars: circularsRes.data || [],
+    circulars: circularsWithStats,
     segments: segmentsRes.data || [],
     campuses: campusesRes.data || [],
   };
@@ -228,3 +237,62 @@ export async function unpublishCircularAction(circularId: string) {
   revalidatePath('/portal/circulars');
   return { success: true, circular: data };
 }
+
+export async function fetchCircularStatsAction(circularId: string) {
+  const supabase = await supabaseServer();
+  const client = supabase as any;
+
+  const [statsRes, unreadRes] = await Promise.all([
+    client
+      .from('v_circular_read_stats')
+      .select('*')
+      .eq('circular_id', circularId)
+      .single(),
+    client
+      .from('v_circular_unread_guardians')
+      .select('*')
+      .eq('circular_id', circularId),
+  ]);
+
+  return {
+    stats: statsRes.data || null,
+    unreadGuardians: unreadRes.data || [],
+  };
+}
+
+export async function exportUnreadSegmentAction(circularId: string, segmentName: string) {
+  const supabase = await supabaseServer();
+
+  if (!segmentName || !segmentName.trim()) {
+    return { success: false, error: 'Segment name is required.' };
+  }
+
+  const { data, error } = await (supabase as any).rpc('export_circular_unread_segment', {
+    p_circular_id: circularId,
+    p_segment_name: segmentName.trim(),
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/communication/segments');
+  revalidatePath('/communication/circulars');
+  return { success: true, segmentId: data };
+}
+
+export async function recordCircularReadAction(circularId: string, guardianId?: string) {
+  const supabase = await supabaseServer();
+
+  const { data, error } = await (supabase as any).rpc('mark_circular_read', {
+    p_circular_id: circularId,
+    p_guardian_id: guardianId || null,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, receipt: data };
+}
+

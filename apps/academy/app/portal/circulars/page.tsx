@@ -33,6 +33,17 @@ export default async function PortalCircularsPage() {
 
   const activeCirculars = circulars || [];
 
+  // AC 1: Automatically record circular read receipts for the viewing guardian
+  if (activeCirculars.length > 0) {
+    for (const circ of activeCirculars) {
+      try {
+        await client.rpc('mark_circular_read', { p_circular_id: circ.id });
+      } catch {
+        // Safe catch if viewing as non-guardian or unauthenticated
+      }
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="border-b pb-4">
