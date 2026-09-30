@@ -2031,3 +2031,38 @@ export const paymentGatewayConfigSchema = z.object({
   isEnabled: z.boolean(),
 });
 export type PaymentGatewayConfigInput = z.infer<typeof paymentGatewayConfigSchema>;
+
+export const bankMappingProfileSchema = z
+  .object({
+    bankAccountId: z.string().uuid('Choose a bank account'),
+    name: z.string().trim().min(1, 'Required').max(100),
+    dateFormat: z.enum(['DD/MM/YYYY', 'DD-MM-YYYY', 'YYYY-MM-DD', 'DD-Mon-YYYY']),
+    amountSignRule: z.enum(['credit_positive', 'separate_columns', 'absolute']),
+    txnDate: z.string().min(1, 'Choose the date column'),
+    challanRef: z.string().min(1, 'Choose the challan reference column'),
+    bankRef: z.string().min(1, 'Choose the bank reference column'),
+    amount: z.string().optional(),
+    debit: z.string().optional(),
+    credit: z.string().optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.amountSignRule === 'separate_columns') {
+      if (!v.debit) ctx.addIssue({ code: 'custom', path: ['debit'], message: 'Choose the debit column' });
+      if (!v.credit) ctx.addIssue({ code: 'custom', path: ['credit'], message: 'Choose the credit column' });
+    } else if (!v.amount) {
+      ctx.addIssue({ code: 'custom', path: ['amount'], message: 'Choose the amount column' });
+    }
+  });
+export type BankMappingProfileInput = z.infer<typeof bankMappingProfileSchema>;
+
+export const resolveBankExceptionSchema = z.object({
+  exceptionId: z.string().uuid(),
+  action: z.enum(['post', 'dismiss']),
+  note: z.string().trim().min(5, 'Write a short note (at least 5 characters)').max(500),
+  challanNo: z
+    .string()
+    .trim()
+    .regex(/^\d{12}$|^$/, 'A challan number is 12 digits')
+    .optional(),
+});
+export type ResolveBankExceptionInput = z.infer<typeof resolveBankExceptionSchema>;

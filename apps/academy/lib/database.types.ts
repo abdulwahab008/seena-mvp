@@ -3375,6 +3375,305 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_mapping_profile: {
+        Row: {
+          amount_sign_rule: string
+          column_map: Json
+          created_at: string
+          created_by: string | null
+          date_format: string
+          format: string
+          id: string
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_sign_rule?: string
+          column_map: Json
+          created_at?: string
+          created_by?: string | null
+          date_format?: string
+          format?: string
+          id?: string
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          amount_sign_rule?: string
+          column_map?: Json
+          created_at?: string
+          created_by?: string | null
+          date_format?: string
+          format?: string
+          id?: string
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_mapping_profile_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_recon_exception: {
+        Row: {
+          campus_id: string
+          challan_id: string | null
+          created_at: string
+          expected_paisa: number | null
+          id: string
+          import_id: string
+          line_id: string
+          payment_id: string | null
+          reason: string
+          received_paisa: number
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          challan_id?: string | null
+          created_at?: string
+          expected_paisa?: number | null
+          id?: string
+          import_id: string
+          line_id: string
+          payment_id?: string | null
+          reason: string
+          received_paisa: number
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          challan_id?: string | null
+          created_at?: string
+          expected_paisa?: number | null
+          id?: string
+          import_id?: string
+          line_id?: string
+          payment_id?: string | null
+          reason?: string
+          received_paisa?: number
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_recon_exception_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_recon_exception_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_recon_exception_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "bank_statement_import"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_recon_exception_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "v_bank_recon_summary"
+            referencedColumns: ["import_id"]
+          },
+          {
+            foreignKeyName: "bank_recon_exception_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: true
+            referencedRelation: "bank_statement_line"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_recon_exception_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "fee_payment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_recon_exception_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["payment_id"]
+          },
+          {
+            foreignKeyName: "bank_recon_exception_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_statement_import: {
+        Row: {
+          bank_account_id: string
+          campus_id: string
+          created_at: string
+          failed_count: number
+          file_name: string | null
+          file_sha256: string
+          id: string
+          parsed_count: number
+          row_count: number
+          status: string
+          storage_path: string | null
+          tenant_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          bank_account_id: string
+          campus_id: string
+          created_at?: string
+          failed_count?: number
+          file_name?: string | null
+          file_sha256: string
+          id?: string
+          parsed_count?: number
+          row_count?: number
+          status?: string
+          storage_path?: string | null
+          tenant_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          bank_account_id?: string
+          campus_id?: string
+          created_at?: string
+          failed_count?: number
+          file_name?: string | null
+          file_sha256?: string
+          id?: string
+          parsed_count?: number
+          row_count?: number
+          status?: string
+          storage_path?: string | null
+          tenant_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_statement_import_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "campus_bank_account"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_import_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_import_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_statement_line: {
+        Row: {
+          amount_paisa: number | null
+          bank_ref: string | null
+          campus_id: string
+          challan_ref: string | null
+          created_at: string
+          error_text: string | null
+          id: string
+          import_id: string
+          line_no: number
+          raw_line: string
+          status: string
+          tenant_id: string
+          txn_date: string | null
+        }
+        Insert: {
+          amount_paisa?: number | null
+          bank_ref?: string | null
+          campus_id: string
+          challan_ref?: string | null
+          created_at?: string
+          error_text?: string | null
+          id?: string
+          import_id: string
+          line_no: number
+          raw_line: string
+          status?: string
+          tenant_id: string
+          txn_date?: string | null
+        }
+        Update: {
+          amount_paisa?: number | null
+          bank_ref?: string | null
+          campus_id?: string
+          challan_ref?: string | null
+          created_at?: string
+          error_text?: string | null
+          id?: string
+          import_id?: string
+          line_no?: number
+          raw_line?: string
+          status?: string
+          tenant_id?: string
+          txn_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_statement_line_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_line_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "bank_statement_import"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_line_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "v_bank_recon_summary"
+            referencedColumns: ["import_id"]
+          },
+          {
+            foreignKeyName: "bank_statement_line_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bell_calendar_rule: {
         Row: {
           bell_template_id: string
@@ -3936,6 +4235,7 @@ export type Database = {
           iban: string | null
           id: string
           is_default: boolean
+          mapping_profile_id: string | null
           title: string
         }
         Insert: {
@@ -3947,6 +4247,7 @@ export type Database = {
           iban?: string | null
           id?: string
           is_default?: boolean
+          mapping_profile_id?: string | null
           title: string
         }
         Update: {
@@ -3958,6 +4259,7 @@ export type Database = {
           iban?: string | null
           id?: string
           is_default?: boolean
+          mapping_profile_id?: string | null
           title?: string
         }
         Relationships: [
@@ -3966,6 +4268,13 @@ export type Database = {
             columns: ["campus_id"]
             isOneToOne: false
             referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campus_bank_account_mapping_profile_id_fkey"
+            columns: ["mapping_profile_id"]
+            isOneToOne: false
+            referencedRelation: "bank_mapping_profile"
             referencedColumns: ["id"]
           },
         ]
@@ -8153,6 +8462,7 @@ export type Database = {
       fee_payment: {
         Row: {
           amount_paisa: number
+          bank_account_id: string | null
           campus_id: string
           collected_by: string | null
           enrolment_id: string
@@ -8165,6 +8475,7 @@ export type Database = {
         }
         Insert: {
           amount_paisa: number
+          bank_account_id?: string | null
           campus_id: string
           collected_by?: string | null
           enrolment_id: string
@@ -8177,6 +8488,7 @@ export type Database = {
         }
         Update: {
           amount_paisa?: number
+          bank_account_id?: string | null
           campus_id?: string
           collected_by?: string | null
           enrolment_id?: string
@@ -8188,6 +8500,13 @@ export type Database = {
           value_date?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fee_payment_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "campus_bank_account"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fee_payment_campus_id_fkey"
             columns: ["campus_id"]
@@ -19786,6 +20105,70 @@ export type Database = {
           },
         ]
       }
+      v_bank_recon_summary: {
+        Row: {
+          bank_account_id: string | null
+          campus_id: string | null
+          exception_count: number | null
+          failed_count: number | null
+          import_id: string | null
+          matched_count: number | null
+          parsed_count: number | null
+          row_count: number | null
+          status: string | null
+          tenant_id: string | null
+          unresolved_count: number | null
+        }
+        Insert: {
+          bank_account_id?: string | null
+          campus_id?: string | null
+          exception_count?: never
+          failed_count?: number | null
+          import_id?: string | null
+          matched_count?: never
+          parsed_count?: number | null
+          row_count?: number | null
+          status?: string | null
+          tenant_id?: string | null
+          unresolved_count?: never
+        }
+        Update: {
+          bank_account_id?: string | null
+          campus_id?: string | null
+          exception_count?: never
+          failed_count?: number | null
+          import_id?: string | null
+          matched_count?: never
+          parsed_count?: number | null
+          row_count?: number | null
+          status?: string | null
+          tenant_id?: string | null
+          unresolved_count?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_statement_import_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "campus_bank_account"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_import_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_import_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_campaign_cost: {
         Row: {
           campaign_id: string | null
@@ -23087,6 +23470,10 @@ export type Database = {
         Returns: string
       }
       activate_guardian_account: { Args: { p_token: string }; Returns: string }
+      add_bank_statement_lines: {
+        Args: { p_complete?: boolean; p_import_id: string; p_lines: Json }
+        Returns: Json
+      }
       add_holiday: {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
         Returns: string
@@ -23190,6 +23577,10 @@ export type Database = {
         Returns: undefined
       }
       archive_campus: { Args: { p_campus_id: string }; Returns: undefined }
+      assign_bank_mapping_profile: {
+        Args: { p_bank_account_id: string; p_profile_id: string }
+        Returns: undefined
+      }
       assign_class_teacher: {
         Args: {
           p_effective_from: string
@@ -23437,6 +23828,7 @@ export type Database = {
         Args: { p_version_id: string }
         Returns: string
       }
+      close_bank_import: { Args: { p_import_id: string }; Returns: undefined }
       collect_cash_payment: {
         Args: {
           p_amount_paisa: number
@@ -23559,6 +23951,16 @@ export type Database = {
         Returns: Json
       }
       create_audit_partition: { Args: { p_month?: string }; Returns: undefined }
+      create_bank_mapping_profile: {
+        Args: {
+          p_amount_sign_rule: string
+          p_column_map: Json
+          p_date_format: string
+          p_format: string
+          p_name: string
+        }
+        Returns: string
+      }
       create_bell_calendar_rule: {
         Args: {
           p_bell_template_id: string
@@ -25410,6 +25812,7 @@ export type Database = {
         Args: { p_payment_id: string }
         Returns: undefined
       }
+      reconcile_bank_import: { Args: { p_import_id: string }; Returns: Json }
       record_admission_fee_payment: {
         Args: {
           p_amount_paisa: number
@@ -25653,6 +26056,15 @@ export type Database = {
           p_session_id: string
         }
         Returns: string
+      }
+      resolve_bank_exception: {
+        Args: {
+          p_action: string
+          p_challan_id?: string
+          p_exception_id: string
+          p_note: string
+        }
+        Returns: Json
       }
       resolve_bell_template: {
         Args: {
@@ -26259,6 +26671,15 @@ export type Database = {
       stage_import_rows: {
         Args: { p_batch_id: string; p_rows: Json }
         Returns: number
+      }
+      start_bank_statement_import: {
+        Args: {
+          p_bank_account_id: string
+          p_file_name: string
+          p_file_sha256: string
+          p_storage_path: string
+        }
+        Returns: string
       }
       start_guardian_claim: {
         Args: {
