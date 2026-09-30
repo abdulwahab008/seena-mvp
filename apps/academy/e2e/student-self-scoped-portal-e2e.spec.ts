@@ -466,6 +466,6 @@ test.describe('FR-N09: Student self-scoped portal', () => {
       .select('id, name_en')
       .eq('id', studentId);
     expect(guardianChildView?.length).toBe(1);
-    expect(guardianChildView![0].id).toBe(studentId);
+    expect(guardianChildView?.[0]?.id).toBe(studentId);
   });
 });
