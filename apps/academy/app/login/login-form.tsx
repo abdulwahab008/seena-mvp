@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const LoginSchema = z.object({
-  email: z.string().email('Enter a valid email address'),
+  email: z.string().min(1, 'Enter email or GR number'),
   password: z.string().min(1, 'Required'),
 });
 type LoginValues = z.infer<typeof LoginSchema>;
@@ -45,8 +45,8 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" autoComplete="email" {...register('email')} />
+        <Label htmlFor="email">Email or GR Number</Label>
+        <Input id="email" type="text" placeholder="name@school.com or GR-1234" autoComplete="username" {...register('email')} />
         {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
       </div>
       <div className="space-y-2">

@@ -45,6 +45,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   //    gives them app_role 'parent'). They have a home — it is the portal.
   //  - anyone else: credentials but no school, e.g. straight from /sign-up.
   if (!appUser) {
+    const { data: student } = await supabase
+      .from('student_portal_account')
+      .select('id, status')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (student && student.status === 'active') {
+      redirect('/student/timetable');
+    }
+
     const { data: guardian } = await supabase
       .from('guardian')
       .select('id')
