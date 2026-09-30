@@ -430,8 +430,8 @@ select throws_ok(
              '[{"component":"theory","max_marks":50,"pass_marks":17}]'::jsonb) $$,
          :'term_t1', :'cs_cs'),
   '42501',
-  'FORBIDDEN',
-  'a Subject Teacher cannot configure the exam — that is the exam office''s job'
+  'TEACHER_NOT_ASSIGNED_TO_SUBJECT',
+  'a Subject Teacher not assigned to the subject cannot configure its exam'
 );
 select is(
   (public.fn_exam_entry_readiness(:'term_t1', :'sec9_pm', :'subj_bio') ->> 'ready')::boolean,
