@@ -8,10 +8,11 @@ select id as tenant_id from public.tenant where slug = 'test-subject-co' \gset
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_id', 'app_role', 'exam_controller')::text, true);
 
-select throws_ok(
-  $$ select public.create_subject('ISL', 'Islamiyat', '') $$,
-  'URDU_NAME_REQUIRED',
-  'a subject with a blank Urdu name is rejected'
+select public.create_subject('ENGO', 'English Only', '') as engonly_id \gset
+select is(
+  (select name_ur from public.subject where id = :'engonly_id'),
+  'English Only',
+  'a blank Urdu name falls back to the English name (English-only subjects are valid)'
 );
 
 select public.create_subject('MATH', 'Mathematics', 'ریاضی') as math_id \gset
