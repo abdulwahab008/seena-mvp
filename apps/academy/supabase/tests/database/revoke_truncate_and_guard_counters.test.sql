@@ -91,7 +91,7 @@ select is(
   'public.fn_next_enquiry_no() still allocates, and still allocates consecutively'
 );
 
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-15'::date, false);
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', current_date)::date + 14), false);
 select id as challan_id, challan_no from public.fee_challan where enrolment_id = :'enrol_id' \gset
 select is(
   left(:'challan_no', 11),

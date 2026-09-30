@@ -39,11 +39,11 @@ select public.create_concession_scheme(
 select public.create_student(:'campus_id'::uuid, 'Student B Fixed', '2015-01-01'::date, 'female') as student_b_id \gset
 select public.enrol_student(:'section_id'::uuid, :'student_b_id'::uuid) as enrol_b_id \gset
 select public.request_concession_award(
-  :'enrol_b_id'::uuid, :'fixed_scheme_id'::uuid, 6000, '2026-08-01'::date, '2026-12-31'::date
+  :'enrol_b_id'::uuid, :'fixed_scheme_id'::uuid, 6000, date_trunc('month', current_date)::date, (date_trunc('month', current_date) + interval '6 months')::date
 ) as award_fixed_id \gset
 select public.decide_concession_award(:'award_fixed_id'::uuid, true);
 
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-01'::date, false) as gen_b_result \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, date_trunc('month', current_date)::date, false) as gen_b_result \gset
 select concession_paisa, net_paisa from public.fee_challan_line
   where challan_id = (select id from public.fee_challan where enrolment_id = :'enrol_b_id') \gset
 select is(
@@ -101,10 +101,10 @@ select public.enrol_student(:'section_id'::uuid, :'student_a_id'::uuid) as enrol
 -- FR-K06's own "editing resets to pending" trigger, which is correct
 -- behaviour but not what this test is exercising.
 select public.request_concession_award(
-  :'enrol_a_id'::uuid, :'sib_scheme_id'::uuid, 30, '2026-08-01'::date, '2026-08-15'::date
+  :'enrol_a_id'::uuid, :'sib_scheme_id'::uuid, 30, date_trunc('month', current_date)::date, (date_trunc('month', current_date)::date + 14)
 ) as award_sib_id \gset
 select public.request_concession_award(
-  :'enrol_a_id'::uuid, :'merit_scheme_id'::uuid, 40, '2026-08-01'::date, '2026-12-31'::date
+  :'enrol_a_id'::uuid, :'merit_scheme_id'::uuid, 40, date_trunc('month', current_date)::date, (date_trunc('month', current_date) + interval '6 months')::date
 ) as award_merit_id \gset
 select set_config(
   'request.jwt.claims',
@@ -121,7 +121,7 @@ select set_config(
   true
 );
 
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-01'::date, false) as gen_a_result \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, date_trunc('month', current_date)::date, false) as gen_a_result \gset
 select id as line_a_id, concession_paisa as concession_a, net_paisa as net_a, applied_award_ids
   from public.fee_challan_line where challan_id = (select id from public.fee_challan where enrolment_id = :'enrol_a_id') \gset
 select is(
@@ -138,13 +138,13 @@ select is(
 -- ── expiry ──────────────────────────────────────────────────────────
 
 select throws_ok(
-  format('select public.expire_due_concessions(%L)', '2026-08-20'::date),
+  format('select public.expire_due_concessions(%L)', (date_trunc('month', current_date)::date + 19)),
   'permission denied for function expire_due_concessions',
   'an authenticated owner cannot call expire_due_concessions directly — it is service_role only'
 );
 
 reset role;
-select public.expire_due_concessions('2026-08-20'::date) as expired_count \gset
+select public.expire_due_concessions((date_trunc('month', current_date)::date + 19)) as expired_count \gset
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
@@ -180,7 +180,7 @@ select is(
 );
 
 reset role;
-select public.expire_due_concessions('2026-08-21'::date) as expired_again_count \gset
+select public.expire_due_concessions((date_trunc('month', current_date)::date + 20)) as expired_again_count \gset
 set local role authenticated;
 select set_config(
   'request.jwt.claims',

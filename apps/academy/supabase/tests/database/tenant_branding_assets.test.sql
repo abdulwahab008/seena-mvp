@@ -84,7 +84,7 @@ select public.add_structure_line(:'structure_id'::uuid, :'class1_id'::uuid, :'tu
 select public.publish_fee_structure(:'structure_id'::uuid);
 select public.create_student(:'campus_id'::uuid, 'Branding Student', '2015-01-01'::date, 'male') as student_id \gset
 select public.enrol_student(:'section_id'::uuid, :'student_id'::uuid) as enrol_id \gset
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-01'::date, false) as gen_result \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, date_trunc('month', current_date)::date, false) as gen_result \gset
 select id as challan_id from public.fee_challan where enrolment_id = :'enrol_id' \gset
 
 select public.set_challan_template(:'campus_id'::uuid, 'Test Bank', 'Branding Co', '1234567890');

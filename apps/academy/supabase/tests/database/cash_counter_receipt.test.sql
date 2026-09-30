@@ -37,7 +37,7 @@ select public.publish_fee_structure(:'structure_id'::uuid);
 
 select public.create_student(:'campus_id'::uuid, 'Counter Child', '2015-01-01'::date, 'male') as student_id \gset
 select public.enrol_student(:'section_id'::uuid, :'student_id'::uuid) as enrol_id \gset
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-15'::date, false);
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', current_date)::date + 14), false);
 select id as challan_id, challan_no from public.fee_challan where enrolment_id = :'enrol_id' \gset
 
 -- ── AC: scanning the challan pre-fills student + net payable + outstanding ─

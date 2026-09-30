@@ -47,7 +47,7 @@ select public.create_concession_scheme(
 select public.create_student(:'campus_id'::uuid, 'Student B Concession', '2015-01-01'::date, 'female') as student_b_id \gset
 select public.enrol_student(:'section_id'::uuid, :'student_b_id'::uuid) as enrol_b_id \gset
 select public.request_concession_award(
-  :'enrol_b_id'::uuid, :'scheme_id'::uuid, 20, '2026-08-01'::date, '2026-12-31'::date
+  :'enrol_b_id'::uuid, :'scheme_id'::uuid, 20, date_trunc('month', current_date)::date, (date_trunc('month', current_date) + interval '6 months')::date
 ) as award_b_id \gset
 select set_config(
   'request.jwt.claims',
@@ -91,7 +91,7 @@ select public.fn_change_student_status(:'student_e_id'::uuid, 'inactive'::public
 
 -- ── dry run: 2 billable (b, c), 2 failed (a, d), 0 written ─────────────
 
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-01'::date, true) as dry_result \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, date_trunc('month', current_date)::date, true) as dry_result \gset
 select is((:'dry_result'::jsonb ->> 'generated')::int, 2, 'dry run: 2 enrolments are billable (B and C)');
 select is((:'dry_result'::jsonb ->> 'failed')::int, 2, 'dry run: 2 enrolments fail (A has no plan, D has a coverage gap)');
 select is((:'dry_result'::jsonb ->> 'skipped')::int, 0, 'dry run: nothing is skipped yet — no challans exist');
@@ -105,7 +105,7 @@ select is((select count(*)::int from public.fee_challan_batch), 0, 'dry run writ
 
 -- ── real run ────────────────────────────────────────────────────────
 
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-01'::date, false) as run1_result \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, date_trunc('month', current_date)::date, false) as run1_result \gset
 select is((:'run1_result'::jsonb ->> 'generated')::int, 2, 'real run: 2 challans generated');
 select is((:'run1_result'::jsonb ->> 'failed')::int, 2, 'real run: 2 enrolments still recorded as failed');
 select is((:'run1_result'::jsonb ->> 'skipped')::int, 0, 'real run: nothing skipped on the first pass');
@@ -158,7 +158,7 @@ select is(
 
 -- ── re-run for the same period: fully idempotent ───────────────────────
 
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-01'::date, false) as run2_result \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, date_trunc('month', current_date)::date, false) as run2_result \gset
 select is((:'run2_result'::jsonb ->> 'generated')::int, 0, 're-run: 0 new challans generated');
 select is((:'run2_result'::jsonb ->> 'skipped')::int, 2, 're-run: both existing challans are reported skipped');
 select is((select count(*)::int from public.fee_challan), 2, 're-run leaves the fee_challan count unchanged at 2');
@@ -176,7 +176,7 @@ select set_config(
   true
 );
 select throws_ok(
-  format('select public.generate_challans(%L, %L, ''2026-08-01''::date, false)', :'campus_id', :'session_id'),
+  format('select public.generate_challans(%L, %L, date_trunc(''month'', current_date)::date, false)', :'campus_id', :'session_id'),
   'FORBIDDEN',
   'a teacher cannot run challan generation'
 );
@@ -196,7 +196,7 @@ select set_config(
 -- who are exempt from the scope check) but doesn't exist in the tenant —
 -- not re-tested here since that existence check itself is unchanged.
 select throws_ok(
-  format('select public.generate_challans(%L, %L, ''2026-08-01''::date, false)', gen_random_uuid(), :'session_id'),
+  format('select public.generate_challans(%L, %L, date_trunc(''month'', current_date)::date, false)', gen_random_uuid(), :'session_id'),
   'FORBIDDEN',
   'an unknown campus id outside this accountant''s own scope is rejected as FORBIDDEN, not CAMPUS_NOT_FOUND'
 );

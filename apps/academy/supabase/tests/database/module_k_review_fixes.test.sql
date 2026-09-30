@@ -137,7 +137,7 @@ select set_config(
   json_build_object('tenant_id', :'tenant_id', 'app_role', 'owner', 'campus_ids', json_build_array(:'campus_id'))::text,
   true
 );
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, '2026-08-01'::date, false) as gen_result \gset
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, date_trunc('month', current_date)::date, false) as gen_result \gset
 select is(
   (:'gen_result'::jsonb ->> 'generated')::int, 1,
   'the fixes did not regress ordinary challan generation'
