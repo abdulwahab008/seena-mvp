@@ -163,3 +163,9 @@
     animation: none;
   }
 }
+
+/* FR-N12: Urdu is set in Nastaliq where installed, with Naskh as the fallback. */
+[lang='ur'] {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Noto Naskh Arabic', system-ui, sans-serif;
+  line-height: 2;
+}

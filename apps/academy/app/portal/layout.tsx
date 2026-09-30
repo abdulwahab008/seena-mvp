@@ -1,18 +1,21 @@
 import Link from 'next/link';
 import { requireSession } from '@/lib/auth/require-session';
+import { getLang } from '@/lib/i18n/server';
+import { dirFor, t, type MessageKey } from '@/lib/i18n/messages';
+import { LanguageToggle } from '@/components/language-toggle';
 
-const PORTAL_LINKS = [
-  { href: '/portal/attendance', label: 'Attendance' },
-  { href: '/portal/fees', label: 'Fees' },
-  { href: '/portal/homework', label: 'Homework' },
-  { href: '/portal/timetable', label: 'Timetable' },
-  { href: '/portal/results', label: 'Results' },
-  { href: '/portal/consent', label: 'Consent' },
-  { href: '/portal/circulars', label: 'Circulars' },
-  { href: '/portal/calendar', label: 'Calendar' },
-  { href: '/portal/remarks', label: 'Remarks' },
-  { href: '/portal/tickets', label: 'Support & Complaints' },
-  { href: '/portal/link-child', label: 'Add child' },
+const PORTAL_LINKS: { href: string; key: MessageKey }[] = [
+  { href: '/portal/attendance', key: 'nav.attendance' },
+  { href: '/portal/fees', key: 'nav.fees' },
+  { href: '/portal/homework', key: 'nav.homework' },
+  { href: '/portal/timetable', key: 'nav.timetable' },
+  { href: '/portal/results', key: 'nav.results' },
+  { href: '/portal/consent', key: 'nav.consent' },
+  { href: '/portal/circulars', key: 'nav.circulars' },
+  { href: '/portal/calendar', key: 'nav.calendar' },
+  { href: '/portal/remarks', key: 'nav.remarks' },
+  { href: '/portal/tickets', key: 'nav.tickets' },
+  { href: '/portal/link-child', key: 'nav.linkChild' },
 ];
 
 // The parent/guardian portal. Deliberately separate from (app)'s layout —
@@ -24,14 +27,18 @@ export default async function PortalLayout({ children }: { children: React.React
   // creates no app_user row, so this intentionally checks only for a session
   // — the /no-school membership rule belongs to the staff app, not here.
   await requireSession();
+  const lang = await getLang();
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-2 text-lg font-semibold">Parent Portal</h1>
-      <nav className="mb-6 flex gap-4 text-sm">
+    <div className="mx-auto max-w-2xl p-4 sm:p-6" dir={dirFor(lang)} lang={lang}>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h1 className="text-lg font-semibold">{t(lang, 'portal.title')}</h1>
+        <LanguageToggle lang={lang} />
+      </div>
+      <nav className="mb-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
         {PORTAL_LINKS.map((l) => (
           <Link key={l.href} href={l.href} className="text-muted-foreground hover:text-foreground">
-            {l.label}
+            {t(lang, l.key)}
           </Link>
         ))}
       </nav>

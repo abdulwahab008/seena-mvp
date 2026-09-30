@@ -9413,6 +9413,7 @@ export type Database = {
           occupation: string | null
           phone_e164: string | null
           phone_last10: string | null
+          preferred_language: string
           tenant_id: string
         }
         Insert: {
@@ -9430,6 +9431,7 @@ export type Database = {
           occupation?: string | null
           phone_e164?: string | null
           phone_last10?: string | null
+          preferred_language?: string
           tenant_id: string
         }
         Update: {
@@ -9447,6 +9449,7 @@ export type Database = {
           occupation?: string | null
           phone_e164?: string | null
           phone_last10?: string | null
+          preferred_language?: string
           tenant_id?: string
         }
         Relationships: [
@@ -17104,6 +17107,7 @@ export type Database = {
           id: string
           initial_password: string | null
           must_change_password: boolean
+          preferred_language: string
           status: string
           student_id: string
           tenant_id: string
@@ -17116,6 +17120,7 @@ export type Database = {
           id?: string
           initial_password?: string | null
           must_change_password?: boolean
+          preferred_language?: string
           status?: string
           student_id: string
           tenant_id: string
@@ -17128,6 +17133,7 @@ export type Database = {
           id?: string
           initial_password?: string | null
           must_change_password?: boolean
+          preferred_language?: string
           status?: string
           student_id?: string
           tenant_id?: string
@@ -25522,6 +25528,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_preferred_language: { Args: never; Returns: string }
       global_search: {
         Args: { p_limit?: number; p_q: string }
         Returns: {
@@ -25766,6 +25773,10 @@ export type Database = {
       }
       pick_body: {
         Args: { p_lang?: string; p_version_id: string }
+        Returns: string
+      }
+      pick_body_for_guardian: {
+        Args: { p_guardian_id: string; p_version_id: string }
         Returns: string
       }
       portal_challan_payload: { Args: { p_challan_id: string }; Returns: Json }
@@ -26670,6 +26681,7 @@ export type Database = {
         Args: { p_campus_id: string; p_precision: number }
         Returns: undefined
       }
+      set_preferred_language: { Args: { p_lang: string }; Returns: string }
       set_rank_policy: {
         Args: {
           p_campus_id: string

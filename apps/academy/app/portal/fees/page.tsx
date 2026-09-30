@@ -3,6 +3,8 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChallanActionsClient } from './challan-actions-client';
 import { PayPanel } from './pay-panel';
+import { getLang } from '@/lib/i18n/server';
+import { t, type MessageKey } from '@/lib/i18n/messages';
 
 /**
  * FR-N04: Fee dues view with pay action for parents/guardians.
@@ -57,15 +59,15 @@ const STATUS_CONFIG: Record<
   { label: string; badgeClass: string }
 > = {
   paid: {
-    label: 'Paid',
+    label: 'fees.paid',
     badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800',
   },
   unpaid: {
-    label: 'Unpaid',
+    label: 'fees.unpaid',
     badgeClass: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800',
   },
   part_paid: {
-    label: 'Partially Paid',
+    label: 'fees.partPaid',
     badgeClass: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800',
   },
   cancelled: {
@@ -81,6 +83,7 @@ export default async function PortalFeesPage({
 }) {
   const params = await searchParams;
   const supabase = await supabaseServer();
+  const lang = await getLang();
 
   // 1. Fetch children enrolled for this guardian
   const { data: enrolments } = await supabase
@@ -186,7 +189,7 @@ export default async function PortalFeesPage({
   return (
     <div className="space-y-6" data-testid="portal-fees-page">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Fee Dues &amp; Billing</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">{t(lang, 'fees.title')}</h2>
         <p className="text-sm text-muted-foreground">FR-N04 — View fee challans, outstanding balance and payment options.</p>
       </div>
 
@@ -227,7 +230,7 @@ export default async function PortalFeesPage({
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Current Outstanding Balance
+                  {t(lang, 'fees.outstanding')}
                 </span>
                 <div
                   className={`text-3xl font-extrabold mt-1 ${
@@ -291,7 +294,7 @@ export default async function PortalFeesPage({
                               className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${cfg.badgeClass}`}
                               data-testid={`challan-status-${challan.challan_no}`}
                             >
-                              {dues.get(challan.id)?.underReconciliation ? 'Payment under reconciliation' : cfg.label}
+                              {dues.get(challan.id)?.underReconciliation ? t(lang, 'fees.underReconciliation') : cfg.label.startsWith('fees.') ? t(lang, cfg.label as MessageKey) : cfg.label}
                             </span>
                             {isOverdue && (
                               <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-600 text-white">
@@ -331,17 +334,17 @@ export default async function PortalFeesPage({
                         {challan.status !== 'paid' && dues.get(challan.id) && (
                           <div className="space-y-1 border-t py-3 text-sm" data-testid={`dues-${challan.challan_no}`}>
                             <div className="flex justify-between">
-                              <span>Balance</span>
+                              <span>{t(lang, 'fees.balance')}</span>
                               <span data-testid={`balance-${challan.challan_no}`}>{formatPkr(dues.get(challan.id)!.balance)}</span>
                             </div>
                             {dues.get(challan.id)!.lateFee > 0 && (
                               <div className="flex justify-between text-rose-700">
-                                <span>Late fee</span>
+                                <span>{t(lang, 'fees.lateFee')}</span>
                                 <span data-testid={`late-fee-${challan.challan_no}`}>{formatPkr(dues.get(challan.id)!.lateFee)}</span>
                               </div>
                             )}
                             <div className="flex justify-between font-semibold">
-                              <span>Total due</span>
+                              <span>{t(lang, 'fees.totalDue')}</span>
                               <span data-testid={`total-due-${challan.challan_no}`}>{formatPkr(dues.get(challan.id)!.total)}</span>
                             </div>
                             <PayPanel
@@ -351,6 +354,7 @@ export default async function PortalFeesPage({
                               balancePaisa={dues.get(challan.id)!.balance}
                               underReconciliation={dues.get(challan.id)!.underReconciliation}
                               gateways={dues.get(challan.id)!.gateways}
+                              lang={lang}
                             />
                           </div>
                         )}
