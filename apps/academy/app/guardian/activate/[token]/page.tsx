@@ -43,7 +43,7 @@ export default async function GuardianActivatePage({ params }: { params: Promise
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ActivateForm token={token} phoneE164={data.phone_e164} />
+          <ActivateForm token={token} phoneHint={data.is_claim ? (data.phone_masked ?? '') : data.phone_e164} />
         </CardContent>
       </Card>
     </div>

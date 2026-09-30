@@ -5,16 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { requestActivationCode, verifyActivationCode } from './actions';
+import { requestActivationCode, requestManualReview, verifyActivationCode } from './actions';
 import { otpCodeSchema, type OtpCodeInput } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export function ActivateForm({ token, phoneE164 }: { token: string; phoneE164: string }) {
+export function ActivateForm({ token, phoneHint }: { token: string; phoneHint: string }) {
   const router = useRouter();
   const [phone, setPhone] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [queued, setQueued] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const codeForm = useForm<OtpCodeInput>({ resolver: zodResolver(otpCodeSchema) });
@@ -31,12 +32,20 @@ export function ActivateForm({ token, phoneE164 }: { token: string; phoneE164: s
     });
   };
 
+  const onManualReview = () => {
+    startTransition(async () => {
+      const result = await requestManualReview(token);
+      if (result.queued) setQueued(true);
+      else setServerError('This request could not be sent. Ask the school to resend your invite.');
+    });
+  };
+
   const onVerify = codeForm.handleSubmit((values) => {
     setServerError(null);
     const fd = new FormData();
     fd.set('code', values.code);
     startTransition(async () => {
-      const result = await verifyActivationCode(token, phone ?? phoneE164, { error: null, ok: false }, fd);
+      const result = await verifyActivationCode(token, { error: null, ok: false }, fd);
       if (result.error) {
         setServerError(result.error);
         return;
@@ -58,10 +67,18 @@ export function ActivateForm({ token, phoneE164 }: { token: string; phoneE164: s
     });
   });
 
+  if (queued) {
+    return (
+      <p role="status" className="text-sm text-muted-foreground" data-testid="activate-queued">
+        The school office will verify your claim and contact you. You can close this page.
+      </p>
+    );
+  }
+
   if (!phone) {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">We&apos;ll send a verification code to {phoneE164}.</p>
+        <p className="text-sm text-muted-foreground">We&apos;ll send a verification code to {phoneHint}.</p>
         {serverError && (
           <p role="alert" className="text-sm text-destructive">
             {serverError}
@@ -69,6 +86,9 @@ export function ActivateForm({ token, phoneE164 }: { token: string; phoneE164: s
         )}
         <Button type="button" disabled={pending} onClick={onRequestCode} className="w-full" data-testid="activate-request-code">
           {pending ? 'Sending…' : 'Send code'}
+        </Button>
+        <Button type="button" variant="ghost" disabled={pending} onClick={onManualReview} className="w-full" data-testid="activate-manual-review">
+          I can&apos;t receive the code
         </Button>
       </div>
     );
@@ -89,6 +109,9 @@ export function ActivateForm({ token, phoneE164 }: { token: string; phoneE164: s
       )}
       <Button type="submit" disabled={pending} className="w-full" data-testid="activate-verify-code">
         {pending ? 'Verifying…' : 'Activate account'}
+      </Button>
+      <Button type="button" variant="ghost" disabled={pending} onClick={onManualReview} className="w-full" data-testid="activate-manual-review">
+        I can&apos;t receive the code
       </Button>
     </form>
   );

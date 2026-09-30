@@ -35,14 +35,15 @@ export async function requestActivationCode(token: string, _prev: RequestActivat
   });
   if (error) return { error: 'Could not send the code. Try again shortly.', phone: null };
 
-  return { error: null, phone: preview.phone_e164 };
+  // A claimant only proved two weak factors (GR + CNIC digits): show them the
+  // masked number, never the full one. Office-sent invites keep the full number.
+  return { error: null, phone: preview.is_claim ? preview.phone_masked : preview.phone_e164 };
 }
 
 export type VerifyActivationCodeState = { error: string | null; ok: boolean };
 
 export async function verifyActivationCode(
   token: string,
-  phone: string,
   _prev: VerifyActivationCodeState,
   formData: FormData,
 ): Promise<VerifyActivationCodeState> {
@@ -52,9 +53,11 @@ export async function verifyActivationCode(
   const supabase = await supabaseServer();
 
   const { data: preview } = await supabase.rpc('get_guardian_invite_preview', { p_token: token }).maybeSingle();
-  if (preview?.locked) return { error: 'Too many wrong attempts. Try again in 30 minutes.', ok: false };
+  if (!preview || !preview.valid || !preview.phone_e164) return { error: 'This invite link is not valid.', ok: false };
+  if (preview.locked) return { error: 'Too many wrong attempts. Try again in 30 minutes.', ok: false };
 
-  const { error: verifyError } = await supabase.auth.verifyOtp({ phone: toGoTruePhone(phone), token: code, type: 'sms' });
+  // The phone comes from the invite, never from the client.
+  const { error: verifyError } = await supabase.auth.verifyOtp({ phone: toGoTruePhone(preview.phone_e164), token: code, type: 'sms' });
   // Ground truth from this action's own verifyOtp call, written via the
   // service-role client — same reasoning as register_otp_attempt in
   // app/login/otp/actions.ts.
@@ -72,4 +75,12 @@ export async function verifyActivationCode(
   if (refreshError) return { error: 'Account activated, but please sign in again to continue.', ok: false };
 
   return { error: null, ok: true };
+}
+
+// FR-N01 AC3: a claimant who cannot receive the code on the number on file is
+// queued for the office — they can never type in a different number.
+export async function requestManualReview(token: string): Promise<{ queued: boolean }> {
+  const supabase = await supabaseServer();
+  const { data } = await supabase.rpc('request_claim_manual_review', { p_token: token });
+  return { queued: data === true };
 }

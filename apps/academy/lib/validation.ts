@@ -1994,3 +1994,29 @@ export type StartImpersonationInput = z.infer<typeof startImpersonationSchema>;
 
 export const endImpersonationSchema = z.object({ sessionId: z.string().uuid().optional() });
 export type EndImpersonationInput = z.infer<typeof endImpersonationSchema>;
+
+// FR-N01: the anonymous guardian claim form. The CNIC is never asked for in
+// full — six digits are enough to match and far less to leak.
+export const guardianClaimSchema = z.object({
+  schoolCode: z
+    .string()
+    .trim()
+    .min(3, 'Enter your school code')
+    .max(50, 'Enter your school code')
+    .transform((s) => s.toLowerCase()),
+  grNumber: z
+    .string()
+    .trim()
+    .max(30, 'Enter the GR number')
+    .regex(/\d/, 'Enter the GR number'),
+  cnicLast6: z.string().trim().regex(/^\d{6}$/, 'Enter the last 6 digits of your CNIC'),
+});
+export type GuardianClaimInput = z.input<typeof guardianClaimSchema>;
+export type GuardianClaimParsed = z.output<typeof guardianClaimSchema>;
+
+export const resolveGuardianClaimSchema = z.object({
+  claimId: z.string().uuid(),
+  approve: z.boolean(),
+  note: z.string().trim().max(500).optional(),
+});
+export type ResolveGuardianClaimInput = z.infer<typeof resolveGuardianClaimSchema>;

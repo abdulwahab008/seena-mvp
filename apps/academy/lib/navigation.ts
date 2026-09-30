@@ -74,6 +74,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/admissions/test-sittings', label: 'Test Sittings' },
       { href: '/admissions/interviews', label: 'Interviews' },
       { href: '/admissions/reminders', label: 'Reminders' },
+      { href: '/admissions/guardian-claims', label: 'Parent Claims' },
     ],
   },
   {

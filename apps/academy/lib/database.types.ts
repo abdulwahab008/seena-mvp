@@ -3108,63 +3108,6 @@ export type Database = {
         }
         Relationships: []
       }
-      audit_log_2026_08: {
-        Row: {
-          action: Database["public"]["Enums"]["audit_action"]
-          actor_role: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id: string | null
-          after: Json | null
-          before: Json | null
-          campus_id: string | null
-          changed_columns: string[] | null
-          effective_actor_user_id: string | null
-          id: string
-          impersonation_session_id: string | null
-          occurred_at: string
-          prev_hash: string | null
-          row_hash: string | null
-          row_id: string | null
-          table_name: string
-          tenant_id: string
-        }
-        Insert: {
-          action: Database["public"]["Enums"]["audit_action"]
-          actor_role?: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id?: string | null
-          after?: Json | null
-          before?: Json | null
-          campus_id?: string | null
-          changed_columns?: string[] | null
-          effective_actor_user_id?: string | null
-          id?: string
-          impersonation_session_id?: string | null
-          occurred_at?: string
-          prev_hash?: string | null
-          row_hash?: string | null
-          row_id?: string | null
-          table_name: string
-          tenant_id: string
-        }
-        Update: {
-          action?: Database["public"]["Enums"]["audit_action"]
-          actor_role?: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id?: string | null
-          after?: Json | null
-          before?: Json | null
-          campus_id?: string | null
-          changed_columns?: string[] | null
-          effective_actor_user_id?: string | null
-          id?: string
-          impersonation_session_id?: string | null
-          occurred_at?: string
-          prev_hash?: string | null
-          row_hash?: string | null
-          row_id?: string | null
-          table_name?: string
-          tenant_id?: string
-        }
-        Relationships: []
-      }
       audit_log_2026_09: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -3223,6 +3166,63 @@ export type Database = {
         Relationships: []
       }
       audit_log_2026_10: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          actor_role: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id: string | null
+          after: Json | null
+          before: Json | null
+          campus_id: string | null
+          changed_columns: string[] | null
+          effective_actor_user_id: string | null
+          id: string
+          impersonation_session_id: string | null
+          occurred_at: string
+          prev_hash: string | null
+          row_hash: string | null
+          row_id: string | null
+          table_name: string
+          tenant_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          actor_role?: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          campus_id?: string | null
+          changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
+          id?: string
+          impersonation_session_id?: string | null
+          occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
+          row_id?: string | null
+          table_name: string
+          tenant_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          actor_role?: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          campus_id?: string | null
+          changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
+          id?: string
+          impersonation_session_id?: string | null
+          occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
+          row_id?: string | null
+          table_name?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      audit_log_2026_11: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
           actor_role: Database["public"]["Enums"]["app_role"] | null
@@ -9098,6 +9098,142 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "guardian_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_claim: {
+        Row: {
+          campus_id: string
+          created_at: string
+          device_hash: string
+          expires_at: string
+          guardian_id: string
+          id: string
+          invite_id: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          review_note: string | null
+          review_reason: string | null
+          status: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          device_hash: string
+          expires_at: string
+          guardian_id: string
+          id?: string
+          invite_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_note?: string | null
+          review_reason?: string | null
+          status: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          device_hash?: string
+          expires_at?: string
+          guardian_id?: string
+          id?: string
+          invite_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_note?: string | null
+          review_reason?: string | null
+          status?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_claim_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_claim_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_claim_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "guardian_invite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_claim_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_claim_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "guardian_claim_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "guardian_claim_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_claim_attempt: {
+        Row: {
+          created_at: string
+          device_hash: string
+          gr_digits: string | null
+          id: string
+          outcome: string
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_hash: string
+          gr_digits?: string | null
+          id?: string
+          outcome: string
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_hash?: string
+          gr_digits?: string | null
+          id?: string
+          outcome?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_claim_attempt_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -16163,6 +16299,7 @@ export type Database = {
           guardian_id: string
           is_primary: boolean
           may_collect_child: boolean
+          portal_access: boolean
           priority: number
           receives_academic: boolean
           receives_billing: boolean
@@ -16177,6 +16314,7 @@ export type Database = {
           guardian_id: string
           is_primary?: boolean
           may_collect_child?: boolean
+          portal_access?: boolean
           priority?: number
           receives_academic?: boolean
           receives_billing?: boolean
@@ -16191,6 +16329,7 @@ export type Database = {
           guardian_id?: string
           is_primary?: boolean
           may_collect_child?: boolean
+          portal_access?: boolean
           priority?: number
           receives_academic?: boolean
           receives_billing?: boolean
@@ -16543,6 +16682,13 @@ export type Database = {
           {
             foreignKeyName: "student_remark_version_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "student_remark_version_moderated_by_fkey"
+            columns: ["moderated_by"]
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
@@ -19182,45 +19328,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      pg_all_foreign_keys: {
-        Row: {
-          fk_columns: unknown[] | null
-          fk_constraint_name: unknown
-          fk_schema_name: unknown
-          fk_table_name: unknown
-          fk_table_oid: unknown
-          is_deferrable: boolean | null
-          is_deferred: boolean | null
-          match_type: string | null
-          on_delete: string | null
-          on_update: string | null
-          pk_columns: unknown[] | null
-          pk_constraint_name: unknown
-          pk_index_name: unknown
-          pk_schema_name: unknown
-          pk_table_name: unknown
-          pk_table_oid: unknown
-        }
-        Relationships: []
-      }
-      tap_funky: {
-        Row: {
-          args: string | null
-          is_definer: boolean | null
-          is_strict: boolean | null
-          is_visible: boolean | null
-          kind: unknown
-          langoid: unknown
-          name: unknown
-          oid: unknown
-          owner: unknown
-          returns: string | null
-          returns_set: boolean | null
-          schema: unknown
-          volatility: string | null
-        }
-        Relationships: []
       }
       v_admission_merit_rank: {
         Row: {
@@ -22683,21 +22790,6 @@ export type Database = {
       }
     }
     Functions: {
-      _cleanup: { Args: never; Returns: boolean }
-      _contract_on: { Args: { "": string }; Returns: unknown }
-      _currtest: { Args: never; Returns: number }
-      _db_privs: { Args: never; Returns: unknown[] }
-      _extensions: { Args: never; Returns: unknown[] }
-      _get: { Args: { "": string }; Returns: number }
-      _get_latest: { Args: { "": string }; Returns: number[] }
-      _get_note: { Args: { "": string }; Returns: string }
-      _is_verbose: { Args: never; Returns: boolean }
-      _prokind: { Args: { p_oid: unknown }; Returns: unknown }
-      _query: { Args: { "": string }; Returns: string }
-      _refine_vol: { Args: { "": string }; Returns: string }
-      _table_privs: { Args: never; Returns: unknown[] }
-      _temptypes: { Args: { "": string }; Returns: string }
-      _todo: { Args: never; Returns: string }
       absentees_for_date: {
         Args: { p_campus_id: string; p_date: string }
         Returns: {
@@ -22999,6 +23091,10 @@ export type Database = {
           section_label: string
         }[]
       }
+      claim_additional_student: {
+        Args: { p_cnic_last6: string; p_gr_no: string }
+        Returns: Json
+      }
       claim_message_batch: {
         Args: {
           p_channel?: Database["public"]["Enums"]["comm_channel"]
@@ -23072,42 +23168,6 @@ export type Database = {
         Args: { p_version_id: string }
         Returns: string
       }
-      col_is_null:
-        | {
-            Args: {
-              column_name: unknown
-              description?: string
-              schema_name: unknown
-              table_name: unknown
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              column_name: unknown
-              description?: string
-              table_name: unknown
-            }
-            Returns: string
-          }
-      col_not_null:
-        | {
-            Args: {
-              column_name: unknown
-              description?: string
-              schema_name: unknown
-              table_name: unknown
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              column_name: unknown
-              description?: string
-              table_name: unknown
-            }
-            Returns: string
-          }
       collect_cash_payment: {
         Args: {
           p_amount_paisa: number
@@ -23703,20 +23763,6 @@ export type Database = {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: Json
       }
-      diag:
-        | {
-            Args: { msg: unknown }
-            Returns: {
-              error: true
-            } & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-          }
-        | {
-            Args: { msg: string }
-            Returns: {
-              error: true
-            } & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-          }
-      diag_test_name: { Args: { "": string }; Returns: string }
       dispatch_absentee_notifications: {
         Args: {
           p_campus_id: string
@@ -23725,9 +23771,6 @@ export type Database = {
         }
         Returns: Json
       }
-      do_tap:
-        | { Args: never; Returns: string[] }
-        | { Args: { "": string }; Returns: string[] }
       dob_to_words: {
         Args: { p_date: string; p_lang?: string }
         Returns: string
@@ -23835,9 +23878,6 @@ export type Database = {
         Args: { p_circular_id: string; p_segment_name: string }
         Returns: string
       }
-      fail:
-        | { Args: never; Returns: string }
-        | { Args: { "": string }; Returns: string }
       fail_audit_export: {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
@@ -23875,8 +23915,6 @@ export type Database = {
         }
       }
       finalise_import_batch: { Args: { p_batch_id: string }; Returns: Json }
-      findfuncs: { Args: { "": string }; Returns: string[] }
-      finish: { Args: { exception_on_failure?: boolean }; Returns: string[] }
       finish_report_card_batch_item: {
         Args: {
           p_error_code?: string
@@ -24648,8 +24686,10 @@ export type Database = {
         Args: { p_token: string }
         Returns: {
           guardian_name: string
+          is_claim: boolean
           locked: boolean
           phone_e164: string
+          phone_masked: string
           tenant_name: string
           valid: boolean
         }[]
@@ -24712,10 +24752,8 @@ export type Database = {
         Args: { p_purpose: string; p_student_id: string }
         Returns: boolean
       }
-      has_unique: { Args: { "": string }; Returns: string }
       impersonation_blocked_tables: { Args: never; Returns: string[] }
       impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
-      in_todo: { Args: never; Returns: boolean }
       initialize_school_leave_policies: { Args: never; Returns: Json }
       invite_user: {
         Args: {
@@ -24729,7 +24767,6 @@ export type Database = {
         Args: { p_date: string; p_section_id: string }
         Returns: boolean
       }
-      is_empty: { Args: { "": string }; Returns: string }
       is_guardian_otp_locked: {
         Args: { p_guardian_id: string }
         Returns: boolean
@@ -24766,7 +24803,6 @@ export type Database = {
         Args: { p_campus_id: string; p_date: string }
         Returns: boolean
       }
-      isnt_empty: { Args: { "": string }; Returns: string }
       issue_character_certificate: {
         Args: {
           p_board_code?: string
@@ -24817,7 +24853,6 @@ export type Database = {
         Args: { p_staff_id: string; p_user_id: string }
         Returns: undefined
       }
-      lives_ok: { Args: { "": string }; Returns: string }
       lock_attendance_now: {
         Args: { p_date: string; p_section_id: string }
         Returns: undefined
@@ -24908,24 +24943,15 @@ export type Database = {
         Returns: Database["public"]["Enums"]["comm_channel"]
       }
       next_ticket_no: { Args: { p_campus_id: string }; Returns: string }
-      no_plan: { Args: never; Returns: boolean[] }
       normalise_board_export_run: {
         Args: { p_run_id: string }
         Returns: number
       }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
-      num_failed: { Args: never; Returns: number }
-      os_name: { Args: never; Returns: string }
       outstanding_balance_as_of: {
         Args: { p_as_of?: string; p_enrolment_id: string }
         Returns: number
       }
-      pass:
-        | { Args: never; Returns: string }
-        | { Args: { "": string }; Returns: string }
-      pg_version: { Args: never; Returns: string }
-      pg_version_num: { Args: never; Returns: number }
-      pgtap_version: { Args: never; Returns: number }
       pick_body: {
         Args: { p_lang?: string; p_version_id: string }
         Returns: string
@@ -25274,6 +25300,10 @@ export type Database = {
         }
         Returns: string
       }
+      request_claim_manual_review: {
+        Args: { p_token: string }
+        Returns: boolean
+      }
       request_concession_award: {
         Args: {
           p_document_paths?: string[]
@@ -25379,6 +25409,10 @@ export type Database = {
           p_session_id: string
         }
         Returns: string
+      }
+      resolve_guardian_claim: {
+        Args: { p_approve: boolean; p_claim_id: string; p_note?: string }
+        Returns: Json
       }
       resolve_segment: {
         Args: { p_as_of?: string; p_segment_id: string }
@@ -25517,9 +25551,6 @@ export type Database = {
         Args: { p_campus_id: string; p_date?: string }
         Returns: Json
       }
-      runtests:
-        | { Args: never; Returns: string[] }
-        | { Args: { "": string }; Returns: string[] }
       save_attendance_register: {
         Args: {
           p_attendance_date: string
@@ -25784,6 +25815,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_guardian_portal_access: {
+        Args: {
+          p_allowed: boolean
+          p_guardian_id: string
+          p_student_id: string
+        }
+        Returns: undefined
+      }
       set_homework_load_policy: {
         Args: {
           p_campus_id: string
@@ -25912,9 +25951,6 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
-      skip:
-        | { Args: { "": string }; Returns: string }
-        | { Args: { how_many: number; why: string }; Returns: string }
       sla_due: {
         Args: { p_campus_id: string; p_from: string; p_hours?: number }
         Returns: string
@@ -25938,6 +25974,15 @@ export type Database = {
       stage_import_rows: {
         Args: { p_batch_id: string; p_rows: Json }
         Returns: number
+      }
+      start_guardian_claim: {
+        Args: {
+          p_cnic_last6: string
+          p_device_hash: string
+          p_gr_no: string
+          p_school_code: string
+        }
+        Returns: Json
       }
       start_impersonation: {
         Args: { p_minutes?: number; p_target_user_id: string }
@@ -26095,18 +26140,8 @@ export type Database = {
           weekday: number
         }[]
       }
-      throws_ok: { Args: { "": string }; Returns: string }
       timemultirange: { Args: never; Returns: unknown }
       timetable_export_payload: { Args: { p_job_id: string }; Returns: Json }
-      todo:
-        | { Args: { how_many: number }; Returns: boolean[] }
-        | { Args: { how_many: number; why: string }; Returns: boolean[] }
-        | { Args: { why: string }; Returns: boolean[] }
-        | { Args: { how_many: number; why: string }; Returns: boolean[] }
-      todo_end: { Args: never; Returns: boolean[] }
-      todo_start:
-        | { Args: never; Returns: boolean[] }
-        | { Args: { "": string }; Returns: boolean[] }
       toggle_leave_policy_status: {
         Args: { p_id: string; p_is_active: boolean }
         Returns: boolean
@@ -26707,9 +26742,7 @@ export type Database = {
       waitlist_status: "waiting" | "offer_pending" | "withdrawn"
     }
     CompositeTypes: {
-      _time_trial_type: {
-        a_time: number | null
-      }
+      [_ in never]: never
     }
   }
 }

@@ -259,6 +259,8 @@ max_frequency = "5s"
 # share a phone with otp-login.spec.ts's, or the two specs' concurrent
 # auth.users churn on the same number would race under --workers=2.
 923005551234 = "654321"
+# Claim specs (FR-N01).
+923005551299 = "654321"
 
 # Configure logged in session timeouts.
 # [auth.sessions]
