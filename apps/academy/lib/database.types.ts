@@ -17073,6 +17073,115 @@ export type Database = {
           },
         ]
       }
+      support_ticket: {
+        Row: {
+          assigned_to: string | null
+          breached_at: string | null
+          campus_id: string
+          category: Database["public"]["Enums"]["ticket_category"]
+          closed_at: string | null
+          created_at: string
+          creator_user_id: string
+          description: string
+          first_staff_reply_at: string | null
+          id: string
+          resolved_at: string | null
+          sla_due_at: string
+          sla_hours: number
+          status: Database["public"]["Enums"]["ticket_status"]
+          student_id: string | null
+          subject: string
+          tenant_id: string
+          ticket_no: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          breached_at?: string | null
+          campus_id: string
+          category?: Database["public"]["Enums"]["ticket_category"]
+          closed_at?: string | null
+          created_at?: string
+          creator_user_id: string
+          description: string
+          first_staff_reply_at?: string | null
+          id?: string
+          resolved_at?: string | null
+          sla_due_at: string
+          sla_hours?: number
+          status?: Database["public"]["Enums"]["ticket_status"]
+          student_id?: string | null
+          subject: string
+          tenant_id: string
+          ticket_no: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          breached_at?: string | null
+          campus_id?: string
+          category?: Database["public"]["Enums"]["ticket_category"]
+          closed_at?: string | null
+          created_at?: string
+          creator_user_id?: string
+          description?: string
+          first_staff_reply_at?: string | null
+          id?: string
+          resolved_at?: string | null
+          sla_due_at?: string
+          sla_hours?: number
+          status?: Database["public"]["Enums"]["ticket_status"]
+          student_id?: string | null
+          subject?: string
+          tenant_id?: string
+          ticket_no?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "support_ticket_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "support_ticket_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "support_ticket_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tax_slab: {
         Row: {
           fixed_amount_paisa: number
@@ -17752,6 +17861,196 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      ticket_attachment: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          message_id: string
+          tenant_id: string
+          ticket_id: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id?: string
+          message_id: string
+          tenant_id: string
+          ticket_id: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          message_id?: string
+          tenant_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_attachment_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_message"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_attachment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_attachment_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_ticket"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_counter: {
+        Row: {
+          campus_id: string
+          last_no: number
+          year: number
+        }
+        Insert: {
+          campus_id: string
+          last_no?: number
+          year: number
+        }
+        Update: {
+          campus_id?: string
+          last_no?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_escalation_notification: {
+        Row: {
+          campus_id: string
+          category: Database["public"]["Enums"]["ticket_category"]
+          created_at: string
+          id: string
+          is_read: boolean
+          recipient_id: string
+          subject: string
+          tenant_id: string
+          ticket_id: string
+          ticket_no: string
+        }
+        Insert: {
+          campus_id: string
+          category: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id: string
+          subject: string
+          tenant_id: string
+          ticket_id: string
+          ticket_no: string
+        }
+        Update: {
+          campus_id?: string
+          category?: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id?: string
+          subject?: string
+          tenant_id?: string
+          ticket_id?: string
+          ticket_no?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_escalation_notification_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_escalation_notification_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_escalation_notification_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_ticket"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_message: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          tenant_id: string
+          ticket_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          tenant_id: string
+          ticket_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          tenant_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_message_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_message_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_ticket"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -22458,6 +22757,10 @@ export type Database = {
         }
         Returns: string
       }
+      add_ticket_message: {
+        Args: { p_body: string; p_is_internal?: boolean; p_ticket_id: string }
+        Returns: string
+      }
       advance_leave_approval: {
         Args: {
           p_application_id: string
@@ -23254,6 +23557,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_support_ticket: {
+        Args: {
+          p_campus_id: string
+          p_category: Database["public"]["Enums"]["ticket_category"]
+          p_description: string
+          p_sla_hours?: number
+          p_student_id?: string
+          p_subject: string
+        }
+        Returns: Json
+      }
       create_test_sitting: {
         Args: {
           p_campus_id: string
@@ -23469,6 +23783,7 @@ export type Database = {
         }
         Returns: string
       }
+      escalate_tickets: { Args: never; Returns: number }
       escalate_timed_out_attempts: {
         Args: { p_tenant_id?: string }
         Returns: {
@@ -24592,6 +24907,7 @@ export type Database = {
         Args: { p_message_id: string }
         Returns: Database["public"]["Enums"]["comm_channel"]
       }
+      next_ticket_no: { Args: { p_campus_id: string }; Returns: string }
       no_plan: { Args: never; Returns: boolean[] }
       normalise_board_export_run: {
         Args: { p_run_id: string }
@@ -24936,6 +25252,10 @@ export type Database = {
         Args: { p_ctx: Json; p_lang?: string; p_version_id: string }
         Returns: string
       }
+      reopen_ticket: {
+        Args: { p_reason: string; p_ticket_id: string }
+        Returns: boolean
+      }
       request_attendance_correction: {
         Args: {
           p_attendance_date: string
@@ -25079,6 +25399,10 @@ export type Database = {
       resolve_student_login: {
         Args: { p_campus_id?: string; p_identifier: string }
         Returns: Json
+      }
+      resolve_ticket: {
+        Args: { p_resolution_note?: string; p_ticket_id: string }
+        Returns: boolean
       }
       resolve_timetable_version: {
         Args: { p_campus_id: string; p_date: string; p_session_id: string }
@@ -25591,6 +25915,10 @@ export type Database = {
       skip:
         | { Args: { "": string }; Returns: string }
         | { Args: { how_many: number; why: string }; Returns: string }
+      sla_due: {
+        Args: { p_campus_id: string; p_from: string; p_hours?: number }
+        Returns: string
+      }
       sms_segment_count: {
         Args: { p_body: string; p_encoding?: string }
         Returns: number
@@ -26363,6 +26691,8 @@ export type Database = {
       substitution_status: "active" | "review"
       tenant_status: "provisioning" | "active" | "suspended" | "closed"
       test_attendance: "pending" | "present" | "absent"
+      ticket_category: "fee" | "transport" | "teaching" | "discipline" | "other"
+      ticket_status: "open" | "in_progress" | "resolved" | "closed"
       timetable_export_layout: "section" | "teacher" | "master"
       timetable_export_status: "queued" | "running" | "completed" | "failed"
       timetable_version_status: "DRAFT" | "PUBLISHED" | "SUPERSEDED"
@@ -26864,6 +27194,8 @@ export const Constants = {
       substitution_status: ["active", "review"],
       tenant_status: ["provisioning", "active", "suspended", "closed"],
       test_attendance: ["pending", "present", "absent"],
+      ticket_category: ["fee", "transport", "teaching", "discipline", "other"],
+      ticket_status: ["open", "in_progress", "resolved", "closed"],
       timetable_export_layout: ["section", "teacher", "master"],
       timetable_export_status: ["queued", "running", "completed", "failed"],
       timetable_version_status: ["DRAFT", "PUBLISHED", "SUPERSEDED"],

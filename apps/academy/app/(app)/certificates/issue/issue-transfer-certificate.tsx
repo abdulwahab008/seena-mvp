@@ -1,15 +1,19 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { issueTransferCertificate } from './actions';
+import { issueTransferCertificate, getClearanceSummary, type ClearanceItem } from './actions';
 import type { CertificateLanguageCode } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Alert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export type CandidateRow = {
   id: string;
@@ -76,9 +80,49 @@ export function IssueTransferCertificate({
   const [issueError, setIssueError] = useState<string | null>(null);
   const [lastIssued, setLastIssued] = useState<{ serialNo: string; downloadUrl?: string } | null>(null);
 
+  // FR-T04: Dues clearance gate
+  const [clearanceItems, setClearanceItems] = useState<ClearanceItem[]>([]);
+  const [loadingClearance, setLoadingClearance] = useState<boolean>(false);
+  const [overrideReason, setOverrideReason] = useState<string>('');
+
   const selectedCandidate = candidates.find((c) => c.id === enrolmentId) ?? null;
 
+  useEffect(() => {
+    if (!selectedCandidate?.student?.id) {
+      setClearanceItems([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingClearance(true);
+    getClearanceSummary(selectedCandidate.student.id)
+      .then((res) => {
+        if (!cancelled) {
+          setClearanceItems(res.items);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setClearanceItems([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingClearance(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCandidate?.student?.id]);
+
+  const hasDues = clearanceItems.length > 0;
+  const totalDuesAmount = clearanceItems.reduce((sum, item) => sum + item.amount, 0);
+
   const onIssue = () => {
+    if (hasDues && overrideReason.trim().length < 20) {
+      const err = 'Outstanding dues detected. A principal override reason of at least 20 characters is required to issue this TC.';
+      setIssueError(err);
+      toast.error(err);
+      return;
+    }
+
     const [boardCode, language] = template.split('|');
     const fd = new FormData();
     fd.set('enrolmentId', enrolmentId);
@@ -87,6 +131,9 @@ export function IssueTransferCertificate({
     fd.set('conduct', conduct);
     fd.set('boardCode', boardCode === ANY_BOARD ? '' : (boardCode ?? ''));
     fd.set('language', language ?? 'en');
+    if (overrideReason.trim()) {
+      fd.set('overrideReason', overrideReason.trim());
+    }
 
     setIssueError(null);
     setLastIssued(null);
@@ -140,6 +187,90 @@ export function IssueTransferCertificate({
                 )}
               </div>
 
+              {/* FR-T04: Dues Clearance Gate */}
+              {selectedCandidate && (
+                <div className="rounded-lg border p-3.5 space-y-2.5 bg-muted/20" data-testid="clearance-gate-container">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-foreground flex items-center gap-1.5">
+                      Clearance Gate (FR-T04)
+                    </span>
+                    {loadingClearance ? (
+                      <span className="text-muted-foreground">Checking dues…</span>
+                    ) : hasDues ? (
+                      <Badge variant="destructive" dot data-testid="clearance-status-dues">
+                        Dues Outstanding (PKR {totalDuesAmount.toLocaleString()})
+                      </Badge>
+                    ) : (
+                      <Badge variant="success" dot data-testid="clearance-status-cleared">
+                        Dues Cleared
+                      </Badge>
+                    )}
+                  </div>
+
+                  {hasDues && (
+                    <div className="space-y-3 pt-1">
+                      <Alert variant="warning" className="py-2 px-3 text-xs" title="Unpaid Arrears Notice">
+                        <div className="space-y-1.5 w-full">
+                          <p className="text-muted-foreground">
+                            This student has {clearanceItems.length} unpaid challan(s). Clearance is required before TC release or provide an authorized principal override below:
+                          </p>
+                          <div className="rounded border bg-background overflow-hidden">
+                            <table className="w-full text-left text-xs">
+                              <thead className="bg-muted/50 border-b text-[11px] text-muted-foreground">
+                                <tr>
+                                  <th className="p-1.5 font-medium">Challan / Item</th>
+                                  <th className="p-1.5 font-medium">Amount</th>
+                                  <th className="p-1.5 font-medium">Overdue</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-border">
+                                {clearanceItems.map((item, idx) => (
+                                  <tr key={idx} className="text-foreground">
+                                    <td className="p-1.5">{item.description}</td>
+                                    <td className="p-1.5 font-mono font-medium">PKR {item.amount.toLocaleString()}</td>
+                                    <td className="p-1.5 text-muted-foreground">{item.days_outstanding} day(s)</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </Alert>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="cert-issue-override" className="text-xs font-semibold text-amber-900 dark:text-amber-300">
+                            Principal Clearance Override (Min 20 Characters)
+                          </Label>
+                          <span
+                            className={`text-[11px] ${
+                              overrideReason.trim().length >= 20 ? 'text-success font-medium' : 'text-muted-foreground'
+                            }`}
+                          >
+                            {overrideReason.trim().length} / 20 chars
+                          </span>
+                        </div>
+                        <textarea
+                          id="cert-issue-override"
+                          value={overrideReason}
+                          onChange={(e) => setOverrideReason(e.target.value)}
+                          placeholder="State the reason for TC release without full clearance (e.g., Principal approved with signed parent affidavit and deferred installment plan)..."
+                          className="w-full rounded-md border border-input bg-background p-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[60px]"
+                          data-testid="cert-issue-override-reason"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {!loadingClearance && !hasDues && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success inline" />
+                      All fee challans have been paid. No clearance override required.
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="cert-issue-template">Certificate template</Label>
                 <Select value={template} onValueChange={setTemplate}>
@@ -159,11 +290,10 @@ export function IssueTransferCertificate({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="cert-issue-leaving-date">Date of leaving</Label>
-                  <Input
+                  <DatePicker
                     id="cert-issue-leaving-date"
-                    type="date"
                     value={leavingDate}
-                    onChange={(e) => setLeavingDate(e.target.value)}
+                    onChange={setLeavingDate}
                     data-testid="cert-issue-leaving-date"
                   />
                 </div>

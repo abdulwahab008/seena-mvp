@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ConfirmDialog } from '@/components/ui/modal';
 
 type ComponentDraft = { component: MarkComponentCode; maxMarks: string; passMarks: string };
 
@@ -21,16 +22,55 @@ type Props = {
   examTermId: string;
   examTermLabel: string;
   canWrite: boolean;
+  isTeacher?: boolean;
+  assignedSubjectIds?: string[];
   configured: ExamSubjectRow[];
   options: ClassSubjectOption[];
 };
+
+const PRESETS: { label: string; description: string; drafts: ComponentDraft[] }[] = [
+  {
+    label: 'Theory 100',
+    description: 'Standard 100 Marks (Pass: 40)',
+    drafts: [{ component: 'theory', maxMarks: '100', passMarks: '40' }],
+  },
+  {
+    label: 'Theory 75 + Practical 25',
+    description: 'Science: 75/30 + 25/10',
+    drafts: [
+      { component: 'theory', maxMarks: '75', passMarks: '30' },
+      { component: 'practical', maxMarks: '25', passMarks: '10' },
+    ],
+  },
+  {
+    label: 'Theory 80 + Viva 20',
+    description: 'Languages/Arts: 80/32 + 20/8',
+    drafts: [
+      { component: 'theory', maxMarks: '80', passMarks: '32' },
+      { component: 'viva', maxMarks: '20', passMarks: '8' },
+    ],
+  },
+  {
+    label: 'Single Paper 50',
+    description: 'Midterm/Quiz: 50/20',
+    drafts: [{ component: 'theory', maxMarks: '50', passMarks: '20' }],
+  },
+];
 
 const BLANK: ComponentDraft[] = [{ component: 'theory', maxMarks: '', passMarks: '' }];
 
 const describe = (o: ClassSubjectOption) =>
   `${o.className}${o.streamName ? ` ${o.streamName}` : ''} — ${o.subjectName}`;
 
-export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, options }: Props) {
+export function SubjectSetup({
+  examTermId,
+  examTermLabel,
+  canWrite,
+  isTeacher = false,
+  assignedSubjectIds = [],
+  configured,
+  options,
+}: Props) {
   const [pending, startTransition] = useTransition();
   const [classSubjectId, setClassSubjectId] = useState('');
   const [drafts, setDrafts] = useState<ComponentDraft[]>(BLANK);
@@ -78,13 +118,19 @@ export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, 
     });
   };
 
-  const onDelete = (id: string) => {
+  const [subjectToRemove, setSubjectToRemove] = useState<ExamSubjectRow | null>(null);
+
+  const confirmRemoveSubject = () => {
+    if (!subjectToRemove) return;
     const fd = new FormData();
-    fd.set('examSubjectId', id);
+    fd.set('examSubjectId', subjectToRemove.id);
     startTransition(async () => {
       const result = await deleteExamSubject(fd);
       if (result.error) toast.error(result.error);
-      else toast.success('Exam setup removed.');
+      else {
+        toast.success('Exam setup removed.');
+        setSubjectToRemove(null);
+      }
     });
   };
 
@@ -128,7 +174,13 @@ export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, 
                   </td>
                   <td className="p-3 text-right">
                     {canWrite && (
-                      <Button variant="ghost" size="sm" disabled={pending} onClick={() => onDelete(row.id)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={pending}
+                        onClick={() => setSubjectToRemove(row)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
                         Remove
                       </Button>
                     )}
@@ -140,12 +192,37 @@ export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, 
         </div>
       </section>
 
+      <ConfirmDialog
+        open={Boolean(subjectToRemove)}
+        onClose={() => setSubjectToRemove(null)}
+        onConfirm={confirmRemoveSubject}
+        title="Remove Exam Subject Setup"
+        description={
+          subjectToRemove
+            ? `Are you sure you want to remove the exam setup for "${subjectToRemove.subjectName}" (${subjectToRemove.className})? Any unentered marks configuration for this term will be removed.`
+            : undefined
+        }
+        confirmLabel={pending ? 'Removing…' : 'Remove Subject'}
+        destructive
+        pending={pending}
+      />
+
       {canWrite && (
-        <section className="space-y-3 rounded-lg border p-4">
-          <h2 className="text-lg font-medium">Configure a class subject</h2>
-          <p className="text-xs text-muted-foreground">
-            Configuration is per class, not per section — every section of the class inherits it with no further setup.
-          </p>
+        <section className="space-y-4 rounded-lg border p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-medium">Configure a class subject</h2>
+              <p className="text-xs text-muted-foreground">
+                Configuration is per class, not per section — every section of the class inherits it with no further setup.
+              </p>
+            </div>
+            {isTeacher && (
+              <span className="text-xs bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-medium px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+                Teacher Assessment Setup
+              </span>
+            )}
+          </div>
+
           <div className="space-y-1">
             <Label htmlFor="classSubjectId">Class subject</Label>
             <select
@@ -163,6 +240,26 @@ export function SubjectSetup({ examTermId, examTermLabel, canWrite, configured, 
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Quick Assessment Presets */}
+          <div className="space-y-1.5 pt-1">
+            <Label className="text-xs text-muted-foreground">Assessment Presets (Quick Fill):</Label>
+            <div className="flex flex-wrap gap-2">
+              {PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => setDrafts(preset.drafts)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border bg-muted/40 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-colors cursor-pointer"
+                  title={preset.description}
+                  data-testid={`preset-${preset.label.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                >
+                  <span>⚡</span>
+                  <span>{preset.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-2">

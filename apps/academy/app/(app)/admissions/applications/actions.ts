@@ -374,10 +374,96 @@ export async function enrolFromOffer(_prev: EnrolFromOfferState, formData: FormD
       return { error: 'This payment or waiver has already been used to enrol a student.', grNumber: null };
     if (error.message.includes('SECTION_REQUIRED')) return { error: 'Choose a section.', grNumber: null };
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to enrol students.', grNumber: null };
-    return { error: 'Could not enrol the student.', grNumber: null };
+    if (error.message.includes('chk_dob_reasonable'))
+      return { error: 'Student date of birth is outside the allowed range (must not be in the future and under 32 years).', grNumber: null };
+    if (error.message.includes('BFORM_INVALID_FORMAT'))
+      return { error: 'Invalid B-Form number format (must be 13 digits).', grNumber: null };
+    if (error.message.includes('BFORM_DUPLICATE'))
+      return { error: 'A student with this B-Form number is already enrolled.', grNumber: null };
+    return { error: error.message || 'Could not enrol the student.', grNumber: null };
   }
 
   revalidatePath('/admissions/applications');
   revalidatePath('/students');
   return { error: null, grNumber: (data as { gr_number: string } | null)?.gr_number ?? null };
+}
+
+export type QuickAdmissionState = {
+  error: string | null;
+  grNumber: string | null;
+  studentId: string | null;
+  applicationNo: string | null;
+  receiptNo: string | null;
+};
+
+export async function quickAdmission(
+  _prev: QuickAdmissionState,
+  formData: FormData
+): Promise<QuickAdmissionState> {
+  const campusId = formData.get('campusId')?.toString() || '';
+  const sessionId = formData.get('sessionId')?.toString() || '';
+  const childName = formData.get('childName')?.toString() || '';
+  const dob = formData.get('dob')?.toString() || '';
+  const gender = (formData.get('gender')?.toString() as 'male' | 'female' | 'other') || 'male';
+  const classLevelId = formData.get('classLevelId')?.toString() || '';
+  const sectionId = formData.get('sectionId')?.toString() || '';
+  const parentName = formData.get('parentName')?.toString() || '';
+  const phone = formData.get('phone')?.toString() || '';
+  const admissionFee = parseFloat(formData.get('admissionFee')?.toString() || '0');
+  const paymentMode = formData.get('paymentMode')?.toString() || 'cash';
+  const rawReceipt = formData.get('paymentReference')?.toString()?.trim();
+  const receiptNo = rawReceipt || `REC-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+  const bFormNo = formData.get('bFormNo')?.toString() || undefined;
+  const fatherNameEn = formData.get('fatherNameEn')?.toString() || undefined;
+
+  if (!childName.trim()) return { error: "Child's name is required.", grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+  if (!dob) return { error: 'Date of birth is required.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+  if (!classLevelId) return { error: 'Please choose a class.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+  if (!sectionId) return { error: 'Please choose a section.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+  if (!parentName.trim()) return { error: 'Parent name is required.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+  if (!phone.trim()) return { error: 'Phone number is required.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await (supabase.rpc as any)('fn_quick_admission', {
+    p_campus_id: campusId,
+    p_session_id: sessionId,
+    p_child_name: childName.trim(),
+    p_dob: dob,
+    p_gender: gender,
+    p_class_level_id: classLevelId,
+    p_section_id: sectionId,
+    p_parent_name: parentName.trim(),
+    p_phone: phone.trim(),
+    p_admission_fee: isNaN(admissionFee) ? 0 : admissionFee,
+    p_payment_mode: paymentMode,
+    p_payment_reference: receiptNo,
+    p_b_form_no: bFormNo,
+    p_father_name_en: fatherNameEn,
+  });
+
+  if (error) {
+    if (error.message.includes('FORBIDDEN'))
+      return { error: 'You do not have permission to admit students.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+    if (error.message.includes('chk_dob_reasonable'))
+      return { error: 'Student date of birth is outside allowed range (must not be in future and under 32 years).', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+    if (error.message.includes('BFORM_INVALID_FORMAT'))
+      return { error: 'Invalid B-Form format (13 digits required).', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+    if (error.message.includes('BFORM_DUPLICATE'))
+      return { error: 'A student with this B-Form is already enrolled.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+    return { error: error.message || 'Could not complete quick admission.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+  }
+
+  revalidatePath('/admissions/walk-in');
+  revalidatePath('/admissions/enquiries');
+  revalidatePath('/admissions/applications');
+  revalidatePath('/students');
+
+  const res = data as unknown as { gr_number: string; student_id: string; application_no: string } | null;
+  return {
+    error: null,
+    grNumber: res?.gr_number ?? null,
+    studentId: res?.student_id ?? null,
+    applicationNo: res?.application_no ?? null,
+    receiptNo,
+  };
 }

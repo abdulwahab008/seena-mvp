@@ -19,6 +19,8 @@ export function Modal({
   footer,
   size = 'md',
   className,
+  hideHeader = false,
+  rawChildren = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -26,8 +28,10 @@ export function Modal({
   description?: React.ReactNode;
   children?: React.ReactNode;
   footer?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
+  hideHeader?: boolean;
+  rawChildren?: boolean;
 }) {
   const ref = React.useRef<HTMLDialogElement>(null);
 
@@ -50,13 +54,19 @@ export function Modal({
     return () => el.removeEventListener('cancel', handleCancel);
   }, [onClose]);
 
-  const width = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-3xl' }[size];
+  const width = {
+    sm: 'max-w-sm',
+    md: 'max-w-lg',
+    lg: 'max-w-3xl',
+    xl: 'max-w-5xl',
+    '2xl': 'max-w-6xl',
+  }[size];
 
   return (
     <dialog
       ref={ref}
       className={cn(
-        'w-[calc(100vw-2rem)] rounded-lg border bg-card p-0 text-card-foreground shadow-lg backdrop:bg-transparent',
+        'w-[calc(100vw-2rem)] rounded-xl border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-transparent relative',
         width,
         className,
       )}
@@ -65,24 +75,45 @@ export function Modal({
         if (e.target === ref.current) onClose();
       }}
     >
-      <div className="flex items-start justify-between gap-4 border-b px-5 py-4">
-        <div className="min-w-0 space-y-1">
-          <h2 className="text-base font-semibold leading-none tracking-tight">{title}</h2>
-          {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+      {!hideHeader && (
+        <div className="flex items-start justify-between gap-4 border-b px-5 py-4">
+          <div className="min-w-0 space-y-1">
+            <h2 className="text-base font-semibold leading-none tracking-tight">{title}</h2>
+            {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="-mr-2 -mt-2 h-8 w-8 shrink-0"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
+      )}
+
+      {hideHeader && (
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="-mr-2 -mt-2 h-8 w-8 shrink-0"
+          className="absolute right-3.5 top-3.5 z-20 h-8 w-8 rounded-full bg-background/80 hover:bg-background shadow-xs text-muted-foreground hover:text-foreground"
           onClick={onClose}
           aria-label="Close"
         >
           <X className="h-4 w-4" />
         </Button>
-      </div>
+      )}
 
-      {children ? <div className="max-h-[65vh] overflow-y-auto px-5 py-4">{children}</div> : null}
+      {children ? (
+        rawChildren ? (
+          <div className="overflow-hidden">{children}</div>
+        ) : (
+          <div className="max-h-[65vh] overflow-y-auto px-5 py-4">{children}</div>
+        )
+      ) : null}
 
       {footer ? (
         <div className="flex flex-wrap items-center justify-end gap-2 border-t bg-muted/30 px-5 py-3">
@@ -108,6 +139,7 @@ export function ConfirmDialog({
   destructive = false,
   pending = false,
   confirmWord,
+  confirmTestId = 'confirm-action',
 }: {
   open: boolean;
   onClose: () => void;
@@ -119,6 +151,7 @@ export function ConfirmDialog({
   destructive?: boolean;
   pending?: boolean;
   confirmWord?: string;
+  confirmTestId?: string;
 }) {
   const [typed, setTyped] = React.useState('');
   React.useEffect(() => {
@@ -144,7 +177,7 @@ export function ConfirmDialog({
             variant={destructive ? 'destructive' : 'default'}
             onClick={onConfirm}
             disabled={pending || blocked}
-            data-testid="confirm-action"
+            data-testid={confirmTestId}
           >
             {pending ? 'Working…' : confirmLabel}
           </Button>

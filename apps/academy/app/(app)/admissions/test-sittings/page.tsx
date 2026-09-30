@@ -10,21 +10,23 @@ export default async function TestSittingsPage() {
   const supabase = await supabaseServer();
 
   const [{ data: campuses }, { data: classLevels }] = await Promise.all([
-    supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1),
-    supabase.from('class_level').select('id, name_en').eq('is_active', true).order('ordinal'),
+    supabase.from('campus').select('id, name, code').eq('status', 'active').order('code').limit(1),
+    supabase.from('class_level').select('id, name_en, code').eq('is_active', true).order('ordinal'),
   ]);
-  const campusId = campuses?.[0]?.id;
+  const activeCampus = campuses?.[0];
+  const campusId = activeCampus?.id;
 
   const { data: sessions } = campusId
-    ? await supabase.from('academic_session').select('id').eq('is_current', true).limit(1)
-    : { data: [] as { id: string }[] };
-  const sessionId = sessions?.[0]?.id;
+    ? await supabase.from('academic_session').select('id, name').eq('is_current', true).limit(1)
+    : { data: [] as { id: string; name: string }[] };
+  const currentSession = sessions?.[0];
+  const sessionId = currentSession?.id;
 
-  const [{ data: sittingRows }, { data: candidateRows }, { data: appRows }, { data: meritRows }] = await Promise.all([
+  const [{ data: sittingRows }, { data: candidateRows }, { data: appRows }, { data: meritRows }, { data: roomRows }] = await Promise.all([
     campusId && sessionId
       ? supabase
           .from('admission_test_sitting')
-          .select('id, starts_at, venue, capacity, class_level_id, locked_at, class_level(name_en)')
+          .select('id, starts_at, venue, capacity, class_level_id, locked_at, class_level(name_en, code)')
           .eq('campus_id', campusId)
           .eq('session_id', sessionId)
           .order('starts_at')
@@ -32,7 +34,7 @@ export default async function TestSittingsPage() {
     campusId
       ? supabase
           .from('admission_test_candidate')
-          .select('id, sitting_id, seat_no, attendance, admission_application(id, admission_enquiry(child_name, dob))')
+          .select('id, sitting_id, seat_no, attendance, admission_application(id, application_no, admission_enquiry(child_name, dob))')
           .is('cancelled_at', null)
       : Promise.resolve({ data: [] as never[] }),
     campusId && sessionId
@@ -44,6 +46,14 @@ export default async function TestSittingsPage() {
           .in('status', ['submitted', 'under_review'])
       : Promise.resolve({ data: [] as never[] }),
     campusId ? supabase.from('v_admission_merit_rank').select('sitting_id, candidate_id, pct, rnk, tie_break_basis') : Promise.resolve({ data: [] as never[] }),
+    campusId
+      ? supabase
+          .from('room')
+          .select('id, code, name, capacity, room_type, block_label')
+          .eq('campus_id', campusId)
+          .eq('is_active', true)
+          .order('code')
+      : Promise.resolve({ data: [] as never[] }),
   ]);
 
   const { data: scoreRows } = candidateRows?.length
@@ -75,6 +85,7 @@ export default async function TestSittingsPage() {
     const row: CandidateRow = {
       id: c.id,
       seatNo: c.seat_no,
+      applicationNo: app?.application_no ?? null,
       childName: one(app?.admission_enquiry ?? null)?.child_name ?? 'Unknown',
       attendance: c.attendance,
       scores: scoresByCandidate.get(c.id) ?? [],
@@ -105,20 +116,59 @@ export default async function TestSittingsPage() {
     classAppliedId: a.class_applied_id,
   }));
 
+  const roomsList = (roomRows ?? []).map((r) => ({
+    id: r.id,
+    code: r.code,
+    name: r.name,
+    capacity: r.capacity,
+    roomType: r.room_type,
+    blockLabel: r.block_label,
+  }));
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Admission test sittings</h1>
-        <p className="text-sm text-muted-foreground">
-          FR-B11/B12 — schedule test sittings, allocate conflict-free seats, record scores, and publish the merit rank.
-        </p>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b pb-3">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Admission test sittings</h1>
+            {activeCampus && (
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                {activeCampus.name}
+              </span>
+            )}
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            Entry exam scheduling, seat assignments, score records, and merit rank lists.
+          </p>
+        </div>
+
+        {currentSession && (
+          <div className="flex items-center gap-1.5 rounded-lg border bg-muted/30 px-2.5 py-1 text-xs self-start sm:self-auto">
+            <span className="text-muted-foreground">Session:</span>
+            <span className="font-semibold text-foreground">{currentSession.name}</span>
+          </div>
+        )}
       </div>
+
       {!campusId || !sessionId ? (
-        <p className="text-sm text-muted-foreground">No active campus or current session found.</p>
+        <div className="rounded-xl border border-dashed p-8 text-center">
+          <p className="text-sm font-medium text-muted-foreground">No active campus or current academic session found.</p>
+        </div>
       ) : (
         <>
-          <SittingForm campusId={campusId} sessionId={sessionId} classLevels={classLevels ?? []} />
-          <SittingList sittings={sittings} applications={applications} />
+          <SittingForm
+            campusId={campusId}
+            sessionId={sessionId}
+            classLevels={classLevels ?? []}
+            rooms={roomsList}
+          />
+          <SittingList
+            sittings={sittings}
+            applications={applications}
+            campusName={activeCampus?.name ?? 'Main Campus'}
+            sessionName={currentSession?.name ?? 'Current Session'}
+          />
         </>
       )}
     </div>

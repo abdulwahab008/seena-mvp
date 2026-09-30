@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { createHomework } from './actions';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 type Assignment = { sectionId: string; sectionLabel: string; subjectId: string; subjectLabel: string };
 
@@ -107,11 +108,39 @@ export function CreateHomeworkForm({ assignments }: { assignments: Assignment[] 
       </div>
       <div className="space-y-1">
         <Label htmlFor="assignedDate">Assigned date</Label>
-        <Input id="assignedDate" type="date" {...register('assignedDate')} />
+        <Controller
+          control={control}
+          name="assignedDate"
+          render={({ field }) => (
+            <DatePicker
+              id="assignedDate"
+              name="assignedDate"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Assigned date"
+              data-testid="assigned-date-picker"
+            />
+          )}
+        />
       </div>
       <div className="space-y-1">
         <Label htmlFor="dueDate">Due date</Label>
-        <Input id="dueDate" type="date" {...register('dueDate')} />
+        <Controller
+          control={control}
+          name="dueDate"
+          render={({ field }) => (
+            <DatePicker
+              id="dueDate"
+              name="dueDate"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Due date"
+              data-testid="due-date-picker"
+            />
+          )}
+        />
         {errors.dueDate && <p className="text-xs text-destructive">{errors.dueDate.message}</p>}
       </div>
       <div className="space-y-1">

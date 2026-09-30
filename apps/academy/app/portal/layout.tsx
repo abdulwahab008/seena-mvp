@@ -11,6 +11,7 @@ const PORTAL_LINKS = [
   { href: '/portal/circulars', label: 'Circulars' },
   { href: '/portal/calendar', label: 'Calendar' },
   { href: '/portal/remarks', label: 'Remarks' },
+  { href: '/portal/tickets', label: 'Support & Complaints' },
 ];
 
 // The parent/guardian portal. Deliberately separate from (app)'s layout —

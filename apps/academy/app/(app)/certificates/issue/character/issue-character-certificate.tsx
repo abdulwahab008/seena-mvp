@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 export type StudentRow = {
   id: string;
@@ -200,21 +201,19 @@ export function IssueCharacterCertificate({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="cc-issue-period-from">Attended from (override)</Label>
-                  <Input
+                  <DatePicker
                     id="cc-issue-period-from"
-                    type="date"
                     value={periodFrom}
-                    onChange={(e) => setPeriodFrom(e.target.value)}
+                    onChange={setPeriodFrom}
                     data-testid="cc-issue-period-from"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cc-issue-period-to">Attended to (override)</Label>
-                  <Input
+                  <DatePicker
                     id="cc-issue-period-to"
-                    type="date"
                     value={periodTo}
-                    onChange={(e) => setPeriodTo(e.target.value)}
+                    onChange={setPeriodTo}
                     data-testid="cc-issue-period-to"
                   />
                 </div>

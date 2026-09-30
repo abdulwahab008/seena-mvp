@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 
 type ClassLevel = { id: string; name_en: string };
 type FeeHead = { id: string; code: string; name_en: string };
@@ -102,7 +103,7 @@ function CreateNextVersionControl({ priorStructureId }: { priorStructureId: stri
     <div className="flex items-end gap-2 rounded-lg border p-3">
       <div className="space-y-1">
         <Label htmlFor="effectiveFrom">Revise, effective from</Label>
-        <Input id="effectiveFrom" type="date" value={effectiveFrom} onChange={(e) => setEffectiveFrom(e.target.value)} />
+        <DatePicker id="effectiveFrom" value={effectiveFrom} onChange={setEffectiveFrom} placeholder="Select effective date" />
       </div>
       <Button type="button" disabled={pending} onClick={onClick} data-testid="create-next-version-button">
         {pending ? 'Creating…' : 'Create next version'}

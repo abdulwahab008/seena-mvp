@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 type Scheme = { id: string; code: string; name_en: string; calc_type: string };
 
@@ -83,11 +84,11 @@ function RequestAwardForm({ studentId, enrolmentId, schemes }: { studentId: stri
       </div>
       <div className="space-y-1">
         <Label htmlFor="award-from">From</Label>
-        <Input id="award-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        <DatePicker id="award-from" value={from} onChange={setFrom} />
       </div>
       <div className="space-y-1">
         <Label htmlFor="award-to">To</Label>
-        <Input id="award-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        <DatePicker id="award-to" value={to} onChange={setTo} />
       </div>
       <div className="space-y-1">
         <Label htmlFor="award-doc">Document (optional)</Label>

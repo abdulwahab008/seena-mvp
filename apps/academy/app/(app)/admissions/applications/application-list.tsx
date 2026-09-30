@@ -1,7 +1,8 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import {
   issueOffer,
   respondToOffer,
@@ -26,6 +27,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
+import { ConfirmDialog } from '@/components/ui/modal';
 
 export type DocumentRow = {
   id: string;
@@ -140,7 +143,7 @@ function ChecklistPanel({ applicationId, docTypes }: { applicationId: string; do
           <Input placeholder="Count" type="number" className="h-8 w-20" value={count} onChange={(e) => setCount(e.target.value)} />
         )}
         {status === 'promised' && (
-          <Input type="date" className="h-8 w-40" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+          <DatePicker className="w-40" value={deadline} onChange={setDeadline} placeholder="Deadline" />
         )}
         <Button type="button" size="sm" disabled={pending} onClick={onSave}>
           Save
@@ -265,6 +268,7 @@ function DocumentRejectControl({ documentId }: { documentId: string }) {
 function DocumentsPanel({ applicationId, documents }: { applicationId: string; documents: DocumentRow[] }) {
   const [pending, startTransition] = useTransition();
   const [previewUrl, setPreviewUrl] = useState<Record<string, string>>({});
+  const [documentToDelete, setDocumentToDelete] = useState<DocumentRow | null>(null);
 
   const onVerify = (documentId: string) => {
     startTransition(async () => {
@@ -274,11 +278,15 @@ function DocumentsPanel({ applicationId, documents }: { applicationId: string; d
     });
   };
 
-  const onDelete = (documentId: string) => {
+  const confirmDelete = () => {
+    if (!documentToDelete) return;
     startTransition(async () => {
-      const result = await deleteDocument(documentId);
+      const result = await deleteDocument(documentToDelete.id);
       if (result.error) toast.error(result.error);
-      else toast.success('Document deleted.');
+      else {
+        toast.success('Document deleted.');
+        setDocumentToDelete(null);
+      }
     });
   };
 
@@ -314,13 +322,28 @@ function DocumentsPanel({ applicationId, documents }: { applicationId: string; d
                 </Button>
               )}
               {d.status !== 'rejected' && <DocumentRejectControl documentId={d.id} />}
-              <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => onDelete(d.id)} data-testid={`document-delete-${d.id}`}>
+              <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => setDocumentToDelete(d)} data-testid={`document-delete-${d.id}`}>
                 Delete
               </Button>
             </li>
           ))}
         </ul>
       )}
+
+      <ConfirmDialog
+        open={Boolean(documentToDelete)}
+        onClose={() => setDocumentToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Delete Application Document"
+        description={
+          documentToDelete
+            ? `Are you sure you want to delete this ${documentToDelete.docType.replace(/_/g, ' ')} document? This cannot be undone.`
+            : undefined
+        }
+        confirmLabel={pending ? 'Deleting…' : 'Delete Document'}
+        destructive
+        pending={pending}
+      />
     </div>
   );
 }
@@ -619,22 +642,31 @@ function EnrolForm({
   offerId,
   sections,
   fundingOptions,
+  isFullyCovered,
 }: {
   offerId: string;
   sections: SectionOption[];
   fundingOptions: { value: string; label: string }[];
+  isFullyCovered?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [sectionId, setSectionId] = useState(sections[0]?.id ?? '');
   const [gender, setGender] = useState<'male' | 'female' | 'other'>('male');
   const [funding, setFunding] = useState(fundingOptions[0]?.value ?? '');
 
+  useEffect(() => {
+    if (!funding && fundingOptions.length > 0) {
+      setFunding(fundingOptions[0]!.value);
+    }
+  }, [fundingOptions, funding]);
+
   const onSubmit = () => {
-    if (!funding) {
+    const selectedFunding = funding || fundingOptions[0]?.value;
+    if (!selectedFunding) {
       toast.error('Record a payment or waive the fee before enrolling.');
       return;
     }
-    const [kind, ...idParts] = funding.split(':');
+    const [kind, ...idParts] = selectedFunding.split(':');
     const id = idParts.join(':');
     const fd = new FormData();
     fd.set('offerId', offerId);
@@ -658,7 +690,7 @@ function EnrolForm({
         <SelectContent>
           {sections.map((s) => (
             <SelectItem key={s.id} value={s.id}>
-              {s.name}
+              Section {s.name}
             </SelectItem>
           ))}
         </SelectContent>
@@ -673,7 +705,7 @@ function EnrolForm({
           <SelectItem value="other">Other</SelectItem>
         </SelectContent>
       </Select>
-      <Select value={funding} onValueChange={setFunding}>
+      <Select value={funding || fundingOptions[0]?.value || ''} onValueChange={setFunding}>
         <SelectTrigger className="h-8 w-56" data-testid={`enrol-funding-trigger-${offerId}`}>
           <SelectValue placeholder="Fund with…" />
         </SelectTrigger>
@@ -685,7 +717,14 @@ function EnrolForm({
           ))}
         </SelectContent>
       </Select>
-      <Button type="button" size="sm" disabled={pending || !sectionId} onClick={onSubmit} data-testid={`enrol-submit-${offerId}`}>
+      <Button
+        type="button"
+        size="sm"
+        disabled={pending || !sectionId || (!funding && fundingOptions.length === 0)}
+        onClick={onSubmit}
+        className={cn(isFullyCovered && 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm')}
+        data-testid={`enrol-submit-${offerId}`}
+      >
         {pending ? 'Enrolling…' : 'Enrol'}
       </Button>
     </div>
@@ -706,16 +745,35 @@ function EnrolmentPanel({
   sections: SectionOption[];
 }) {
   const feeRupees = (offer.admission_fee_amount).toLocaleString();
+  const totalReconciledRupees = payments
+    .filter((p) => p.status === 'reconciled')
+    .reduce((sum, p) => sum + p.amountPaisa / 100, 0);
+  const isFullyCovered = totalReconciledRupees >= offer.admission_fee_amount || waivers.some((w) => !w.consumed);
+
   const fundingOptions = [
     ...payments
-      .filter((p) => !p.consumed)
+      .filter((p) => !p.consumed && p.status === 'reconciled')
+      .map((p) => ({ value: `payment:${p.id}`, label: `Payment PKR ${(p.amountPaisa / 100).toLocaleString()} (${p.mode}, reconciled)` })),
+    ...payments
+      .filter((p) => !p.consumed && p.status !== 'reconciled')
       .map((p) => ({ value: `payment:${p.id}`, label: `Payment PKR ${(p.amountPaisa / 100).toLocaleString()} (${p.mode}, ${p.status})` })),
     ...waivers.filter((w) => !w.consumed).map((w) => ({ value: `waiver:${w.id}`, label: `Waiver — ${w.reason}` })),
   ];
 
   return (
     <div className="mt-2 space-y-2 border-t pt-2" data-testid={`enrolment-panel-${applicationId}`}>
-      <p className="text-xs text-muted-foreground">Admission fee: PKR {feeRupees}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">Admission fee: PKR {feeRupees}</p>
+        {isFullyCovered ? (
+          <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+            ✓ Fee Covered ({totalReconciledRupees >= offer.admission_fee_amount ? `Paid PKR ${totalReconciledRupees.toLocaleString()}` : 'Waived'})
+          </span>
+        ) : (
+          <span className="text-xs text-amber-600">
+            Outstanding: PKR {Math.max(0, offer.admission_fee_amount - totalReconciledRupees).toLocaleString()}
+          </span>
+        )}
+      </div>
       {offer.expiry_paused_at && (
         <p className="text-xs text-amber-600" data-testid={`offer-paused-${offer.id}`}>
           Expiry paused — {offer.expiry_pause_reason}
@@ -739,7 +797,7 @@ function EnrolmentPanel({
         <RecordPaymentForm offerId={offer.id} />
         <WaiveFeeForm offerId={offer.id} />
       </div>
-      <EnrolForm offerId={offer.id} sections={sections} fundingOptions={fundingOptions} />
+      <EnrolForm offerId={offer.id} sections={sections} fundingOptions={fundingOptions} isFullyCovered={isFullyCovered} />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { loadAbsenteeNotifications, runAbsenteeDispatch, type NotificationRow, t
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -52,7 +53,7 @@ export function AbsenteeNotificationsView({ campusId, isAdmin }: { campusId: str
       <div className="flex flex-wrap items-end gap-2 rounded-lg border p-4">
         <div className="space-y-1">
           <Label htmlFor="date">Date</Label>
-          <Input id="date" type="date" className="w-40" value={date} onChange={(e) => setDate(e.target.value)} data-testid="absentee-date" />
+          <DatePicker id="date" className="w-40" value={date} onChange={setDate} data-testid="absentee-date" />
         </div>
         <Button type="button" disabled={pending} onClick={onLoad} data-testid="absentee-load">
           Load

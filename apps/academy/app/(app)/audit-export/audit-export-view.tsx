@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { ALL_CAMPUSES_VALUE, buildCampusFilterOptions, type CampusOption } from '@/lib/campus-scope';
 
 export type AuditExportJobRow = {
@@ -104,11 +105,11 @@ export function AuditExportView({ campuses, jobs: initialJobs }: { campuses: Cam
         <div className="flex flex-wrap items-end gap-3">
           <div className="space-y-1">
             <Label htmlFor="export-from">From</Label>
-            <Input id="export-from" type="date" data-testid="export-from-input" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <DatePicker id="export-from" data-testid="export-from-input" value={from} onChange={setFrom} />
           </div>
           <div className="space-y-1">
             <Label htmlFor="export-to">To</Label>
-            <Input id="export-to" type="date" data-testid="export-to-input" value={to} onChange={(e) => setTo(e.target.value)} />
+            <DatePicker id="export-to" data-testid="export-to-input" value={to} onChange={setTo} />
           </div>
           <div className="space-y-1">
             <Label htmlFor="export-campus">Campus</Label>

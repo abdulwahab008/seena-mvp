@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/modal';
 
 type Mode = 'create' | 'edit';
 
@@ -79,6 +80,7 @@ export function PatternBuilder({ initial, mode, patternId }: Props) {
     initial?.sections ?? [emptySection()],
   );
   const [busy, setBusy] = useState<'save' | 'delete' | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const totalMarks = useMemo(
     () =>
@@ -98,22 +100,20 @@ export function PatternBuilder({ initial, mode, patternId }: Props) {
   }
 
   function removeSection(index: number) {
-    setSections((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
+    if (sections.length <= 1) return;
+    setSections((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function save() {
     if (!name.trim()) {
-      toast.error('Name is required.');
+      toast.error('Name is required');
       return;
     }
     if (sections.length === 0) {
-      toast.error('At least one section is required.');
+      toast.error('Add at least one section');
       return;
     }
-    if (totalMarks <= 0) {
-      toast.error('Total marks must be greater than zero.');
-      return;
-    }
+
     setBusy('save');
     try {
       const body = {
@@ -126,6 +126,7 @@ export function PatternBuilder({ initial, mode, patternId }: Props) {
         sections,
         notes: notes.trim() ? notes.trim() : undefined,
       };
+
       const url = mode === 'edit' && patternId ? `/api/patterns/${patternId}` : '/api/patterns';
       const method = mode === 'edit' ? 'PATCH' : 'POST';
       const res = await fetch(url, {
@@ -133,6 +134,7 @@ export function PatternBuilder({ initial, mode, patternId }: Props) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       });
+
       if (!res.ok) throw new Error(await res.text());
       toast.success(mode === 'edit' ? 'Pattern updated.' : 'Pattern created.');
       router.push('/settings/patterns');
@@ -144,14 +146,14 @@ export function PatternBuilder({ initial, mode, patternId }: Props) {
     }
   }
 
-  async function remove() {
+  async function confirmRemove() {
     if (mode !== 'edit' || !patternId) return;
-    if (!confirm('Delete this pattern? Existing exams already created from it will be unaffected.')) return;
     setBusy('delete');
     try {
       const res = await fetch(`/api/patterns/${patternId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(await res.text());
       toast.success('Pattern deleted.');
+      setConfirmDeleteOpen(false);
       router.push('/settings/patterns');
       router.refresh();
     } catch (e) {
@@ -373,7 +375,7 @@ export function PatternBuilder({ initial, mode, patternId }: Props) {
             <Button
               type="button"
               variant="destructive"
-              onClick={remove}
+              onClick={() => setConfirmDeleteOpen(true)}
               disabled={busy !== null}
             >
               {busy === 'delete' ? 'Deleting…' : 'Delete'}
@@ -384,6 +386,17 @@ export function PatternBuilder({ initial, mode, patternId }: Props) {
           </Button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onClose={() => setConfirmDeleteOpen(false)}
+        onConfirm={() => void confirmRemove()}
+        title="Delete Pattern"
+        description="Are you sure you want to delete this pattern? Existing exams already created from it will be unaffected."
+        confirmLabel="Delete Pattern"
+        destructive
+        pending={busy === 'delete'}
+      />
     </div>
   );
 }

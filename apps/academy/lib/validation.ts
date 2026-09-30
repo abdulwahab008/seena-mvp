@@ -515,6 +515,7 @@ export const upsertClassSubjectSchema = z
 export type UpsertClassSubjectInput = z.infer<typeof upsertClassSubjectSchema>;
 
 export const ROOM_TYPES = ['CLASSROOM', 'SCIENCE_LAB', 'COMPUTER_LAB', 'HALL', 'LIBRARY', 'PRAYER_AREA'] as const;
+export type RoomType = (typeof ROOM_TYPES)[number];
 
 // Mirrors create_room()'s own checks in
 // supabase/migrations/20260731320000_room_registry.sql — room codes are
@@ -1239,6 +1240,7 @@ export const issueTransferCertificateSchema = z.object({
   conduct: z.string().max(120).optional(),
   boardCode: boardCodeSchema.optional(),
   language: z.enum(CERTIFICATE_LANGUAGES),
+  overrideReason: z.string().max(500).optional(),
 });
 export type IssueTransferCertificateInput = z.infer<typeof issueTransferCertificateSchema>;
 

@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { ApplicationList, type ApplicationRow } from './application-list';
+import { QuickAdmissionModal } from '@/components/admissions/quick-admission-modal';
 
 function one<T>(v: T | T[] | null): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
@@ -8,7 +9,15 @@ function one<T>(v: T | T[] | null): T | null {
 export default async function ApplicationsPage() {
   const supabase = await supabaseServer();
 
-  const [{ data: apps }, { data: offers }, { data: waitlistRows }, { data: documentRows }] = await Promise.all([
+  const [
+    { data: apps },
+    { data: offers },
+    { data: waitlistRows },
+    { data: documentRows },
+    { data: campuses },
+    { data: sessions },
+    { data: classLevels },
+  ] = await Promise.all([
     supabase
       .from('admission_application')
       .select(
@@ -24,6 +33,9 @@ export default async function ApplicationsPage() {
       .from('admission_document')
       .select('id, application_id, doc_type, status, reject_reason, b_form_no, created_at')
       .order('created_at', { ascending: false }),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('code'),
+    supabase.from('academic_session').select('id, name').order('starts_on', { ascending: false }),
+    supabase.from('class_level').select('id, name_en').eq('is_active', true).order('ordinal'),
   ]);
 
   const latestOfferByApp = new Map<
@@ -110,11 +122,25 @@ export default async function ApplicationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Applications</h1>
-        <p className="text-sm text-muted-foreground">
-          FR-B08/B15/B16/B06 — issue offers against live seat availability and record responses.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">Applications</h1>
+          <p className="text-sm text-muted-foreground">
+            FR-B08/B15/B16/B06 — issue offers against live seat availability and record responses.
+          </p>
+        </div>
+        <QuickAdmissionModal
+          campuses={campuses ?? []}
+          sessions={sessions ?? []}
+          classLevels={classLevels ?? []}
+          sections={(sectionRows ?? []).map((s) => ({
+            id: s.id,
+            name: s.name,
+            class_level_id: s.class_level_id,
+            campus_id: s.campus_id,
+            session_id: s.session_id,
+          }))}
+        />
       </div>
       <ApplicationList applications={rows} />
     </div>

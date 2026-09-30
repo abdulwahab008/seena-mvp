@@ -22,9 +22,33 @@ export type IssueTransferCertificateState = {
   downloadUrl?: string;
   /** AC2: the serial of the certificate that already exists, for the UI to name. */
   existingSerial?: string;
+  /** FR-T04: flagged when outstanding dues block issuance */
+  hasDues?: boolean;
 };
 
+export type ClearanceItem = {
+  source: string;
+  description: string;
+  amount: number;
+  days_outstanding: number;
+};
+
+export async function getClearanceSummary(studentId: string): Promise<{ items: ClearanceItem[]; error?: string }> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('get_clearance_summary', { p_student_id: studentId });
+  if (error) {
+    return { items: [], error: error.message };
+  }
+  return { items: (data as ClearanceItem[]) ?? [] };
+}
+
 function issueErrorMessage(message: string): string | null {
+  if (message.includes('UNPAID_DUES_OUTSTANDING')) {
+    return 'This student has outstanding fee dues. Dues must be cleared before issuing a Transfer Certificate, or an authorized override reason (min 20 chars) must be provided.';
+  }
+  if (message.includes('OVERRIDE_REASON_MIN_LENGTH_20')) {
+    return 'The override reason must be at least 20 characters long explaining the dues clearance exception.';
+  }
   if (message.includes('ENROLMENT_NOT_ACTIVE')) {
     return 'This student is not currently enrolled, so no Transfer Certificate can be issued.';
   }
@@ -45,6 +69,7 @@ export async function issueTransferCertificate(formData: FormData): Promise<Issu
     conduct: formData.get('conduct') ?? '',
     boardCode: formData.get('boardCode') ?? '',
     language: formData.get('language'),
+    overrideReason: formData.get('overrideReason') ?? '',
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
 
@@ -56,6 +81,7 @@ export async function issueTransferCertificate(formData: FormData): Promise<Issu
     p_conduct: parsed.data.conduct || undefined,
     p_board_code: parsed.data.boardCode || undefined,
     p_language: parsed.data.language,
+    p_override_reason: parsed.data.overrideReason?.trim() || undefined,
   });
 
   if (error || !data) {
@@ -70,7 +96,11 @@ export async function issueTransferCertificate(formData: FormData): Promise<Issu
         existingSerial: already[1],
       };
     }
-    return { error: (error && issueErrorMessage(error.message)) ?? 'Could not issue the certificate.' };
+    const hasDues = error?.message.includes('UNPAID_DUES_OUTSTANDING');
+    return {
+      error: (error && issueErrorMessage(error.message)) ?? 'Could not issue the certificate.',
+      hasDues,
+    };
   }
 
   const issued = data as unknown as IssuedCertificate;

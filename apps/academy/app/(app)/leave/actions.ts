@@ -101,3 +101,101 @@ export async function decideLeave(_prev: DecideLeaveState, formData: FormData): 
   revalidatePath('/leave');
   return { error: null };
 }
+
+export async function initializeStandardLeavePolicies(): Promise<{ error: string | null; count?: number }> {
+  const supabase = await supabaseServer();
+  const { data, error } = await (supabase.rpc as any)('initialize_school_leave_policies');
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only owners, principals, or HR managers can initialize leave policies.' };
+    return { error: error.message || 'Could not initialize leave policies.' };
+  }
+  revalidatePath('/leave');
+  return { error: null, count: (data as any)?.leave_types_created ?? 0 };
+}
+
+export async function getStaffLeaveBalances(staffId: string): Promise<{
+  error: string | null;
+  leaveTypes?: { id: string; code: string; name_en: string }[];
+  balances?: Record<string, number>;
+}> {
+  const supabase = await supabaseServer();
+  const [{ data: types, error: tErr }, { data: ledger, error: lErr }] = await Promise.all([
+    supabase.rpc('eligible_leave_types', { p_staff_id: staffId }),
+    supabase.from('leave_ledger').select('leave_type_id, days').eq('staff_id', staffId),
+  ]);
+  if (tErr) return { error: tErr.message };
+  if (lErr) return { error: lErr.message };
+  const balances = (ledger ?? []).reduce<Record<string, number>>((acc, row) => {
+    acc[row.leave_type_id] = (acc[row.leave_type_id] ?? 0) + Number(row.days);
+    return acc;
+  }, {});
+  return { error: null, leaveTypes: types ?? [], balances };
+}
+
+export type SaveLeavePolicyInput = {
+  id?: string;
+  code?: string;
+  name_en: string;
+  entitlement_days: number;
+  is_paid: boolean;
+  doc_required_after_days?: number | null;
+  is_active?: boolean;
+  sync_active_staff?: boolean;
+};
+
+export async function saveSchoolLeavePolicy(input: SaveLeavePolicyInput): Promise<{ error: string | null; id?: string }> {
+  const supabase = await supabaseServer();
+
+  if (input.id) {
+    // Update existing policy
+    const { data, error } = await (supabase.rpc as any)('update_school_leave_policy', {
+      p_id: input.id,
+      p_name_en: input.name_en,
+      p_entitlement_days: input.entitlement_days,
+      p_is_paid: input.is_paid,
+      p_doc_required_after_days: input.doc_required_after_days ?? null,
+      p_is_active: input.is_active ?? true,
+      p_sync_active_staff: input.sync_active_staff ?? true,
+    });
+    if (error) {
+      if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to update leave policies.' };
+      return { error: error.message || 'Could not update leave policy.' };
+    }
+    revalidatePath('/leave');
+    return { error: null, id: (data as any)?.id };
+  } else {
+    // Create new custom policy
+    if (!input.code || !input.code.trim()) {
+      return { error: 'Policy code is required (e.g. STUDY, BEREAVEMENT).' };
+    }
+    const { data, error } = await (supabase.rpc as any)('create_custom_leave_policy', {
+      p_code: input.code,
+      p_name_en: input.name_en,
+      p_entitlement_days: input.entitlement_days,
+      p_is_paid: input.is_paid,
+      p_doc_required_after_days: input.doc_required_after_days ?? null,
+      p_grant_active_staff: input.sync_active_staff ?? true,
+    });
+    if (error) {
+      if (error.message.includes('LEAVE_CODE_ALREADY_EXISTS')) return { error: `Policy code "${input.code}" already exists in this school.` };
+      if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to create leave policies.' };
+      return { error: error.message || 'Could not create leave policy.' };
+    }
+    revalidatePath('/leave');
+    return { error: null, id: (data as any)?.id };
+  }
+}
+
+export async function toggleLeavePolicyActive(id: string, isActive: boolean): Promise<{ error: string | null }> {
+  const supabase = await supabaseServer();
+  const { error } = await (supabase.rpc as any)('toggle_leave_policy_status', {
+    p_id: id,
+    p_is_active: isActive,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to change policy status.' };
+    return { error: error.message || 'Could not update policy status.' };
+  }
+  revalidatePath('/leave');
+  return { error: null };
+}

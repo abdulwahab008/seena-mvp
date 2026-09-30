@@ -9,7 +9,15 @@ import { SubjectSetup } from './subject-setup';
  * the mark-entry readiness preview in particular — is deliberately open to
  * anyone in campus scope, because AC4's question is asked BY a teacher.
  */
-const SETUP_ROLES = ['super_admin', 'owner', 'principal', 'exam_controller'];
+const SETUP_ROLES = [
+  'super_admin',
+  'owner',
+  'principal',
+  'exam_controller',
+  'subject_teacher',
+  'class_teacher',
+  'head_of_department',
+];
 
 type SearchParams = { term?: string };
 
@@ -65,6 +73,21 @@ export default async function ExamSubjectsPage({ searchParams }: { searchParams:
 
   const { configured, options } = await readExamSubjectSetup(supabase, campus.id, session.id, term.id);
 
+  // If the user is a teacher, fetch their assigned subject IDs in this campus & session
+  let assignedSubjectIds: string[] = [];
+  const isTeacher = ['subject_teacher', 'class_teacher'].includes(role);
+  if (isTeacher && user?.id) {
+    const { data: sstRows } = await supabase
+      .from('section_subject_teacher')
+      .select('subject_id')
+      .eq('campus_id', campus.id)
+      .eq('session_id', session.id)
+      .eq('staff_id', user.id)
+      .is('effective_to', null);
+
+    assignedSubjectIds = (sstRows ?? []).map((r) => r.subject_id);
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -83,6 +106,8 @@ export default async function ExamSubjectsPage({ searchParams }: { searchParams:
         examTermId={term.id}
         examTermLabel={term.name}
         canWrite={SETUP_ROLES.includes(role)}
+        isTeacher={isTeacher}
+        assignedSubjectIds={assignedSubjectIds}
         configured={configured}
         options={options}
       />

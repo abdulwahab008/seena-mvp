@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { ALL_CAMPUSES_VALUE, buildCampusFilterOptions, type CampusOption } from '@/lib/campus-scope';
 
 // Radix's Select.Item rejects an empty-string value outright, but '' is the
@@ -93,11 +94,11 @@ export function CollectionReportView({ campuses, canFinalise }: { campuses: Camp
         </div>
         <div className="space-y-1">
           <Label htmlFor="report-from">From</Label>
-          <Input id="report-from" type="date" data-testid="report-from-input" value={from} onChange={(e) => setFrom(e.target.value)} />
+          <DatePicker id="report-from" data-testid="report-from-input" value={from} onChange={setFrom} />
         </div>
         <div className="space-y-1">
           <Label htmlFor="report-to">To</Label>
-          <Input id="report-to" type="date" data-testid="report-to-input" value={to} onChange={(e) => setTo(e.target.value)} />
+          <DatePicker id="report-to" data-testid="report-to-input" value={to} onChange={setTo} />
         </div>
         <Button type="button" disabled={pending} onClick={onRun} data-testid="report-run-button">
           {pending ? 'Loading…' : 'Run report'}

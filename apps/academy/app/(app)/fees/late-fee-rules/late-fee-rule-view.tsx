@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 export type RuleRow = {
   id: string;
@@ -153,7 +154,7 @@ function PreviewPanel({ challans }: { challans: ChallanOption[] }) {
         </div>
         <div className="space-y-1">
           <Label htmlFor="asOf">As of</Label>
-          <Input id="asOf" type="date" data-testid="preview-as-of-input" value={asOf} onChange={(e) => setAsOf(e.target.value)} />
+          <DatePicker id="asOf" data-testid="preview-as-of-input" value={asOf} onChange={setAsOf} />
         </div>
         <Button type="button" disabled={pending} onClick={onPreview} data-testid="preview-late-fee-button">
           {pending ? 'Computing…' : 'Preview'}

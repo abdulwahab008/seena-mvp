@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 export type CampusOption = { id: string; name: string; code: string };
 
@@ -113,7 +114,7 @@ function IdentityForm({ campuses }: { campuses: CampusOption[] }) {
         </div>
         <div className="space-y-1">
           <Label htmlFor="signing-valid-from">Valid from</Label>
-          <Input id="signing-valid-from" name="validFrom" type="date" className="h-9 w-40" data-testid="signing-valid-from" />
+          <DatePicker id="signing-valid-from" name="validFrom" className="w-40" data-testid="signing-valid-from" />
         </div>
       </div>
 

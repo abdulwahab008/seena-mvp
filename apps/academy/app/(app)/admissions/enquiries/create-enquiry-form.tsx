@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 type ClassLevel = { id: string; code: string; name_en: string };
 type Campus = { id: string; code: string; name: string };
@@ -169,7 +170,19 @@ export function CreateEnquiryForm({
       </div>
       <div className="space-y-1">
         <Label htmlFor="dob">Date of birth</Label>
-        <Input id="dob" type="date" {...register('dob')} />
+        <Controller
+          name="dob"
+          control={control}
+          render={({ field }) => (
+            <DatePicker
+              id="dob"
+              value={field.value}
+              onChange={field.onChange}
+              placeholder="Select date of birth"
+              data-testid="enquiry-dob-picker"
+            />
+          )}
+        />
         {errors.dob && <p className="text-xs text-destructive">{errors.dob.message}</p>}
       </div>
       <div className="space-y-1">

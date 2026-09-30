@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ import { formatWeightPct, upsertExamTermSchema, type UpsertExamTermInput } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ConfirmDialog } from '@/components/ui/modal';
 
 export type ExamTermRow = {
   id: string;
@@ -110,13 +111,19 @@ export function TermSetEditor({ campusId, sessionId, canWrite, terms }: Props) {
     });
   };
 
-  const onDelete = (id: string) => {
+  const [termToRemove, setTermToRemove] = useState<ExamTermRow | null>(null);
+
+  const confirmDeleteTerm = () => {
+    if (!termToRemove) return;
     const fd = new FormData();
-    fd.set('examTermId', id);
+    fd.set('examTermId', termToRemove.id);
     startTransition(async () => {
       const result = await deleteExamTerm(fd);
       if (result.error) toast.error(result.error);
-      else toast.success('Term removed.');
+      else {
+        toast.success('Term removed.');
+        setTermToRemove(null);
+      }
     });
   };
 
@@ -170,7 +177,13 @@ export function TermSetEditor({ campusId, sessionId, canWrite, terms }: Props) {
                 </td>
                 <td className="p-3 text-right">
                   {canWrite && t.status === 'draft' && (
-                    <Button variant="ghost" size="sm" disabled={pending} onClick={() => onDelete(t.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={pending}
+                      onClick={() => setTermToRemove(t)}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
                       Remove
                     </Button>
                   )}
@@ -248,6 +261,21 @@ export function TermSetEditor({ campusId, sessionId, canWrite, terms }: Props) {
           </Button>
         </form>
       )}
+
+      <ConfirmDialog
+        open={Boolean(termToRemove)}
+        onClose={() => setTermToRemove(null)}
+        onConfirm={confirmDeleteTerm}
+        title="Remove Exam Term"
+        description={
+          termToRemove
+            ? `Are you sure you want to remove the draft exam term "${termToRemove.name}" (${termToRemove.code})? This action cannot be undone.`
+            : undefined
+        }
+        confirmLabel={pending ? 'Removing…' : 'Remove Term'}
+        destructive
+        pending={pending}
+      />
     </div>
   );
 }

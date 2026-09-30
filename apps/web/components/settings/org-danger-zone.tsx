@@ -4,17 +4,13 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/modal';
 
 export function OrgDangerZone() {
   const [deleting, setDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function deleteOrg() {
-    if (
-      !confirm(
-        'Delete this organization and ALL its data — books, exams, student submissions, and files? This cannot be undone.',
-      )
-    )
-      return;
     setDeleting(true);
     try {
       const res = await fetch('/api/org', { method: 'DELETE' });
@@ -24,6 +20,7 @@ export function OrgDangerZone() {
     } catch (e) {
       toast.error((e as Error).message);
       setDeleting(false);
+      setConfirmOpen(false);
     }
   }
 
@@ -51,7 +48,7 @@ export function OrgDangerZone() {
           </p>
           <Button
             variant="outline"
-            onClick={() => void deleteOrg()}
+            onClick={() => setConfirmOpen(true)}
             disabled={deleting}
             className="mt-2 border-red-300 text-red-700 hover:bg-red-50"
           >
@@ -59,6 +56,17 @@ export function OrgDangerZone() {
           </Button>
         </div>
       </CardContent>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => void deleteOrg()}
+        title="Delete Organization"
+        description="Are you sure you want to delete this organization and ALL its data — books, exams, student submissions, and files? This cannot be undone."
+        confirmLabel="Permanently Delete Organization"
+        destructive
+        pending={deleting}
+      />
     </Card>
   );
 }

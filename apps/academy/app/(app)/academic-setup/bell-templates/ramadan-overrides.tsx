@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 export type DateRangeRuleRow = {
   id: string;
@@ -39,6 +40,7 @@ function CorrectDatesForm({ rule }: { rule: DateRangeRuleRow }) {
   const [pending, startTransition] = useTransition();
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<UpdateBellRuleDatesInput>({
@@ -72,12 +74,40 @@ function CorrectDatesForm({ rule }: { rule: DateRangeRuleRow }) {
     <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-2" data-testid={`correct-dates-form-${rule.id}`} noValidate>
       <div className="space-y-1">
         <Label htmlFor={`from-${rule.id}`}>New start</Label>
-        <Input id={`from-${rule.id}`} type="date" data-testid={`correct-date-from-${rule.id}`} {...register('dateFrom')} />
+        <Controller
+          control={control}
+          name="dateFrom"
+          render={({ field }) => (
+            <DatePicker
+              id={`from-${rule.id}`}
+              name="dateFrom"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Start date"
+              data-testid={`correct-date-from-${rule.id}`}
+            />
+          )}
+        />
         {errors.dateFrom && <p className="text-xs text-destructive">{errors.dateFrom.message}</p>}
       </div>
       <div className="space-y-1">
         <Label htmlFor={`to-${rule.id}`}>New end</Label>
-        <Input id={`to-${rule.id}`} type="date" data-testid={`correct-date-to-${rule.id}`} {...register('dateTo')} />
+        <Controller
+          control={control}
+          name="dateTo"
+          render={({ field }) => (
+            <DatePicker
+              id={`to-${rule.id}`}
+              name="dateTo"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="End date"
+              data-testid={`correct-date-to-${rule.id}`}
+            />
+          )}
+        />
         {errors.dateTo && <p className="text-xs text-destructive">{errors.dateTo.message}</p>}
       </div>
       <Button type="submit" size="sm" disabled={pending} data-testid={`save-dates-${rule.id}`}>
@@ -209,12 +239,40 @@ export function RamadanOverrides({
         </div>
         <div className="space-y-1">
           <Label htmlFor="override-date-from">Override from</Label>
-          <Input id="override-date-from" type="date" data-testid="override-date-from" {...register('dateFrom')} />
+          <Controller
+            control={control}
+            name="dateFrom"
+            render={({ field }) => (
+              <DatePicker
+                id="override-date-from"
+                name="dateFrom"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="From date"
+                data-testid="override-date-from"
+              />
+            )}
+          />
           {errors.dateFrom && <p className="text-xs text-destructive">{errors.dateFrom.message}</p>}
         </div>
         <div className="space-y-1">
           <Label htmlFor="override-date-to">Override to</Label>
-          <Input id="override-date-to" type="date" data-testid="override-date-to" {...register('dateTo')} />
+          <Controller
+            control={control}
+            name="dateTo"
+            render={({ field }) => (
+              <DatePicker
+                id="override-date-to"
+                name="dateTo"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="To date"
+                data-testid="override-date-to"
+              />
+            )}
+          />
           {errors.dateTo && <p className="text-xs text-destructive">{errors.dateTo.message}</p>}
         </div>
         <div className="space-y-1">

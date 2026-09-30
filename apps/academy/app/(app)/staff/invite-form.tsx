@@ -1,6 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'sonner';
 import { inviteStaff } from './actions';
@@ -9,15 +10,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const ROLES = [
-  'principal', 'vice_principal', 'admissions_officer', 'accountant', 'exam_controller',
-  'head_of_department', 'class_teacher', 'subject_teacher', 'hr_manager', 'librarian',
-  'transport_manager', 'receptionist',
+export const ROLE_OPTIONS = [
+  { value: 'principal', label: 'Principal' },
+  { value: 'admissions_officer', label: 'Admissions Officer' },
+  { value: 'accountant', label: 'Accountant' },
+  { value: 'exam_controller', label: 'Exam Controller' },
+  { value: 'subject_teacher', label: 'Teacher (Subject Teacher)' },
+  { value: 'hr_manager', label: 'HR Manager' },
 ] as const;
 
-type FormValues = { email: string; role: (typeof ROLES)[number] | '' };
+type RoleValue = (typeof ROLE_OPTIONS)[number]['value'];
+type FormValues = { email: string; role: RoleValue | '' };
 
 export function InviteForm({ campusId }: { campusId: string }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const { register, handleSubmit, control, reset } = useForm<FormValues>({
     defaultValues: { email: '', role: '' },
@@ -37,6 +43,7 @@ export function InviteForm({ campusId }: { campusId: string }) {
       else {
         toast.success(`Invitation sent to ${values.email}.`);
         reset();
+        router.refresh();
       }
     });
   });
@@ -58,9 +65,9 @@ export function InviteForm({ campusId }: { campusId: string }) {
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                {ROLES.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {r.replace(/_/g, ' ')}
+                {ROLE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>

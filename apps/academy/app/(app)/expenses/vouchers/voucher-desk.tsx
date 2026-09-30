@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 // Radix's Select.Item rejects an empty-string value; '' is this page's
 // "all" sentinel, mapped the same way every other filtered page here does.
@@ -182,10 +183,9 @@ export function VoucherDesk({
 
           <div className="space-y-1">
             <Label htmlFor="voucherDate">Voucher date</Label>
-            <Input
+            <DatePicker
               id="voucherDate"
               name="voucherDate"
-              type="date"
               defaultValue={today()}
               max={today()}
               required

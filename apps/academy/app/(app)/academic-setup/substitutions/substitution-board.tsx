@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -182,7 +183,7 @@ export function SubstitutionBoard({ campusId }: { campusId: string }) {
       <div className="flex flex-wrap items-end gap-2 rounded-lg border p-4">
         <div className="space-y-1">
           <Label htmlFor="sub-date">Date</Label>
-          <Input id="sub-date" type="date" value={subDate} onChange={(e) => setSubDate(e.target.value)} data-testid="sub-date-input" />
+          <DatePicker id="sub-date" value={subDate} onChange={setSubDate} data-testid="sub-date-input" />
         </div>
         <Button type="button" onClick={onLoadTeachers} disabled={pending} data-testid="sub-load-button">
           Load absences

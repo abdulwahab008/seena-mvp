@@ -6,6 +6,7 @@ import { runUnmarkedAttendanceCheck, type UnmarkedSection } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -38,7 +39,7 @@ export function UnmarkedView({ campusId }: { campusId: string }) {
       <div className="flex flex-wrap items-end gap-2 rounded-lg border p-4">
         <div className="space-y-1">
           <Label htmlFor="unmarked-date">Date</Label>
-          <Input id="unmarked-date" type="date" className="w-40" value={date} onChange={(e) => setDate(e.target.value)} data-testid="unmarked-date" />
+          <DatePicker id="unmarked-date" className="w-40" value={date} onChange={setDate} data-testid="unmarked-date" />
         </div>
         <Button type="button" disabled={pending} onClick={onRun} data-testid="unmarked-run">
           {pending ? 'Checking…' : 'Run check'}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { createSession } from './actions';
@@ -9,12 +9,14 @@ import { createSessionSchema, type CreateSessionInput } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 
 export function CreateSessionForm({ campusId }: { campusId: string }) {
   const [pending, startTransition] = useTransition();
   const {
     register,
     handleSubmit,
+    control,
     reset,
     formState: { errors },
   } = useForm<CreateSessionInput>({ resolver: zodResolver(createSessionSchema) });
@@ -43,11 +45,40 @@ export function CreateSessionForm({ campusId }: { campusId: string }) {
       </div>
       <div className="space-y-1">
         <Label htmlFor="session-starts">Starts</Label>
-        <Input id="session-starts" type="date" {...register('startsOn')} />
+        <Controller
+          control={control}
+          name="startsOn"
+          render={({ field }) => (
+            <DatePicker
+              id="session-starts"
+              name="startsOn"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Start date"
+              data-testid="session-starts"
+            />
+          )}
+        />
+        {errors.startsOn && <p className="text-xs text-destructive">{errors.startsOn.message}</p>}
       </div>
       <div className="space-y-1">
         <Label htmlFor="session-ends">Ends</Label>
-        <Input id="session-ends" type="date" {...register('endsOn')} />
+        <Controller
+          control={control}
+          name="endsOn"
+          render={({ field }) => (
+            <DatePicker
+              id="session-ends"
+              name="endsOn"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="End date"
+              data-testid="session-ends"
+            />
+          )}
+        />
         {errors.endsOn && <p className="text-xs text-destructive">{errors.endsOn.message}</p>}
       </div>
       <Button type="submit" disabled={pending}>

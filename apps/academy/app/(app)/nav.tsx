@@ -9,6 +9,7 @@ const LINKS = [
   { href: '/staff/directory', label: 'Staff Directory' },
   { href: '/staff/qualifications', label: 'Qualifications' },
   { href: '/staff/remarks', label: 'Remarks & Moderation' },
+  { href: '/staff/tickets', label: 'Support & Complaints' },
   { href: '/leave', label: 'Leave' },
   { href: '/admissions/enquiries', label: 'Admissions' },
   { href: '/admissions/applications', label: 'Applications' },

@@ -1,13 +1,14 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { termsSchema, type TermsInput } from '@/lib/validation';
 import { saveTerms } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 
 type ExistingTerm = { name: string; starts_on: string; ends_on: string; weightage: string | number };
 
@@ -41,8 +42,36 @@ export function TermEditor({ sessionId, existingTerms }: { sessionId: string; ex
       {fields.map((field, i) => (
         <div key={field.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-2">
           <Input placeholder="Term name" {...register(`terms.${i}.name`)} />
-          <Input type="date" {...register(`terms.${i}.startsOn`)} />
-          <Input type="date" {...register(`terms.${i}.endsOn`)} />
+          <Controller
+            control={control}
+            name={`terms.${i}.startsOn`}
+            render={({ field }) => (
+              <DatePicker
+                id={`term-starts-${i}`}
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="Starts"
+                data-testid={`term-starts-${i}`}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name={`terms.${i}.endsOn`}
+            render={({ field }) => (
+              <DatePicker
+                id={`term-ends-${i}`}
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="Ends"
+                data-testid={`term-ends-${i}`}
+              />
+            )}
+          />
           <Input type="number" step="0.01" placeholder="Weight %" {...register(`terms.${i}.weightage`)} />
           <Button type="button" variant="ghost" size="sm" onClick={() => remove(i)} disabled={fields.length <= 1}>
             Remove

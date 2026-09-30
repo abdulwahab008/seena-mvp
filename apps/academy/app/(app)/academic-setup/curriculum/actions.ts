@@ -5,10 +5,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 
 export type UpsertClassSubjectState = { error: string | null };
 
-// FR-E06: map a subject onto a class (optionally within a stream) with its
-// weekly period count. Authorization and every business rule (weekly
-// periods required, elective subjects need a bucket) are enforced inside
-// upsert_class_subject() itself.
+// Map a subject onto a class (optionally within a stream) with its weekly period count.
 export async function upsertClassSubject(_prev: UpsertClassSubjectState, formData: FormData): Promise<UpsertClassSubjectState> {
   const campusId = formData.get('campusId');
   const sessionId = formData.get('sessionId');
@@ -57,6 +54,21 @@ export async function upsertClassSubject(_prev: UpsertClassSubjectState, formDat
   return { error: null };
 }
 
+export async function deleteClassSubject(id: string): Promise<{ error: string | null }> {
+  const supabase = await supabaseServer();
+  const { error } = await (supabase.rpc as any)('delete_class_subject', { p_id: id });
+
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) {
+      return { error: 'You do not have permission to remove subjects from the curriculum.' };
+    }
+    return { error: error.message || 'Could not remove subject from curriculum.' };
+  }
+
+  revalidatePath('/academic-setup/curriculum');
+  return { error: null };
+}
+
 export type CopyMapState = { error: string | null; result: { created: number; skipped: number } | null };
 
 export async function copyClassSubjectMap(
@@ -77,4 +89,86 @@ export async function copyClassSubjectMap(
 
   revalidatePath('/academic-setup/curriculum');
   return { error: null, result: data as { created: number; skipped: number } };
+}
+
+// Copy a class's full curriculum across multiple target classes at once (e.g. Class 1 -> Classes 2, 3, 4, 5)
+export async function copyCurriculumToMultipleClasses(
+  fromClassLevelId: string,
+  toClassLevelIds: string[],
+  sessionId: string,
+  campusId: string,
+): Promise<{ error: string | null; created: number; skipped: number }> {
+  if (!toClassLevelIds.length) {
+    return { error: 'Select at least one destination class.', created: 0, skipped: 0 };
+  }
+
+  const supabase = await supabaseServer();
+  let totalCreated = 0;
+  let totalSkipped = 0;
+
+  for (const toId of toClassLevelIds) {
+    const { data, error } = await supabase.rpc('copy_class_subject_map', {
+      p_from_class_level_id: fromClassLevelId,
+      p_to_class_level_id: toId,
+      p_session_id: sessionId,
+      p_campus_id: campusId,
+    });
+
+    if (error) {
+      return { error: 'Could not copy curriculum to all selected classes.', created: totalCreated, skipped: totalSkipped };
+    }
+
+    const res = data as { created: number; skipped: number };
+    totalCreated += res?.created ?? 0;
+    totalSkipped += res?.skipped ?? 0;
+  }
+
+  revalidatePath('/academic-setup/curriculum');
+  return { error: null, created: totalCreated, skipped: totalSkipped };
+}
+
+// Bulk assign a subject to multiple classes in one click (e.g. English, 6 periods, to Classes 1-5)
+export async function assignSubjectToMultipleClasses({
+  campusId,
+  sessionId,
+  classLevelIds,
+  subjectId,
+  weeklyPeriods,
+  isCompulsory,
+  electiveBucket,
+}: {
+  campusId: string;
+  sessionId: string;
+  classLevelIds: string[];
+  subjectId: string;
+  weeklyPeriods: number;
+  isCompulsory: boolean;
+  electiveBucket?: number;
+}): Promise<{ error: string | null; count?: number }> {
+  if (!classLevelIds.length) {
+    return { error: 'Select at least one class.' };
+  }
+
+  const supabase = await supabaseServer();
+  let assignedCount = 0;
+
+  for (const classId of classLevelIds) {
+    const { error } = await supabase.rpc('upsert_class_subject', {
+      p_campus_id: campusId,
+      p_session_id: sessionId,
+      p_class_level_id: classId,
+      p_subject_id: subjectId,
+      p_weekly_periods: weeklyPeriods,
+      p_is_compulsory: isCompulsory,
+      p_elective_bucket: electiveBucket,
+    });
+
+    if (error) {
+      return { error: `Failed to map subject: ${error.message}` };
+    }
+    assignedCount++;
+  }
+
+  revalidatePath('/academic-setup/curriculum');
+  return { error: null, count: assignedCount };
 }

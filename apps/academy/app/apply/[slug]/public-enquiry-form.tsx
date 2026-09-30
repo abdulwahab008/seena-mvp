@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 type ClassLevelOption = { code: string; name_en: string; name_ur: string | null };
 
@@ -111,7 +112,21 @@ export function PublicEnquiryForm({ slug, classLevels }: { slug: string; classLe
       </div>
       <div className="space-y-1">
         <Label htmlFor="dob">{t.dob}</Label>
-        <Input id="dob" type="date" {...register('dob')} />
+        <Controller
+          control={control}
+          name="dob"
+          render={({ field }) => (
+            <DatePicker
+              id="dob"
+              name="dob"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder={t.dob}
+              data-testid="dob-picker"
+            />
+          )}
+        />
         {errors.dob && <p className="text-xs text-destructive">{errors.dob.message}</p>}
       </div>
       <div className="space-y-1">

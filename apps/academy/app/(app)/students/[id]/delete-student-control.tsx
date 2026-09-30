@@ -5,19 +5,12 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { deleteStudent } from '../actions';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/modal';
 
 export function DeleteStudentControl({ studentId, studentName }: { studentId: string; studentName: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [confirming, setConfirming] = useState(false);
-
-  if (!confirming) {
-    return (
-      <Button type="button" size="sm" variant="destructive" onClick={() => setConfirming(true)} data-testid="delete-student-button">
-        Delete
-      </Button>
-    );
-  }
 
   const onConfirm = () => {
     startTransition(async () => {
@@ -33,14 +26,29 @@ export function DeleteStudentControl({ studentId, studentName }: { studentId: st
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">Delete {studentName}?</span>
-      <Button type="button" size="sm" variant="destructive" disabled={pending} onClick={onConfirm} data-testid="confirm-delete-student">
-        {pending ? 'Deleting…' : 'Confirm'}
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant="destructive"
+        onClick={() => setConfirming(true)}
+        data-testid="delete-student-button"
+      >
+        Delete
       </Button>
-      <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => setConfirming(false)}>
-        Cancel
-      </Button>
-    </div>
+
+      <ConfirmDialog
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        onConfirm={onConfirm}
+        title="Delete Student Record"
+        description={`Are you sure you want to move ${studentName} to the Recycle Bin? The student, enrolment, and fee records can be restored later by an administrator.`}
+        confirmLabel={pending ? 'Deleting…' : 'Delete Student'}
+        confirmTestId="confirm-delete-student"
+        destructive
+        pending={pending}
+      />
+    </>
   );
 }
+

@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 // FR-G04: present -> absent -> late -> excused -> present, one tap, no
 // dialog, no dropdown. The AC's own cycle names the 4th state "leave" —
@@ -273,11 +274,10 @@ export function RegisterForm({
         </div>
         <div className="space-y-1">
           <Label htmlFor="attendanceDate">Date</Label>
-          <Input
+          <DatePicker
             id="attendanceDate"
-            type="date"
             value={attendanceDate}
-            onChange={(e) => setAttendanceDate(e.target.value)}
+            onChange={setAttendanceDate}
             data-testid="register-date"
           />
         </div>

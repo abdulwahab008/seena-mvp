@@ -27,12 +27,8 @@ export default defineConfig({
   webServer: {
     command: 'pnpm start',
     url: 'http://127.0.0.1:3011',
-    // Always false, deliberately: this machine runs multiple projects and
-    // port collisions are real (a totally unrelated backend on 3001 once
-    // got silently "reused" as this app, and every test failed against the
-    // wrong server with no obvious clue why). Refusing to bind a busy port
-    // fails loudly and immediately instead.
-    reuseExistingServer: false,
+    // Refusing to bind a busy port fails loudly unless REUSE_EXISTING_SERVER is explicitly set
+    reuseExistingServer: process.env.REUSE_EXISTING_SERVER === 'true',
     timeout: 60_000,
   },
 });

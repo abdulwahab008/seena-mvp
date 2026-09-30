@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 
 /** One row of v_grading_scheme. */
 export type GradingSchemeRow = {
@@ -182,12 +183,11 @@ export function GradingSchemeBoard({ schemes, canEdit }: { schemes: GradingSchem
             </div>
             <div className="space-y-1">
               <Label htmlFor="grading-effective-from">Effective from</Label>
-              <Input
+              <DatePicker
                 id="grading-effective-from"
-                type="date"
                 data-testid="grading-effective-from"
                 value={editing.effectiveFrom}
-                onChange={(e) => setEditing({ ...editing, effectiveFrom: e.target.value })}
+                onChange={(date) => setEditing({ ...editing, effectiveFrom: date })}
               />
             </div>
             <Button
@@ -387,12 +387,11 @@ export function GradingSchemeBoard({ schemes, canEdit }: { schemes: GradingSchem
                   <div className="flex flex-wrap items-end gap-3">
                     <div className="space-y-1">
                       <Label htmlFor={`grading-new-version-date-${scheme.id}`}>New version effective from</Label>
-                      <Input
+                      <DatePicker
                         id={`grading-new-version-date-${scheme.id}`}
-                        type="date"
                         data-testid={`grading-new-version-date-${scheme.id}`}
                         value={versionDates[scheme.id] ?? ''}
-                        onChange={(e) => setVersionDates((prev) => ({ ...prev, [scheme.id]: e.target.value }))}
+                        onChange={(date) => setVersionDates((prev) => ({ ...prev, [scheme.id]: date }))}
                       />
                     </div>
                     <Button

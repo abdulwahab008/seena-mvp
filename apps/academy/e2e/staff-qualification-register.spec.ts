@@ -86,3 +86,65 @@ test('an owner records two qualifications for a teacher, then verifies one and r
   await expect(page.getByText('Qualification rejected.')).toBeVisible();
   await expect(bedRow).toContainText('rejected');
 });
+
+test('records a qualification with attached degree document and verifies it from the in-app preview modal', async ({ page }) => {
+  const { ownerEmail, password } = await seedOwnerAndTeacher();
+
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Email').fill(ownerEmail);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+
+  await page.goto('/staff/qualifications');
+  await page.waitForLoadState('networkidle');
+
+  await page.getByTestId('qualification-staff-trigger').click();
+  await page.getByRole('option', { name: 'Chemistry Teacher' }).click();
+  await page.getByTestId('qualification-level-trigger').click();
+  await page.getByRole('option', { name: 'phd', exact: true }).click();
+  await page.getByTestId('qualification-discipline-input').fill('Organic Chemistry');
+  await page.getByTestId('qualification-institution-input').fill('Quaid-i-Azam University');
+  await page.getByTestId('qualification-year-input').fill('2020');
+
+  // Attach a sample document
+  const fileInput = page.getByTestId('qualification-file-input');
+  await fileInput.setInputFiles({
+    name: 'phd_degree_scan.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4 sample degree content'),
+  });
+
+  await expect(page.getByText('phd_degree_scan.pdf')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Add qualification' }).click();
+  await expect(page.getByText('Qualification saved.').last()).toBeVisible();
+
+  const phdRow = page.locator('[data-testid^="qualification-row-"]').filter({ hasText: 'Organic Chemistry' }).filter({ hasText: 'phd' });
+  await expect(phdRow).toContainText('pending');
+  await expect(phdRow.getByRole('button', { name: 'View File' })).toBeVisible();
+
+  // Click View File to open In-App Preview Modal
+  await phdRow.getByRole('button', { name: 'View File' }).click();
+
+  // Modal dialog appears
+  const modal = page.getByRole('dialog');
+  await expect(modal).toBeVisible();
+  await expect(modal.getByText('PHD - Organic Chemistry')).toBeVisible();
+  await expect(modal.getByText('Chemistry Teacher')).toBeVisible();
+
+  // Verify from inside the modal
+  await modal.getByRole('button', { name: 'Verify Qualification' }).click();
+  await expect(page.getByText('Qualification verified.')).toBeVisible();
+  await expect(modal.getByText('verified')).toBeVisible();
+
+  // Close modal
+  await modal.getByRole('button', { name: 'Close' }).click();
+  await expect(modal).toHaveCount(0);
+
+  // Table row reflects verification
+  await expect(phdRow).toContainText('verified');
+  await expect(phdRow.getByRole('button', { name: 'Verify' })).toHaveCount(0);
+});
+

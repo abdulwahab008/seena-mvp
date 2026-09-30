@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const WEEKDAYS = [
   { value: 1, label: 'Monday' },
@@ -376,6 +377,7 @@ function PublishVersionForm({ versionId }: { versionId: string }) {
   const [shortfallMessage, setShortfallMessage] = useState('');
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<PublishTimetableInput>({
@@ -407,7 +409,21 @@ function PublishVersionForm({ versionId }: { versionId: string }) {
     <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3 rounded-lg border border-blue-300 bg-blue-50 p-4" data-testid="publish-version-form">
       <div className="space-y-1">
         <Label htmlFor="publish-effective-from">Effective from</Label>
-        <Input id="publish-effective-from" type="date" data-testid="publish-effective-from-input" {...register('effectiveFrom')} />
+        <Controller
+          control={control}
+          name="effectiveFrom"
+          render={({ field }) => (
+            <DatePicker
+              id="publish-effective-from"
+              name="effectiveFrom"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Effective from"
+              data-testid="publish-effective-from-input"
+            />
+          )}
+        />
         {errors.effectiveFrom && <p className="text-xs text-destructive">{errors.effectiveFrom.message}</p>}
       </div>
       {needsOverride && (
