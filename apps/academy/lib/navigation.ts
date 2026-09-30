@@ -175,6 +175,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/concessions', label: 'Concessions' },
       { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
       { href: '/fees/late-fee-rules', label: 'Late Fee Rules' },
+      { href: '/fees/gateways', label: 'Online Payments' },
       { href: '/fees/reports', label: 'Collection Reports' },
     ],
   },

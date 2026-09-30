@@ -12783,6 +12783,275 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_alert: {
+        Row: {
+          campus_id: string
+          created_at: string
+          detail: string | null
+          event_id: string | null
+          expected_paisa: number | null
+          id: string
+          intent_id: string | null
+          kind: string
+          received_paisa: number | null
+          resolved_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          detail?: string | null
+          event_id?: string | null
+          expected_paisa?: number | null
+          id?: string
+          intent_id?: string | null
+          kind: string
+          received_paisa?: number | null
+          resolved_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          detail?: string | null
+          event_id?: string | null
+          expected_paisa?: number | null
+          id?: string
+          intent_id?: string | null
+          kind?: string
+          received_paisa?: number | null
+          resolved_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_alert_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_alert_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "payment_webhook_event"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_alert_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "payment_intent"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_alert_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_gateway_config: {
+        Row: {
+          campus_id: string | null
+          created_at: string
+          gateway: string
+          id: string
+          is_enabled: boolean
+          is_live: boolean
+          merchant_id: string
+          secret_ref: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          campus_id?: string | null
+          created_at?: string
+          gateway: string
+          id?: string
+          is_enabled?: boolean
+          is_live?: boolean
+          merchant_id: string
+          secret_ref: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string | null
+          created_at?: string
+          gateway?: string
+          id?: string
+          is_enabled?: boolean
+          is_live?: boolean
+          merchant_id?: string
+          secret_ref?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_gateway_config_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_gateway_config_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_intent: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          challan_id: string
+          created_at: string
+          created_by: string | null
+          enrolment_id: string
+          expires_at: string
+          gateway: string
+          gateway_ref: string
+          id: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          challan_id: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id: string
+          expires_at: string
+          gateway: string
+          gateway_ref: string
+          id?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          challan_id?: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id?: string
+          expires_at?: string
+          gateway?: string
+          gateway_ref?: string
+          id?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_intent_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intent_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intent_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intent_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "payment_intent_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "payment_intent_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_webhook_event: {
+        Row: {
+          created_at: string
+          error_text: string | null
+          gateway: string
+          gateway_txn_id: string | null
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          raw_body: string | null
+          raw_body_sha256: string
+          signature_valid: boolean
+          status: string
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_text?: string | null
+          gateway: string
+          gateway_txn_id?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          raw_body?: string | null
+          raw_body_sha256: string
+          signature_valid: boolean
+          status?: string
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_text?: string | null
+          gateway?: string
+          gateway_txn_id?: string | null
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          raw_body?: string | null
+          raw_body_sha256?: string
+          signature_valid?: boolean
+          status?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_webhook_event_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_adjustment: {
         Row: {
           adjustment_type: string
@@ -23495,6 +23764,10 @@ export type Database = {
         Args: { p_effective_from: string; p_prior_structure_id: string }
         Returns: string
       }
+      create_payment_intent: {
+        Args: { p_challan_id: string; p_gateway: string }
+        Returns: Json
+      }
       create_room: {
         Args: {
           p_block_label?: string
@@ -23867,6 +24140,7 @@ export type Database = {
         Args: { p_as_of?: string }
         Returns: number
       }
+      expire_payment_intents: { Args: { p_as_of?: string }; Returns: number }
       expire_stale_attempts: {
         Args: { p_cutoff_interval?: string; p_tenant_id?: string }
         Returns: {
@@ -24754,6 +25028,16 @@ export type Database = {
       }
       impersonation_blocked_tables: { Args: never; Returns: string[] }
       impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
+      ingest_payment_webhook: {
+        Args: {
+          p_gateway: string
+          p_payload: Json
+          p_raw: string
+          p_signature_valid: boolean
+          p_txn_id: string
+        }
+        Returns: Json
+      }
       initialize_school_leave_policies: { Args: never; Returns: Json }
       invite_user: {
         Args: {
@@ -25492,6 +25776,7 @@ export type Database = {
         Args: { p_identity_id: string; p_valid_to?: string }
         Returns: Json
       }
+      retry_orphan_webhooks: { Args: never; Returns: number }
       retry_report_card_batch: {
         Args: { p_batch_id: string; p_remarks?: Json }
         Returns: Json
@@ -26292,6 +26577,16 @@ export type Database = {
           p_sequence: number
           p_session_id: string
           p_weight_pct: number
+        }
+        Returns: string
+      }
+      upsert_payment_gateway_config: {
+        Args: {
+          p_gateway: string
+          p_is_enabled?: boolean
+          p_is_live?: boolean
+          p_merchant_id: string
+          p_secret_ref: string
         }
         Returns: string
       }

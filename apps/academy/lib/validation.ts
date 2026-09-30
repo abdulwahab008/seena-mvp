@@ -2020,3 +2020,14 @@ export const resolveGuardianClaimSchema = z.object({
   note: z.string().trim().max(500).optional(),
 });
 export type ResolveGuardianClaimInput = z.infer<typeof resolveGuardianClaimSchema>;
+
+// FR-K21: a gateway is configured with the NAME of the env var holding its
+// signing secret — the secret value itself is never accepted or stored.
+export const paymentGatewayConfigSchema = z.object({
+  gateway: z.enum(['jazzcash', 'easypaisa', 'onelink']),
+  merchantId: z.string().trim().min(1, 'Required').max(100),
+  secretRef: z.string().trim().regex(/^[A-Z][A-Z0-9_]{2,63}$/, 'An environment variable name, e.g. PAY_SECRET_JAZZCASH'),
+  isLive: z.boolean(),
+  isEnabled: z.boolean(),
+});
+export type PaymentGatewayConfigInput = z.infer<typeof paymentGatewayConfigSchema>;
