@@ -192,9 +192,9 @@ select throws_ok(
   'a subject teacher cannot verify any qualification'
 );
 select throws_ok(
-  format($$ select public.add_staff_document(%L, 'Some doc') $$, :'teacher_user_id'),
+  format($$ select public.add_staff_document(%L, 'Some doc') $$, :'hr_user_id'),
   'FORBIDDEN',
-  'a subject teacher cannot add a staff document'
+  'a subject teacher cannot add a staff document for another staff member'
 );
 
 -- ── tenant isolation ────────────────────────────────────────────────
