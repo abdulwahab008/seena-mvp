@@ -1,17 +1,23 @@
 import crypto from 'crypto';
 import { createServerClient } from '@supabase/ssr';
 
-export const COMM_WEBHOOK_SECRET = process.env.COMM_WEBHOOK_SECRET || 'seena-comm-webhook-secret-key-2026';
+// No fallback: a secret that ships in source is not a secret. Unset or short
+// means every signature fails (fail closed), never "accept the default".
+function webhookSecret(): string | null {
+  const secret = process.env.COMM_WEBHOOK_SECRET;
+  return secret && secret.length >= 16 ? secret : null;
+}
 
 export function verifyWebhookSignature(rawBody: string, signatureHeader: string | null): boolean {
-  if (!signatureHeader || !signatureHeader.trim()) {
+  const secret = webhookSecret();
+  if (!secret || !signatureHeader || !signatureHeader.trim()) {
     return false;
   }
 
   try {
     const cleanSignature = signatureHeader.replace(/^sha256=/, '').trim();
     const expectedSignature = crypto
-      .createHmac('sha256', COMM_WEBHOOK_SECRET)
+      .createHmac('sha256', secret)
       .update(rawBody, 'utf8')
       .digest('hex');
 
@@ -24,7 +30,7 @@ export function verifyWebhookSignature(rawBody: string, signatureHeader: string 
 
     // Try trimmed version
     const expectedTrimmed = crypto
-      .createHmac('sha256', COMM_WEBHOOK_SECRET)
+      .createHmac('sha256', secret)
       .update(rawBody.trim(), 'utf8')
       .digest('hex');
 

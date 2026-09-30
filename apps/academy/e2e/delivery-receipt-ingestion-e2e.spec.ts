@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import crypto from 'crypto';
 
 test.describe('FR-M09: Delivery Receipt Ingestion & Monotonic State Machine', () => {
-  const WEBHOOK_SECRET = 'seena-comm-webhook-secret-key-2026';
+  const WEBHOOK_SECRET = process.env.COMM_WEBHOOK_SECRET!;
 
   test('AC 2: Webhook endpoint rejects missing or invalid HMAC signature with HTTP 401', async ({ request }) => {
     // 1. Missing signature

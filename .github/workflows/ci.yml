@@ -62,6 +62,7 @@ jobs:
                   -e 's/^SERVICE_ROLE_KEY=/SUPABASE_SERVICE_ROLE_KEY=/' \
             > .env.local
           echo "ADMIN_SETUP_TOKEN=ci-$(openssl rand -hex 12)" >> .env.local
+          echo "COMM_WEBHOOK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
 
       - name: Typecheck
         working-directory: apps/academy
