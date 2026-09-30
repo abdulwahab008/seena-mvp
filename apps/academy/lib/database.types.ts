@@ -25557,6 +25557,7 @@ export type Database = {
           p_payload: Json
           p_raw: string
           p_signature_valid: boolean
+          p_tenant_id: string
           p_txn_id: string
         }
         Returns: Json

@@ -4,6 +4,7 @@ import { supabaseServiceRole } from '@/lib/supabase/server';
 import { isGateway, verifySignature } from '@/lib/payments/gateways';
 
 const MAX_BODY_BYTES = 64 * 1024;
+const NIL_UUID = '00000000-0000-0000-0000-000000000000';
 
 const payloadSchema = z.object({
   merchant_id: z.string().min(1).max(100),
@@ -35,19 +36,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ gat
   // Find the merchant's secret by the merchant id the payload CLAIMS; the
   // claim is only ever used to pick which secret to verify against.
   let secret: string | undefined;
+  let tenantId: string | null = null;
   if (parsed.success) {
     const { data: cfg } = await db
       .from('payment_gateway_config')
-      .select('secret_ref, is_enabled')
+      .select('tenant_id, secret_ref, is_enabled')
       .eq('gateway', gateway)
       .eq('merchant_id', parsed.data.merchant_id)
       .maybeSingle();
-    if (cfg?.is_enabled) secret = process.env[cfg.secret_ref];
+    if (cfg?.is_enabled) {
+      secret = process.env[cfg.secret_ref];
+      tenantId = cfg.tenant_id;
+    }
   }
 
   const valid = Boolean(secret) && parsed.success && verifySignature(secret as string, raw, req.headers.get('x-signature'));
 
   const { data, error } = await db.rpc('ingest_payment_webhook', {
+    p_tenant_id: valid && tenantId ? tenantId : NIL_UUID,
     p_gateway: gateway,
     p_txn_id: valid && parsed.success ? parsed.data.gateway_txn_id : '',
     p_payload: valid && parsed.success ? parsed.data : {},

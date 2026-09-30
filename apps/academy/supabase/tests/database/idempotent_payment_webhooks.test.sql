@@ -40,17 +40,17 @@ select :'tenant_id', :'campus_id', e, c, 'jazzcash', r, 500000, now() + interval
 
 select has_table('public', 'payment_webhook_event', 'payment_webhook_event exists');
 select ok((select bool_and(relrowsecurity) from pg_class where oid in ('public.payment_webhook_event'::regclass, 'public.payment_alert'::regclass)), 'RLS on the event and alert tables');
-select is(has_function_privilege('anon', 'public.ingest_payment_webhook(text,text,jsonb,text,boolean)', 'execute'), false, 'anon cannot ingest');
-select is(has_function_privilege('authenticated', 'public.ingest_payment_webhook(text,text,jsonb,text,boolean)', 'execute'), false, 'authenticated cannot ingest');
-select is(has_function_privilege('service_role', 'public.ingest_payment_webhook(text,text,jsonb,text,boolean)', 'execute'), true, 'service_role can ingest');
+select is(has_function_privilege('anon', 'public.ingest_payment_webhook(uuid,text,text,jsonb,text,boolean)', 'execute'), false, 'anon cannot ingest');
+select is(has_function_privilege('authenticated', 'public.ingest_payment_webhook(uuid,text,text,jsonb,text,boolean)', 'execute'), false, 'authenticated cannot ingest');
+select is(has_function_privilege('service_role', 'public.ingest_payment_webhook(uuid,text,text,jsonb,text,boolean)', 'execute'), true, 'service_role can ingest');
 
 -- ── exactly-once ──────────────────────────────────────────────────────────
 
 set local role service_role;
-select public.ingest_payment_webhook('jazzcash', 'T-9001', '{"gateway_ref":"JA-REF-ONE","status":"success","amount_paisa":500000}'::jsonb, '{"t":1}', true) as r1 \gset
-select public.ingest_payment_webhook('jazzcash', 'T-9001', '{"gateway_ref":"JA-REF-ONE","status":"success","amount_paisa":500000}'::jsonb, '{"t":1}', true) as r2 \gset
-select public.ingest_payment_webhook('jazzcash', 'T-9001', '{"gateway_ref":"JA-REF-ONE","status":"success","amount_paisa":500000}'::jsonb, '{"t":1}', true) as r3 \gset
-select public.ingest_payment_webhook('jazzcash', 'T-9001', '{"gateway_ref":"JA-REF-ONE","status":"success","amount_paisa":500000}'::jsonb, '{"t":1}', true) as r4 \gset
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9001', '{"gateway_ref":"JA-REF-ONE","status":"success","amount_paisa":500000}'::jsonb, '{"t":1}', true) as r1 \gset
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9001', '{"gateway_ref":"JA-REF-ONE","status":"success","amount_paisa":500000}'::jsonb, '{"t":1}', true) as r2 \gset
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9001', '{"gateway_ref":"JA-REF-ONE","status":"success","amount_paisa":500000}'::jsonb, '{"t":1}', true) as r3 \gset
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9001', '{"gateway_ref":"JA-REF-ONE","status":"success","amount_paisa":500000}'::jsonb, '{"t":1}', true) as r4 \gset
 reset role;
 select is((:'r1'::jsonb ->> 'result'), 'processed', 'the first valid callback is processed');
 select is(array[(:'r2'::jsonb ->> 'result'), (:'r3'::jsonb ->> 'result'), (:'r4'::jsonb ->> 'result')], array['duplicate', 'duplicate', 'duplicate'], 'AC: callbacks 2-4 are duplicates');
@@ -62,14 +62,14 @@ select is((select status from public.payment_intent where gateway_ref = 'JA-REF-
 -- ── signature failures store the raw body and post nothing ────────────────
 
 set local role service_role;
-select public.ingest_payment_webhook('jazzcash', 'T-9002', '{"gateway_ref":"JA-REF-TWO","status":"success","amount_paisa":500000}'::jsonb, 'FORGED-BODY', false) as r_bad \gset
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9002', '{"gateway_ref":"JA-REF-TWO","status":"success","amount_paisa":500000}'::jsonb, 'FORGED-BODY', false) as r_bad \gset
 reset role;
 select is((:'r_bad'::jsonb ->> 'result'), 'signature_invalid', 'AC: a bad signature is rejected');
 select is((select count(*)::int from public.payment_webhook_event where status = 'signature_invalid' and raw_body = 'FORGED-BODY'), 1, 'AC: the raw body is stored');
 select is((select count(*)::int from public.fee_payment where reference_no = 'T-9002'), 0, 'AC: no payment is posted');
 
 set local role service_role;
-select public.ingest_payment_webhook('jazzcash', 'T-9002', '{"gateway_ref":"JA-REF-TWO","status":"success","amount_paisa":400000}'::jsonb, '{"t":2}', true) as r_short \gset
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9002', '{"gateway_ref":"JA-REF-TWO","status":"success","amount_paisa":400000}'::jsonb, '{"t":2}', true) as r_short \gset
 reset role;
 select is((:'r_short'::jsonb ->> 'result'), 'processed', 'a forged event did not squat the real transaction id');
 
@@ -82,7 +82,7 @@ select is((select count(*)::int from public.payment_alert where tenant_id = :'te
 -- ── orphan: callback before the intent is visible ─────────────────────────
 
 set local role service_role;
-select public.ingest_payment_webhook('jazzcash', 'T-9003', '{"gateway_ref":"JA-LATE-REF","status":"success","amount_paisa":500000}'::jsonb, '{"t":3}', true) as r_orphan \gset
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9003', '{"gateway_ref":"JA-LATE-REF","status":"success","amount_paisa":500000}'::jsonb, '{"t":3}', true) as r_orphan \gset
 reset role;
 select is((:'r_orphan'::jsonb ->> 'result'), 'orphan', 'AC: a callback with no intent yet is kept as an orphan');
 update public.payment_intent set gateway_ref = 'JA-LATE-REF' where gateway_ref = 'JA-REF-THREE';
@@ -98,8 +98,8 @@ insert into public.payment_intent (tenant_id, campus_id, enrolment_id, challan_i
 values (:'tenant_id', :'campus_id', :'e2', :'ch2', 'jazzcash', 'JA-REF-FAIL', 100000, now() + interval '30 minutes', 'initiated'),
        (:'tenant_id', :'campus_id', :'e2', :'ch2', 'jazzcash', 'JA-REF-LATE', 100000, now() - interval '5 minutes', 'expired');
 set local role service_role;
-select public.ingest_payment_webhook('jazzcash', 'T-9004', '{"gateway_ref":"JA-REF-FAIL","status":"failed"}'::jsonb, '{"t":4}', true);
-select public.ingest_payment_webhook('jazzcash', 'T-9005', '{"gateway_ref":"JA-REF-LATE","status":"success","amount_paisa":100000}'::jsonb, '{"t":5}', true);
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9004', '{"gateway_ref":"JA-REF-FAIL","status":"failed"}'::jsonb, '{"t":4}', true);
+select public.ingest_payment_webhook(:'tenant_id'::uuid, 'jazzcash', 'T-9005', '{"gateway_ref":"JA-REF-LATE","status":"success","amount_paisa":100000}'::jsonb, '{"t":5}', true);
 reset role;
 select is((select status from public.payment_intent where gateway_ref = 'JA-REF-FAIL'), 'failed', 'a failed callback fails the intent');
 select is((select count(*)::int from public.fee_payment where reference_no = 'T-9004'), 0, 'and posts no payment');

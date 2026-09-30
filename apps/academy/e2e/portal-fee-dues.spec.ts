@@ -48,7 +48,8 @@ test('parent dues: PDF without a gateway, pay options with one, reconciliation g
   await expect(page.getByTestId(`total-due-${challan.challan_no}`)).toHaveText('PKR 8,600');
 
   // 3. A gateway is configured: Pay buttons appear; 1LINK shows the voucher reference = challan number.
-  await db.from('payment_gateway_config').insert({ tenant_id: tenant, gateway: 'onelink', merchant_id: 'MC-1L', secret_ref: 'PAY_SECRET_ONELINK' });
+  const { error: cfgError } = await db.from('payment_gateway_config').insert({ tenant_id: tenant, gateway: 'onelink', merchant_id: `MC-1L-${randomUUID().slice(0, 8)}`, secret_ref: 'PAY_SECRET_ONELINK' });
+  expect(cfgError).toBeNull();
   await page.goto('/portal/fees');
   await page.getByTestId(`pay-onelink-${challan.challan_no}`).click();
   await expect(page.getByTestId(`voucher-${challan.challan_no}`)).toContainText(challan.challan_no);
