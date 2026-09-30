@@ -3484,6 +3484,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bank_recon_exception_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
+          },
+          {
             foreignKeyName: "bank_recon_exception_import_id_fkey"
             columns: ["import_id"]
             isOneToOne: false
@@ -8104,6 +8111,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fee_challan_line_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
+          },
+          {
             foreignKeyName: "fee_challan_line_fee_head_id_fkey"
             columns: ["fee_head_id"]
             isOneToOne: false
@@ -8144,6 +8158,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_challan"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_pdf_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
           },
         ]
       }
@@ -8395,6 +8416,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fee_ledger_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
+          },
+          {
             foreignKeyName: "fee_ledger_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -8583,6 +8611,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_challan"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_allocation_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
           },
           {
             foreignKeyName: "fee_payment_allocation_fee_head_id_fkey"
@@ -13287,6 +13322,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_challan"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intent_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
           },
           {
             foreignKeyName: "payment_intent_enrolment_id_fkey"
@@ -22121,6 +22163,85 @@ export type Database = {
           },
         ]
       }
+      v_portal_dues: {
+        Row: {
+          allocated_paisa: number | null
+          balance_paisa: number | null
+          billing_period: string | null
+          campus_id: string | null
+          challan_id: string | null
+          challan_no: string | null
+          days_overdue: number | null
+          due_date: string | null
+          enrolment_id: string | null
+          gateways: string[] | null
+          late_fee_paisa: number | null
+          net_paisa: number | null
+          status: Database["public"]["Enums"]["fee_challan_status"] | null
+          student_id: string | null
+          tenant_id: string | null
+          total_due_paisa: number | null
+          under_reconciliation: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_result_position: {
         Row: {
           campus_id: string | null
@@ -25515,6 +25636,10 @@ export type Database = {
         Returns: Json
       }
       join_waitlist: { Args: { p_application_id: string }; Returns: string }
+      late_fee_for: {
+        Args: { p_as_of?: string; p_challan_id: string }
+        Returns: number
+      }
       link_enrolment_promotion: {
         Args: { p_new_enrolment_id: string; p_old_enrolment_id: string }
         Returns: undefined
@@ -25642,6 +25767,7 @@ export type Database = {
         Args: { p_lang?: string; p_version_id: string }
         Returns: string
       }
+      portal_challan_payload: { Args: { p_challan_id: string }; Returns: Json }
       post_ledger_entry: {
         Args: {
           p_amount_paisa: number

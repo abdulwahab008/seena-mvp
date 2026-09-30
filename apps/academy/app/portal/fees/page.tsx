@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChallanActionsClient } from './challan-actions-client';
+import { PayPanel } from './pay-panel';
 
 /**
  * FR-N04: Fee dues view with pay action for parents/guardians.
@@ -105,6 +106,7 @@ export default async function PortalFeesPage({
   const child = children.find((c) => c.enrolmentId === params.enrolment) ?? children[0];
 
   // 2. Fetch challans for the selected child
+  const dues = new Map<string, { balance: number; lateFee: number; total: number; underReconciliation: boolean; gateways: string[] }>();
   let challans: FeeChallan[] = [];
   let linesByChallan: Record<string, { id: string; headName: string; lineType: string; amountPaisa: number; concessionPaisa: number; netPaisa: number }[]> = {};
   let template: { bank_name?: string; bank_account_title?: string; bank_account_no?: string } | null = null;
@@ -117,6 +119,14 @@ export default async function PortalFeesPage({
       .order('due_date', { ascending: false });
 
     challans = (challansData ?? []) as FeeChallan[];
+
+    const { data: duesData } = await supabase
+      .from('v_portal_dues')
+      .select('challan_id, balance_paisa, late_fee_paisa, total_due_paisa, under_reconciliation, gateways')
+      .eq('enrolment_id', child.enrolmentId);
+    for (const d of duesData ?? []) {
+      if (d.challan_id) dues.set(d.challan_id, { balance: Number(d.balance_paisa ?? 0), lateFee: Number(d.late_fee_paisa ?? 0), total: Number(d.total_due_paisa ?? 0), underReconciliation: Boolean(d.under_reconciliation), gateways: d.gateways ?? [] });
+    }
 
     const challanIds = challans.map((c) => c.id);
 
@@ -164,10 +174,10 @@ export default async function PortalFeesPage({
     }
   }
 
-  // Calculate outstanding dues (sum of net_paisa for unpaid or part_paid challans)
+  // Outstanding = what is still owed: principal balance after payments plus accrued late fee.
   const outstandingPaisa = challans
     .filter((c) => c.status === 'unpaid' || c.status === 'part_paid')
-    .reduce((sum, c) => sum + (c.net_paisa || 0), 0);
+    .reduce((sum, c) => sum + (dues.get(c.id)?.total ?? c.net_paisa ?? 0), 0);
 
   const formatPkr = (paisa: number) => {
     return `PKR ${(paisa / 100).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -281,7 +291,7 @@ export default async function PortalFeesPage({
                               className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${cfg.badgeClass}`}
                               data-testid={`challan-status-${challan.challan_no}`}
                             >
-                              {cfg.label}
+                              {dues.get(challan.id)?.underReconciliation ? 'Payment under reconciliation' : cfg.label}
                             </span>
                             {isOverdue && (
                               <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-600 text-white">
@@ -317,6 +327,33 @@ export default async function PortalFeesPage({
                             </span>
                           </div>
                         </div>
+
+                        {challan.status !== 'paid' && dues.get(challan.id) && (
+                          <div className="space-y-1 border-t py-3 text-sm" data-testid={`dues-${challan.challan_no}`}>
+                            <div className="flex justify-between">
+                              <span>Balance</span>
+                              <span data-testid={`balance-${challan.challan_no}`}>{formatPkr(dues.get(challan.id)!.balance)}</span>
+                            </div>
+                            {dues.get(challan.id)!.lateFee > 0 && (
+                              <div className="flex justify-between text-rose-700">
+                                <span>Late fee</span>
+                                <span data-testid={`late-fee-${challan.challan_no}`}>{formatPkr(dues.get(challan.id)!.lateFee)}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between font-semibold">
+                              <span>Total due</span>
+                              <span data-testid={`total-due-${challan.challan_no}`}>{formatPkr(dues.get(challan.id)!.total)}</span>
+                            </div>
+                            <PayPanel
+                              challanId={challan.id}
+                              challanNo={challan.challan_no}
+                              status={challan.status}
+                              balancePaisa={dues.get(challan.id)!.balance}
+                              underReconciliation={dues.get(challan.id)!.underReconciliation}
+                              gateways={dues.get(challan.id)!.gateways}
+                            />
+                          </div>
+                        )}
 
                         {/* Actions */}
                         <div className="pt-2 border-t flex items-center justify-between">

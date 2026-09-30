@@ -37,7 +37,6 @@ type ChallanModalProps = {
 
 export function ChallanActionsClient({ challan }: ChallanModalProps) {
   const [showSlip, setShowSlip] = useState(false);
-  const [showPay, setShowPay] = useState(false);
 
   const formatPkr = (paisa: number) => {
     return `PKR ${(paisa / 100).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -57,17 +56,6 @@ export function ChallanActionsClient({ challan }: ChallanModalProps) {
       >
         View Challan Slip
       </Button>
-
-      {challan.status !== 'paid' && (
-        <Button
-          size="sm"
-          onClick={() => setShowPay(true)}
-          data-testid={`pay-online-${challan.challanNo}`}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white"
-        >
-          Pay Online
-        </Button>
-      )}
 
       {/* Challan Slip Modal */}
       {showSlip && (
@@ -175,63 +163,6 @@ export function ChallanActionsClient({ challan }: ChallanModalProps) {
               </Button>
               <Button size="sm" onClick={() => setShowSlip(false)}>
                 Close
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Pay Online Modal */}
-      {showPay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="relative max-h-[90vh] w-full max-w-md rounded-xl border bg-card p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="text-base font-bold">Pay Fee Online</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowPay(false)}>
-                ✕
-              </Button>
-            </div>
-
-            <div className="mt-4 space-y-4 text-sm">
-              <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/30 p-3 text-center border border-emerald-200 dark:border-emerald-900">
-                <span className="text-xs text-muted-foreground">Amount to Pay</span>
-                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                  {formatPkr(challan.netPaisa)}
-                </div>
-                <span className="text-xs font-medium">Challan No: {challan.challanNo}</span>
-              </div>
-
-              <div className="space-y-3">
-                <div className="rounded-lg border p-3">
-                  <div className="font-semibold text-xs text-primary mb-1">Option 1: 1Link 1Bill Invoice</div>
-                  <p className="text-xs text-muted-foreground">
-                    Pay through your mobile banking app (HBL, Meezan, Alfalah, etc.) using 1Bill Invoice / Voucher.
-                  </p>
-                  <div className="mt-2 flex items-center justify-between bg-muted p-2 rounded text-xs font-mono">
-                    <span>Biller Code / ID:</span>
-                    <span className="font-bold">{challan.challanNo.replace(/[^0-9]/g, '') || '1004829381'}</span>
-                  </div>
-                </div>
-
-                <div className="rounded-lg border p-3">
-                  <div className="font-semibold text-xs text-primary mb-1">Option 2: JazzCash &amp; EasyPaisa</div>
-                  <p className="text-xs text-muted-foreground">
-                    Go to Payments &rarr; School &amp; Education &rarr; Search &ldquo;Seena Academy&rdquo; &rarr; Enter Challan No.
-                  </p>
-                </div>
-
-                <div className="rounded-lg border p-3">
-                  <div className="font-semibold text-xs text-primary mb-1">Option 3: Bank Counter Deposit</div>
-                  <p className="text-xs text-muted-foreground">
-                    Visit any branch of {challan.bankName || 'Askari Bank'} with your printed challan slip and deposit cash directly.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <Button size="sm" onClick={() => setShowPay(false)}>
-                Understood
               </Button>
             </div>
           </div>

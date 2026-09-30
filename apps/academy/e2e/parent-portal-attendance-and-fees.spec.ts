@@ -174,11 +174,5 @@ test.describe('FR-N03 & FR-N04: Parent Portal Attendance and Fees', () => {
     await expect(page.locator('[data-testid="challan-slip-modal"]')).toContainText('PKR 6,000');
     await page.click('[data-testid="btn-close-challan-slip"]');
 
-    // Open Pay Online Modal
-    await page.click('[data-testid="btn-pay-online-CH-PORTAL-E2E-1"]');
-    await expect(page.locator('[data-testid="pay-online-modal"]')).toBeVisible();
-    await expect(page.locator('[data-testid="pay-online-modal"]')).toContainText('CH-PORTAL-E2E-1');
-    await expect(page.locator('[data-testid="pay-online-modal"]')).toContainText('1Link / 1Bill');
-    await page.click('[data-testid="btn-close-pay-online"]');
   });
 });

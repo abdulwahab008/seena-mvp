@@ -46,14 +46,15 @@ export async function initiatePayment(input: z.input<typeof inputSchema>): Promi
     .eq('gateway', parsed.data.gateway)
     .maybeSingle();
   const secret = cfg ? process.env[cfg.secret_ref] : undefined;
-  if (!cfg || !secret) return { error: 'This payment method is not available right now.' };
+  // A 1LINK voucher is just the challan number — it needs no signing secret.
+  if (!cfg || (parsed.data.gateway !== 'onelink' && !secret)) return { error: 'This payment method is not available right now.' };
 
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${(await headers()).get('host') ?? 'localhost'}`;
   const checkout = buildCheckout({
     gateway: parsed.data.gateway,
     baseUrl: process.env[`PAYMENT_CHECKOUT_URL_${parsed.data.gateway.toUpperCase()}`],
     merchantId: cfg.merchant_id,
-    secret,
+    secret: secret ?? '',
     intent: intent.data,
     returnUrl: `${origin}/portal/fees`,
   });

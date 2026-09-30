@@ -44,5 +44,5 @@ export async function seedFeesTenant(students: number, label: string) {
   const now = new Date();
   must(await owner$.rpc('generate_challans', { p_campus_id: campus!.id, p_session_id: session!.id, p_period: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 15)).toISOString().slice(0, 10), p_dry_run: false }), 'challans');
   const { data: challans } = await db.from('fee_challan').select('id, challan_no, enrolment_id').in('enrolment_id', enrolIds);
-  return { db, email, tenant, campusId: campus!.id as string, challans: challans ?? [] };
+  return { db, owner$, email, tenant, campusId: campus!.id as string, challans: challans ?? [] };
 }
