@@ -3,13 +3,7 @@
 -- Module M: Communication — FR-M09: Delivery receipt ingestion
 -- ══════════════════════════════════════════════════════════════════════════════
 
--- 1. Extend enums for attempt and message statuses if missing
-alter type public.attempt_status add value if not exists 'submitted';
-alter type public.attempt_status add value if not exists 'expired';
-
-alter type public.message_status add value if not exists 'submitted';
-alter type public.message_status add value if not exists 'expired';
-alter type public.message_status add value if not exists 'sent';
+-- 1. Enum values: see 20260801425000_delivery_receipt_enum_values.sql
 
 -- 2. Delivery receipts audit table
 create table if not exists public.message_receipt (

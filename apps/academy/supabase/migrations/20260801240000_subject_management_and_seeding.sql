@@ -107,8 +107,10 @@ grant execute on function public.update_subject(
 ) to authenticated;
 
 -- 4. Seed standard school subjects for Seena Model School & College
+-- Guarded on the tenant existing: a fresh database (db reset, CI) has no such tenant.
 insert into public.subject (tenant_id, code, name_en, name_ur, subject_type, is_examinable, default_max_marks)
-values
+select v.tenant_id::uuid, v.code, v.name_en, v.name_ur, v.subject_type::public.subject_type, v.is_examinable, v.default_max_marks
+from (values
   ('d02148d8-395a-4c3d-8bce-e948547adb05', 'ENG', 'English', 'English', 'CORE', true, 100),
   ('d02148d8-395a-4c3d-8bce-e948547adb05', 'URD', 'Urdu', 'Urdu', 'CORE', true, 100),
   ('d02148d8-395a-4c3d-8bce-e948547adb05', 'MTH', 'Mathematics', 'Mathematics', 'CORE', true, 100),
@@ -122,4 +124,6 @@ values
   ('d02148d8-395a-4c3d-8bce-e948547adb05', 'TQR', 'Tarjuma-tul-Quran', 'Tarjuma-tul-Quran', 'CORE', true, 50),
   ('d02148d8-395a-4c3d-8bce-e948547adb05', 'SST', 'Social Studies', 'Social Studies', 'CORE', true, 75),
   ('d02148d8-395a-4c3d-8bce-e948547adb05', 'ART', 'Art & Drawing', 'Art & Drawing', 'NON_EXAMINABLE', false, null)
+) as v(tenant_id, code, name_en, name_ur, subject_type, is_examinable, default_max_marks)
+where exists (select 1 from public.tenant t where t.id = v.tenant_id::uuid)
 on conflict (tenant_id, code) do nothing;
