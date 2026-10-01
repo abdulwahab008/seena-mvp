@@ -212,6 +212,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Boxes,
     items: [
       { href: '/inventory', label: 'Stores and Stock' },
+      { href: '/inventory/sales', label: 'Counter Sales' },
     ],
   },
   {
