@@ -10,6 +10,7 @@ const PORTAL_LINKS: { href: string; key: MessageKey }[] = [
   { href: '/portal/homework', key: 'nav.homework' },
   { href: '/portal/timetable', key: 'nav.timetable' },
   { href: '/portal/results', key: 'nav.results' },
+  { href: '/portal/datesheet', key: 'nav.datesheet' },
   { href: '/portal/consent', key: 'nav.consent' },
   { href: '/portal/circulars', key: 'nav.circulars' },
   { href: '/portal/calendar', key: 'nav.calendar' },
