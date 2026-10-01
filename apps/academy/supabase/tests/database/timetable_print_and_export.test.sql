@@ -9,7 +9,7 @@
 -- to contain for that scope, who can read the job afterwards, and the
 -- 30-day purge.
 begin;
-select plan(34);
+select plan(37);
 
 select public.provision_tenant('test-ttexport-co', 'TT Export Co', 'owner@ttexport.test');
 select id as tenant_id from public.tenant where slug = 'test-ttexport-co' \gset
@@ -293,7 +293,11 @@ select is(
 
 -- ── 30-day purge ───────────────────────────────────────────────────────
 
-update public.timetable_export_job set requested_at = now() - interval '40 days' where id = :'owner_job_id';
+update public.timetable_export_job
+   set requested_at = now() - interval '40 days',
+       file_path = :'campus_id' || '/' || :'owner_job_id' || '/purge-me.pdf'
+ where id = :'owner_job_id';
+insert into storage.objects (bucket_id, name) values ('timetable-exports', :'campus_id' || '/' || :'owner_job_id' || '/purge-me.pdf');
 
 set local role authenticated;
 select set_config(
@@ -321,6 +325,25 @@ select is(
   (select count(*)::int from public.timetable_export_job where id = :'ayesha_job_id'),
   1,
   'and leaves a job requested today alone'
+);
+
+reset role;
+select is(
+  (select count(*)::int from public.storage_delete_queue
+    where bucket = 'timetable-exports' and path = :'campus_id' || '/' || :'owner_job_id' || '/purge-me.pdf' and done_at is null),
+  1,
+  'the purge queues the export blob for deletion through the Storage API'
+);
+select is(
+  (select count(*)::int from storage.objects
+    where bucket_id = 'timetable-exports' and name = :'campus_id' || '/' || :'owner_job_id' || '/purge-me.pdf'),
+  1,
+  'and never deletes storage.objects rows directly (blocked on current Supabase)'
+);
+select is(
+  (select count(*)::int from public.timetable_export_job where id = :'owner_job_id'),
+  0,
+  'and the job row itself is gone'
 );
 
 select * from finish();
