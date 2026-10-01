@@ -2757,3 +2757,65 @@ export const boardExamExportSchema = z.object({
   sessionYear: z.number({ message: 'Enter the session year' }).int().min(2000).max(2100),
 });
 export type BoardExamExportInput = z.infer<typeof boardExamExportSchema>;
+// FR-O01: library title catalogue.
+export const LIBRARY_LANGUAGES = ['en', 'ur', 'ar', 'pa', 'sd', 'other'] as const;
+export const libraryTitleSchema = z.object({
+  title: z.string().trim().min(1, 'Enter the title').max(300, 'At most 300 characters'),
+  titleUr: z.string().trim().max(300, 'At most 300 characters').optional(),
+  rawIsbn: z.string().trim().max(20, 'At most 20 characters').optional(),
+  author: z.string().trim().max(200, 'At most 200 characters').optional(),
+  publisher: z.string().trim().max(200, 'At most 200 characters').optional(),
+  edition: z.string().trim().max(50, 'At most 50 characters').optional(),
+  language: z.enum(LIBRARY_LANGUAGES).default('en'),
+  dewey: z.string().trim().regex(/^([0-9]{1,3}(\.[0-9]+)?)?$/, 'Dewey class looks like 297 or 954.91').optional(),
+  subjectId: z.string().uuid().optional().or(z.literal('')),
+});
+export type LibraryTitleInput = z.input<typeof libraryTitleSchema>;
+
+// FR-O02: library copy register.
+export const libraryCopySchema = z.object({
+  titleId: z.string().uuid('Choose a title'),
+  campusId: z.string().uuid('Choose a campus'),
+  accessionNo: z.string().trim().min(1, 'Enter the accession number').max(50, 'At most 50 characters'),
+  barcode: z.string().trim().min(1, 'Enter the barcode').max(50, 'At most 50 characters'),
+  shelf: z.string().trim().max(50, 'At most 50 characters').optional(),
+  purchaseCostPkr: z
+    .string()
+    .trim()
+    .regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter the cost in PKR, for example 850 or 850.50')
+    .optional(),
+  acquiredOn: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, 'Choose a date').optional(),
+});
+export type LibraryCopyInput = z.input<typeof libraryCopySchema>;
+
+// FR-O03: borrowing policy. Money fields are entered in PKR and converted to paisa on the server.
+const pkrField = z.string().trim().regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter an amount in PKR, for example 5 or 7.50');
+export const LIBRARY_BORROWER_ROLES = ['student', 'teacher', 'staff'] as const;
+export const libraryPolicySchema = z.object({
+  role: z.enum(LIBRARY_BORROWER_ROLES),
+  campusId: z.string().uuid().optional().or(z.literal('')),
+  bandFrom: z.string().regex(/^\d{0,2}$/, 'Choose a class').optional(),
+  bandTo: z.string().regex(/^\d{0,2}$/, 'Choose a class').optional(),
+  maxLoans: z.number({ message: 'Enter the loan limit' }).int('Whole numbers only').min(0).max(100),
+  loanDays: z.number({ message: 'Enter the loan period' }).int('Whole days only').min(1, 'At least 1 day').max(365),
+  maxRenewals: z.number({ message: 'Enter the renewal limit' }).int('Whole numbers only').min(0).max(20),
+  finePerDayPkr: pkrField,
+  fineCapPkr: pkrField.optional(),
+  blockThresholdPkr: pkrField.optional(),
+  countWorkingDaysOnly: z.boolean().default(false),
+  effectiveFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the date it takes effect'),
+});
+export type LibraryPolicyInput = z.input<typeof libraryPolicySchema>;
+
+// FR-O08: lost copy write-off.
+export const LIBRARY_WRITE_OFF_BASES = ['multiple', 'purchase_cost', 'market'] as const;
+export const libraryWriteOffSchema = z
+  .object({
+    barcode: z.string().trim().min(1, 'Scan or type the barcode'),
+    basis: z.enum(LIBRARY_WRITE_OFF_BASES),
+    multiplier: z.string().trim().regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter a multiplier such as 1.5').optional(),
+    marketValuePkr: z.string().trim().regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter the value in PKR').optional(),
+    reason: z.string().trim().max(300, 'At most 300 characters').optional(),
+  })
+  .refine((v) => v.basis !== 'market' || !!v.marketValuePkr, { message: 'Enter the market value for this basis', path: ['marketValuePkr'] });
+export type LibraryWriteOffInput = z.input<typeof libraryWriteOffSchema>;
