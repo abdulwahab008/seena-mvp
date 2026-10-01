@@ -13,6 +13,7 @@ export default async function RoomsPage({
   searchParams?: Promise<{ campus_id?: string }>;
 }) {
   const resolvedParams: { campus_id?: string } = (await searchParams) ?? {};
+  const resolvedParams = searchParams ? await searchParams : {};
   const supabase = await supabaseServer();
 
   // Role check

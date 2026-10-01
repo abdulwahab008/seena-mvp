@@ -54,7 +54,7 @@ test('a class teacher writes remarks with the library, the 250 cap and apply-to-
 
   // Apply one remark to the three that are left.
   for (const i of [2, 3, 4]) await page.getByTestId('remark-row').nth(i).getByRole('checkbox').check();
-  await page.getByLabel('Remark for the selection').fill('A satisfactory term. Keep working steadily.');
+  await page.getByLabel('Remark for the selection', { exact: true }).fill('A satisfactory term. Keep working steadily.');
   await page.getByTestId('apply-selected').click();
   await expect(page.getByTestId('missing-count')).toHaveText('0');
 
