@@ -17,7 +17,7 @@ export function ModerationForm({ examSubjectId, sectionId, cap }: { examSubjectI
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ affected: number; capped: ModerationCapped[] } | null>(null);
   const form = useForm<ModerationInput>({ resolver: zodResolver(moderationSchema), defaultValues: { examSubjectId, sectionId, delta: 4, reason: '' } });
-  const onSubmit = form.handleSubmit((v) =>
+  const submit = form.handleSubmit((v) =>
     startTransition(async () => {
       const r = await applyModeration(v);
       setError(r.error);
@@ -30,6 +30,12 @@ export function ModerationForm({ examSubjectId, sectionId, cap }: { examSubjectI
       }
     }),
   );
+  // A new attempt starts clean: otherwise the previous refusal from the server (still in state) would mask
+  // the validation message for what was just typed, because an invalid form never reaches the server call.
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    setError(null);
+    return submit(e);
+  };
   const firstError = Object.values(form.formState.errors)[0]?.message as string | undefined;
   return (
     <form onSubmit={onSubmit} className="space-y-3" noValidate>
@@ -80,7 +86,7 @@ export function ReverseForm({ moderationId }: { moderationId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const form = useForm<ReverseModerationInput>({ resolver: zodResolver(reverseModerationSchema), defaultValues: { moderationId, reason: '' } });
-  const onSubmit = form.handleSubmit((v) =>
+  const submit = form.handleSubmit((v) =>
     startTransition(async () => {
       const r = await reverseModeration(v);
       setError(r.error);
@@ -91,6 +97,11 @@ export function ReverseForm({ moderationId }: { moderationId: string }) {
       }
     }),
   );
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    setError(null);
+    setNotice(null);
+    return submit(e);
+  };
   const firstError = Object.values(form.formState.errors)[0]?.message as string | undefined;
   return (
     <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3" noValidate>
