@@ -266,6 +266,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/reports/exports', label: 'Excel Exports' },
       { href: '/reports/audit', label: 'Export Audit' },
+      { href: '/reports/digests', label: 'Scheduled Digests' },
     ],
   },
 ];

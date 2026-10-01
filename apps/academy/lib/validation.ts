@@ -2253,3 +2253,14 @@ export const drilldownExportSchema = z.object({
   onDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 export type DrilldownExportInput = z.infer<typeof drilldownExportSchema>;
+
+// FR-S05: report digest subscription.
+export const digestSubscriptionSchema = z.object({
+  reportKey: z.string().min(1, 'Choose a report'),
+  cadence: z.enum(['daily', 'weekly', 'monthly']),
+  runAtLocal: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Enter a time like 20:00'),
+  channel: z.enum(['email', 'sms', 'whatsapp', 'in_app']),
+  timezone: z.string().trim().min(1).max(64).default('Asia/Karachi'),
+  languageCode: z.string().regex(/^[a-z]{2}(_[A-Z]{2})?$/, 'Use a code like en or ur').default('en'),
+});
+export type DigestSubscriptionInput = z.input<typeof digestSubscriptionSchema>;
