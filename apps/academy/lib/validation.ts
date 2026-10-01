@@ -2296,13 +2296,13 @@ export const varianceAckSchema = z.object({
 export type VarianceAckInput = z.infer<typeof varianceAckSchema>;
 
 // FR-H09: syllabus scope for a generated exam paper.
-export const paperRequestSchema = z.object({
+export const paperScopeRequestSchema = z.object({
   title: z.string().trim().min(1, 'Enter a title for the paper').max(200),
   unitIds: z.array(z.string().uuid()).min(1, 'Select at least one chapter').max(100),
   sectionId: z.string().uuid().optional().or(z.literal('')),
   untaughtOverride: z.boolean().optional(),
 });
-export type PaperRequestInput = z.input<typeof paperRequestSchema>;
+export type PaperRequestInput = z.input<typeof paperScopeRequestSchema>;
 
 // FR-N11: PTM events and slots.
 export const ptmEventSchema = z.object({
@@ -2717,7 +2717,6 @@ export const masterySheetSchema = z.object({ enrolmentId: z.string().uuid() });
 // FR-T12: board examination form export and fee reconciliation. Mirrors
 // supabase/migrations/20260802400700_board_exam_form_export.sql. Money is paisa;
 // the form takes rupees and converts once, here.
-export const BOARD_CODES = ['FBISE', 'PUNJAB', 'SINDH', 'KPK', 'BALOCHISTAN', 'AKU_EB', 'CAMBRIDGE'] as const;
 export const CANDIDATE_CATEGORIES = ['regular', 'improvement', 'private'] as const;
 export const REGISTRATION_ELECTIONS = ['compulsory', 'elective', 'improvement'] as const;
 export const boardFeeScheduleSchema = z
