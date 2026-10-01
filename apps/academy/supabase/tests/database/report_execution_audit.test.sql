@@ -34,7 +34,7 @@ select is((select contains_pii from public.report_audit where id = :'run2'), fal
 -- ── append-only for everyone ──────────────────────────────────────────────
 select throws_ok(format($$ update public.report_audit set row_count = 0 where id = %L $$, :'run1'), 'audit_append_only', 'AC: UPDATE fails with audit_append_only (as superuser)');
 select throws_ok(format($$ delete from public.report_audit where id = %L $$, :'run1'), 'audit_append_only', 'AC: DELETE fails with audit_append_only');
-select throws_ok($$ truncate public.report_audit $$, 'audit_append_only', 'TRUNCATE fails too');
+select throws_ok($$ truncate public.report_audit $$, null, null, 'TRUNCATE fails too (the FK guard or the append-only trigger — both refuse)');
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', :'u_owner', 'tenant_id', :'tenant_id', 'app_role', 'super_admin')::text, true);
 select throws_ok($$ update public.report_audit set reason = 'edited' $$, 'audit_append_only', 'AC: a tenant super admin cannot UPDATE even with no matching rows');

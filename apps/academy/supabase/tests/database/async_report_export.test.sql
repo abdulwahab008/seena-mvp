@@ -11,6 +11,8 @@ insert into public.campus (tenant_id, code, name) values (:'tenant_id', 'B', 'Ca
 select public.provision_tenant('test-export-other', 'Other Export Co', 'owner@otherexportco.test');
 select id as other_tenant_id from public.tenant where slug = 'test-export-other' \gset
 
+-- The queue is global: park anything another run left behind so only this test's jobs are claimable.
+update public.report_export_job set status = 'failed', attempts = 3 where status in ('queued', 'running');
 select gen_random_uuid() as principal \gset
 select gen_random_uuid() as accountant \gset
 insert into auth.users (id, email, aud, role, encrypted_password) values (:'principal', 'p@exportco.test', 'authenticated', 'authenticated', 'x'), (:'accountant', 'a@exportco.test', 'authenticated', 'authenticated', 'x');
@@ -102,7 +104,7 @@ select is((select count(*)::int from public.report_export_job), 0, 'another scho
 reset role;
 
 set local role service_role;
-select public.fail_export_job((select id from public.report_export_job where status = 'running'), 'renderer crashed');
+select public.fail_export_job((select id from public.report_export_job where tenant_id = :'tenant_id' and status = 'running'), 'renderer crashed');
 reset role;
 select is((select status from public.report_export_job where error = 'renderer crashed'), 'queued', 'a first failure goes back to the queue for a retry');
 update public.report_export_job set attempts = 3, status = 'running' where error = 'renderer crashed';
