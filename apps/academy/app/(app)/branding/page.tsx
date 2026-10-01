@@ -1,10 +1,11 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { BrandingList } from './branding-list';
+import { AddressForm } from './address-form';
 
 export default async function BrandingPage() {
   const supabase = await supabaseServer();
 
-  const [{ data: campuses }, { data: assets }, { data: theme }] = await Promise.all([
+  const [{ data: campuses }, { data: assets }, { data: theme }, { data: addresses }] = await Promise.all([
     supabase.from('campus').select('id, code, name').eq('status', 'active').order('code'),
     supabase
       .from('branding_asset')
@@ -12,6 +13,7 @@ export default async function BrandingPage() {
       .eq('is_current', true)
       .order('asset_type'),
     supabase.from('tenant_theme').select('primary_hex, secondary_hex').maybeSingle(),
+    supabase.from('campus_branding').select('campus_id, address_en, address_ur'),
   ]);
 
   return (
@@ -34,6 +36,9 @@ export default async function BrandingPage() {
         campuses={(campuses ?? []).map((c) => ({ id: c.id, name: c.name }))}
         primaryHex={theme?.primary_hex ?? null}
         secondaryHex={theme?.secondary_hex ?? null}
+      />
+      <AddressForm
+        campuses={(campuses ?? []).map((c) => ({ id: c.id, name: c.name, addressEn: addresses?.find((a) => a.campus_id === c.id)?.address_en ?? '', addressUr: addresses?.find((a) => a.campus_id === c.id)?.address_ur ?? '' }))}
       />
     </div>
   );

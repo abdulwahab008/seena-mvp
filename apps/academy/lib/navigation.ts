@@ -298,6 +298,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: ShieldCheck,
     items: [
       { href: '/audit-export', label: 'Audit Trail Export' },
+      { href: '/compliance/census', label: 'Census & EMIS Returns' },
       { href: '/impersonation', label: 'Support Access' },
     ],
   },
@@ -344,6 +345,8 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/branding', label: 'Branding' },
       { href: '/roles', label: 'Roles' },
       { href: '/feature-flags', label: 'Modules' },
+      { href: '/settings/data-export', label: 'Export School Data' },
+      { href: '/settings/retention', label: 'Data Retention' },
     ],
   },
   {
@@ -353,6 +356,9 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/reports/exports', label: 'Excel Exports' },
       { href: '/reports/audit', label: 'Export Audit' },
+      { href: '/reports/digests', label: 'Scheduled Digests' },
+      { href: '/reports/year-on-year', label: 'Year on Year' },
+      { href: '/reports/builder', label: 'Report Builder' },
     ],
   },
 ];

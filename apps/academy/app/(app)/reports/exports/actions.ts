@@ -39,7 +39,8 @@ export async function requestExport(input: ExportRequestInput): Promise<RequestE
 
   const h = await headers();
   const supabase = await supabaseServer();
-  const { data, error } = await supabase.rpc('request_report_export', {
+  const rpcName = parsed.data.format === 'pdf' ? 'request_report_pdf' : 'request_report_export';
+  const { data, error } = await supabase.rpc(rpcName, {
     p_dataset_key: parsed.data.datasetKey,
     p_params: params,
     p_reason: parsed.data.reason || undefined,

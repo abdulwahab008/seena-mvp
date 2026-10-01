@@ -2077,6 +2077,8 @@ export const exportRequestSchema = z.object({
   bucket: z.enum(['1-30', '31-60', '61-90', '90+']).optional(),
   hideHardship: z.boolean().optional(),
   reason: z.string().trim().max(500).optional(),
+  // FR-S09: the same dataset, printed as a branded PDF instead of a workbook.
+  format: z.enum(['xlsx', 'pdf']).optional(),
 });
 export type ExportRequestInput = z.infer<typeof exportRequestSchema>;
 
@@ -3218,3 +3220,85 @@ export const assetDisposalSchema = z.object({
   proceedsPkr: z.coerce.number({ message: 'Enter the proceeds' }).min(0).default(0),
   writeOff: z.boolean().default(false),
 });
+// FR-S04: KPI drill-down export. The filters on screen are the filters exported.
+export const drilldownExportSchema = z.object({
+  metric: z.enum(['outstanding', 'absentees', 'staff_cost']),
+  campusId: z.string().uuid().optional(),
+  bucket: z.enum(['0_30', '31_60', '60_plus']).optional(),
+  onDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+});
+export type DrilldownExportInput = z.infer<typeof drilldownExportSchema>;
+
+// FR-S05: report digest subscription.
+export const digestSubscriptionSchema = z.object({
+  reportKey: z.string().min(1, 'Choose a report'),
+  cadence: z.enum(['daily', 'weekly', 'monthly']),
+  runAtLocal: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Enter a time like 20:00'),
+  channel: z.enum(['email', 'sms', 'whatsapp', 'in_app']),
+  timezone: z.string().trim().min(1).max(64).default('Asia/Karachi'),
+  languageCode: z.string().regex(/^[a-z]{2}(_[A-Z]{2})?$/, 'Use a code like en or ur').default('en'),
+});
+export type DigestSubscriptionInput = z.input<typeof digestSubscriptionSchema>;
+
+// FR-S09: campus address printed on report letterhead.
+export const campusAddressSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  addressEn: z.string().trim().max(300, 'At most 300 characters').optional(),
+  addressUr: z.string().trim().max(300, 'At most 300 characters').optional(),
+});
+export type CampusAddressInput = z.infer<typeof campusAddressSchema>;
+
+// FR-S10: year-on-year comparison filters (query string).
+export const yoyQuerySchema = z.object({
+  metric: z.enum(['fees_collected', 'enrolment', 'outstanding', 'collection_rate', 'attendance_rate', 'staff_cost_ratio']).catch('fees_collected'),
+  current: z.string().uuid().optional().catch(undefined),
+  prior: z.string().uuid().optional().catch(undefined),
+  campus: z.string().uuid().optional().catch(undefined),
+});
+export type YoyQuery = z.infer<typeof yoyQuerySchema>;
+
+// FR-S07: custom report builder. The definition is data; the server assembles the SQL
+// from its own column whitelist, so nothing here is ever executed as written.
+export const REPORT_FILTER_OPS = ['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'in', 'is_null', 'not_null'] as const;
+export const reportFilterSchema = z.object({
+  column: z.string().min(1, 'Choose a column'),
+  op: z.enum(REPORT_FILTER_OPS),
+  value: z.string().trim().max(200).optional(),
+});
+export const reportDefinitionSchema = z.object({
+  columns: z.array(z.string()).default([]),
+  filters: z.array(reportFilterSchema).max(10, 'At most 10 filters').default([]),
+  groupBy: z.array(z.string()).max(3, 'Group by at most 3 columns').default([]),
+});
+export type ReportDefinitionInput = z.input<typeof reportDefinitionSchema>;
+export const saveReportSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Name the report').max(120),
+    datasetKey: z.string().min(1, 'Choose a dataset'),
+    definition: reportDefinitionSchema,
+    isShared: z.boolean().default(false),
+    id: z.string().uuid().optional(),
+  })
+  .refine((v) => v.definition.groupBy.length > 0 || v.definition.columns.length > 0, { path: ['definition', 'columns'], message: 'Choose at least one column' });
+export type SaveReportInput = z.input<typeof saveReportSchema>;
+export const exportSavedReportSchema = z.object({
+  id: z.string().uuid(),
+  format: z.enum(['xlsx', 'pdf']),
+  reason: z.string().trim().max(500).optional(),
+});
+export type ExportSavedReportInput = z.infer<typeof exportSavedReportSchema>;
+
+// FR-T13: generate a government census / EMIS return as of a census date.
+export const generateCensusSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  framework: z.enum(['punjab_emis', 'sindh_emis', 'kpk_emis', 'pmiu', 'federal']),
+  censusDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the census date'),
+});
+export type GenerateCensusInput = z.infer<typeof generateCensusSchema>;
+
+// FR-T16: retention policy years per data category (Super Admin).
+export const retentionPolicySchema = z.object({
+  category: z.enum(['student_identity', 'student_name_gr', 'guardian_contact', 'fee_ledger']),
+  years: z.number({ message: 'Enter the number of years' }).int('Whole years only').min(1, 'At least 1 year').max(50, 'At most 50 years'),
+});
+export type RetentionPolicyInput = z.infer<typeof retentionPolicySchema>;
