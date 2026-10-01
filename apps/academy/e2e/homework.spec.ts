@@ -174,7 +174,9 @@ test('a teacher publishes homework and a parent sees it live in the portal feed,
   await teacherPage.getByLabel('Due date').fill(pastDue);
   await teacherPage.getByLabel('Publish now').check();
   await teacherPage.getByRole('button', { name: 'Publish homework' }).click();
-  await expect(teacherPage.getByText('Homework published.')).toBeVisible();
+  // Sonner stacks toasts, so wait for the new row (rendered after the form reset) rather
+  // than a toast an earlier step may have left on screen.
+  await expect(teacherPage.getByText('Overdue lab report (Chemistry)')).toBeVisible();
 
   // Pending item, published immediately too.
   await teacherPage.getByLabel('Title').fill('Chapter 3 exercises');
@@ -182,14 +184,15 @@ test('a teacher publishes homework and a parent sees it live in the portal feed,
   await teacherPage.getByLabel('Due date').fill(futureDue);
   await teacherPage.getByLabel('Publish now').check();
   await teacherPage.getByRole('button', { name: 'Publish homework' }).click();
-  await expect(teacherPage.getByText('Homework published.')).toBeVisible();
+  await expect(teacherPage.getByText('Chapter 3 exercises (Chemistry)')).toBeVisible();
 
   // A still-draft item — must never reach the parent feed.
   await teacherPage.getByLabel('Title').fill('Not ready yet');
   await teacherPage.getByLabel('Assigned date').fill(today);
   await teacherPage.getByLabel('Due date').fill(futureDue);
   await teacherPage.getByRole('button', { name: 'Save as draft' }).click();
-  await expect(teacherPage.getByText('Homework saved as draft.')).toBeVisible();
+  await expect(teacherPage.getByText('Homework saved as draft.').last()).toBeVisible();
+  await expect(teacherPage.getByText('Not ready yet (Chemistry)')).toBeVisible();
 
   // Guardian, in a third context, opens the portal feed.
   const guardianContext = await browser.newContext();
