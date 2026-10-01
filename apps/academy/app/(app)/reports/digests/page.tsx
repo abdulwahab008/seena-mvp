@@ -8,12 +8,14 @@ const STATUS_LABEL: Record<string, string> = { pending: 'queued', sent: 'sent', 
 
 export default async function DigestsPage() {
   const supabase = await supabaseServer();
-  const [reportsRes, subsRes] = await Promise.all([
+  const [reportsRes, subsRes, templatesRes] = await Promise.all([
     supabase.from('digest_report').select('report_key, display_name, allowed_roles').order('display_name'),
     supabase.from('v_report_subscription_status').select('*').order('run_at_local'),
+    supabase.from('wa_template').select('id, meta_template_name, language, status, variable_count, report_key').not('report_key', 'is', null).order('meta_template_name'),
   ]);
   const reports = (reportsRes.data ?? []).map((r) => ({ key: r.report_key, label: r.display_name }));
   const subs = subsRes.data ?? [];
+  const templates = templatesRes.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -28,6 +30,20 @@ export default async function DigestsPage() {
         </CardHeader>
         <CardContent>
           <SubscribeForm reports={reports} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">WhatsApp templates available to digests</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1 text-sm" data-testid="wa-templates">
+          {templates.length === 0 && <p className="text-muted-foreground">No WhatsApp template is registered for digests, so WhatsApp cannot be chosen yet. SMS, email and in-app delivery still work.</p>}
+          {templates.map((t) => (
+            <p key={t.id}>
+              <strong>{t.meta_template_name}</strong> ({t.language}) · {t.variable_count} variables · <Badge variant={t.status === 'APPROVED' ? 'success' : 'outline'}>{t.status.toLowerCase()}</Badge>
+            </p>
+          ))}
         </CardContent>
       </Card>
 
@@ -53,6 +69,7 @@ export default async function DigestsPage() {
                   Last: {STATUS_LABEL[s.last_status] ?? s.last_status}
                   {s.last_scheduled_for ? ` for ${new Date(s.last_scheduled_for).toLocaleString('en-PK', { timeZone: s.timezone ?? 'Asia/Karachi' })}` : ''}
                   {s.last_attempt_no && s.last_attempt_no > 1 ? ` (attempt ${s.last_attempt_no})` : ''}
+                  {s.last_was_fallback && s.last_channel_used ? ` — sent by ${CHANNEL[s.last_channel_used] ?? s.last_channel_used} because WhatsApp could not deliver` : ''}
                 </p>
               )}
               {s.last_status === 'failed' && s.last_error && (

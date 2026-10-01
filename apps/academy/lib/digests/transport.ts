@@ -47,11 +47,24 @@ export class DevTransport implements DigestTransport {
   }
 }
 
-export function transportFor(env: Record<string, string | undefined> = process.env): DigestTransport {
-  // Real providers register here. Credentials come from the environment or the
-  // database vault on the server only; none are read for the dev transport.
+/** Routes by channel: a dedicated transport per channel, everything else to the fallback. */
+export class CompositeTransport implements DigestTransport {
+  readonly name = 'composite';
+  constructor(
+    private readonly byChannel: Partial<Record<DigestChannel, DigestTransport>>,
+    private readonly fallback: DigestTransport,
+  ) {}
+  send(message: DigestMessage): Promise<SendResult> {
+    return (this.byChannel[message.channel] ?? this.fallback).send(message);
+  }
+}
+
+export function transportFor(env: Record<string, string | undefined> = process.env, whatsapp?: DigestTransport): DigestTransport {
+  // Real providers register here. Credentials come from the server environment or
+  // the database vault; none are read for the dev transport.
   if (env.DIGEST_TRANSPORT && env.DIGEST_TRANSPORT !== 'dev') {
     throw new Error(`Unknown DIGEST_TRANSPORT "${env.DIGEST_TRANSPORT}": only "dev" is built in; add a provider adapter implementing DigestTransport.`);
   }
-  return new DevTransport();
+  const dev = new DevTransport();
+  return whatsapp ? new CompositeTransport({ whatsapp }, dev) : dev;
 }
