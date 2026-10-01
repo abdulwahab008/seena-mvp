@@ -22,6 +22,16 @@ export async function refreshVariance(campusId: string): Promise<Result> {
   return { error: null };
 }
 
+// FR-H13: whether parents of this campus may see which chapters are covered.
+export async function setParentSyllabusVisibility(campusId: string, enabled: boolean): Promise<Result> {
+  if (!z.string().uuid().safeParse(campusId).success) return { error: 'Invalid campus.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_campus_feature_flag', { p_campus_id: campusId, p_flag_key: 'parent_syllabus_visibility', p_enabled: enabled });
+  if (error) return { error: mapError(error.message) };
+  revalidatePath('/syllabus-variance');
+  return { error: null };
+}
+
 export async function acknowledgeVariance(input: VarianceAckInput): Promise<Result> {
   const p = varianceAckSchema.safeParse(input);
   if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
