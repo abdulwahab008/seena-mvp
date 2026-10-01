@@ -460,3 +460,6 @@ ${body}
 
   return { html, pageFormat: 'A4', landscape: false };
 }
+
+/** FR-J11: the card without its document, for a packet that continues past it. */
+export { reportCardBody as reportCardBodyHtml, css as reportCardCss };
