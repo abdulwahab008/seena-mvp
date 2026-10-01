@@ -1,14 +1,36 @@
 import { test, expect } from '@playwright/test';
+import { createClient } from '@supabase/supabase-js';
+import { seedFreshOwner } from './fixtures/fresh-owner';
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 
 test.describe('FR-M05: WhatsApp Session Window Enforcement & Meta Compliance', () => {
   test('Principal / Owner manages 24h windows, Meta templates, Principal alerts, and triggers SMS fallback', async ({
     page,
   }) => {
     // 1. Sign in as Owner
+    const owner = await seedFreshOwner('whatsapp-e2e');
+
+    // Step 9c needs a Meta-APPROVED template to dispatch with. The template
+    // this test registers is deliberately approved and then rejected (step 7),
+    // so on a fresh tenant none would be left; the original run relied on an
+    // approved one already sitting in a long-lived dev tenant. Seed it.
+    const approvedTemplateName = `fee_reminder_${Date.now()}`;
+    const admin = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+    const { error: seedTemplateError } = await admin.from('wa_template').insert({
+      tenant_id: owner.tenantId,
+      meta_template_name: approvedTemplateName,
+      category: 'UTILITY',
+      status: 'APPROVED',
+      language: 'en_US',
+      body_text: 'Dear Parent, the fee reminder for {{1}} is due on {{2}}.',
+    });
+    if (seedTemplateError) throw seedTemplateError;
+
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
@@ -105,8 +127,10 @@ test.describe('FR-M05: WhatsApp Session Window Enforcement & Meta Compliance', (
     await expect(page.getByText('24-hour customer service window is open')).toBeVisible();
 
     // 9c. Test Template-backed message to unengaged recipient with approved template (Approved -> Valid without window)
+    await page.getByTestId('sim-phone-input').fill(unengagedPhone);
     await page.getByRole('button', { name: 'Meta Approved Template' }).click();
     await page.getByRole('button', { name: 'Simulate Dispatch & Evaluate Rules' }).click();
     await expect(page.getByText('Dispatch Validation Passed')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(`Approved Meta template "${approvedTemplateName}" permitted without artificial session window.`)).toBeVisible();
   });
 });
