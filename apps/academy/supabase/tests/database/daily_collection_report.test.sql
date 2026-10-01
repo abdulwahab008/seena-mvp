@@ -26,11 +26,11 @@ select public.publish_fee_structure(:'structure_id'::uuid);
 -- Three students, three challans, three payments on the same day split
 -- across the three modes the AC itself uses. Dated 3 days before "today"
 -- (rather than a fixed calendar date) so the reversal below — which
--- reverse_ledger_entry() always posts at the REAL current_date, never a
+-- reverse_ledger_entry() always posts at the REAL app.fn_karachi_today(), never a
 -- chosen/backdated one — is guaranteed to land strictly after it,
 -- matching the AC's own "paid on the 12th, reversed on the 15th" order
 -- regardless of what today actually is when this test runs.
-select (current_date - 3) as pay_date \gset
+select (app.fn_karachi_today() - 3) as pay_date \gset
 
 select public.create_student(:'campus_id'::uuid, 'Cash Payer', '2015-01-01'::date, 'male') as cash_student_id \gset
 select public.enrol_student(:'section_id'::uuid, :'cash_student_id'::uuid) as cash_enrol_id \gset
@@ -90,9 +90,9 @@ select is(
   'AC: regenerating the original day''s report after a later reversal still shows the ORIGINAL total, unchanged'
 );
 select is(
-  (select count(*)::int from public.fee_ledger where campus_id = :'campus_id' and entry_type = 'reversal' and value_date = current_date),
+  (select count(*)::int from public.fee_ledger where campus_id = :'campus_id' and entry_type = 'reversal' and value_date = app.fn_karachi_today()),
   1,
-  'AC: the reversal itself appears, dated today (reverse_ledger_entry always uses current_date, never backdated)'
+  'AC: the reversal itself appears, dated today (reverse_ledger_entry always uses app.fn_karachi_today(), never backdated)'
 );
 
 -- ── cash_book_day: finalising computes opening/receipts/disbursements/
@@ -110,7 +110,7 @@ select throws_ok(
 );
 
 -- The reversal's OWN day (today) picks up the disbursement.
-select public.finalise_cash_book_day(:'campus_id'::uuid, current_date) as cb_today \gset
+select public.finalise_cash_book_day(:'campus_id'::uuid, app.fn_karachi_today()) as cb_today \gset
 select is(
   (:'cb_today'::public.cash_book_day).disbursements_paisa,
   500000::bigint,

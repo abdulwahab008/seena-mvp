@@ -31,28 +31,28 @@ begin
     insert into kid values (i, public.enrol_student((select id from public.class_section where campus_id = current_setting('t.campus')::uuid limit 1), v_stu), v_stu);
   end loop;
 end $$;
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', current_date)::date + 14), false);
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', current_date + interval '1 month')::date + 14), false);
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date + 14), false);
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', (now() at time zone 'Asia/Karachi')::date + interval '1 month')::date + 14), false);
 select public.fn_find_or_create_guardian(p_name_en => 'Kid 1 Parent', p_phone_e164 => '+923005550001') as g1 \gset
 select public.link_guardian((select student_id from kid where n = 1), :'g1'::uuid, 'father'::public.guardian_relationship, true, true);
 select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
-select public.record_payment((select enrol_id from kid where n = 2), 200000::bigint, 'cash'::public.fee_payment_mode, 'k25-partial', current_date);
-select public.record_payment((select enrol_id from kid where n = 4), 1000000::bigint, 'cash'::public.fee_payment_mode, 'k25-paid', current_date);
+select public.record_payment((select enrol_id from kid where n = 2), 200000::bigint, 'cash'::public.fee_payment_mode, 'k25-partial', (now() at time zone 'Asia/Karachi')::date);
+select public.record_payment((select enrol_id from kid where n = 4), 1000000::bigint, 'cash'::public.fee_payment_mode, 'k25-paid', (now() at time zone 'Asia/Karachi')::date);
 reset role;
 
 -- Kid 1: oldest unpaid challan due 65 days ago.            -> 61-90
 -- Kid 2: due 100 days ago (part-paid) and 10 days ago.     -> 90+, measured from the OLDEST, balances summed
 -- Kid 3: due 20 days ago, with an approved hardship award.  -> 1-30, flagged
 -- Kid 4: both challans paid.                                -> not a defaulter
-update public.fee_challan set due_date = current_date - 65 where enrolment_id = (select enrol_id from kid where n = 1) and billing_period = date_trunc('month', current_date)::date;
-update public.fee_challan set due_date = current_date + 30 where enrolment_id = (select enrol_id from kid where n = 1) and billing_period <> date_trunc('month', current_date)::date;
-update public.fee_challan set due_date = current_date - 100 where enrolment_id = (select enrol_id from kid where n = 2) and billing_period = date_trunc('month', current_date)::date;
-update public.fee_challan set due_date = current_date - 10 where enrolment_id = (select enrol_id from kid where n = 2) and billing_period <> date_trunc('month', current_date)::date;
-update public.fee_challan set due_date = current_date - 20 where enrolment_id = (select enrol_id from kid where n = 3) and billing_period = date_trunc('month', current_date)::date;
-update public.fee_challan set due_date = current_date + 30 where enrolment_id = (select enrol_id from kid where n = 3) and billing_period <> date_trunc('month', current_date)::date;
+update public.fee_challan set due_date = (now() at time zone 'Asia/Karachi')::date - 65 where enrolment_id = (select enrol_id from kid where n = 1) and billing_period = date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date;
+update public.fee_challan set due_date = (now() at time zone 'Asia/Karachi')::date + 30 where enrolment_id = (select enrol_id from kid where n = 1) and billing_period <> date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date;
+update public.fee_challan set due_date = (now() at time zone 'Asia/Karachi')::date - 100 where enrolment_id = (select enrol_id from kid where n = 2) and billing_period = date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date;
+update public.fee_challan set due_date = (now() at time zone 'Asia/Karachi')::date - 10 where enrolment_id = (select enrol_id from kid where n = 2) and billing_period <> date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date;
+update public.fee_challan set due_date = (now() at time zone 'Asia/Karachi')::date - 20 where enrolment_id = (select enrol_id from kid where n = 3) and billing_period = date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date;
+update public.fee_challan set due_date = (now() at time zone 'Asia/Karachi')::date + 30 where enrolment_id = (select enrol_id from kid where n = 3) and billing_period <> date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date;
 insert into public.concession_scheme (tenant_id, code, name_en, name_ur, category, calc_type, value, applicable_head_ids) values (:'tenant_id', 'HARD', 'Hardship waiver', 'Hardship waiver', 'hardship', 'percentage', 100, array[:'tuition_id'::uuid]) returning id as scheme_id \gset
 insert into public.concession_award (tenant_id, campus_id, enrolment_id, scheme_id, calc_type, value, effective_from, effective_to, status)
-values (:'tenant_id', :'campus_id', (select enrol_id from kid where n = 3), :'scheme_id', 'percentage', 100, current_date - 60, current_date + 60, 'approved');
+values (:'tenant_id', :'campus_id', (select enrol_id from kid where n = 3), :'scheme_id', 'percentage', 100, (now() at time zone 'Asia/Karachi')::date - 60, (now() at time zone 'Asia/Karachi')::date + 60, 'approved');
 
 select has_materialized_view('app', 'mv_fee_defaulter', 'mv_fee_defaulter exists');
 select has_index('app', 'mv_fee_defaulter', 'mv_fee_defaulter_uq', 'AC: the unique index on enrolment_id exists');
