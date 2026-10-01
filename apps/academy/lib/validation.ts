@@ -2129,3 +2129,7 @@ export const disburseDepositSchema = z
   })
   .refine((v) => v.instrumentType === 'cash' || Boolean(v.instrumentRef), { path: ['instrumentRef'], message: 'A cheque or transfer needs its reference number' });
 export type DisburseDepositInput = z.infer<typeof disburseDepositSchema>;
+
+// FR-K23: gateway settlement reconciliation.
+export const unsettledDaysSchema = z.object({ days: z.number({ message: 'Enter a number of days' }).int('Whole days only').min(1, 'At least 1 day').max(30, 'At most 30 days') });
+export type UnsettledDaysInput = z.infer<typeof unsettledDaysSchema>;

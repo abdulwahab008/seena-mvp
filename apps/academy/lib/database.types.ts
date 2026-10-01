@@ -3940,6 +3940,13 @@ export type Database = {
             referencedColumns: ["payment_id"]
           },
           {
+            foreignKeyName: "bank_recon_exception_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_unsettled_online_payments"
+            referencedColumns: ["payment_id"]
+          },
+          {
             foreignKeyName: "bank_recon_exception_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -9503,6 +9510,13 @@ export type Database = {
             referencedRelation: "v_daily_collection"
             referencedColumns: ["payment_id"]
           },
+          {
+            foreignKeyName: "fee_payment_allocation_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_unsettled_online_payments"
+            referencedColumns: ["payment_id"]
+          },
         ]
       }
       fee_plan: {
@@ -9795,6 +9809,13 @@ export type Database = {
             columns: ["payment_id"]
             isOneToOne: false
             referencedRelation: "v_daily_collection"
+            referencedColumns: ["payment_id"]
+          },
+          {
+            foreignKeyName: "fee_receipt_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_unsettled_online_payments"
             referencedColumns: ["payment_id"]
           },
           {
@@ -10402,6 +10423,299 @@ export type Database = {
             columns: ["structure_id"]
             isOneToOne: false
             referencedRelation: "fee_structure"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gateway_commission: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          created_at: string
+          enrolment_id: string
+          gateway: string
+          gateway_txn_id: string
+          id: string
+          payment_id: string
+          settlement_date: string
+          settlement_line_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          created_at?: string
+          enrolment_id: string
+          gateway: string
+          gateway_txn_id: string
+          id?: string
+          payment_id: string
+          settlement_date: string
+          settlement_line_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          created_at?: string
+          enrolment_id?: string
+          gateway?: string
+          gateway_txn_id?: string
+          id?: string
+          payment_id?: string
+          settlement_date?: string
+          settlement_line_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gateway_commission_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "mv_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: true
+            referencedRelation: "fee_payment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: true
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["payment_id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: true
+            referencedRelation: "v_unsettled_online_payments"
+            referencedColumns: ["payment_id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_settlement_line_id_fkey"
+            columns: ["settlement_line_id"]
+            isOneToOne: false
+            referencedRelation: "gateway_settlement_line"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gateway_commission_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gateway_settlement_import: {
+        Row: {
+          created_at: string
+          exception_count: number
+          file_name: string | null
+          file_sha256: string
+          gateway: string
+          id: string
+          matched_count: number
+          row_count: number
+          settlement_date: string | null
+          status: string
+          storage_path: string | null
+          tenant_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          exception_count?: number
+          file_name?: string | null
+          file_sha256: string
+          gateway: string
+          id?: string
+          matched_count?: number
+          row_count?: number
+          settlement_date?: string | null
+          status?: string
+          storage_path?: string | null
+          tenant_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          exception_count?: number
+          file_name?: string | null
+          file_sha256?: string
+          gateway?: string
+          id?: string
+          matched_count?: number
+          row_count?: number
+          settlement_date?: string | null
+          status?: string
+          storage_path?: string | null
+          tenant_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gateway_settlement_import_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gateway_settlement_line: {
+        Row: {
+          commission_paisa: number | null
+          created_at: string
+          error_text: string | null
+          gateway_txn_id: string | null
+          gross_paisa: number | null
+          id: string
+          import_id: string
+          line_no: number
+          net_paisa: number | null
+          payment_id: string | null
+          raw_line: string
+          settlement_date: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          commission_paisa?: number | null
+          created_at?: string
+          error_text?: string | null
+          gateway_txn_id?: string | null
+          gross_paisa?: number | null
+          id?: string
+          import_id: string
+          line_no: number
+          net_paisa?: number | null
+          payment_id?: string | null
+          raw_line: string
+          settlement_date?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          commission_paisa?: number | null
+          created_at?: string
+          error_text?: string | null
+          gateway_txn_id?: string | null
+          gross_paisa?: number | null
+          id?: string
+          import_id?: string
+          line_no?: number
+          net_paisa?: number | null
+          payment_id?: string | null
+          raw_line?: string
+          settlement_date?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gateway_settlement_line_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "gateway_settlement_import"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gateway_settlement_line_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "fee_payment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gateway_settlement_line_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["payment_id"]
+          },
+          {
+            foreignKeyName: "gateway_settlement_line_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "v_unsettled_online_payments"
+            referencedColumns: ["payment_id"]
+          },
+          {
+            foreignKeyName: "gateway_settlement_line_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gateway_settlement_policy: {
+        Row: {
+          tenant_id: string
+          unsettled_after_days: number
+        }
+        Insert: {
+          tenant_id: string
+          unsettled_after_days?: number
+        }
+        Update: {
+          tenant_id?: string
+          unsettled_after_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gateway_settlement_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
         ]
@@ -26821,6 +27135,76 @@ export type Database = {
           },
         ]
       }
+      v_unsettled_online_payments: {
+        Row: {
+          age_days: number | null
+          amount_paisa: number | null
+          campus_id: string | null
+          enrolment_id: string | null
+          gateway_txn_id: string | null
+          payment_id: string | null
+          tenant_id: string | null
+          value_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_payment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "fee_payment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "mv_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_payment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_payment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_payment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_payment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       absentees_for_date: {
@@ -26852,6 +27236,10 @@ export type Database = {
       }
       activate_guardian_account: { Args: { p_token: string }; Returns: string }
       add_bank_statement_lines: {
+        Args: { p_complete?: boolean; p_import_id: string; p_lines: Json }
+        Returns: Json
+      }
+      add_gateway_settlement_lines: {
         Args: { p_complete?: boolean; p_import_id: string; p_lines: Json }
         Returns: Json
       }
@@ -29390,6 +29778,10 @@ export type Database = {
         Returns: undefined
       }
       reconcile_bank_import: { Args: { p_import_id: string }; Returns: Json }
+      reconcile_gateway_settlement: {
+        Args: { p_import_id: string }
+        Returns: Json
+      }
       record_admission_fee_payment: {
         Args: {
           p_amount_paisa: number
@@ -30294,6 +30686,7 @@ export type Database = {
         }
         Returns: string
       }
+      set_unsettled_after_days: { Args: { p_days: number }; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       sla_due: {
@@ -30325,6 +30718,15 @@ export type Database = {
           p_bank_account_id: string
           p_file_name: string
           p_file_sha256: string
+          p_storage_path: string
+        }
+        Returns: string
+      }
+      start_gateway_settlement_import: {
+        Args: {
+          p_file_name: string
+          p_file_sha256: string
+          p_gateway: string
           p_storage_path: string
         }
         Returns: string

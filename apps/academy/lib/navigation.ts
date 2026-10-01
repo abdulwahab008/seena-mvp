@@ -180,6 +180,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/reminders', label: 'Reminders' },
       { href: '/fees/settlements', label: 'Withdrawal Settlements' },
       { href: '/fees/no-dues', label: 'Deposits and No-Dues' },
+      { href: '/fees/gateway-settlements', label: 'Gateway Settlements' },
       { href: '/fees/concessions', label: 'Concessions' },
       { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
       { href: '/fees/late-fee-rules', label: 'Late Fee Rules' },
