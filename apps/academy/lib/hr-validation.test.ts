@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { complianceDocumentSchema, issueDisciplinarySchema, staffAttendanceRuleSchema } from './validation';
+import { complianceDocumentSchema, initiateExitSchema, issueDisciplinarySchema, staffAttendanceRuleSchema, waiveItemSchema } from './validation';
 
 const uuid = '3f0c1c0e-5a4e-4d0b-9d6b-0e6f1e6a2b11';
 
@@ -42,5 +42,19 @@ describe('FR-D15 issue disciplinary action input', () => {
 
   it('refuses an unknown action type', () => {
     expect(issueDisciplinarySchema.safeParse({ ...base, actionType: 'demotion' }).success).toBe(false);
+  });
+});
+
+describe('FR-D16 exit input', () => {
+  it('needs a type and a last working date that is not before the notice date', () => {
+    expect(initiateExitSchema.safeParse({ staffId: uuid, exitType: 'resignation', noticeDate: '2026-08-20', lastWorkingDate: '2026-08-25' }).success).toBe(true);
+    expect(initiateExitSchema.safeParse({ staffId: uuid, exitType: 'resignation', noticeDate: '2026-08-20', lastWorkingDate: '2026-08-19' }).success).toBe(false);
+    expect(initiateExitSchema.safeParse({ staffId: uuid, exitType: 'quit', lastWorkingDate: '2026-08-25' }).success).toBe(false);
+    expect(initiateExitSchema.safeParse({ staffId: uuid, exitType: 'death', noticeDate: '', lastWorkingDate: '2026-08-25' }).success).toBe(true);
+  });
+
+  it('a waiver reason must be at least 10 characters', () => {
+    expect(waiveItemSchema.safeParse({ exitId: uuid, itemCode: 'it_assets', reason: 'too short' }).success).toBe(false);
+    expect(waiveItemSchema.safeParse({ exitId: uuid, itemCode: 'it_assets', reason: '0123456789' }).success).toBe(true);
   });
 });

@@ -2303,3 +2303,19 @@ export const supersedeDisciplinarySchema = z.object({
   suspendTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
 });
 export const reinstateSchema = z.object({ recordId: z.string().uuid(), note: z.string().trim().max(1000).optional() });
+
+// FR-D16: staff exit and clearance.
+export const STAFF_EXIT_TYPES = ['resignation', 'termination', 'contract_expiry', 'retirement', 'death'] as const;
+export const initiateExitSchema = z
+  .object({
+    staffId: z.string().uuid(),
+    exitType: z.enum(STAFF_EXIT_TYPES, { message: 'Choose the type of exit' }),
+    noticeDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+    lastWorkingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the last working date'),
+    reason: z.string().trim().max(500).optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.noticeDate && v.lastWorkingDate < v.noticeDate) ctx.addIssue({ code: 'custom', path: ['lastWorkingDate'], message: 'The last working date is before the notice date' });
+  });
+export const clearItemSchema = z.object({ exitId: z.string().uuid(), itemCode: z.string().regex(/^[a-z][a-z0-9_]{1,39}$/) });
+export const waiveItemSchema = clearItemSchema.extend({ reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(500) });
