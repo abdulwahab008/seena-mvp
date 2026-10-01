@@ -13865,11 +13865,14 @@ export type Database = {
           copy_id: string
           created_at: string
           due_on: string
+          fine_amount: number | null
           id: string
           issued_at: string
           issued_by: string | null
           policy_snapshot: Json
+          received_by: string | null
           renewal_count: number
+          return_condition: string | null
           returned_at: string | null
           tenant_id: string
         }
@@ -13880,11 +13883,14 @@ export type Database = {
           copy_id: string
           created_at?: string
           due_on: string
+          fine_amount?: number | null
           id?: string
           issued_at?: string
           issued_by?: string | null
           policy_snapshot: Json
+          received_by?: string | null
           renewal_count?: number
+          return_condition?: string | null
           returned_at?: string | null
           tenant_id: string
         }
@@ -13895,11 +13901,14 @@ export type Database = {
           copy_id?: string
           created_at?: string
           due_on?: string
+          fine_amount?: number | null
           id?: string
           issued_at?: string
           issued_by?: string | null
           policy_snapshot?: Json
+          received_by?: string | null
           renewal_count?: number
+          return_condition?: string | null
           returned_at?: string | null
           tenant_id?: string
         }
@@ -13928,6 +13937,13 @@ export type Database = {
           {
             foreignKeyName: "library_loan_issued_by_fkey"
             columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "library_loan_received_by_fkey"
+            columns: ["received_by"]
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
@@ -32576,6 +32592,14 @@ export type Database = {
       retry_orphan_webhooks: { Args: never; Returns: number }
       retry_report_card_batch: {
         Args: { p_batch_id: string; p_remarks?: Json }
+        Returns: Json
+      }
+      return_copy: {
+        Args: {
+          p_barcode: string
+          p_condition?: string
+          p_received_by?: string
+        }
         Returns: Json
       }
       reverse_ledger_entry: {

@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IssueDesk } from './issue-desk';
+import { ReturnDesk } from './return-desk';
 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 const todayIso = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
@@ -40,6 +41,14 @@ export default async function LibraryCirculationPage() {
         </CardHeader>
         <CardContent>
           <IssueDesk />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Return a book (FR-O05)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ReturnDesk />
         </CardContent>
       </Card>
       <Card>
