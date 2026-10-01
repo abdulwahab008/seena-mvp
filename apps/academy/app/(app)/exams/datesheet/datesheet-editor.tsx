@@ -13,7 +13,7 @@ import {
   type DatesheetSlotInput,
   type ExamHallInput,
 } from '@/lib/validation';
-import { createDatesheet, deleteSlot, saveHall, saveSlot, type SlotWarning } from './actions';
+import { createDatesheet, deleteSlot, publishDatesheet, reopenDatesheet, saveHall, saveSlot, type SlotWarning } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -187,6 +187,61 @@ export function SlotForm({ datesheetId, papers, halls }: { datesheetId: string; 
         <WarningList warnings={warnings} />
       </div>
     </form>
+  );
+}
+
+/** FR-I04: publish the draft as the next version, or reopen the published one for revision. */
+export function PublishPanel({ datesheetId, status, canPublish, nextVersion }: { datesheetId: string; status: string; canPublish: boolean; nextVersion: number }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState('');
+  if (status === 'published') {
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          disabled={pending}
+          data-testid="reopen-datesheet"
+          onClick={() =>
+            startTransition(async () => {
+              const r = await reopenDatesheet(datesheetId);
+              setError(r.error);
+              if (!r.error) router.refresh();
+            })
+          }
+        >
+          Reopen for revision
+        </Button>
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-wrap items-end gap-3">
+      <div className="space-y-1">
+        <Label htmlFor="publishNote">{nextVersion > 1 ? 'What changed (shown to parents)' : 'Note (optional)'}</Label>
+        <Input id="publishNote" className="w-80" value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} />
+      </div>
+      <Button
+        disabled={pending || !canPublish}
+        data-testid="publish-datesheet"
+        onClick={() =>
+          startTransition(async () => {
+            const r = await publishDatesheet(datesheetId, note);
+            setError(r.error);
+            if (!r.error) {
+              toast.success(`Published as version ${r.version ?? nextVersion}.`);
+              setNote('');
+              router.refresh();
+            }
+          })
+        }
+      >
+        Publish version {nextVersion}
+      </Button>
+      {error && <p role="alert" className="text-sm text-destructive" data-testid="publish-error">{error}</p>}
+    </div>
   );
 }
 

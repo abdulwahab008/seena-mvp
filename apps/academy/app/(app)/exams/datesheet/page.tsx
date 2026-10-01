@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope, one } from '@/lib/exams/office-scope';
 import type { SlotWarning } from './actions';
-import { CreateDatesheetForm, HallForm, RemoveSlotButton, SlotForm, WarningList } from './datesheet-editor';
+import { CreateDatesheetForm, HallForm, PublishPanel, RemoveSlotButton, SlotForm, WarningList } from './datesheet-editor';
 
 /**
  * FR-I03. Build the datesheet of one exam term. Every save runs the clash
@@ -67,6 +67,8 @@ export default async function DatesheetPage({ searchParams }: { searchParams: Pr
   const { data: warnRows } = datesheet ? await supabase.rpc('fn_datesheet_warnings', { p_datesheet_id: datesheet.id }) : { data: [] };
   const warningsBySlot = new Map((warnRows ?? []).map((w) => [w.slot_id, (w.warnings ?? []) as unknown as SlotWarning[]]));
   const { data: clashRows } = datesheet ? await supabase.rpc('fn_detect_datesheet_clash', { p_datesheet_id: datesheet.id }) : { data: [] };
+
+  const { data: versions } = datesheet ? await supabase.from('datesheet_version').select('id, version_no, status, note, published_at, slot_count').eq('datesheet_id', datesheet.id).order('version_no', { ascending: false }) : { data: [] };
 
   const paperLabel = new Map(papers.map((p) => [p.id, p.label]));
   const hallLabel = new Map((halls ?? []).map((h) => [h.id, `${h.name} (${h.capacity})`]));
@@ -161,6 +163,44 @@ export default async function DatesheetPage({ searchParams }: { searchParams: Pr
             </Card>
           )}
           {!editable && datesheet.status === 'published' && <p className="text-sm text-muted-foreground">This datesheet is published and read-only.</p>}
+
+          {scope.canWrite && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Publication</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <p className="text-muted-foreground">
+                  Publishing freezes the papers into a numbered, immutable version that parents see. To change a published datesheet, reopen it, edit and publish again: the earlier version stays on record.
+                </p>
+                <PublishPanel datesheetId={datesheet.id} status={datesheet.status} canPublish={(slots ?? []).length > 0 && (clashRows ?? []).length === 0} nextVersion={datesheet.current_version + 1} />
+              </CardContent>
+            </Card>
+          )}
+
+          {(versions ?? []).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Published versions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm" data-testid="version-list">
+                {(versions ?? []).map((v) => (
+                  <div key={v.id} className="flex flex-wrap items-center justify-between gap-2 border-b pb-2" data-testid="version-row">
+                    <span>
+                      Version {v.version_no} · {v.slot_count} papers · {fmtDate(v.published_at, tz)}
+                      {v.note ? ` · ${v.note}` : ''}
+                    </span>
+                    <span className="flex items-center gap-3">
+                      <Badge variant={v.status === 'published' ? 'success' : 'outline'}>{v.status}</Badge>
+                      <a className="underline" href={`/api/datesheets/${v.id}/pdf`} target="_blank" rel="noreferrer">
+                        PDF
+                      </a>
+                    </span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
 

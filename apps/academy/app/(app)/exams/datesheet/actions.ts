@@ -82,6 +82,26 @@ export async function deleteSlot(slotId: string): Promise<Result> {
   return { error: null };
 }
 
+// FR-I04.
+export async function publishDatesheet(datesheetId: string, note: string): Promise<Result & { version?: number }> {
+  if (!z.string().uuid().safeParse(datesheetId).success) return { error: 'Invalid datesheet.' };
+  if (note.length > 500) return { error: 'The note can be at most 500 characters.' };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('publish_datesheet', { p_datesheet_id: datesheetId, p_note: note.trim() || undefined });
+  if (error) return { error: datesheetError(error.message, error.details) };
+  revalidatePath(PATH);
+  return { error: null, version: data ?? undefined };
+}
+
+export async function reopenDatesheet(datesheetId: string): Promise<Result> {
+  if (!z.string().uuid().safeParse(datesheetId).success) return { error: 'Invalid datesheet.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('reopen_datesheet', { p_datesheet_id: datesheetId });
+  if (error) return { error: datesheetError(error.message, error.details) };
+  revalidatePath(PATH);
+  return { error: null };
+}
+
 export async function saveExamSettings(input: ExamSettingsInput): Promise<Result> {
   const p = examSettingsSchema.safeParse(input);
   if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
