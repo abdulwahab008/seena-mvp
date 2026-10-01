@@ -13754,6 +13754,193 @@ export type Database = {
           },
         ]
       }
+      library_fine: {
+        Row: {
+          accrual_date: string
+          amount: number
+          borrower_id: string
+          campus_id: string
+          created_at: string
+          days_overdue: number
+          id: string
+          loan_id: string
+          settled_at: string | null
+          settled_by: string | null
+          settled_receipt_id: string | null
+          status: Database["public"]["Enums"]["library_fine_status"]
+          tenant_id: string
+          waive_reason: string | null
+          waived_at: string | null
+          waived_by: string | null
+          write_off_id: string | null
+        }
+        Insert: {
+          accrual_date: string
+          amount: number
+          borrower_id: string
+          campus_id: string
+          created_at?: string
+          days_overdue: number
+          id?: string
+          loan_id: string
+          settled_at?: string | null
+          settled_by?: string | null
+          settled_receipt_id?: string | null
+          status?: Database["public"]["Enums"]["library_fine_status"]
+          tenant_id: string
+          waive_reason?: string | null
+          waived_at?: string | null
+          waived_by?: string | null
+          write_off_id?: string | null
+        }
+        Update: {
+          accrual_date?: string
+          amount?: number
+          borrower_id?: string
+          campus_id?: string
+          created_at?: string
+          days_overdue?: number
+          id?: string
+          loan_id?: string
+          settled_at?: string | null
+          settled_by?: string | null
+          settled_receipt_id?: string | null
+          status?: Database["public"]["Enums"]["library_fine_status"]
+          tenant_id?: string
+          waive_reason?: string | null
+          waived_at?: string | null
+          waived_by?: string | null
+          write_off_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_fine_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_fine_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_fine_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "library_loan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_fine_settled_by_fkey"
+            columns: ["settled_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "library_fine_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_fine_waived_by_fkey"
+            columns: ["waived_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      library_loan: {
+        Row: {
+          borrower_id: string
+          borrower_role: string
+          campus_id: string
+          copy_id: string
+          created_at: string
+          due_on: string
+          id: string
+          issued_at: string
+          issued_by: string | null
+          policy_snapshot: Json
+          renewal_count: number
+          returned_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          borrower_id: string
+          borrower_role: string
+          campus_id: string
+          copy_id: string
+          created_at?: string
+          due_on: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          policy_snapshot: Json
+          renewal_count?: number
+          returned_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          borrower_id?: string
+          borrower_role?: string
+          campus_id?: string
+          copy_id?: string
+          created_at?: string
+          due_on?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          policy_snapshot?: Json
+          renewal_count?: number
+          returned_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_loan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_loan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_loan_copy_id_fkey"
+            columns: ["copy_id"]
+            isOneToOne: false
+            referencedRelation: "library_copy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_loan_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "library_loan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_title: {
         Row: {
           author: string | null
@@ -30492,6 +30679,17 @@ export type Database = {
       }
       finalise_import_batch: { Args: { p_batch_id: string }; Returns: Json }
       finalize_submission: { Args: { p_submission_id: string }; Returns: Json }
+      find_library_borrowers: {
+        Args: { p_query: string }
+        Returns: {
+          borrower_id: string
+          borrower_role: string
+          detail: string
+          display_name: string
+          open_loans: number
+          outstanding_paisa: number
+        }[]
+      }
       finish_report_card_batch_item: {
         Args: {
           p_error_code?: string
@@ -31484,6 +31682,10 @@ export type Database = {
           p_remarks?: string
           p_student_id: string
         }
+        Returns: Json
+      }
+      issue_copy: {
+        Args: { p_barcode: string; p_borrower_id: string }
         Returns: Json
       }
       issue_otp: { Args: { p_phone: string }; Returns: Json }
@@ -33671,6 +33873,7 @@ export type Database = {
         | "in_repair"
         | "lost"
         | "written_off"
+      library_fine_status: "outstanding" | "settled" | "waived"
       mark_component_code:
         | "theory"
         | "practical"
