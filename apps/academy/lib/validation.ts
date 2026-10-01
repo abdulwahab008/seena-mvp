@@ -2274,3 +2274,12 @@ export const campusAddressSchema = z.object({
   addressUr: z.string().trim().max(300, 'At most 300 characters').optional(),
 });
 export type CampusAddressInput = z.infer<typeof campusAddressSchema>;
+
+// FR-S10: year-on-year comparison filters (query string).
+export const yoyQuerySchema = z.object({
+  metric: z.enum(['fees_collected', 'enrolment', 'outstanding', 'collection_rate', 'attendance_rate', 'staff_cost_ratio']).catch('fees_collected'),
+  current: z.string().uuid().optional().catch(undefined),
+  prior: z.string().uuid().optional().catch(undefined),
+  campus: z.string().uuid().optional().catch(undefined),
+});
+export type YoyQuery = z.infer<typeof yoyQuerySchema>;
