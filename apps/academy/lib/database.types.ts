@@ -1572,6 +1572,119 @@ export type Database = {
           },
         ]
       }
+      agg_campus_day: {
+        Row: {
+          billed_paisa: number
+          campus_id: string
+          collected_paisa: number
+          day: string
+          enrolled_count: number
+          last_refreshed_at: string
+          marked_sections: number
+          outstanding_0_30_paisa: number
+          outstanding_31_60_paisa: number
+          outstanding_60plus_paisa: number
+          outstanding_paisa: number
+          payroll_status: string
+          present_count: number
+          staff_cost_paisa: number
+          tenant_id: string
+        }
+        Insert: {
+          billed_paisa?: number
+          campus_id: string
+          collected_paisa?: number
+          day: string
+          enrolled_count?: number
+          last_refreshed_at?: string
+          marked_sections?: number
+          outstanding_0_30_paisa?: number
+          outstanding_31_60_paisa?: number
+          outstanding_60plus_paisa?: number
+          outstanding_paisa?: number
+          payroll_status?: string
+          present_count?: number
+          staff_cost_paisa?: number
+          tenant_id: string
+        }
+        Update: {
+          billed_paisa?: number
+          campus_id?: string
+          collected_paisa?: number
+          day?: string
+          enrolled_count?: number
+          last_refreshed_at?: string
+          marked_sections?: number
+          outstanding_0_30_paisa?: number
+          outstanding_31_60_paisa?: number
+          outstanding_60plus_paisa?: number
+          outstanding_paisa?: number
+          payroll_status?: string
+          present_count?: number
+          staff_cost_paisa?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agg_campus_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agg_campus_day_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agg_refresh_log: {
+        Row: {
+          error: string | null
+          from_date: string | null
+          id: string
+          job_name: string
+          ran_at: string
+          rows_written: number
+          status: string
+          tenant_id: string | null
+          to_date: string | null
+        }
+        Insert: {
+          error?: string | null
+          from_date?: string | null
+          id?: string
+          job_name: string
+          ran_at?: string
+          rows_written?: number
+          status: string
+          tenant_id?: string | null
+          to_date?: string | null
+        }
+        Update: {
+          error?: string | null
+          from_date?: string | null
+          id?: string
+          job_name?: string
+          ran_at?: string
+          rows_written?: number
+          status?: string
+          tenant_id?: string | null
+          to_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agg_refresh_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       annual_result: {
         Row: {
           campus_id: string
@@ -3108,63 +3221,6 @@ export type Database = {
         }
         Relationships: []
       }
-      audit_log_2026_09: {
-        Row: {
-          action: Database["public"]["Enums"]["audit_action"]
-          actor_role: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id: string | null
-          after: Json | null
-          before: Json | null
-          campus_id: string | null
-          changed_columns: string[] | null
-          effective_actor_user_id: string | null
-          id: string
-          impersonation_session_id: string | null
-          occurred_at: string
-          prev_hash: string | null
-          row_hash: string | null
-          row_id: string | null
-          table_name: string
-          tenant_id: string
-        }
-        Insert: {
-          action: Database["public"]["Enums"]["audit_action"]
-          actor_role?: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id?: string | null
-          after?: Json | null
-          before?: Json | null
-          campus_id?: string | null
-          changed_columns?: string[] | null
-          effective_actor_user_id?: string | null
-          id?: string
-          impersonation_session_id?: string | null
-          occurred_at?: string
-          prev_hash?: string | null
-          row_hash?: string | null
-          row_id?: string | null
-          table_name: string
-          tenant_id: string
-        }
-        Update: {
-          action?: Database["public"]["Enums"]["audit_action"]
-          actor_role?: Database["public"]["Enums"]["app_role"] | null
-          actor_user_id?: string | null
-          after?: Json | null
-          before?: Json | null
-          campus_id?: string | null
-          changed_columns?: string[] | null
-          effective_actor_user_id?: string | null
-          id?: string
-          impersonation_session_id?: string | null
-          occurred_at?: string
-          prev_hash?: string | null
-          row_hash?: string | null
-          row_id?: string | null
-          table_name?: string
-          tenant_id?: string
-        }
-        Relationships: []
-      }
       audit_log_2026_10: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -3223,6 +3279,63 @@ export type Database = {
         Relationships: []
       }
       audit_log_2026_11: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          actor_role: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id: string | null
+          after: Json | null
+          before: Json | null
+          campus_id: string | null
+          changed_columns: string[] | null
+          effective_actor_user_id: string | null
+          id: string
+          impersonation_session_id: string | null
+          occurred_at: string
+          prev_hash: string | null
+          row_hash: string | null
+          row_id: string | null
+          table_name: string
+          tenant_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          actor_role?: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          campus_id?: string | null
+          changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
+          id?: string
+          impersonation_session_id?: string | null
+          occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
+          row_id?: string | null
+          table_name: string
+          tenant_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          actor_role?: Database["public"]["Enums"]["app_role"] | null
+          actor_user_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          campus_id?: string | null
+          changed_columns?: string[] | null
+          effective_actor_user_id?: string | null
+          id?: string
+          impersonation_session_id?: string | null
+          occurred_at?: string
+          prev_hash?: string | null
+          row_hash?: string | null
+          row_id?: string | null
+          table_name?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      audit_log_2026_12: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
           actor_role: Database["public"]["Enums"]["app_role"] | null
@@ -23644,6 +23757,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      agg_freshness: {
+        Args: never
+        Returns: {
+          is_stale: boolean
+          last_failure_at: string
+          last_refreshed_at: string
+        }[]
+      }
       allocate_certificate_serial: {
         Args: {
           p_campus_id: string
@@ -26037,6 +26158,11 @@ export type Database = {
         }
         Returns: string
       }
+      refresh_agg_campus_day: {
+        Args: { p_from: string; p_tenant_id?: string; p_to: string }
+        Returns: number
+      }
+      refresh_agg_nightly: { Args: never; Returns: number }
       register_guardian_otp_attempt: {
         Args: { p_kind: string; p_token: string }
         Returns: undefined
