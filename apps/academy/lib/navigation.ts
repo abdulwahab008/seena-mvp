@@ -2,6 +2,7 @@ import {
   Award,
   BadgeCheck,
   BookOpen,
+  Boxes,
   Building2,
   CalendarClock,
   ClipboardCheck,
@@ -203,6 +204,14 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/expenses/vouchers', label: 'Vouchers', feature: 'module.expenses' },
       { href: '/expenses/approvals', label: 'Approvals', feature: 'module.expenses' },
       { href: '/expenses/petty-cash', label: 'Petty Cash', feature: 'module.expenses' },
+    ],
+  },
+  {
+    id: 'inventory',
+    label: 'Stores & Assets',
+    icon: Boxes,
+    items: [
+      { href: '/inventory', label: 'Stores and Stock' },
     ],
   },
   {

@@ -2244,3 +2244,40 @@ export const lessonPlanSchema = z.object({
   topicIds: z.array(z.string().uuid()).default([]),
 });
 export type LessonPlanInput = z.input<typeof lessonPlanSchema>;
+
+// FR-R01: inventory item master, stores and stock movements. Amounts are
+// entered in rupees and converted to paisa at the server-action boundary.
+export const INV_CATEGORIES = ['uniform', 'textbook', 'stationery', 'consumable'] as const;
+export const STOCK_REASON_CODES = ['SHRINKAGE', 'DAMAGE', 'EXPIRED', 'FOUND', 'COUNT_ERROR', 'OTHER'] as const;
+const nonNegNumber = (msg: string) => z.coerce.number({ message: msg }).min(0, msg);
+export const invItemSchema = z.object({
+  itemCode: z.string().trim().min(1, 'Enter an item code').max(40),
+  name: z.string().trim().min(1, 'Enter an item name').max(200),
+  category: z.enum(INV_CATEGORIES, { message: 'Choose a category' }),
+  uom: z.string().trim().max(20).optional(),
+  size: z.string().trim().max(20).optional(),
+  classId: z.string().uuid().optional().or(z.literal('')),
+  subjectId: z.string().uuid().optional().or(z.literal('')),
+  reorderLevel: nonNegNumber('Enter a reorder level').default(0),
+  salePricePkr: nonNegNumber('Enter a sale price').default(0),
+});
+export type InvItemInput = z.input<typeof invItemSchema>;
+export const invStoreSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  name: z.string().trim().min(1, 'Enter a store name').max(100),
+});
+export type InvStoreInput = z.input<typeof invStoreSchema>;
+export const stockReceiptSchema = z.object({
+  storeId: z.string().uuid('Choose a store'),
+  itemId: z.string().uuid('Choose an item'),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+  unitCostPkr: nonNegNumber('Enter the unit cost').optional(),
+});
+export type StockReceiptInput = z.input<typeof stockReceiptSchema>;
+export const stockTakeSchema = z.object({
+  storeId: z.string().uuid('Choose a store'),
+  itemId: z.string().uuid('Choose an item'),
+  counted: z.coerce.number({ message: 'Enter the counted quantity' }).min(0, 'Count cannot be negative'),
+  reasonCode: z.enum(STOCK_REASON_CODES, { message: 'Choose a reason' }),
+});
+export type StockTakeInput = z.input<typeof stockTakeSchema>;
