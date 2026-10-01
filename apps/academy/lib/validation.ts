@@ -2314,3 +2314,11 @@ export const exportSavedReportSchema = z.object({
   reason: z.string().trim().max(500).optional(),
 });
 export type ExportSavedReportInput = z.infer<typeof exportSavedReportSchema>;
+
+// FR-T13: generate a government census / EMIS return as of a census date.
+export const generateCensusSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  framework: z.enum(['punjab_emis', 'sindh_emis', 'kpk_emis', 'pmiu', 'federal']),
+  censusDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the census date'),
+});
+export type GenerateCensusInput = z.infer<typeof generateCensusSchema>;
