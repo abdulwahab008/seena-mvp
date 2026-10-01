@@ -126,8 +126,8 @@ begin
 end $$;
 reset role;
 
-select is((select count(*) from public.attendance_period), 32::bigint, 'four students each have a row for all eight periods');
-select is((select count(*) from public.attendance_day where attendance_date = :'d'::date and source = 'derived'), 0::bigint, 'nothing is published to the day register before derivation runs');
+select is((select count(*) from public.attendance_period where tenant_id = :'tenant_id'), 32::bigint, 'four students each have a row for all eight periods');
+select is((select count(*) from public.attendance_day where tenant_id = :'tenant_id' and attendance_date = :'d'::date and source = 'derived'), 0::bigint, 'nothing is published to the day register before derivation runs');
 
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', :'prin_uid', 'tenant_id', :'tenant_id', 'app_role', 'principal', 'campus_ids', json_build_array(:'campus_id'))::text, true);
@@ -137,7 +137,7 @@ select is((select status::text || '/' || source::text from public.attendance_day
 select is((select status::text from public.attendance_day where enrolment_id = (select enrol_id from kid where n = 2) and attendance_date = :'d'::date), 'present', 'present in exactly half the periods is still present');
 select is((select status::text from public.attendance_day where enrolment_id = (select enrol_id from kid where n = 3) and attendance_date = :'d'::date), 'absent', 'present in none gives absent');
 select is((select status::text from public.attendance_day where enrolment_id = (select enrol_id from kid where n = 4) and attendance_date = :'d'::date), 'present', 'present in nearly all gives present');
-select is((select count(*) from public.attendance_day where attendance_date = :'d'::date and source = 'derived'), 4::bigint, 'four derived day rows exist');
+select is((select count(*) from public.attendance_day where tenant_id = :'tenant_id' and attendance_date = :'d'::date and source = 'derived'), 4::bigint, 'four derived day rows exist');
 
 -- ── AC4: editing a period after derivation re-derives that day at once ────
 set local role authenticated;
@@ -157,11 +157,11 @@ select is((select derived_status::text || ' vs ' || manual_status::text from pub
 select set_config('request.jwt.claims', json_build_object('sub', :'owner_uid', 'tenant_id', :'tenant_id', 'app_role', 'owner', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select public.derive_day_from_periods(:'campus_id'::uuid, :'d'::date);
 select public.derive_day_from_periods(:'campus_id'::uuid, :'d'::date);
-select is((select count(*) from public.attendance_derivation_conflict), 1::bigint, 'running the nightly derivation again keeps one conflict row, not more');
+select is((select count(*) from public.attendance_derivation_conflict where tenant_id = :'tenant_id'), 1::bigint, 'running the nightly derivation again keeps one conflict row, not more');
 select is((select source::text from public.attendance_day where enrolment_id = (select enrol_id from kid where n = 3) and attendance_date = :'d'::date), 'web', 'and still does not touch the manual row');
 update public.attendance_day set status = 'absent' where enrolment_id = (select enrol_id from kid where n = 3) and attendance_date = :'d'::date;
 select public.derive_day_from_periods(:'campus_id'::uuid, :'d'::date);
-select is((select count(*) from public.attendance_derivation_conflict), 0::bigint, 'once the manual mark agrees with the periods the conflict clears');
+select is((select count(*) from public.attendance_derivation_conflict where tenant_id = :'tenant_id'), 0::bigint, 'once the manual mark agrees with the periods the conflict clears');
 
 -- ── substitution gives the covering teacher access for that date ──────────
 insert into public.timetable_substitution (tenant_id, campus_id, slot_id, sub_date, absent_staff_id, substitute_staff_id, reason)
