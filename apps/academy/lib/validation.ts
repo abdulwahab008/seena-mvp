@@ -2308,3 +2308,29 @@ export const issueTranscriptSchema = z.object({
   purpose: z.string().trim().min(1, 'Say what the transcript is for').max(200),
 });
 export type IssueTranscriptInput = z.infer<typeof issueTranscriptSchema>;
+
+// FR-J14: re-sit and improvement substitution. Mirrors
+// supabase/migrations/20260802400500_resit_improvement_substitution.sql.
+export const RESIT_POLICIES = ['latest', 'best_of', 'capped_at_pass'] as const;
+export type ResitPolicy = (typeof RESIT_POLICIES)[number];
+export const ATTEMPT_TYPES = ['resit', 'improvement'] as const;
+export const setResitPolicySchema = z.object({
+  campusId: z.string().uuid(),
+  policy: z.enum(RESIT_POLICIES, { message: 'Choose a policy' }),
+});
+export type SetResitPolicyInput = z.infer<typeof setResitPolicySchema>;
+export const generateResitListSchema = z.object({ examTermId: z.string().uuid() });
+export const recordAttemptSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examSubjectId: z.string().uuid(),
+  attemptType: z.enum(ATTEMPT_TYPES, { message: 'Choose re-sit or improvement' }),
+  obtained: z.number({ message: 'Enter the marks' }).min(0, 'Marks cannot be negative').max(1000),
+  satOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the date it was sat'),
+});
+export type RecordAttemptInput = z.infer<typeof recordAttemptSchema>;
+export const grantResitExceptionSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examSubjectId: z.string().uuid(),
+  reason: z.string().trim().min(5, 'Give a reason of at least 5 characters').max(500),
+});
+export type GrantResitExceptionInput = z.infer<typeof grantResitExceptionSchema>;

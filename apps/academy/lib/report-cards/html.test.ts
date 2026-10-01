@@ -313,3 +313,46 @@ describe('promotion decision (FR-J04 AC4)', () => {
     expect(buildReportCardHtml(snapshot(), null, noAssets).html).not.toContain('data-promotion');
   });
 });
+
+describe('re-sit and improvement attempts (FR-J14)', () => {
+  const resit = snapshot({
+    subjects: [
+      {
+        ...snapshot().subjects[0]!,
+        subject_name: 'Maths',
+        obtained: 33,
+        max_marks: 100,
+        pct: 33,
+        grade_label: 'E',
+        report_symbol: 'R',
+        attempt_no: 2,
+      },
+    ],
+    attempt_notes: ['Maths: result of re-sit dated 12-Aug-2026'],
+  });
+
+  it('AC3: keeps the published mark on the card, annotated R, with the attempt number', () => {
+    const html = buildReportCardHtml(resit, null, noAssets).html;
+    expect(html).toContain('33.00 <sup data-attempt-mark>R</sup>');
+    expect(html).toContain('Attempt 2');
+  });
+
+  it('AC3: prints the footnote naming the attempt and its date', () => {
+    const html = buildReportCardHtml(resit, null, noAssets).html;
+    expect(html).toContain('data-attempt-notes');
+    expect(html).toContain('Maths: result of re-sit dated 12-Aug-2026');
+  });
+
+  it('still lets AB stand in place of marks', () => {
+    const html = buildReportCardHtml(
+      snapshot({ subjects: [{ ...snapshot().subjects[0]!, report_symbol: 'AB', obtained: 0 }] }),
+      null,
+      noAssets,
+    ).html;
+    expect(html).toContain('colspan="2">AB');
+  });
+
+  it('prints no footnote block on an ordinary card', () => {
+    expect(buildReportCardHtml(snapshot(), null, noAssets).html).not.toContain('data-attempt-notes');
+  });
+});

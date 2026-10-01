@@ -173,6 +173,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/promotion', label: 'Promotion Decisions' },
       { href: '/exams/analytics', label: 'Subject Analytics' },
       { href: '/exams/packets', label: 'Report Card Packets' },
+      { href: '/exams/resits', label: 'Re-sits & Improvements' },
       { href: '/transcripts', label: 'Transcripts' },
     ],
   },
