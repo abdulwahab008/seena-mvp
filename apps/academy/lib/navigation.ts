@@ -175,6 +175,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/mastery', label: 'Topic Mastery' },
       { href: '/exams/packets', label: 'Report Card Packets' },
       { href: '/exams/resits', label: 'Re-sits & Improvements' },
+      { href: '/exams/board-forms', label: 'Board Exam Forms' },
       { href: '/transcripts', label: 'Transcripts' },
     ],
   },
