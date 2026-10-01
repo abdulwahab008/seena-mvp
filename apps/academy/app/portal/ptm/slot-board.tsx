@@ -12,11 +12,30 @@ const L = {
 
 const time = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: 'Asia/Karachi', hour: '2-digit', minute: '2-digit' });
 
-export function SlotBoard({ studentId, initial, myBookings, lang }: { studentId: string; initial: PtmSlot[]; myBookings: Record<string, string>; lang: Lang }) {
+type BoardProps = { studentId: string; initial: PtmSlot[]; myBookings: Record<string, string>; lang: Lang };
+
+// The notice ("slot just taken", the cutoff time, ...) lives out here, above the keyed board. A booking action revalidates the page, and
+// the fresh server list re-keys (remounts) the board; a notice held inside the board would be wiped by that remount whenever it landed
+// after the action's own result, so the loser of a race would see the refreshed list without being told why.
+export function SlotBoard(props: BoardProps) {
+  const [message, setMessage] = useState<string | null>(null);
+  const boardKey = `${props.studentId}-${props.initial.map((s) => `${s.slot_id}${s.available}${s.mine}`).join('')}`;
+  return (
+    <div className="space-y-4">
+      {message && (
+        <p role="alert" className="rounded-md border border-destructive/40 p-3 text-sm text-destructive" data-testid="ptm-message">
+          {message}
+        </p>
+      )}
+      <Board key={boardKey} {...props} setMessage={setMessage} />
+    </div>
+  );
+}
+
+function Board({ studentId, initial, myBookings, lang, setMessage }: BoardProps & { setMessage: (m: string | null) => void }) {
   const router = useRouter();
   const t = L[lang];
   const [slots, setSlots] = useState(initial);
-  const [message, setMessage] = useState<string | null>(null);
   const [waiting, setWaiting] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
 
@@ -50,11 +69,6 @@ export function SlotBoard({ studentId, initial, myBookings, lang }: { studentId:
   if (slots.length === 0) return <p className="text-sm text-muted-foreground">{t.noSlots}</p>;
   return (
     <div className="space-y-4">
-      {message && (
-        <p role="alert" className="rounded-md border border-destructive/40 p-3 text-sm text-destructive" data-testid="ptm-message">
-          {message}
-        </p>
-      )}
       {teachers.map(([teacherId, name]) => (
         <section key={teacherId} className="space-y-2">
           <h4 className="font-medium">{name}</h4>
