@@ -7438,6 +7438,198 @@ export type Database = {
           },
         ]
       }
+      datesheet: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          current_version: number
+          exam_term_id: string
+          id: string
+          session_id: string
+          status: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          current_version?: number
+          exam_term_id: string
+          id?: string
+          session_id: string
+          status?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          current_version?: number
+          exam_term_id?: string
+          id?: string
+          session_id?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "datesheet_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "datesheet_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "datesheet_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "exam_term"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "datesheet_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_term_id"]
+          },
+          {
+            foreignKeyName: "datesheet_exam_term_id_fkey"
+            columns: ["exam_term_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_term_selectable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "datesheet_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "datesheet_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      datesheet_slot: {
+        Row: {
+          campus_id: string
+          created_at: string
+          datesheet_id: string
+          end_at: string
+          exam_subject_id: string
+          hall_id: string | null
+          id: string
+          invigilators_required: number
+          start_at: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          datesheet_id: string
+          end_at: string
+          exam_subject_id: string
+          hall_id?: string | null
+          id?: string
+          invigilators_required?: number
+          start_at: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          datesheet_id?: string
+          end_at?: string
+          exam_subject_id?: string
+          hall_id?: string | null
+          id?: string
+          invigilators_required?: number
+          start_at?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "datesheet_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "datesheet_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "datesheet_slot_datesheet_id_fkey"
+            columns: ["datesheet_id"]
+            isOneToOne: false
+            referencedRelation: "datesheet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "datesheet_slot_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "datesheet_slot_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "datesheet_slot_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "datesheet_slot_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "datesheet_slot_hall_id_fkey"
+            columns: ["hall_id"]
+            isOneToOne: false
+            referencedRelation: "exam_hall"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "datesheet_slot_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dead_letter_receipt: {
         Row: {
           expires_at: string
@@ -7543,6 +7735,38 @@ export type Database = {
           },
         ]
       }
+      document_type_policy: {
+        Row: {
+          applies_to_contract_types: string[]
+          document_type: string
+          is_mandatory: boolean
+          label: string
+          tenant_id: string
+        }
+        Insert: {
+          applies_to_contract_types?: string[]
+          document_type: string
+          is_mandatory?: boolean
+          label: string
+          tenant_id: string
+        }
+        Update: {
+          applies_to_contract_types?: string[]
+          document_type?: string
+          is_mandatory?: boolean
+          label?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_type_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_bank_detail: {
         Row: {
           account_number: string
@@ -7613,6 +7837,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_bank_detail_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: true
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
           {
             foreignKeyName: "employee_bank_detail_tenant_id_fkey"
@@ -7714,6 +7945,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_salary_structure_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
           {
             foreignKeyName: "employee_salary_structure_tenant_id_fkey"
@@ -8198,6 +8436,134 @@ export type Database = {
           },
           {
             foreignKeyName: "exam_attendance_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_hall: {
+        Row: {
+          campus_id: string
+          capacity: number | null
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          rows_count: number
+          seats_per_row: number
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          capacity?: never
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          rows_count: number
+          seats_per_row: number
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          capacity?: never
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          rows_count?: number
+          seats_per_row?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_hall_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_hall_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "exam_hall_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_settings: {
+        Row: {
+          campus_id: string
+          cooldown_mode: string
+          created_at: string
+          id: string
+          invigilation_max_duties: number
+          jummah_cutoff: string
+          max_moderation_delta: number
+          max_moderation_pct: number | null
+          paper_release_offset_minutes: number
+          question_cooldown_terms: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          campus_id: string
+          cooldown_mode?: string
+          created_at?: string
+          id?: string
+          invigilation_max_duties?: number
+          jummah_cutoff?: string
+          max_moderation_delta?: number
+          max_moderation_pct?: number | null
+          paper_release_offset_minutes?: number
+          question_cooldown_terms?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string
+          cooldown_mode?: string
+          created_at?: string
+          id?: string
+          invigilation_max_duties?: number
+          jummah_cutoff?: string
+          max_moderation_delta?: number
+          max_moderation_pct?: number | null
+          paper_release_offset_minutes?: number
+          question_cooldown_terms?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_settings_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_settings_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "exam_settings_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -13088,6 +13454,49 @@ export type Database = {
           },
         ]
       }
+      inv_receipt_counter: {
+        Row: {
+          campus_id: string
+          financial_year: number
+          last_serial: number
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          financial_year: number
+          last_serial?: number
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          financial_year?: number
+          last_serial?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_receipt_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_receipt_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "inv_receipt_counter_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inv_reorder_alert: {
         Row: {
           campus_id: string
@@ -13155,6 +13564,310 @@ export type Database = {
             foreignKeyName: "inv_reorder_alert_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_sale: {
+        Row: {
+          campus_id: string
+          class_name: string | null
+          credit_note_of: string | null
+          doc_type: Database["public"]["Enums"]["inv_sale_doc_type"]
+          enrolment_id: string | null
+          financial_year: number
+          id: string
+          serial: string
+          settlement: Database["public"]["Enums"]["inv_sale_settlement"]
+          sold_at: string
+          sold_by: string | null
+          store_id: string
+          student_gr: string
+          student_id: string
+          student_name: string
+          tenant_id: string
+          total: number
+        }
+        Insert: {
+          campus_id: string
+          class_name?: string | null
+          credit_note_of?: string | null
+          doc_type?: Database["public"]["Enums"]["inv_sale_doc_type"]
+          enrolment_id?: string | null
+          financial_year: number
+          id?: string
+          serial: string
+          settlement: Database["public"]["Enums"]["inv_sale_settlement"]
+          sold_at?: string
+          sold_by?: string | null
+          store_id: string
+          student_gr: string
+          student_id: string
+          student_name: string
+          tenant_id: string
+          total: number
+        }
+        Update: {
+          campus_id?: string
+          class_name?: string | null
+          credit_note_of?: string | null
+          doc_type?: Database["public"]["Enums"]["inv_sale_doc_type"]
+          enrolment_id?: string | null
+          financial_year?: number
+          id?: string
+          serial?: string
+          settlement?: Database["public"]["Enums"]["inv_sale_settlement"]
+          sold_at?: string
+          sold_by?: string | null
+          store_id?: string
+          student_gr?: string
+          student_id?: string
+          student_name?: string
+          tenant_id?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_sale_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_credit_note_of_fkey"
+            columns: ["credit_note_of"]
+            isOneToOne: false
+            referencedRelation: "inv_sale"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_credit_note_of_fkey"
+            columns: ["credit_note_of"]
+            isOneToOne: false
+            referencedRelation: "v_inv_cash_book_entry"
+            referencedColumns: ["sale_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_sold_by_fkey"
+            columns: ["sold_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "inv_store"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_sale_challan_link: {
+        Row: {
+          amount_paisa: number
+          attached_at: string
+          challan_id: string
+          challan_line_id: string | null
+          sale_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          attached_at?: string
+          challan_id: string
+          challan_line_id?: string | null
+          sale_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          attached_at?: string
+          challan_id?: string
+          challan_line_id?: string | null
+          sale_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_sale_challan_link_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_challan_link_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_challan_link_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_challan_link_challan_line_id_fkey"
+            columns: ["challan_line_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan_line"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_challan_link_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: true
+            referencedRelation: "inv_sale"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_challan_link_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: true
+            referencedRelation: "v_inv_cash_book_entry"
+            referencedColumns: ["sale_id"]
+          },
+        ]
+      }
+      inv_sale_line: {
+        Row: {
+          amount: number
+          from_package: boolean
+          id: string
+          item_id: string
+          qty: number
+          sale_id: string
+          tenant_id: string
+          unit_price: number
+        }
+        Insert: {
+          amount: number
+          from_package?: boolean
+          id?: string
+          item_id: string
+          qty: number
+          sale_id: string
+          tenant_id: string
+          unit_price: number
+        }
+        Update: {
+          amount?: number
+          from_package?: boolean
+          id?: string
+          item_id?: string
+          qty?: number
+          sale_id?: string
+          tenant_id?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_sale_line_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_item"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_line_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "inv_sale"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_line_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "v_inv_cash_book_entry"
+            referencedColumns: ["sale_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_line_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_setting: {
+        Row: {
+          return_window_days: number
+          tenant_id: string
+        }
+        Insert: {
+          return_window_days?: number
+          tenant_id: string
+        }
+        Update: {
+          return_window_days?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_setting_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
@@ -13320,6 +14033,82 @@ export type Database = {
           },
           {
             foreignKeyName: "inv_store_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_student_entitlement: {
+        Row: {
+          granted_at: string
+          granted_by: string | null
+          id: string
+          item_id: string
+          qty: number
+          source: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          item_id: string
+          qty: number
+          source?: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          item_id?: string
+          qty?: number
+          source?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_student_entitlement_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "inv_student_entitlement_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_item"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_student_entitlement_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_student_entitlement_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "inv_student_entitlement_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "inv_student_entitlement_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -13506,6 +14295,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "leave_application_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
+          },
+          {
             foreignKeyName: "leave_application_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -13552,6 +14348,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_approval_chain_approver_staff_id_fkey"
+            columns: ["approver_staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
           {
             foreignKeyName: "leave_approval_chain_campus_id_fkey"
@@ -13692,6 +14495,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_ledger_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
           {
             foreignKeyName: "leave_ledger_tenant_id_fkey"
@@ -17098,6 +17908,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payroll_arrear_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
+          },
+          {
             foreignKeyName: "payroll_arrear_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -17294,6 +18111,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_line_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
         ]
       }
@@ -20651,6 +21475,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "staff_attendance_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
+          },
+          {
             foreignKeyName: "staff_attendance_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -20693,6 +21524,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_campus_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
         ]
       }
@@ -20755,6 +21593,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "staff_contract_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
+          },
+          {
             foreignKeyName: "staff_contract_supersedes_id_fkey"
             columns: ["supersedes_id"]
             isOneToOne: false
@@ -20798,6 +21643,8 @@ export type Database = {
       }
       staff_document: {
         Row: {
+          document_type: string | null
+          expires_on: string | null
           id: string
           label: string
           staff_id: string
@@ -20807,6 +21654,8 @@ export type Database = {
           uploaded_by: string | null
         }
         Insert: {
+          document_type?: string | null
+          expires_on?: string | null
           id?: string
           label: string
           staff_id: string
@@ -20816,6 +21665,8 @@ export type Database = {
           uploaded_by?: string | null
         }
         Update: {
+          document_type?: string | null
+          expires_on?: string | null
           id?: string
           label?: string
           staff_id?: string
@@ -20845,6 +21696,55 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      staff_document_reminder: {
+        Row: {
+          document_id: string
+          generated_at: string
+          id: string
+          message_id: string | null
+          tenant_id: string
+          threshold_days: number
+        }
+        Insert: {
+          document_id: string
+          generated_at?: string
+          id?: string
+          message_id?: string | null
+          tenant_id: string
+          threshold_days: number
+        }
+        Update: {
+          document_id?: string
+          generated_at?: string
+          id?: string
+          message_id?: string | null
+          tenant_id?: string
+          threshold_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_document_reminder_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "staff_document"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_document_reminder_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "message"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_document_reminder_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -20921,6 +21821,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
           {
             foreignKeyName: "staff_loan_tenant_id_fkey"
@@ -21005,6 +21912,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_private_contact_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: true
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
         ]
       }
@@ -22811,6 +23725,203 @@ export type Database = {
           },
         ]
       }
+      syllabus_coverage: {
+        Row: {
+          campus_id: string
+          completed_on: string | null
+          id: string
+          note: string | null
+          periods_used: number
+          section_id: string
+          session_id: string
+          start_inferred: boolean
+          started_on: string | null
+          status: Database["public"]["Enums"]["coverage_status"]
+          subject_id: string
+          syllabus_unit_id: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          campus_id: string
+          completed_on?: string | null
+          id?: string
+          note?: string | null
+          periods_used?: number
+          section_id: string
+          session_id: string
+          start_inferred?: boolean
+          started_on?: string | null
+          status?: Database["public"]["Enums"]["coverage_status"]
+          subject_id: string
+          syllabus_unit_id: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          campus_id?: string
+          completed_on?: string | null
+          id?: string
+          note?: string | null
+          periods_used?: number
+          section_id?: string
+          session_id?: string
+          start_inferred?: boolean
+          started_on?: string | null
+          status?: Database["public"]["Enums"]["coverage_status"]
+          subject_id?: string
+          syllabus_unit_id?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_coverage_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_syllabus_unit_id_fkey"
+            columns: ["syllabus_unit_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_unit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syllabus_coverage_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          coverage_id: string
+          id: string
+          new_completed_on: string | null
+          new_status: Database["public"]["Enums"]["coverage_status"]
+          old_completed_on: string | null
+          old_status: Database["public"]["Enums"]["coverage_status"] | null
+          tenant_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          coverage_id: string
+          id?: string
+          new_completed_on?: string | null
+          new_status: Database["public"]["Enums"]["coverage_status"]
+          old_completed_on?: string | null
+          old_status?: Database["public"]["Enums"]["coverage_status"] | null
+          tenant_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          coverage_id?: string
+          id?: string
+          new_completed_on?: string | null
+          new_status?: Database["public"]["Enums"]["coverage_status"]
+          old_completed_on?: string | null
+          old_status?: Database["public"]["Enums"]["coverage_status"] | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_coverage_history_coverage_id_fkey"
+            columns: ["coverage_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_coverage"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_coverage_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       syllabus_topic: {
         Row: {
           created_at: string
@@ -23236,6 +24347,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_subject_competency_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
           {
             foreignKeyName: "teacher_subject_competency_subject_id_fkey"
@@ -24735,6 +25853,210 @@ export type Database = {
           },
           {
             foreignKeyName: "timetable_version_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_fare_slab: {
+        Row: {
+          campus_id: string
+          code: string
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          id: string
+          monthly_amount_paisa: number
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          effective_from: string
+          id?: string
+          monthly_amount_paisa: number
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          id?: string
+          monthly_amount_paisa?: number
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_fare_slab_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_fare_slab_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "transport_fare_slab_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_route: {
+        Row: {
+          active: boolean
+          campus_id: string
+          code: string
+          created_at: string
+          id: string
+          name: string
+          shift: Database["public"]["Enums"]["transport_shift"]
+          tenant_id: string
+        }
+        Insert: {
+          active?: boolean
+          campus_id: string
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          shift: Database["public"]["Enums"]["transport_shift"]
+          tenant_id: string
+        }
+        Update: {
+          active?: boolean
+          campus_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          shift?: Database["public"]["Enums"]["transport_shift"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_route_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_route_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "transport_route_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_stop: {
+        Row: {
+          campus_id: string
+          created_at: string
+          drop_time: string | null
+          fare_slab_id: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string
+          name_ur: string | null
+          pickup_time: string | null
+          route_id: string
+          seq: number
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          drop_time?: string | null
+          fare_slab_id?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          name_ur?: string | null
+          pickup_time?: string | null
+          route_id: string
+          seq: number
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          drop_time?: string | null
+          fare_slab_id?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          name_ur?: string | null
+          pickup_time?: string | null
+          route_id?: string
+          seq?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_stop_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_stop_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "transport_stop_fare_slab_id_fkey"
+            columns: ["fare_slab_id"]
+            isOneToOne: false
+            referencedRelation: "transport_fare_slab"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_stop_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "transport_route"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_stop_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "v_transport_route_sheet"
+            referencedColumns: ["route_id"]
+          },
+          {
+            foreignKeyName: "transport_stop_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -26351,6 +27673,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payroll_run_line_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
+          },
+          {
             foreignKeyName: "payroll_run_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -27251,6 +28580,58 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      v_inv_cash_book_entry: {
+        Row: {
+          amount_paisa: number | null
+          book_date: string | null
+          campus_id: string | null
+          doc_type: Database["public"]["Enums"]["inv_sale_doc_type"] | null
+          sale_id: string | null
+          serial: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          amount_paisa?: never
+          book_date?: never
+          campus_id?: string | null
+          doc_type?: Database["public"]["Enums"]["inv_sale_doc_type"] | null
+          sale_id?: string | null
+          serial?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          amount_paisa?: never
+          book_date?: never
+          campus_id?: string | null
+          doc_type?: Database["public"]["Enums"]["inv_sale_doc_type"] | null
+          sale_id?: string | null
+          serial?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_sale_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_sale_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "inv_sale_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -28718,6 +30099,42 @@ export type Database = {
           },
         ]
       }
+      v_staff_compliance: {
+        Row: {
+          campus_id: string | null
+          compliance_status: string | null
+          employee_code: string | null
+          expired_types: string[] | null
+          full_name: string | null
+          missing_types: string[] | null
+          staff_id: string | null
+          tenant_id: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "staff_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_staff_loan_summary: {
         Row: {
           approved_by: string | null
@@ -28759,6 +30176,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "staff"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
           },
           {
             foreignKeyName: "staff_loan_tenant_id_fkey"
@@ -29313,6 +30737,51 @@ export type Database = {
           },
         ]
       }
+      v_transport_route_sheet: {
+        Row: {
+          active: boolean | null
+          campus_id: string | null
+          drop_time: string | null
+          lat: number | null
+          lng: number | null
+          monthly_amount_paisa: number | null
+          pickup_time: string | null
+          route_code: string | null
+          route_id: string | null
+          route_name: string | null
+          seq: number | null
+          shift: Database["public"]["Enums"]["transport_shift"] | null
+          slab_code: string | null
+          slab_name: string | null
+          stop_id: string | null
+          stop_name: string | null
+          stop_name_ur: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_route_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_route_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "transport_route_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_unallocated_section_subject: {
         Row: {
           campus_id: string | null
@@ -29530,6 +30999,16 @@ export type Database = {
         }
         Returns: Json
       }
+      add_staff_compliance_document: {
+        Args: {
+          p_document_type: string
+          p_expires_on: string
+          p_label?: string
+          p_staff_id: string
+          p_storage_path?: string
+        }
+        Returns: string
+      }
       add_staff_document: {
         Args: { p_label: string; p_staff_id: string; p_storage_path?: string }
         Returns: string
@@ -29593,6 +31072,20 @@ export type Database = {
       }
       add_ticket_message: {
         Args: { p_body: string; p_is_internal?: boolean; p_ticket_id: string }
+        Returns: string
+      }
+      add_transport_stop: {
+        Args: {
+          p_drop_time?: string
+          p_fare_slab_id?: string
+          p_lat?: number
+          p_lng?: number
+          p_name: string
+          p_name_ur?: string
+          p_pickup_time?: string
+          p_route_id: string
+          p_seq?: number
+        }
         Returns: string
       }
       advance_leave_approval: {
@@ -29879,6 +31372,10 @@ export type Database = {
         Args: { p_room_id: string; p_section_id: string }
         Returns: Json
       }
+      check_staff_document_expiry: {
+        Args: { p_tenant?: string; p_today?: string }
+        Returns: number
+      }
       check_submission: {
         Args: {
           p_feedback_code: string
@@ -30132,6 +31629,10 @@ export type Database = {
         }
         Returns: Json
       }
+      coverage_pct: {
+        Args: { p_section_id: string; p_subject_id: string }
+        Returns: number
+      }
       create_academic_session: {
         Args: {
           p_campus_id: string
@@ -30254,6 +31755,10 @@ export type Database = {
       }
       create_custom_role: {
         Args: { p_name: string; p_permission_codes: string[] }
+        Returns: string
+      }
+      create_datesheet: {
+        Args: { p_campus_id: string; p_exam_term_id: string; p_title: string }
         Returns: string
       }
       create_draft_structure: {
@@ -30429,6 +31934,15 @@ export type Database = {
           p_room_type: Database["public"]["Enums"]["room_type_enum"]
         }
         Returns: string
+      }
+      create_sale: {
+        Args: {
+          p_lines: Json
+          p_settlement: string
+          p_store_id?: string
+          p_student_id: string
+        }
+        Returns: Json
       }
       create_section: {
         Args: {
@@ -30683,6 +32197,7 @@ export type Database = {
       delete_class_level: { Args: { p_id: string }; Returns: undefined }
       delete_class_subject: { Args: { p_id: string }; Returns: undefined }
       delete_custom_role: { Args: { p_role_id: string }; Returns: undefined }
+      delete_datesheet_slot: { Args: { p_slot_id: string }; Returns: undefined }
       delete_department: { Args: { p_id: string }; Returns: boolean }
       delete_exam_subject: {
         Args: { p_exam_subject_id: string }
@@ -31113,6 +32628,13 @@ export type Database = {
         Args: { p_exam_term_id: string; p_section_id: string }
         Returns: number
       }
+      fn_datesheet_warnings: {
+        Args: { p_datesheet_id: string }
+        Returns: {
+          slot_id: string
+          warnings: Json
+        }[]
+      }
       fn_decide_leave_application: {
         Args: {
           p_application_id: string
@@ -31127,6 +32649,15 @@ export type Database = {
           bucket: string
           outstanding_paisa: number
           students: number
+        }[]
+      }
+      fn_detect_datesheet_clash: {
+        Args: { p_datesheet_id: string }
+        Returns: {
+          affected_count: number
+          affected_gr_numbers: string[]
+          slot_a: string
+          slot_b: string
         }[]
       }
       fn_dismiss_duplicate_enquiry: {
@@ -31856,6 +33387,8 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_sale_context: { Args: { p_student_id: string }; Returns: Json }
+      get_sale_receipt: { Args: { p_sale_id: string }; Returns: Json }
       global_search: {
         Args: { p_limit?: number; p_q: string }
         Returns: {
@@ -31872,6 +33405,15 @@ export type Database = {
       }
       grant_impersonation_consent: {
         Args: { p_hours?: number; p_target_user_id?: string }
+        Returns: string
+      }
+      grant_student_entitlement: {
+        Args: {
+          p_item_id: string
+          p_qty: number
+          p_source?: string
+          p_student_id: string
+        }
         Returns: string
       }
       guard_campaign_dispatch: { Args: { p_batch_id: string }; Returns: Json }
@@ -32097,6 +33639,10 @@ export type Database = {
       moderate_student_remark: {
         Args: { p_action: string; p_reason?: string; p_version_id: string }
         Returns: Json
+      }
+      move_transport_stop: {
+        Args: { p_new_seq: number; p_stop_id: string }
+        Returns: undefined
       }
       my_effective_permissions: {
         Args: Record<PropertyKey, never>
@@ -32635,6 +34181,7 @@ export type Database = {
         Args: { p_file_id: string }
         Returns: undefined
       }
+      remove_transport_stop: { Args: { p_stop_id: string }; Returns: undefined }
       render_template: {
         Args: { p_ctx: Json; p_lang?: string; p_version_id: string }
         Returns: string
@@ -32899,6 +34446,10 @@ export type Database = {
         Args: { p_batch_id: string; p_remarks?: Json }
         Returns: Json
       }
+      return_sale_items: {
+        Args: { p_lines: Json; p_sale_id: string }
+        Returns: Json
+      }
       reverse_ledger_entry: {
         Args: { p_ledger_id: string; p_reason: string }
         Returns: string
@@ -32950,6 +34501,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      run_staff_document_expiry_check: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       run_unmarked_attendance_check: {
         Args: { p_campus_id: string; p_date?: string }
         Returns: Json
@@ -32971,6 +34526,43 @@ export type Database = {
           p_page_size: Database["public"]["Enums"]["certificate_page_size"]
           p_template_id: string
           p_title: string
+        }
+        Returns: string
+      }
+      save_datesheet_slot: {
+        Args: {
+          p_datesheet_id: string
+          p_end_time: string
+          p_exam_date: string
+          p_exam_subject_id: string
+          p_hall_id?: string
+          p_invigilators?: number
+          p_start_time: string
+        }
+        Returns: Json
+      }
+      save_exam_hall: {
+        Args: {
+          p_campus_id: string
+          p_code: string
+          p_is_active?: boolean
+          p_name: string
+          p_rows_count: number
+          p_seats_per_row: number
+        }
+        Returns: string
+      }
+      save_exam_settings: {
+        Args: { p_campus_id: string; p_settings: Json }
+        Returns: undefined
+      }
+      save_fare_slab: {
+        Args: {
+          p_campus_id: string
+          p_code: string
+          p_effective_from: string
+          p_monthly_amount_paisa: number
+          p_name: string
         }
         Returns: string
       }
@@ -33023,6 +34615,17 @@ export type Database = {
           p_units: Json
         }
         Returns: number
+      }
+      save_transport_route: {
+        Args: {
+          p_active?: boolean
+          p_campus_id: string
+          p_code: string
+          p_id?: string
+          p_name: string
+          p_shift: Database["public"]["Enums"]["transport_shift"]
+        }
+        Returns: string
       }
       schedule_campaign: {
         Args: {
@@ -33315,6 +34918,7 @@ export type Database = {
         Args: { p_campus_id: string; p_enabled: boolean }
         Returns: undefined
       }
+      set_inv_return_window: { Args: { p_days: number }; Returns: undefined }
       set_leave_approval_chain_step: {
         Args: {
           p_approver_role: Database["public"]["Enums"]["app_role"]
@@ -33402,6 +35006,10 @@ export type Database = {
         Args: { p_scheme_id: string; p_sibling_rank: number }
         Returns: undefined
       }
+      set_staff_document_expiry: {
+        Args: { p_document_id: string; p_expires_on: string }
+        Returns: undefined
+      }
       set_stream_active: {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
@@ -33436,6 +35044,18 @@ export type Database = {
           p_subject_id: string
         }
         Returns: undefined
+      }
+      set_syllabus_coverage: {
+        Args: {
+          p_completed_on?: string
+          p_periods_used?: number
+          p_section_id: string
+          p_started_on?: string
+          p_status: Database["public"]["Enums"]["coverage_status"]
+          p_subject_id: string
+          p_unit_id: string
+        }
+        Returns: string
       }
       set_tc_requires_no_dues: {
         Args: { p_required: boolean }
@@ -33716,6 +35336,10 @@ export type Database = {
         }
         Returns: number
       }
+      transport_slab_amount: {
+        Args: { p_on: string; p_slab_id: string }
+        Returns: number
+      }
       undo_import_batch: { Args: { p_batch_id: string }; Returns: Json }
       unlink_guardian: {
         Args: { p_guardian_id: string; p_student_id: string }
@@ -33840,6 +35464,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_transport_stop: {
+        Args: {
+          p_drop_time?: string
+          p_fare_slab_id?: string
+          p_lat?: number
+          p_lng?: number
+          p_name: string
+          p_name_ur?: string
+          p_pickup_time?: string
+          p_stop_id: string
+        }
+        Returns: undefined
+      }
       upsert_class_subject: {
         Args: {
           p_campus_id: string
@@ -33863,6 +35500,15 @@ export type Database = {
           p_name_ur?: string
         }
         Returns: Json
+      }
+      upsert_document_type_policy: {
+        Args: {
+          p_contract_types?: string[]
+          p_document_type: string
+          p_is_mandatory: boolean
+          p_label: string
+        }
+        Returns: undefined
       }
       upsert_exam_subject: {
         Args: {
@@ -34090,6 +35736,7 @@ export type Database = {
         | "probation"
         | "visiting"
         | "part_time"
+      coverage_status: "not_started" | "in_progress" | "completed"
       disability_type:
         | "none"
         | "visual_impairment"
@@ -34192,6 +35839,8 @@ export type Database = {
         | "return"
         | "adjustment"
         | "writeoff"
+      inv_sale_doc_type: "sale" | "credit_note"
+      inv_sale_settlement: "cash" | "fee_ledger"
       late_fee_basis: "flat" | "per_day" | "percentage"
       leave_accrual_method: "annual_grant" | "monthly_accrual" | "none"
       leave_application_status:
@@ -34358,6 +36007,7 @@ export type Database = {
       timetable_export_status: "queued" | "running" | "completed" | "failed"
       timetable_version_status: "DRAFT" | "PUBLISHED" | "SUPERSEDED"
       transport_direction: "pickup" | "drop" | "both"
+      transport_shift: "morning" | "afternoon"
       user_status: "active" | "suspended" | "terminated"
       wa_template_category:
         | "UTILITY"
@@ -34588,6 +36238,7 @@ export const Constants = {
         "visiting",
         "part_time",
       ],
+      coverage_status: ["not_started", "in_progress", "completed"],
       disability_type: [
         "none",
         "visual_impairment",
@@ -34701,6 +36352,8 @@ export const Constants = {
         "adjustment",
         "writeoff",
       ],
+      inv_sale_doc_type: ["sale", "credit_note"],
+      inv_sale_settlement: ["cash", "fee_ledger"],
       late_fee_basis: ["flat", "per_day", "percentage"],
       leave_accrual_method: ["annual_grant", "monthly_accrual", "none"],
       leave_application_status: [
@@ -34884,6 +36537,7 @@ export const Constants = {
       timetable_export_status: ["queued", "running", "completed", "failed"],
       timetable_version_status: ["DRAFT", "PUBLISHED", "SUPERSEDED"],
       transport_direction: ["pickup", "drop", "both"],
+      transport_shift: ["morning", "afternoon"],
       user_status: ["active", "suspended", "terminated"],
       wa_template_category: [
         "UTILITY",
