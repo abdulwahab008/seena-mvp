@@ -10,7 +10,7 @@ export default async function ExportsPage() {
   const { data: user } = await supabase.auth.getUser();
   const [datasetsRes, jobsRes, notesRes] = await Promise.all([
     supabase.from('report_dataset').select('dataset_key, display_name').order('display_name'),
-    supabase.from('v_report_export_job').select('id, requested_by, dataset_key, status, row_count, error, created_at, finished_at, expires_at, downloadable').order('created_at', { ascending: false }).limit(30),
+    supabase.from('v_report_export_job').select('id, requested_by, dataset_key, format, page_count, status, row_count, error, created_at, finished_at, expires_at, downloadable').order('created_at', { ascending: false }).limit(30),
     supabase.from('user_notification').select('id, title, body, link, created_at, read_at').order('created_at', { ascending: false }).limit(5),
   ]);
 
@@ -60,8 +60,9 @@ export default async function ExportsPage() {
           {jobs.map((j) => (
             <div key={j.id ?? j.created_at} className="flex items-center justify-between gap-2 border-b py-2" data-testid="export-job">
               <span>
-                {j.dataset_key} · {when(j.created_at)}
+                {j.dataset_key} ({j.format === 'pdf' ? 'PDF' : 'Excel'}) · {when(j.created_at)}
                 {j.row_count !== null ? ` · ${j.row_count} rows` : ''}
+                {j.page_count ? ` · ${j.page_count} pages` : ''}
               </span>
               <span className="flex items-center gap-3">
                 <Badge variant={j.status === 'done' ? 'success' : j.status === 'failed' ? 'destructive' : 'outline'}>{j.status ?? ''}</Badge>

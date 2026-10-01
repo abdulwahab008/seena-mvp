@@ -67,7 +67,9 @@ export async function renderPdf(doc: PrintDocument): Promise<Buffer> {
 
   let browser;
   try {
-    browser = await chromium.launch();
+    // ACADEMY_CHROMIUM_PATH lets a deployment (or a machine whose Playwright
+    // build differs from its installed browser) point at the Chromium to use.
+    browser = await chromium.launch({ executablePath: process.env.ACADEMY_CHROMIUM_PATH || undefined });
   } catch (cause) {
     throw new RendererUnavailableError(cause);
   }
