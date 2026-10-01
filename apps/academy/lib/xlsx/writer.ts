@@ -96,9 +96,11 @@ const STYLES_XML =
   `<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>` +
   `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 
-type Entry = { name: string; data: Uint8Array };
+export type ZipEntry = { name: string; data: Uint8Array };
+type Entry = ZipEntry;
 
-function zip(entries: Entry[]): Uint8Array {
+// Stored (uncompressed) ZIP container. Shared by the workbook writer and the tenant data export.
+export function zip(entries: Entry[]): Uint8Array {
   const enc = new TextEncoder();
   const parts: Uint8Array[] = [];
   const central: Uint8Array[] = [];
