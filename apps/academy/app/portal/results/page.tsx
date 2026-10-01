@@ -84,6 +84,10 @@ export default async function PortalResultsPage({ searchParams }: { searchParams
           FR-J08 — your child&apos;s result for the term.{' '}
           <Link href="/portal/results/trend" className="underline" data-testid="results-trend-link">
             See progress across terms
+          </Link>{' '}
+          ·{' '}
+          <Link href="/portal/results/transcripts" className="underline" data-testid="results-transcripts-link">
+            Transcripts
           </Link>
         </p>
       </div>

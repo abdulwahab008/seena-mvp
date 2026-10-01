@@ -2293,3 +2293,18 @@ export const assemblePacketSchema = z.object({
   billingPeriod: billingPeriodField,
 });
 export type AssemblePacketInput = z.infer<typeof assemblePacketSchema>;
+
+// FR-J13: cumulative transcript issuance. Mirrors
+// supabase/migrations/20260802400400_cumulative_transcript.sql.
+export const TRANSCRIPT_PURPOSES = [
+  'Transfer Certificate',
+  'College admission',
+  'Scholarship application',
+  'Board registration',
+  'Other',
+] as const;
+export const issueTranscriptSchema = z.object({
+  studentId: z.string().uuid(),
+  purpose: z.string().trim().min(1, 'Say what the transcript is for').max(200),
+});
+export type IssueTranscriptInput = z.infer<typeof issueTranscriptSchema>;
