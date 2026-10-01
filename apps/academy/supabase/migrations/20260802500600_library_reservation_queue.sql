@@ -368,7 +368,7 @@ begin
   end if;
 
   select * into v_b from app.fn_library_borrower(p_borrower_id);
-  if v_b.borrower_role is null or (v_b.borrower_role = 'student' and not exists (select 1 from public.student s where s.id = p_borrower_id and s.status = 'active')) then
+  if v_b.borrower_role is null or (v_b.borrower_role = 'student' and not exists (select 1 from public.student s where s.id = p_borrower_id and s.status = 'active' and s.deleted_at is null)) then
     raise exception 'BORROWER_NOT_FOUND' using errcode = 'P0002';
   end if;
 

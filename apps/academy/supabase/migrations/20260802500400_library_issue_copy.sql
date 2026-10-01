@@ -245,13 +245,13 @@ begin
   if char_length(v_q) < 2 then
     return;
   end if;
-  if exists (select 1 from public.student s where s.tenant_id = v_tenant and s.gr_number = v_q and s.status = 'active') then
+  if exists (select 1 from public.student s where s.tenant_id = v_tenant and s.gr_number = v_q and s.status = 'active' and s.deleted_at is null) then
     return query
       select s.id, 'student'::text, s.name_en,
              'GR ' || s.gr_number || coalesce(' · ' || (select cl.name_en || ' ' || cs.name from public.enrolment e join public.class_level cl on cl.id = e.class_level_id join public.class_section cs on cs.id = e.section_id where e.student_id = s.id and e.status = 'active' order by e.joined_on desc limit 1), ''),
              (select count(*)::int from public.library_loan l where l.borrower_id = s.id and l.returned_at is null),
              app.fn_library_outstanding(s.id)
-        from public.student s where s.tenant_id = v_tenant and s.gr_number = v_q and s.status = 'active';
+        from public.student s where s.tenant_id = v_tenant and s.gr_number = v_q and s.status = 'active' and s.deleted_at is null;
     return;
   end if;
   return query
@@ -260,7 +260,7 @@ begin
             (select count(*)::int from public.library_loan l where l.borrower_id = s.id and l.returned_at is null),
             app.fn_library_outstanding(s.id)
        from public.student s
-      where s.tenant_id = v_tenant and s.status = 'active' and app.fn_library_campus_ok(s.campus_id) and (s.name_en ilike '%' || v_q || '%' or s.name_ur ilike '%' || v_q || '%')
+      where s.tenant_id = v_tenant and s.status = 'active' and s.deleted_at is null and app.fn_library_campus_ok(s.campus_id) and (s.name_en ilike '%' || v_q || '%' or s.name_ur ilike '%' || v_q || '%')
       order by s.name_en limit 10)
     union all
     (select u.user_id, case when u.app_role in ('class_teacher', 'subject_teacher', 'head_of_department') then 'teacher' else 'staff' end, u.full_name,
