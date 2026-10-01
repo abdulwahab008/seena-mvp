@@ -1,12 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test.describe('FR-M01: Unified Outbound Message Outbox End-to-End Flow', () => {
   test('Principal / Owner can view outbox, compose a message, claim batch, and inspect attempts', async ({ page }) => {
     // 1. Sign in as Owner
+    const owner = await seedSchoolOwner('comm-outbox');
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 

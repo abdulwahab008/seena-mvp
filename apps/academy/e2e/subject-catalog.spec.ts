@@ -1,11 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner, seedStandardSubjects } from './support/school-owner-seed';
 
 test('Subject catalog, adding new subject, and verifying competency & class curriculum dropdowns', async ({ page }) => {
   // 1. Log in as School Owner
+  const owner = await seedSchoolOwner('subject-catalog');
+  // The standard subjects are only backfilled for tenants that existed when the migration ran.
+  await seedStandardSubjects(owner);
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
-  await page.getByLabel('Email').fill('owner@seena.academy');
-  await page.getByLabel('Password').fill('Password123!');
+  await page.getByLabel('Email').fill(owner.email);
+  await page.getByLabel('Password').fill(owner.password);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL('**/dashboard', { timeout: 15000 });
 
@@ -19,20 +23,12 @@ test('Subject catalog, adding new subject, and verifying competency & class curr
   await expect(page.getByRole('cell', { name: 'Physics', exact: true })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'English', exact: true })).toBeVisible();
 
-  // Capture screenshot of Subject Catalog Desk
-  await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/subject_catalog_desk.png',
-  });
 
   // 3. Open "Add Subject" modal
   await page.getByRole('button', { name: 'Add Subject' }).first().click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByText('Add New Subject')).toBeVisible();
 
-  // Capture screenshot of Add Subject modal
-  await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/subject_modal_add.png',
-  });
 
   // Fill in new subject details (Strictly English)
   const rand = Math.floor(Math.random() * 899 + 100);
@@ -65,10 +61,6 @@ test('Subject catalog, adding new subject, and verifying competency & class curr
   await expect(page.getByRole('option', { name: 'Physics' })).toBeVisible();
   await expect(page.getByRole('option', { name: newName })).toBeVisible();
 
-  // Capture screenshot of Teacher Competency dropdown open
-  await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/teacher_competency_subjects_populated.png',
-  });
 
   // Select Mathematics
   await page.getByRole('option', { name: 'Mathematics' }).click();
@@ -84,8 +76,4 @@ test('Subject catalog, adding new subject, and verifying competency & class curr
   await expect(page.getByRole('option', { name: 'Mathematics' })).toBeVisible();
   await expect(page.getByRole('option', { name: 'Physics' })).toBeVisible();
 
-  // Capture screenshot of Curriculum Mapping with subjects
-  await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/curriculum_mapping_subjects_available.png',
-  });
 });

@@ -1,12 +1,24 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner, seedStandardDepartments, seedStaffMember } from './support/school-owner-seed';
 
 test.describe('Teacher Departments End-to-End Flow', () => {
   test('Owner can manage departments, assign faculty, and filter staff directory by department', async ({ page }) => {
     // 1. Sign in as Owner
+    const owner = await seedSchoolOwner('teacher-depts');
+    // The standard departments are only backfilled for tenants that existed when the migration ran.
+    await seedStandardDepartments(owner);
+    // The directory search below needs this teacher to exist; file him under Sciences so the
+    // reassignment to Mathematics is a real change.
+    await seedStaffMember(owner, {
+      fullName: 'Prof. Zafar Iqbal',
+      employeeCode: 'SA-MAIN-0002',
+      cnic: '42101-1234567-1',
+      departmentCode: 'SCI',
+    });
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await page.waitForURL('**/dashboard', { timeout: 15000 });
 
@@ -83,10 +95,13 @@ test.describe('Teacher Departments End-to-End Flow', () => {
 
   test('Department cards are minimal without clutter and Assign Modal immediately shows updated department name', async ({ page }) => {
     // 1. Sign in as Owner
+    const owner = await seedSchoolOwner('teacher-depts');
+    // The standard departments are only backfilled for tenants that existed when the migration ran.
+    await seedStandardDepartments(owner);
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await page.waitForURL('**/dashboard', { timeout: 15000 });
 

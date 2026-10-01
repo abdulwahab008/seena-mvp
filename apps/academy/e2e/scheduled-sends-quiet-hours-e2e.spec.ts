@@ -1,14 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test.describe('FR-M07: Scheduled Sends with Quiet Hours & PTA Anti-Spam Compliance', () => {
   test('Principal / Owner schedules campaigns, validates past-time rejection (AC 3), tests quiet hours deferral (AC 1), executes emergency bypass with audit log (AC 2), and creates Ramadan override (AC 4)', async ({
     page,
   }) => {
     // 1. Sign in as Owner
+    const owner = await seedSchoolOwner('quiet-hours');
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
