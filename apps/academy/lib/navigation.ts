@@ -228,6 +228,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/hostel', label: 'Blocks & Beds' },
       { href: '/hostel/allocations', label: 'Bed Allocation' },
+      { href: '/hostel/gate-passes', label: 'Gate Passes' },
     ],
   },
   {
