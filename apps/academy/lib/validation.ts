@@ -2343,3 +2343,22 @@ export const certificateTemplateSchema = z.object({
   bodyHtml: z.string().trim().min(20, 'The wording is too short').max(8000),
   numberFormat: z.string().trim().max(60).refine((v) => v.includes('{seq4}'), 'The number format must contain {seq4}'),
 });
+
+// FR-D14: appraisal cycle, scoring and the appraisee's response.
+export const appraisalCycleSchema = z
+  .object({
+    sessionId: z.string().uuid({ message: 'Choose the academic session' }),
+    name: z.string().trim().min(1, 'Name the cycle').max(120),
+    opensOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the opening date'),
+    closesOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the closing date'),
+    minServiceDays: z.coerce.number({ message: 'Enter the minimum service in days' }).int().min(0).max(3650),
+  })
+  .refine((v) => v.closesOn >= v.opensOn, { path: ['closesOn'], message: 'The closing date is before the opening date' });
+export const appraisalScoresSchema = z.object({
+  appraisalId: z.string().uuid(),
+  ratings: z.array(z.object({ competencyId: z.string().uuid(), rating: z.coerce.number().int().min(1, 'Ratings are 1 to 5').max(5, 'Ratings are 1 to 5') })).min(1),
+});
+export const appraisalDisputeSchema = z.object({
+  appraisalId: z.string().uuid(),
+  comment: z.string().trim().min(1, 'Write your response').max(2000, 'At most 2000 characters'),
+});
