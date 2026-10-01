@@ -2409,5 +2409,20 @@ export const issueGatePassSchema = z
   })
   .refine((v) => v.expectedBackAt > v.departsAt, { message: 'The return time must be after the departure', path: ['expectedBackAt'] });
 export const cancelGatePassSchema = z.object({ passId: tuuid, reason: z.string().trim().min(5, 'Give a reason').max(300) });
+// FR-Q04
+export const visitorEntrySchema = z.object({
+  studentId: tuuid,
+  visitId: tuuid,
+  visitorName: z.string().trim().min(2, 'Enter the visitor\'s name').max(120),
+  visitorCnic: z.string().trim().regex(/^\d{5}-?\d{7}-?\d$/, 'CNIC must be 13 digits, e.g. 35202-1234567-1'),
+  relationship: toptText(60),
+  phone: toptText(20),
+  photoPath: toptText(300),
+});
+export const hostelSettingsSchema = z.object({
+  visitingClose: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM'),
+  retentionDays: tint('Retention days', 7, 3650),
+  messNoticeHours: tint('Notice hours', 0, 720),
+});
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];
