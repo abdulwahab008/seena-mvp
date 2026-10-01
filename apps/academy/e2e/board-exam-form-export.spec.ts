@@ -62,7 +62,7 @@ test('the export is blocked on a missing mandatory subject, reconciles the fee, 
   const register = async (kid: { studentId: string }, category: string, group: string | null, roll: string, subjects: { subject_code: string; election: string }[]) => {
     const { error } = await owner$.rpc('save_exam_registration', {
       p_student_id: kid.studentId, p_session_id: session!.id, p_board_code: 'FBISE', p_session_year: 2026, p_session_date: '2026-04-15',
-      p_candidate_category: category, p_group_code: group ?? undefined, p_roll_no: roll, p_subjects: subjects,
+      p_candidate_category: category, p_group_code: group ?? '', p_roll_no: roll, p_subjects: subjects,
     });
     expect(error).toBeNull();
   };
