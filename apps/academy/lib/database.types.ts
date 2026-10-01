@@ -77,6 +77,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "academic_clone_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "academic_clone_run_from_session_id_fkey"
             columns: ["from_session_id"]
             isOneToOne: false
@@ -153,6 +160,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_session_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "academic_session_tenant_id_fkey"
@@ -279,6 +293,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_application_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "admission_application_class_applied_id_fkey"
@@ -456,6 +477,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admission_document_requirement_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "admission_document_requirement_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -515,6 +543,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_document_submission_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "admission_document_submission_tenant_id_fkey"
@@ -618,6 +653,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admission_enquiry_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "admission_enquiry_class_applied_id_fkey"
             columns: ["class_applied_id"]
             isOneToOne: false
@@ -707,6 +749,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_fee_payment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
@@ -806,6 +855,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admission_fee_waiver_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "admission_fee_waiver_consumed_by_enrolment_id_fkey"
             columns: ["consumed_by_enrolment_id"]
             isOneToOne: false
@@ -902,6 +958,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_followup_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "admission_followup_completed_by_fkey"
@@ -1448,6 +1511,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admission_test_sitting_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "admission_test_sitting_class_level_id_fkey"
             columns: ["class_level_id"]
             isOneToOne: false
@@ -1534,6 +1604,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_waitlist_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "admission_waitlist_class_level_id_fkey"
@@ -1631,6 +1708,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agg_campus_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "agg_campus_day_tenant_id_fkey"
@@ -1762,6 +1846,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "annual_result_class_level_id_fkey"
@@ -1967,6 +2058,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "application_no_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "application_no_counter_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -2010,6 +2108,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_threshold_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "approval_threshold_tenant_id_fkey"
@@ -2086,6 +2191,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_audit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "attendance_audit_enrolment_id_fkey"
@@ -2205,6 +2317,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "attendance_correction_request_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "attendance_correction_request_decided_by_fkey"
             columns: ["decided_by"]
             isOneToOne: false
@@ -2314,6 +2433,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "attendance_day_enrolment_id_fkey"
@@ -2448,6 +2574,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "attendance_gap_log_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "attendance_gap_log_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
@@ -2543,6 +2676,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_lock_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "attendance_lock_locked_by_user_fkey"
@@ -2673,6 +2813,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "attendance_monthly_summary_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -2764,6 +2911,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "attendance_notification_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "attendance_notification_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -2851,6 +3005,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "attendance_policy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "attendance_policy_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -2908,6 +3069,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_status_weight_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "attendance_status_weight_session_id_fkey"
@@ -2978,6 +3146,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sync_log_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "attendance_sync_log_section_id_fkey"
@@ -3147,6 +3322,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_export_job_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "audit_export_job_requested_by_fkey"
@@ -3590,6 +3772,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bank_recon_exception_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "bank_recon_exception_challan_id_fkey"
             columns: ["challan_id"]
             isOneToOne: false
@@ -3709,6 +3898,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bank_statement_import_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "bank_statement_import_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -3770,6 +3966,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_line_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "bank_statement_line_import_id_fkey"
@@ -3848,6 +4051,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bell_calendar_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "bell_calendar_rule_tenant_id_fkey"
@@ -3937,6 +4147,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bell_template_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "bell_template_tenant_id_fkey"
@@ -4092,6 +4309,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_export_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "board_export_run_class_level_id_fkey"
@@ -4259,6 +4483,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "branding_asset_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "branding_asset_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -4391,6 +4622,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "campus_bank_account_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "campus_bank_account_mapping_profile_id_fkey"
             columns: ["mapping_profile_id"]
             isOneToOne: false
@@ -4460,6 +4698,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "campus_event_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "campus_event_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -4520,6 +4765,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "campus_event_override_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "campus_event_override_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
@@ -4565,6 +4817,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "campus_portal_policy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "campus_portal_policy_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -4599,6 +4858,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campus_setting_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
         ]
       }
@@ -4643,6 +4909,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_book_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "cash_book_day_finalised_by_fkey"
@@ -4758,6 +5031,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "certificate_issue_enrolment_id_fkey"
@@ -4936,6 +5216,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "certificate_serial_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "certificate_serial_counter_last_allocated_by_fkey"
             columns: ["last_allocated_by"]
             isOneToOne: false
@@ -5050,6 +5337,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "certificate_template_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "certificate_template_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -5120,6 +5414,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "challan_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "challan_counter_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -5179,6 +5480,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challan_template_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "challan_template_tenant_id_fkey"
@@ -5246,6 +5554,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "circular_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "circular_tenant_id_fkey"
@@ -5523,6 +5838,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "class_section_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "class_section_class_level_id_fkey"
             columns: ["class_level_id"]
             isOneToOne: false
@@ -5640,6 +5962,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subject_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "class_subject_class_level_id_fkey"
@@ -6067,6 +6396,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "comm_trigger_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "comm_trigger_rule_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -6155,6 +6491,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "concession_award_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "concession_award_enrolment_id_fkey"
@@ -6403,6 +6746,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "consent_record_granted_by_guardian_id_fkey"
@@ -6680,6 +7030,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "employee_bank_detail_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "employee_bank_detail_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: true
@@ -6715,6 +7072,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_code_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
         ]
       }
@@ -6765,6 +7129,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_salary_structure_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "employee_salary_structure_staff_id_fkey"
@@ -6858,6 +7229,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enquiry_no_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "enquiry_no_counter_session_id_fkey"
@@ -6975,6 +7353,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "enrolment_class_level_id_fkey"
@@ -7178,6 +7563,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "exam_attendance_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "exam_attendance_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -7274,6 +7666,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "exam_subject_class_subject_id_fkey"
@@ -7456,6 +7855,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "exam_term_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "exam_term_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -7518,6 +7924,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "expense_budget_created_by_fkey"
@@ -7645,6 +8058,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "expense_head_campus_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "expense_head_campus_head_id_fkey"
             columns: ["head_id"]
             isOneToOne: false
@@ -7728,6 +8148,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "expense_voucher_created_by_fkey"
@@ -7989,6 +8416,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "fee_challan_deleted_by_fkey"
             columns: ["deleted_by"]
             isOneToOne: false
@@ -8107,6 +8541,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "fee_challan_batch_requested_by_fkey"
@@ -8522,6 +8963,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fee_ledger_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "fee_ledger_challan_id_fkey"
             columns: ["challan_id"]
             isOneToOne: false
@@ -8654,6 +9102,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "fee_payment_collected_by_fkey"
@@ -8793,6 +9248,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_plan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "fee_plan_enrolment_id_fkey"
@@ -9006,6 +9468,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fee_receipt_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "fee_receipt_payment_id_fkey"
             columns: ["payment_id"]
             isOneToOne: false
@@ -9054,6 +9523,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_receipt_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "fee_receipt_counter_session_id_fkey"
@@ -9170,6 +9646,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_structure_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "fee_structure_created_by_fkey"
@@ -9311,6 +9794,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "gr_ledger_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "gr_ledger_student_fk"
             columns: ["student_id"]
             isOneToOne: false
@@ -9362,6 +9852,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gr_sequence_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "gr_sequence_tenant_id_fkey"
@@ -9633,6 +10130,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "guardian_claim_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "guardian_claim_guardian_id_fkey"
             columns: ["guardian_id"]
             isOneToOne: false
@@ -9867,6 +10371,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "holiday_calendar_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "holiday_calendar_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -9940,6 +10451,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "homework_overridden_by_fkey"
@@ -10062,6 +10580,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_load_policy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "homework_load_policy_session_id_fkey"
@@ -10328,6 +10853,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "import_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "import_batch_committed_by_fkey"
             columns: ["committed_by"]
             isOneToOne: false
@@ -10556,6 +11088,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "late_fee_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "late_fee_rule_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -10639,6 +11178,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "leave_application_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "leave_application_decided_by_fkey"
             columns: ["decided_by"]
             isOneToOne: false
@@ -10713,6 +11259,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_approval_chain_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "leave_approval_chain_leave_type_id_fkey"
@@ -10990,6 +11543,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mark_entry_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "mark_entry_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -11124,6 +11684,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_entry_audit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "mark_entry_audit_enrolment_id_fkey"
@@ -11289,6 +11856,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mark_entry_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "mark_entry_batch_exam_subject_id_fkey"
             columns: ["exam_subject_id"]
             isOneToOne: false
@@ -11388,6 +11962,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_lock_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "mark_lock_exam_subject_id_fkey"
@@ -11588,6 +12169,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mark_unlock_request_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
             columns: ["exam_subject_id"]
             isOneToOne: false
@@ -11741,6 +12329,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "marketing_gallery_export_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "marketing_gallery_export_requested_by_fkey"
             columns: ["requested_by"]
             isOneToOne: false
@@ -11840,6 +12435,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_gallery_export_exclusion_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "marketing_gallery_export_exclusion_export_id_fkey"
@@ -12029,6 +12631,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "message_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "message_template_version_id_fkey"
             columns: ["template_version_id"]
             isOneToOne: false
@@ -12182,6 +12791,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "message_audience_snapshot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "message_audience_snapshot_guardian_id_fkey"
             columns: ["guardian_id"]
             isOneToOne: false
@@ -12280,6 +12896,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "message_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "message_batch_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -12356,6 +12979,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_campaign_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "message_campaign_created_by_fkey"
@@ -12460,6 +13090,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_cost_ledger_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "message_cost_ledger_message_id_fkey"
@@ -12585,6 +13222,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "message_segment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "message_segment_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -12705,6 +13349,30 @@ export type Database = {
           },
         ]
       }
+      metric_definition: {
+        Row: {
+          denominator_desc: string
+          display_name: string
+          metric_key: string
+          note: string | null
+          numerator_desc: string
+        }
+        Insert: {
+          denominator_desc: string
+          display_name: string
+          metric_key: string
+          note?: string | null
+          numerator_desc: string
+        }
+        Update: {
+          denominator_desc?: string
+          display_name?: string
+          metric_key?: string
+          note?: string | null
+          numerator_desc?: string
+        }
+        Relationships: []
+      }
       ocr_mark_job: {
         Row: {
           campus_id: string
@@ -12767,6 +13435,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_mark_job_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "ocr_mark_job_cancelled_by_fkey"
@@ -12939,6 +13614,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ocr_mark_suggestion_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "ocr_mark_suggestion_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -13026,6 +13708,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_review_action_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "ocr_review_action_enrolment_id_fkey"
@@ -13193,6 +13882,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "outbound_message_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "outbound_message_enquiry_id_fkey"
             columns: ["enquiry_id"]
             isOneToOne: false
@@ -13302,6 +13998,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payment_alert_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "payment_alert_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
@@ -13370,6 +14073,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payment_gateway_config_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "payment_gateway_config_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -13431,6 +14141,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intent_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "payment_intent_challan_id_fkey"
@@ -13616,6 +14333,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payroll_arrear_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "payroll_arrear_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
@@ -13666,6 +14390,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_config_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "payroll_config_tenant_id_fkey"
@@ -13735,6 +14466,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "payroll_run_tenant_id_fkey"
@@ -14266,6 +15004,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "report_card_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "report_card_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -14446,6 +15191,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_card_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "report_card_batch_exam_term_id_fkey"
@@ -14693,6 +15445,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "result_position_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "result_position_class_level_id_fkey"
             columns: ["class_level_id"]
             isOneToOne: false
@@ -14881,6 +15640,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_withhold_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "result_withhold_enrolment_id_fkey"
@@ -15177,6 +15943,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "room_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "room_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -15294,6 +16067,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "section_class_teacher_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "section_class_teacher_section_id_fkey"
@@ -15530,6 +16310,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "section_subject_teacher_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "section_subject_teacher_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
@@ -15659,6 +16446,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_event_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "security_event_tenant_id_fkey"
@@ -15918,6 +16712,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "session_rollover_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "session_rollover_run_from_session_id_fkey"
             columns: ["from_session_id"]
             isOneToOne: false
@@ -16017,6 +16818,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sibling_group_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "sibling_group_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -16079,6 +16887,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_identity_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "signing_identity_created_by_fkey"
@@ -16186,6 +17001,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "staff_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "staff_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
@@ -16254,6 +17076,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "staff_attendance_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "staff_attendance_marked_by_fkey"
             columns: ["marked_by"]
             isOneToOne: false
@@ -16296,6 +17125,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_campus_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "staff_campus_staff_id_fkey"
@@ -16517,6 +17353,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "staff_loan_staff_id_fkey"
@@ -16916,6 +17759,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "student_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "student_deleted_by_fkey"
             columns: ["deleted_by"]
             isOneToOne: false
@@ -16979,6 +17829,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_elective_choice_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "student_elective_choice_class_level_id_fkey"
@@ -17177,6 +18034,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "student_medical_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "student_medical_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: true
@@ -17260,6 +18124,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_portal_account_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "student_portal_account_student_id_fkey"
@@ -17353,6 +18224,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_remark_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "student_remark_student_id_fkey"
@@ -17618,6 +18496,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "student_transport_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "student_transport_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -17811,6 +18696,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "subject_result_computed_by_fkey"
@@ -18046,6 +18938,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "support_ticket_student_id_fkey"
@@ -18841,6 +19740,13 @@ export type Database = {
             referencedRelation: "campus"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ticket_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
         ]
       }
       ticket_escalation_notification: {
@@ -18887,6 +19793,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_escalation_notification_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "ticket_escalation_notification_tenant_id_fkey"
@@ -18989,6 +19902,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "timetable_constraint_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "timetable_constraint_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -19074,6 +19994,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "timetable_export_job_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "timetable_export_job_requested_by_fkey"
             columns: ["requested_by"]
             isOneToOne: false
@@ -19151,6 +20078,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_parallel_group_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "timetable_parallel_group_section_id_fkey"
@@ -19394,6 +20328,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "timetable_room_capacity_warning_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "timetable_room_capacity_warning_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
@@ -19486,6 +20427,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "timetable_slot_room_id_fkey"
@@ -19636,6 +20584,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "timetable_substitution_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "timetable_substitution_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -19754,6 +20709,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "timetable_version_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "timetable_version_published_by_fkey"
             columns: ["published_by"]
             isOneToOne: false
@@ -19802,6 +20764,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_campus_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "user_campus_user_id_fkey"
@@ -20056,6 +21025,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "message_cost_ledger_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "message_cost_ledger_message_id_fkey"
             columns: ["message_id"]
             isOneToOne: false
@@ -20144,6 +21120,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annual_result_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "annual_result_class_level_id_fkey"
@@ -20322,6 +21305,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bank_statement_import_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "bank_statement_import_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -20436,6 +21426,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_issue_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "certificate_issue_enrolment_id_fkey"
@@ -20594,6 +21591,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "certificate_serial_counter_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "certificate_serial_counter_last_allocated_by_fkey"
             columns: ["last_allocated_by"]
             isOneToOne: false
@@ -20640,6 +21644,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "circular_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "circular_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -20676,6 +21687,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_subject_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "class_subject_class_level_id_fkey"
@@ -20766,6 +21784,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "student_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "student_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -20799,6 +21824,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_record_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "consent_record_granted_by_guardian_id_fkey"
@@ -20864,6 +21896,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fee_ledger_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "fee_ledger_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -20922,6 +21961,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "timetable_slot_room_id_fkey"
@@ -21125,6 +22171,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "exam_subject_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "exam_subject_exam_term_id_fkey"
             columns: ["exam_term_id"]
             isOneToOne: false
@@ -21179,6 +22232,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_section_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "class_section_class_level_id_fkey"
@@ -21279,6 +22339,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subject_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "exam_subject_class_subject_id_fkey"
@@ -21404,6 +22471,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "exam_term_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "exam_term_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -21445,6 +22519,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_budget_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "expense_budget_head_id_fkey"
@@ -21512,6 +22593,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_voucher_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "expense_voucher_created_by_fkey"
@@ -21637,6 +22725,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "student_guardian_guardian_id_fkey"
@@ -21790,6 +22885,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "import_batch_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "import_batch_committed_by_fkey"
             columns: ["committed_by"]
             isOneToOne: false
@@ -21851,6 +22953,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
@@ -21948,6 +23057,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mark_unlock_request_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "mark_unlock_request_exam_subject_id_fkey"
@@ -22226,6 +23342,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ocr_review_action_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "ocr_review_action_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -22275,6 +23398,52 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "onboarding_progress_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_owner_kpi: {
+        Row: {
+          as_of_day: string | null
+          attendance_pct: number | null
+          billed_paisa: number | null
+          campus_id: string | null
+          campus_name: string | null
+          collected_paisa: number | null
+          collection_pct: number | null
+          enrolled_count: number | null
+          last_refreshed_at: string | null
+          outstanding_0_30_paisa: number | null
+          outstanding_31_60_paisa: number | null
+          outstanding_60plus_paisa: number | null
+          outstanding_paisa: number | null
+          payroll_locked: boolean | null
+          payroll_status: string | null
+          present_count: number | null
+          staff_cost_paisa: number | null
+          staff_cost_ratio: number | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agg_campus_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agg_campus_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "agg_campus_day_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -22332,6 +23501,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "fee_challan_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
@@ -22354,6 +23530,47 @@ export type Database = {
           },
           {
             foreignKeyName: "fee_challan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_principal_today: {
+        Row: {
+          absent_count: number | null
+          campus_id: string | null
+          collected_today_paisa: number | null
+          on_date: string | null
+          pending_online_count: number | null
+          sections_marked: number | null
+          sections_total: number | null
+          tenant_id: string | null
+        }
+        Insert: {
+          absent_count?: never
+          campus_id?: string | null
+          collected_today_paisa?: never
+          on_date?: never
+          pending_online_count?: never
+          sections_marked?: never
+          sections_total?: never
+          tenant_id?: string | null
+        }
+        Update: {
+          absent_count?: never
+          campus_id?: string | null
+          collected_today_paisa?: never
+          on_date?: never
+          pending_online_count?: never
+          sections_marked?: never
+          sections_total?: never
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -22394,6 +23611,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_position_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "result_position_class_level_id_fkey"
@@ -22654,6 +23878,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "session_rollover_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "session_rollover_run_from_session_id_fkey"
             columns: ["from_session_id"]
             isOneToOne: false
@@ -22712,6 +23943,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "homework_section_id_fkey"
@@ -22791,6 +24029,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "class_section_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "class_section_class_level_id_fkey"
             columns: ["class_level_id"]
             isOneToOne: false
@@ -22852,6 +24097,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "timetable_slot_room_id_fkey"
@@ -22985,6 +24237,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "timetable_slot_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
@@ -23097,6 +24356,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_loan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "staff_loan_staff_id_fkey"
@@ -23222,6 +24488,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "enrolment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "enrolment_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -23297,6 +24570,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_result_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "subject_result_enrolment_id_fkey"
@@ -23468,6 +24748,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "timetable_slot_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "timetable_slot_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
@@ -23603,6 +24890,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "class_subject_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
             foreignKeyName: "class_subject_class_level_id_fkey"
             columns: ["class_level_id"]
             isOneToOne: false
@@ -23649,6 +24943,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "campus"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_transport_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
           },
           {
             foreignKeyName: "student_transport_session_id_fkey"
@@ -25435,6 +26736,10 @@ export type Database = {
         }
         Returns: string
       }
+      fn_staff_cost_ratio: {
+        Args: { p_campus_id: string; p_month: string }
+        Returns: number
+      }
       fn_student_medical_flags: {
         Args: { p_campus_id?: string }
         Returns: {
@@ -25475,9 +26780,30 @@ export type Database = {
         Args: { p_exam_term_id: string; p_section_id: string }
         Returns: Json
       }
+      fn_today_absentees: {
+        Args: { p_campus_id: string; p_on_date?: string }
+        Returns: {
+          class_name: string
+          enrolment_id: string
+          gr_number: string
+          guardian_name: string
+          guardian_phone: string
+          section_name: string
+          student_name: string
+        }[]
+      }
       fn_unlock_test_scores: {
         Args: { p_sitting_id: string }
         Returns: undefined
+      }
+      fn_unmarked_sections: {
+        Args: { p_campus_id: string; p_on_date?: string }
+        Returns: {
+          class_name: string
+          class_teacher_name: string
+          section_id: string
+          section_name: string
+        }[]
       }
       fn_unpaid_days: {
         Args: {

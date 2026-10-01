@@ -51,7 +51,11 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'overview',
     label: 'Overview',
     icon: LayoutDashboard,
-    items: [{ href: '/dashboard', label: 'Dashboard' }],
+    items: [
+      { href: '/dashboard', label: 'Dashboard' },
+      { href: '/dashboard/owner', label: 'Owner KPIs' },
+      { href: '/dashboard/today', label: 'Today' },
+    ],
   },
   // Top level rather than inside Settings: a school that has not finished
   // setting up needs this to be the most findable thing in the product, and a
