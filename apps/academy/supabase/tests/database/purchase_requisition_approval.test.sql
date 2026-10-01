@@ -1,6 +1,6 @@
 -- pgTAP tests for FR-R06: purchase requisition with approval thresholds.
 begin;
-select plan(38);
+select plan(41);
 
 select public.provision_tenant('test-purchase-co', 'Purchase Co', 'owner@purchase.test');
 select id as tenant_id from public.tenant where slug = 'test-purchase-co' \gset
@@ -35,6 +35,14 @@ select public.create_inv_item('CHAIR', 'Classroom chair', 'consumable', 'pcs', n
 select public.create_inv_store(:'campus_id'::uuid, 'Main Store') as store \gset
 select public.save_purchase_thresholds('[{"upto_amount": 5000000, "approver_role": "principal"}, {"upto_amount": null, "approver_role": "owner"}]'::jsonb, null, current_date);
 select public.create_procurement_vendor('Chair Traders') as vendor \gset
+
+-- ── the item picker: a requester who cannot read inv_item still sees code and name ──
+select set_config('request.jwt.claims', json_build_object('sub', :'hod_uid', 'tenant_id', :'tenant_id', 'app_role', 'head_of_department', 'campus_ids', json_build_array(:'campus_id'))::text, true);
+select is((select count(*) from public.inv_item), 0::bigint, 'a head of department cannot read the item master directly');
+select is((select item_code || ' / ' || name from public.list_requisition_items() where id = :'chair'::uuid), 'CHAIR / Classroom chair', 'but the requisition picker lists the item by code and name');
+select set_config('request.jwt.claims', json_build_object('sub', :'other_hod_uid', 'tenant_id', :'other_tenant_id', 'app_role', 'head_of_department', 'campus_ids', '[]'::jsonb)::text, true);
+select is((select count(*) from public.list_requisition_items()), 0::bigint, 'another school''s requester sees none of it');
+select set_config('request.jwt.claims', json_build_object('sub', :'owner_uid', 'tenant_id', :'tenant_id', 'app_role', 'owner', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 
 -- ── AC1: PKR 35,000 needs the Principal only ──────────────────────────────
 select set_config('request.jwt.claims', json_build_object('sub', :'hod_uid', 'tenant_id', :'tenant_id', 'app_role', 'head_of_department', 'campus_ids', json_build_array(:'campus_id'))::text, true);
