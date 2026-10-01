@@ -259,6 +259,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/roles', label: 'Roles' },
       { href: '/feature-flags', label: 'Modules' },
       { href: '/settings/data-export', label: 'Export School Data' },
+      { href: '/settings/retention', label: 'Data Retention' },
     ],
   },
   {

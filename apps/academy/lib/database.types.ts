@@ -17608,6 +17608,197 @@ export type Database = {
           },
         ]
       }
+      hostel_security_deposit: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          charged_on: string
+          created_at: string
+          enrolment_id: string
+          id: string
+          ledger_id: string | null
+          received_on: string | null
+          refund_voucher_no: string | null
+          refunded_on: string | null
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          charged_on: string
+          created_at?: string
+          enrolment_id: string
+          id?: string
+          ledger_id?: string | null
+          received_on?: string | null
+          refund_voucher_no?: string | null
+          refunded_on?: string | null
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          charged_on?: string
+          created_at?: string
+          enrolment_id?: string
+          id?: string
+          ledger_id?: string | null
+          received_on?: string | null
+          refund_voucher_no?: string | null
+          refunded_on?: string | null
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hostel_security_deposit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_transcript"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "fee_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["ledger_id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "hostel_security_deposit_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hostel_tariff: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          id: string
+          mess_rate_per_day_paisa: number
+          monthly_amount_paisa: number
+          room_type: Database["public"]["Enums"]["hostel_room_type"]
+          security_deposit_paisa: number
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_from: string
+          id?: string
+          mess_rate_per_day_paisa?: number
+          monthly_amount_paisa: number
+          room_type: Database["public"]["Enums"]["hostel_room_type"]
+          security_deposit_paisa?: number
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          id?: string
+          mess_rate_per_day_paisa?: number
+          monthly_amount_paisa?: number
+          room_type?: Database["public"]["Enums"]["hostel_room_type"]
+          security_deposit_paisa?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hostel_tariff_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_tariff_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "hostel_tariff_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hostel_visitor_log: {
         Row: {
           campus_id: string
@@ -27970,6 +28161,162 @@ export type Database = {
           },
           {
             foreignKeyName: "result_withhold_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retention_bypass_tx: {
+        Row: {
+          run_id: string
+          txid: number
+        }
+        Insert: {
+          run_id: string
+          txid: number
+        }
+        Update: {
+          run_id?: string
+          txid?: number
+        }
+        Relationships: []
+      }
+      retention_policy: {
+        Row: {
+          action: string
+          anchor_event: string
+          data_category: string
+          id: string
+          retention_years: number
+          tenant_id: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          action: string
+          anchor_event: string
+          data_category: string
+          id?: string
+          retention_years: number
+          tenant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          action?: string
+          anchor_event?: string
+          data_category?: string
+          id?: string
+          retention_years?: number
+          tenant_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retention_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retention_purge_item: {
+        Row: {
+          action_taken: string
+          blob_deleted: boolean
+          data_category: string
+          exemption_reason: string | null
+          id: string
+          planned_action: string
+          processed_at: string | null
+          row_pk: string
+          run_id: string
+          storage_bucket: string | null
+          storage_path: string | null
+          table_name: string
+        }
+        Insert: {
+          action_taken: string
+          blob_deleted?: boolean
+          data_category: string
+          exemption_reason?: string | null
+          id?: string
+          planned_action: string
+          processed_at?: string | null
+          row_pk: string
+          run_id: string
+          storage_bucket?: string | null
+          storage_path?: string | null
+          table_name: string
+        }
+        Update: {
+          action_taken?: string
+          blob_deleted?: boolean
+          data_category?: string
+          exemption_reason?: string | null
+          id?: string
+          planned_action?: string
+          processed_at?: string | null
+          row_pk?: string
+          run_id?: string
+          storage_bucket?: string | null
+          storage_path?: string | null
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retention_purge_item_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "retention_purge_run"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retention_purge_run: {
+        Row: {
+          as_of: string
+          candidates_count: number
+          dry_run: boolean
+          exempted_count: number
+          finished_at: string | null
+          id: string
+          purged_count: number
+          started_at: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          as_of: string
+          candidates_count?: number
+          dry_run: boolean
+          exempted_count?: number
+          finished_at?: string | null
+          id?: string
+          purged_count?: number
+          started_at?: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          as_of?: string
+          candidates_count?: number
+          dry_run?: boolean
+          exempted_count?: number
+          finished_at?: string | null
+          id?: string
+          purged_count?: number
+          started_at?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retention_purge_run_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -44105,6 +44452,10 @@ export type Database = {
             Args: { p_payload: Json; p_provider: string; p_tenant_id?: string }
             Returns: Json
           }
+      apply_retention_purge: {
+        Args: { p_batch_size?: number; p_run_id: string }
+        Returns: number
+      }
       apply_term_remark: {
         Args: {
           p_enrolment_ids: string[]
@@ -45841,6 +46192,18 @@ export type Database = {
           outstanding_paisa: number
         }[]
       }
+      find_retention_candidates: {
+        Args: { p_as_of: string; p_tenant: string }
+        Returns: {
+          action: string
+          data_category: string
+          exemption_reason: string
+          row_pk: string
+          storage_bucket: string
+          storage_path: string
+          table_name: string
+        }[]
+      }
       finish_report_card_batch_item: {
         Args: {
           p_error_code?: string
@@ -47231,9 +47594,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      hostel_fee_monthly_post: { Args: { p_today?: string }; Returns: number }
       hostel_gate_pass_overdue_check: {
         Args: { p_now?: string }
         Returns: number
+      }
+      hostel_monthly_amount: {
+        Args: { p_month: string; p_student_id: string }
+        Returns: Json
       }
       hostel_open_visit_check: { Args: { p_now?: string }; Returns: number }
       hostel_visitor_retention_purge: {
@@ -47628,6 +47996,10 @@ export type Database = {
         Args: { p_failure_code: string; p_message_id: string }
         Returns: undefined
       }
+      mark_retention_blob_deleted: {
+        Args: { p_item_id: string }
+        Returns: undefined
+      }
       mark_settlement_paid: {
         Args: { p_settlement_id: string }
         Returns: undefined
@@ -47799,6 +48171,7 @@ export type Database = {
         Args: { p_lines: Json; p_po_id: string; p_store_id: string }
         Returns: Json
       }
+      post_hostel_charges: { Args: { p_month: string }; Returns: number }
       post_ledger_entry: {
         Args: {
           p_amount_paisa: number
@@ -48038,6 +48411,10 @@ export type Database = {
         Args: { p_from_role_id: string; p_to_role_id?: string }
         Returns: number
       }
+      receive_hostel_deposit: {
+        Args: { p_deposit_id: string; p_received_on: string }
+        Returns: undefined
+      }
       recompute_past_holiday_impact: {
         Args: { p_event_id: string }
         Returns: Json
@@ -48233,6 +48610,14 @@ export type Database = {
         Returns: number
       }
       refresh_teacher_load: { Args: { p_campus: string }; Returns: undefined }
+      refund_hostel_deposit: {
+        Args: {
+          p_deposit_id: string
+          p_refunded_on?: string
+          p_voucher_no: string
+        }
+        Returns: undefined
+      }
       register_biometric_device: {
         Args: { p_campus_id: string; p_device_serial: string; p_label?: string }
         Returns: {
@@ -48722,6 +49107,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      retention_blobs_to_delete: {
+        Args: { p_limit?: number }
+        Returns: {
+          item_id: string
+          storage_bucket: string
+          storage_path: string
+        }[]
+      }
+      retention_purge_nightly: {
+        Args: { p_time_budget?: string }
+        Returns: number
+      }
       retire_signing_identity: {
         Args: { p_identity_id: string; p_valid_to?: string }
         Returns: Json
@@ -48928,6 +49325,17 @@ export type Database = {
           p_effective_from: string
           p_name: string
           p_scheme_id?: string
+        }
+        Returns: string
+      }
+      save_hostel_tariff: {
+        Args: {
+          p_campus_id: string
+          p_deposit_paisa: number
+          p_effective_from: string
+          p_mess_rate_paisa: number
+          p_monthly_paisa: number
+          p_room_type: Database["public"]["Enums"]["hostel_room_type"]
         }
         Returns: string
       }
@@ -49496,6 +49904,10 @@ export type Database = {
         Args: { p_campus_id: string; p_paisa: number }
         Returns: undefined
       }
+      set_retention_policy: {
+        Args: { p_action?: string; p_category: string; p_years: number }
+        Returns: undefined
+      }
       set_rollover_decision: {
         Args: {
           p_decision: Database["public"]["Enums"]["rollover_decision"]
@@ -49713,6 +50125,7 @@ export type Database = {
         }
         Returns: Json
       }
+      start_retention_run: { Args: { p_dry_run?: boolean }; Returns: string }
       start_session_rollover: {
         Args: {
           p_campus_id: string
