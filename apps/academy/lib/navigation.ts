@@ -268,6 +268,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/reports/audit', label: 'Export Audit' },
       { href: '/reports/digests', label: 'Scheduled Digests' },
       { href: '/reports/year-on-year', label: 'Year on Year' },
+      { href: '/reports/builder', label: 'Report Builder' },
     ],
   },
 ];
