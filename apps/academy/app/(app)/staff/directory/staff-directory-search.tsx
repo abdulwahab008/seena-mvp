@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -171,7 +172,9 @@ export function StaffDirectorySearch({
                 className="border-b last:border-0 hover:bg-muted/20 transition-colors"
               >
                 <td className="p-3 font-medium">
-                  {r.full_name}
+                  <Link href={`/staff/${r.staff_id}`} className="hover:underline" data-testid={`staff-profile-link-${r.full_name}`}>
+                    {r.full_name}
+                  </Link>
                   {r.is_former && (
                     <span
                       className="ml-2 rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
