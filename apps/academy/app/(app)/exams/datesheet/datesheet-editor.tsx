@@ -9,11 +9,13 @@ import {
   createDatesheetSchema,
   datesheetSlotSchema,
   examHallSchema,
+  examSettingsSchema,
   type CreateDatesheetInput,
   type DatesheetSlotInput,
   type ExamHallInput,
+  type ExamSettingsInput,
 } from '@/lib/validation';
-import { createDatesheet, deleteSlot, publishDatesheet, reopenDatesheet, saveHall, saveSlot, type SlotWarning } from './actions';
+import { createDatesheet, deleteSlot, publishDatesheet, reopenDatesheet, saveExamSettings, saveHall, saveSlot, type SlotWarning } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -242,6 +244,78 @@ export function PublishPanel({ datesheetId, status, canPublish, nextVersion }: {
       </Button>
       {error && <p role="alert" className="text-sm text-destructive" data-testid="publish-error">{error}</p>}
     </div>
+  );
+}
+
+export type ExamSettingsValues = {
+  jummahCutoff: string;
+  invigilationMaxDuties: number;
+  paperReleaseOffsetMinutes: number;
+  maxModerationDelta: number;
+  maxModerationPct: number | null;
+};
+
+/**
+ * The exam office's campus settings, in one place: the Friday Jummah cut-off the
+ * datesheet warns against (FR-I03), the invigilation duty cap (FR-I10), how long
+ * before the exam a published paper unseals (FR-I08) and the moderation caps
+ * (FR-I15). The question cooldown has its own card on the papers page.
+ */
+export function ExamSettingsForm({ campusId, values }: { campusId: string; values: ExamSettingsValues }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const form = useForm<ExamSettingsInput>({
+    resolver: zodResolver(examSettingsSchema),
+    defaultValues: {
+      campusId,
+      jummahCutoff: values.jummahCutoff,
+      invigilationMaxDuties: values.invigilationMaxDuties,
+      paperReleaseOffsetMinutes: values.paperReleaseOffsetMinutes,
+      maxModerationDelta: values.maxModerationDelta,
+      maxModerationPct: values.maxModerationPct,
+    },
+  });
+  const onSubmit = form.handleSubmit((v) =>
+    startTransition(async () => {
+      const r = await saveExamSettings(v);
+      setError(r.error);
+      if (!r.error) {
+        toast.success('Exam settings saved.');
+        router.refresh();
+      }
+    }),
+  );
+  const firstError = Object.values(form.formState.errors)[0]?.message as string | undefined;
+  return (
+    <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-5" noValidate>
+      <div className="space-y-1">
+        <Label htmlFor="setJummah">Friday Jummah cut-off</Label>
+        <Input id="setJummah" type="time" {...form.register('jummahCutoff')} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="setMaxDuties">Max invigilation duties per term</Label>
+        <Input id="setMaxDuties" type="number" {...form.register('invigilationMaxDuties', { valueAsNumber: true })} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="setRelease">Paper release (minutes before exam)</Label>
+        <Input id="setRelease" type="number" {...form.register('paperReleaseOffsetMinutes', { valueAsNumber: true })} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="setModDelta">Max moderation (marks)</Label>
+        <Input id="setModDelta" type="number" step="0.5" {...form.register('maxModerationDelta', { valueAsNumber: true })} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="setModPct">Max moderation (% of max, optional)</Label>
+        <Input id="setModPct" type="number" step="0.5" {...form.register('maxModerationPct', { setValueAs: (v) => (v === '' || v === null || Number.isNaN(Number(v)) ? null : Number(v)) })} />
+      </div>
+      <div className="sm:col-span-5">
+        <Button type="submit" variant="outline" disabled={pending} data-testid="save-exam-settings">
+          Save settings
+        </Button>
+      </div>
+      {(error || firstError) && <p role="alert" className="text-sm text-destructive sm:col-span-5">{error ?? firstError}</p>}
+    </form>
   );
 }
 

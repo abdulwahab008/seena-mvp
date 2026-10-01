@@ -2342,6 +2342,23 @@ export const cooldownSettingsSchema = z.object({
   cooldownMode: z.enum(['warn', 'block']),
 });
 export type CooldownSettingsInput = z.infer<typeof cooldownSettingsSchema>;
+// FR-I15: moderation of a section's marks.
+export const moderationSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  sectionId: z.string().uuid(),
+  delta: z
+    .number({ message: 'Enter the adjustment in marks' })
+    .refine((n) => n !== 0, 'The adjustment cannot be zero')
+    .refine((n) => Math.abs(n) <= 100, 'Enter a smaller adjustment'),
+  reason: z.string().trim().min(20, 'Give a reason of at least 20 characters').max(500, 'At most 500 characters'),
+});
+export type ModerationInput = z.infer<typeof moderationSchema>;
+export const reverseModerationSchema = z.object({
+  moderationId: z.string().uuid(),
+  reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(500, 'At most 500 characters'),
+});
+export type ReverseModerationInput = z.infer<typeof reverseModerationSchema>;
+
 // FR-I07: build Set A / Set B from the question bank.
 export const buildSetsSchema = z.object({
   examSubjectId: z.string().uuid({ message: 'Choose a paper' }),
