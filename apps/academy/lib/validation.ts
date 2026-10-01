@@ -2448,5 +2448,16 @@ export const messOffSchema = z
   .object({ studentId: toptUuid, grNumber: toptText(40), from: tdate, to: tdate, reason: toptText(300) })
   .refine((v) => v.to >= v.from, { message: 'The last day cannot be before the first day', path: ['to'] })
   .refine((v) => v.studentId || v.grNumber, { message: 'Enter the GR number', path: ['grNumber'] });
+// FR-Q06
+export const hostelTariffSchema = z.object({
+  campusId: tuuid,
+  roomType: z.enum(['single', 'double', 'triple', 'quad', 'dorm'], { message: 'Choose a room type' }),
+  monthly: trupees('Monthly room fee'),
+  messRate: z.string().trim().regex(/^\d+(\.\d{1,2})?$/, 'Enter the mess rate per day in rupees').transform(Number),
+  deposit: z.string().trim().regex(/^\d+(\.\d{1,2})?$/, 'Enter the deposit in rupees (0 for none)').transform(Number),
+  effectiveFrom: tdate,
+});
+export const postHostelChargesSchema = z.object({ month: tdate });
+export const hostelDepositRefundSchema = z.object({ depositId: tuuid, voucherNo: z.string().trim().min(3, 'Enter the refund voucher number').max(40) });
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];

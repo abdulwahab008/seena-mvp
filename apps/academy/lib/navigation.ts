@@ -231,6 +231,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/hostel/gate-passes', label: 'Gate Passes' },
       { href: '/hostel/visitors', label: 'Visitors' },
       { href: '/hostel/mess', label: 'Mess Menu & Mess-off' },
+      { href: '/hostel/fees', label: 'Hostel & Mess Fees' },
     ],
   },
   {
