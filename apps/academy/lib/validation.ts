@@ -2350,3 +2350,120 @@ export function karachiLocalToIso(local: string | undefined): string | undefined
   if (!local) return undefined;
   return new Date(`${local}:00+05:00`).toISOString();
 }
+// FR-D06: staff compliance documents with an expiry date.
+const isoDateField = (message: string) => z.string().regex(/^\d{4}-\d{2}-\d{2}$/, message);
+export const complianceDocumentSchema = z.object({
+  staffUserId: z.string().uuid({ message: "Choose a staff member" }),
+  documentType: z.string().regex(/^[a-z][a-z0-9_]{1,39}$/, "Choose a document type"),
+  expiresOn: isoDateField("Enter the expiry date"),
+});
+export type ComplianceDocumentInput = z.infer<typeof complianceDocumentSchema>;
+export const renewDocumentSchema = z.object({ documentId: z.string().uuid(), expiresOn: isoDateField("Enter the new expiry date") });
+
+// FR-D08: biometric devices, code mapping and the campus start-time rule.
+export const registerBiometricDeviceSchema = z.object({
+  campusId: z.string().uuid(),
+  deviceSerial: z.string().trim().regex(/^[A-Za-z0-9._-]{3,64}$/, "Serial: 3 to 64 letters, digits, dot, dash or underscore"),
+  label: z.string().trim().max(80).optional(),
+});
+export const mapDeviceCodeSchema = z.object({
+  deviceId: z.string().uuid(),
+  staffId: z.string().uuid({ message: "Choose a staff member" }),
+  code: z.string().trim().min(1, "Enter the code on the device").max(40),
+});
+export const clockOffsetSchema = z.object({
+  deviceId: z.string().uuid(),
+  offsetSeconds: z.coerce.number({ message: "Enter seconds" }).int("Whole seconds only").min(-86400).max(86400),
+});
+export const staffAttendanceRuleSchema = z.object({
+  campusId: z.string().uuid(),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Enter a time like 08:00"),
+  graceMinutes: z.coerce.number({ message: "Enter minutes" }).int().min(0).max(240),
+});
+
+// FR-D15: disciplinary records (append-only; corrections are new rows).
+export const DISCIPLINARY_ACTION_TYPES = ['warning', 'show_cause', 'inquiry', 'suspension', 'termination'] as const;
+export const issueDisciplinarySchema = z
+  .object({
+    staffId: z.string().uuid(),
+    actionType: z.enum(DISCIPLINARY_ACTION_TYPES, { message: 'Choose the type of action' }),
+    description: z.string().trim().min(1, 'Describe the matter').max(4000, 'At most 4000 characters'),
+    responseDays: z.coerce.number().int().min(1, 'Allow at least 1 day').max(60, 'At most 60 days').optional(),
+    suspendFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+    suspendTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+  })
+  .superRefine((v, ctx) => {
+    if (v.actionType === 'show_cause' && !v.responseDays) ctx.addIssue({ code: 'custom', path: ['responseDays'], message: 'Enter the response deadline in days' });
+    if (v.actionType === 'suspension') {
+      if (!v.suspendFrom || !v.suspendTo) ctx.addIssue({ code: 'custom', path: ['suspendFrom'], message: 'Enter the suspension dates' });
+      else if (v.suspendTo < v.suspendFrom) ctx.addIssue({ code: 'custom', path: ['suspendTo'], message: 'The end date is before the start date' });
+    }
+  });
+export const supersedeDisciplinarySchema = z.object({
+  recordId: z.string().uuid(),
+  description: z.string().trim().max(4000).optional(),
+  staffResponse: z.string().trim().max(4000).optional(),
+  outcome: z.string().trim().max(2000).optional(),
+  suspendFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+  suspendTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+});
+export const reinstateSchema = z.object({ recordId: z.string().uuid(), note: z.string().trim().max(1000).optional() });
+
+// FR-D16: staff exit and clearance.
+export const STAFF_EXIT_TYPES = ['resignation', 'termination', 'contract_expiry', 'retirement', 'death'] as const;
+export const initiateExitSchema = z
+  .object({
+    staffId: z.string().uuid(),
+    exitType: z.enum(STAFF_EXIT_TYPES, { message: 'Choose the type of exit' }),
+    noticeDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+    lastWorkingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the last working date'),
+    reason: z.string().trim().max(500).optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.noticeDate && v.lastWorkingDate < v.noticeDate) ctx.addIssue({ code: 'custom', path: ['lastWorkingDate'], message: 'The last working date is before the notice date' });
+  });
+export const clearItemSchema = z.object({ exitId: z.string().uuid(), itemCode: z.string().regex(/^[a-z][a-z0-9_]{1,39}$/) });
+export const waiveItemSchema = clearItemSchema.extend({ reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(500) });
+
+// FR-D17: final settlement manual lines.
+export const SETTLEMENT_MANUAL_LINE_TYPES = ['gratuity', 'asset_recovery', 'advance_recovery', 'other'] as const;
+export const settlementLineSchema = z.object({
+  settlementId: z.string().uuid(),
+  lineType: z.enum(SETTLEMENT_MANUAL_LINE_TYPES, { message: 'Choose the line type' }),
+  description: z.string().trim().min(1, 'Describe the line').max(300),
+  amount: z.string().trim().min(1, 'Enter the amount'),
+  sign: z.enum(['1', '-1']),
+});
+
+// FR-D18: staff certificates.
+export const STAFF_CERTIFICATE_TYPES = ['experience', 'service', 'noc'] as const;
+export const issueCertificateSchema = z.object({
+  staffId: z.string().uuid({ message: 'Choose a staff member' }),
+  certType: z.enum(STAFF_CERTIFICATE_TYPES, { message: 'Choose the certificate type' }),
+  overrideReason: z.string().trim().max(500).optional(),
+});
+export const certificateTemplateSchema = z.object({
+  certType: z.enum(STAFF_CERTIFICATE_TYPES),
+  title: z.string().trim().min(3, 'Enter a title').max(120),
+  bodyHtml: z.string().trim().min(20, 'The wording is too short').max(8000),
+  numberFormat: z.string().trim().max(60).refine((v) => v.includes('{seq4}'), 'The number format must contain {seq4}'),
+});
+
+// FR-D14: appraisal cycle, scoring and the appraisee's response.
+export const appraisalCycleSchema = z
+  .object({
+    sessionId: z.string().uuid({ message: 'Choose the academic session' }),
+    name: z.string().trim().min(1, 'Name the cycle').max(120),
+    opensOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the opening date'),
+    closesOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the closing date'),
+    minServiceDays: z.coerce.number({ message: 'Enter the minimum service in days' }).int().min(0).max(3650),
+  })
+  .refine((v) => v.closesOn >= v.opensOn, { path: ['closesOn'], message: 'The closing date is before the opening date' });
+export const appraisalScoresSchema = z.object({
+  appraisalId: z.string().uuid(),
+  ratings: z.array(z.object({ competencyId: z.string().uuid(), rating: z.coerce.number().int().min(1, 'Ratings are 1 to 5').max(5, 'Ratings are 1 to 5') })).min(1),
+});
+export const appraisalDisputeSchema = z.object({
+  appraisalId: z.string().uuid(),
+  comment: z.string().trim().min(1, 'Write your response').max(2000, 'At most 2000 characters'),
+});
