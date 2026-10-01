@@ -258,6 +258,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/library/circulation', label: 'Circulation Desk' },
       { href: '/library/reservations', label: 'Reservations' },
       { href: '/library/fines', label: 'Fines' },
+      { href: '/library/write-offs', label: 'Write-offs' },
       { href: '/library/policies', label: 'Borrowing Policy' },
     ],
   },

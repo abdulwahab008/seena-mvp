@@ -13855,6 +13855,13 @@ export type Database = {
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "library_fine_write_off_fk"
+            columns: ["write_off_id"]
+            isOneToOne: false
+            referencedRelation: "library_write_off"
+            referencedColumns: ["id"]
+          },
         ]
       }
       library_loan: {
@@ -14113,6 +14120,153 @@ export type Database = {
           },
           {
             foreignKeyName: "library_title_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_write_off: {
+        Row: {
+          base_amount: number
+          basis: Database["public"]["Enums"]["library_write_off_basis"]
+          borrower_id: string | null
+          campus_id: string
+          charge_amount: number
+          copy_id: string
+          created_at: string
+          declared_at: string
+          declared_by: string
+          fee_ledger_id: string | null
+          fine_component: number
+          id: string
+          loan_id: string | null
+          multiplier: number
+          reason: string | null
+          recovery_note: string | null
+          reversal_ledger_id: string | null
+          reversal_of: string | null
+          reversed_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          base_amount?: number
+          basis: Database["public"]["Enums"]["library_write_off_basis"]
+          borrower_id?: string | null
+          campus_id: string
+          charge_amount?: number
+          copy_id: string
+          created_at?: string
+          declared_at?: string
+          declared_by: string
+          fee_ledger_id?: string | null
+          fine_component?: number
+          id?: string
+          loan_id?: string | null
+          multiplier?: number
+          reason?: string | null
+          recovery_note?: string | null
+          reversal_ledger_id?: string | null
+          reversal_of?: string | null
+          reversed_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          base_amount?: number
+          basis?: Database["public"]["Enums"]["library_write_off_basis"]
+          borrower_id?: string | null
+          campus_id?: string
+          charge_amount?: number
+          copy_id?: string
+          created_at?: string
+          declared_at?: string
+          declared_by?: string
+          fee_ledger_id?: string | null
+          fine_component?: number
+          id?: string
+          loan_id?: string | null
+          multiplier?: number
+          reason?: string | null
+          recovery_note?: string | null
+          reversal_ledger_id?: string | null
+          reversal_of?: string | null
+          reversed_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_write_off_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_write_off_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_write_off_copy_id_fkey"
+            columns: ["copy_id"]
+            isOneToOne: false
+            referencedRelation: "library_copy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_write_off_declared_by_fkey"
+            columns: ["declared_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "library_write_off_fee_ledger_id_fkey"
+            columns: ["fee_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "fee_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_write_off_fee_ledger_id_fkey"
+            columns: ["fee_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["ledger_id"]
+          },
+          {
+            foreignKeyName: "library_write_off_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "library_loan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_write_off_reversal_ledger_id_fkey"
+            columns: ["reversal_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "fee_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_write_off_reversal_ledger_id_fkey"
+            columns: ["reversal_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_collection"
+            referencedColumns: ["ledger_id"]
+          },
+          {
+            foreignKeyName: "library_write_off_reversal_of_fkey"
+            columns: ["reversal_of"]
+            isOneToOne: false
+            referencedRelation: "library_write_off"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_write_off_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -32799,6 +32953,10 @@ export type Database = {
         Args: { p_ledger_id: string; p_reason: string }
         Returns: string
       }
+      reverse_write_off: {
+        Args: { p_reason?: string; p_write_off_id: string }
+        Returns: Json
+      }
       revoke_certificate: {
         Args: {
           p_issue_id: string
@@ -33893,6 +34051,16 @@ export type Database = {
         Args: { p_campus_id: string; p_from: string; p_to: string }
         Returns: number
       }
+      write_off_copy: {
+        Args: {
+          p_basis?: string
+          p_copy_id: string
+          p_market_value?: number
+          p_multiplier?: number
+          p_reason?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       academic_group:
@@ -34109,6 +34277,7 @@ export type Database = {
         | "collected"
         | "lapsed"
         | "cancelled"
+      library_write_off_basis: "purchase_cost" | "market" | "multiple"
       mark_component_code:
         | "theory"
         | "practical"
