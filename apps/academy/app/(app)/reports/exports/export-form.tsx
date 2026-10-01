@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-export type DatasetOption = { key: 'students' | 'fee_collection'; label: string };
+export type DatasetOption = { key: 'students' | 'fee_collection' | 'fee_defaulters'; label: string };
 
 export function ExportForm({ datasets }: { datasets: DatasetOption[] }) {
   const router = useRouter();

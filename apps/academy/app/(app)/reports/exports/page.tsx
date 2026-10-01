@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AutoRefresh, ExportForm, type DatasetOption } from './export-form';
 
-const KEYS = new Set(['students', 'fee_collection']);
+const KEYS = new Set(['students', 'fee_collection', 'fee_defaulters']);
 
 export default async function ExportsPage() {
   const supabase = await supabaseServer();

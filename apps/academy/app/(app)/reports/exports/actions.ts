@@ -21,10 +21,15 @@ export async function requestExport(input: ExportRequestInput): Promise<RequestE
   const parsed = exportRequestSchema.safeParse(input);
   if (!parsed.success) return { error: 'Invalid request.' };
 
-  const params: Record<string, string> = {};
+  const params: Record<string, string | boolean> = {};
   if (parsed.data.datasetKey === 'fee_collection') {
     if (parsed.data.from) params.from = parsed.data.from;
     if (parsed.data.to) params.to = parsed.data.to;
+  }
+  if (parsed.data.datasetKey === 'fee_defaulters') {
+    if (parsed.data.classId) params.class_id = parsed.data.classId;
+    if (parsed.data.bucket) params.bucket = parsed.data.bucket;
+    if (parsed.data.hideHardship) params.hide_hardship = true;
   }
 
   const h = await headers();
