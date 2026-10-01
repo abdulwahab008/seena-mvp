@@ -2322,3 +2322,10 @@ export const generateCensusSchema = z.object({
   censusDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the census date'),
 });
 export type GenerateCensusInput = z.infer<typeof generateCensusSchema>;
+
+// FR-T16: retention policy years per data category (Super Admin).
+export const retentionPolicySchema = z.object({
+  category: z.enum(['student_identity', 'student_name_gr', 'guardian_contact', 'fee_ledger']),
+  years: z.number({ message: 'Enter the number of years' }).int('Whole years only').min(1, 'At least 1 year').max(50, 'At most 50 years'),
+});
+export type RetentionPolicyInput = z.infer<typeof retentionPolicySchema>;
