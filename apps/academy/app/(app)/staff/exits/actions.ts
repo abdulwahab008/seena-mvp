@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { clearItemSchema, initiateExitSchema, waiveItemSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
@@ -46,7 +47,11 @@ export async function initiateExit(_prev: ExitState, formData: FormData): Promis
   if (error) return { error: mapError(error.message) };
   revalidatePath('/staff/exits');
   revalidatePath(`/staff/${p.data.staffId}`);
-  return { error: null, message: 'Exit started. Clearance items have been created.', exitId: data as string };
+  // Redirect from the server action itself: the staff profile this form lives on re-renders (revalidatePath)
+  // in the same response and swaps the form for the "exit in progress" link, so a client-side effect that
+  // waited for the success state to push to the exit page would never run — the HR user would stay on the
+  // profile with no indication of the notice shortfall.
+  redirect(`/staff/exits/${data as string}`);
 }
 
 export async function clearItem(_prev: ExitState, formData: FormData): Promise<ExitState> {

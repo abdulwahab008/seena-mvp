@@ -23,12 +23,9 @@ function useSuccess(state: ExitState, then?: (s: ExitState) => void) {
 }
 
 export function InitiateExitForm({ staffId }: { staffId: string }) {
-  const router = useRouter();
+  // On success the server action redirects to the new exit's checklist page, so only the error state renders here.
   const [state, action, pending] = useActionState(initiateExit, initial);
   const [type, setType] = useState('resignation');
-  useSuccess(state, (s) => {
-    if (s.exitId) router.push(`/staff/exits/${s.exitId}`);
-  });
   return (
     <form action={action} className="space-y-3" data-testid="initiate-exit-form">
       <input type="hidden" name="staffId" value={staffId} />
