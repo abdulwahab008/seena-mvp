@@ -2218,3 +2218,18 @@ export const notifyNonSubmittersSchema = z.object({
   includeOnLeave: z.boolean().optional(),
 });
 export type NotifyNonSubmittersInput = z.infer<typeof notifyNonSubmittersSchema>;
+
+// FR-H08: syllabus units and topics.
+export const syllabusUnitSchema = z.object({
+  title: z.string().trim().min(1, 'Enter a title').max(200),
+  titleUr: z.string().trim().max(200).optional(),
+  plannedPeriods: z.number({ message: 'Enter the planned periods' }).int('Whole periods only').min(0).max(500),
+  targetMonth: z.string().regex(/^\d{4}-\d{2}$/, 'Choose a month').optional().or(z.literal('')),
+});
+export type SyllabusUnitInput = z.infer<typeof syllabusUnitSchema>;
+export const syllabusTopicSchema = z.object({
+  title: z.string().trim().min(1, 'Enter a title').max(200),
+  titleUr: z.string().trim().max(200).optional(),
+  plannedPeriods: z.number({ message: 'Enter the planned periods' }).int('Whole periods only').min(0).max(100),
+});
+export type SyllabusTopicInput = z.infer<typeof syllabusTopicSchema>;

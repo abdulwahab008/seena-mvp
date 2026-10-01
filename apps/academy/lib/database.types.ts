@@ -21959,6 +21959,175 @@ export type Database = {
           },
         ]
       }
+      syllabus_topic: {
+        Row: {
+          created_at: string
+          id: string
+          planned_periods: number
+          sequence: number
+          source_topic_id: string | null
+          syllabus_unit_id: string
+          tenant_id: string
+          title: string
+          title_ur: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          planned_periods?: number
+          sequence: number
+          source_topic_id?: string | null
+          syllabus_unit_id: string
+          tenant_id: string
+          title: string
+          title_ur?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          planned_periods?: number
+          sequence?: number
+          source_topic_id?: string | null
+          syllabus_unit_id?: string
+          tenant_id?: string
+          title?: string
+          title_ur?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_topic_source_topic_id_fkey"
+            columns: ["source_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topic"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_topic_syllabus_unit_id_fkey"
+            columns: ["syllabus_unit_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_unit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_topic_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syllabus_unit: {
+        Row: {
+          board: Database["public"]["Enums"]["board"]
+          campus_id: string
+          class_level_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          planned_periods: number
+          sequence: number
+          session_id: string
+          source_unit_id: string | null
+          subject_id: string
+          target_month: string | null
+          tenant_id: string
+          title: string
+          title_ur: string | null
+        }
+        Insert: {
+          board: Database["public"]["Enums"]["board"]
+          campus_id: string
+          class_level_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          planned_periods?: number
+          sequence: number
+          session_id: string
+          source_unit_id?: string | null
+          subject_id: string
+          target_month?: string | null
+          tenant_id: string
+          title: string
+          title_ur?: string | null
+        }
+        Update: {
+          board?: Database["public"]["Enums"]["board"]
+          campus_id?: string
+          class_level_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          planned_periods?: number
+          sequence?: number
+          session_id?: string
+          source_unit_id?: string | null
+          subject_id?: string
+          target_month?: string | null
+          tenant_id?: string
+          title?: string
+          title_ur?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_unit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_unit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "syllabus_unit_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_unit_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "syllabus_unit_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_unit_source_unit_id_fkey"
+            columns: ["source_unit_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_unit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_unit_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_unit_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tax_slab: {
         Row: {
           fixed_amount_paisa: number
@@ -28532,6 +28701,31 @@ export type Database = {
         }
         Returns: Json
       }
+      add_syllabus_topic: {
+        Args: {
+          p_planned_periods?: number
+          p_position?: number
+          p_title: string
+          p_title_ur?: string
+          p_unit_id: string
+        }
+        Returns: string
+      }
+      add_syllabus_unit: {
+        Args: {
+          p_board: Database["public"]["Enums"]["board"]
+          p_campus_id: string
+          p_class_level_id: string
+          p_planned_periods?: number
+          p_position?: number
+          p_session_id: string
+          p_subject_id: string
+          p_target_month?: string
+          p_title: string
+          p_title_ur?: string
+        }
+        Returns: string
+      }
       add_ticket_message: {
         Args: { p_body: string; p_is_internal?: boolean; p_ticket_id: string }
         Returns: string
@@ -28919,6 +29113,16 @@ export type Database = {
           p_to_session_id: string
         }
         Returns: Json
+      }
+      clone_syllabus_to_session: {
+        Args: {
+          p_campus_id: string
+          p_class_level_id: string
+          p_from_session: string
+          p_subject_id: string
+          p_to_session: string
+        }
+        Returns: number
       }
       clone_timetable_version: {
         Args: { p_version_id: string }
@@ -29571,6 +29775,11 @@ export type Database = {
         Returns: undefined
       }
       delete_stream: { Args: { p_id: string }; Returns: undefined }
+      delete_syllabus_topic: {
+        Args: { p_topic_id: string }
+        Returns: undefined
+      }
+      delete_syllabus_unit: { Args: { p_unit_id: string }; Returns: undefined }
       deprovision_on_tc: { Args: never; Returns: number }
       derive_day_attendance_all: { Args: never; Returns: number }
       derive_day_from_periods: {
@@ -31390,6 +31599,14 @@ export type Database = {
         Args: { p_reason: string; p_ticket_id: string }
         Returns: boolean
       }
+      reorder_syllabus_topics: {
+        Args: { p_topic_ids: string[]; p_unit_id: string }
+        Returns: number
+      }
+      reorder_syllabus_units: {
+        Args: { p_unit_ids: string[] }
+        Returns: number
+      }
       request_attendance_correction: {
         Args: {
           p_attendance_date: string
@@ -31723,6 +31940,17 @@ export type Database = {
       save_period_attendance: {
         Args: { p_date: string; p_marks: Json; p_slot_id: string }
         Returns: Json
+      }
+      save_syllabus: {
+        Args: {
+          p_board: Database["public"]["Enums"]["board"]
+          p_campus_id: string
+          p_class_level_id: string
+          p_session_id: string
+          p_subject_id: string
+          p_units: Json
+        }
+        Returns: number
       }
       schedule_campaign: {
         Args: {
@@ -32472,6 +32700,16 @@ export type Database = {
           p_name_en: string
           p_name_ur?: string
           p_subject_type: Database["public"]["Enums"]["subject_type"]
+        }
+        Returns: undefined
+      }
+      update_syllabus_unit: {
+        Args: {
+          p_planned_periods?: number
+          p_target_month?: string
+          p_title: string
+          p_title_ur?: string
+          p_unit_id: string
         }
         Returns: undefined
       }

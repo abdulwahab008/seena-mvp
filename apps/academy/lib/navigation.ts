@@ -116,6 +116,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/academic-setup/subjects', label: 'Subjects' },
       { href: '/academic-setup/classes-sections', label: 'Classes & Sections' },
       { href: '/academic-setup/curriculum', label: 'Curriculum' },
+      { href: '/academic-setup/syllabus', label: 'Syllabus' },
       { href: '/academic-setup/rooms', label: 'Rooms' },
       { href: '/homework', label: 'Homework', feature: 'module.homework' },
       { href: '/academic-setup/rollover', label: 'Session Rollover' },
