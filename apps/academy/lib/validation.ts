@@ -2283,3 +2283,34 @@ export const yoyQuerySchema = z.object({
   campus: z.string().uuid().optional().catch(undefined),
 });
 export type YoyQuery = z.infer<typeof yoyQuerySchema>;
+
+// FR-S07: custom report builder. The definition is data; the server assembles the SQL
+// from its own column whitelist, so nothing here is ever executed as written.
+export const REPORT_FILTER_OPS = ['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'in', 'is_null', 'not_null'] as const;
+export const reportFilterSchema = z.object({
+  column: z.string().min(1, 'Choose a column'),
+  op: z.enum(REPORT_FILTER_OPS),
+  value: z.string().trim().max(200).optional(),
+});
+export const reportDefinitionSchema = z.object({
+  columns: z.array(z.string()).default([]),
+  filters: z.array(reportFilterSchema).max(10, 'At most 10 filters').default([]),
+  groupBy: z.array(z.string()).max(3, 'Group by at most 3 columns').default([]),
+});
+export type ReportDefinitionInput = z.input<typeof reportDefinitionSchema>;
+export const saveReportSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Name the report').max(120),
+    datasetKey: z.string().min(1, 'Choose a dataset'),
+    definition: reportDefinitionSchema,
+    isShared: z.boolean().default(false),
+    id: z.string().uuid().optional(),
+  })
+  .refine((v) => v.definition.groupBy.length > 0 || v.definition.columns.length > 0, { path: ['definition', 'columns'], message: 'Choose at least one column' });
+export type SaveReportInput = z.input<typeof saveReportSchema>;
+export const exportSavedReportSchema = z.object({
+  id: z.string().uuid(),
+  format: z.enum(['xlsx', 'pdf']),
+  reason: z.string().trim().max(500).optional(),
+});
+export type ExportSavedReportInput = z.infer<typeof exportSavedReportSchema>;
