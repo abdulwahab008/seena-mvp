@@ -2281,3 +2281,22 @@ export const stockTakeSchema = z.object({
   reasonCode: z.enum(STOCK_REASON_CODES, { message: 'Choose a reason' }),
 });
 export type StockTakeInput = z.input<typeof stockTakeSchema>;
+
+// FR-R02: counter sale and returns.
+export const saleLineSchema = z.object({
+  itemId: z.string().uuid(),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+  fromPackage: z.boolean().default(false),
+});
+export const saleSchema = z.object({
+  studentId: z.string().uuid('Choose a student'),
+  settlement: z.enum(['cash', 'fee_ledger'], { message: 'Choose how the sale is settled' }),
+  lines: z.array(saleLineSchema).min(1, 'Add at least one item'),
+});
+export type SaleInput = z.input<typeof saleSchema>;
+export const saleReturnSchema = z.object({
+  saleId: z.string().uuid('Choose a receipt'),
+  itemId: z.string().uuid('Choose an item'),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+});
+export type SaleReturnInput = z.input<typeof saleReturnSchema>;
