@@ -39,7 +39,7 @@ test('request a paper, see the job card, accept a matching result and reject a m
 
   // The wrong total is refused with the pattern's own total in the message.
   await page.getByLabel('Total marks').fill('70');
-  await page.getByLabel('Chapters (comma separated)').fill('Ch.1, Ch.2, Ch.3, Ch.4');
+  await page.locator('#reqChapters').fill('Ch.1, Ch.2, Ch.3, Ch.4');
   await page.getByTestId('request-paper').click();
   await expect(page.getByTestId('request-error')).toContainText('totals 65 marks');
 
@@ -60,7 +60,7 @@ test('request a paper, see the job card, accept a matching result and reject a m
 
   // A second request whose result is one mark short is rejected and stores nothing.
   await page.goto('/exams/papers');
-  await page.getByLabel('Chapters (comma separated)').fill('Ch.1');
+  await page.locator('#reqChapters').fill('Ch.1');
   await page.getByTestId('request-paper').click();
   await expect(page.getByTestId('job-card')).toHaveCount(2);
   const { data: second } = await db.from('paper_generation_job').select('id').eq('tenant_id', tenant).neq('id', job!.id).single();
