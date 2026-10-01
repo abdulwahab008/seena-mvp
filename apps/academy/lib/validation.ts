@@ -2244,3 +2244,13 @@ export const lessonPlanSchema = z.object({
   topicIds: z.array(z.string().uuid()).default([]),
 });
 export type LessonPlanInput = z.input<typeof lessonPlanSchema>;
+
+// FR-D06: staff compliance documents with an expiry date.
+const isoDateField = (message: string) => z.string().regex(/^\d{4}-\d{2}-\d{2}$/, message);
+export const complianceDocumentSchema = z.object({
+  staffUserId: z.string().uuid({ message: "Choose a staff member" }),
+  documentType: z.string().regex(/^[a-z][a-z0-9_]{1,39}$/, "Choose a document type"),
+  expiresOn: isoDateField("Enter the expiry date"),
+});
+export type ComplianceDocumentInput = z.infer<typeof complianceDocumentSchema>;
+export const renewDocumentSchema = z.object({ documentId: z.string().uuid(), expiresOn: isoDateField("Enter the new expiry date") });
