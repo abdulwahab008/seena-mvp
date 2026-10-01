@@ -2300,3 +2300,30 @@ export const saleReturnSchema = z.object({
   qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
 });
 export type SaleReturnInput = z.input<typeof saleReturnSchema>;
+
+// FR-R03: fixed asset register and depreciation. Rupees on the screen, paisa in the database.
+export const ASSET_CATEGORIES = ['furniture', 'it', 'lab', 'vehicle', 'building', 'other'] as const;
+export const assetSchema = z
+  .object({
+    campusId: z.string().uuid('Choose a campus'),
+    tagNo: z.string().trim().min(1, 'Enter a tag number').max(40),
+    name: z.string().trim().min(1, 'Enter a name').max(200),
+    category: z.enum(ASSET_CATEGORIES, { message: 'Choose a category' }),
+    purchasedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the purchase date'),
+    costPkr: z.coerce.number({ message: 'Enter the cost' }).positive('Cost must be more than zero'),
+    lifeMonths: z.coerce.number({ message: 'Enter the useful life in months' }).int('Whole months only').min(1).max(1200),
+    salvagePkr: z.coerce.number({ message: 'Enter the salvage value' }).min(0).default(0),
+    method: z.enum(['SL', 'RB'], { message: 'Choose a method' }),
+    rate: z.coerce.number().min(0).max(100).optional().or(z.literal('')),
+    vehicleId: z.string().uuid().optional().or(z.literal('')),
+  })
+  .refine((v) => v.salvagePkr <= v.costPkr, { message: 'Salvage cannot exceed the cost', path: ['salvagePkr'] })
+  .refine((v) => v.method !== 'RB' || (typeof v.rate === 'number' && v.rate > 0), { message: 'Enter the annual rate for reducing balance', path: ['rate'] });
+export type AssetInput = z.input<typeof assetSchema>;
+export const depreciationRunSchema = z.object({ period: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Choose a month') });
+export const assetDisposalSchema = z.object({
+  assetId: z.string().uuid('Choose an asset'),
+  disposedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the disposal date'),
+  proceedsPkr: z.coerce.number({ message: 'Enter the proceeds' }).min(0).default(0),
+  writeOff: z.boolean().default(false),
+});
