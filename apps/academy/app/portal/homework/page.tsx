@@ -11,10 +11,10 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
   // only the signed-in guardian's own active enrolments.
   const { data: enrolments } = await supabase
     .from('enrolment')
-    .select('section_id, student:student_id(id, name_en), class_section:section_id(name, class_level(name_en))')
+    .select('id, section_id, student:student_id(id, name_en), class_section:section_id(name, class_level(name_en))')
     .eq('status', 'active');
 
-  type Child = { studentId: string; studentName: string; sectionId: string; sectionLabel: string };
+  type Child = { enrolmentId: string; studentId: string; studentName: string; sectionId: string; sectionLabel: string };
   const children: Child[] = (enrolments ?? [])
     .map((e) => {
       const student = Array.isArray(e.student) ? e.student[0] : e.student;
@@ -22,6 +22,7 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
       const level = section ? (Array.isArray(section.class_level) ? section.class_level[0] : section.class_level) : null;
       if (!student || !section) return null;
       return {
+        enrolmentId: e.id,
         studentId: student.id,
         studentName: student.name_en,
         sectionId: e.section_id,
@@ -31,6 +32,7 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
     .filter((c): c is Child => !!c);
 
   const selectedSectionId = sectionParam ?? children[0]?.sectionId;
+  const selectedChild = children.find((c) => c.sectionId === selectedSectionId) ?? children[0];
 
   const { data: feedRows } = selectedSectionId
     ? await supabase
@@ -87,6 +89,11 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
                     {h.title} <span className="text-muted-foreground">({h.subject_name_en})</span>
                   </p>
                   <p className="text-sm text-muted-foreground">Due {h.due_date}</p>
+                  {selectedChild && (
+                    <Link href={`/portal/homework/submit?homework=${h.id}&enrolment=${selectedChild.enrolmentId}`} className="mt-1 inline-block text-sm underline" data-testid={`homework-submit-${h.title}`}>
+                      Submit work
+                    </Link>
+                  )}
                   {attachmentsFor(h.id).length > 0 && (
                     <p className="mt-1 text-sm" data-testid="homework-feed-attachments">
                       {attachmentsFor(h.id).map((a) => (
@@ -113,6 +120,11 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
                   </p>
                   <p className="text-sm text-muted-foreground">Due {h.due_date}</p>
                   {h.description && <p className="mt-1 text-sm">{h.description}</p>}
+                  {selectedChild && (
+                    <Link href={`/portal/homework/submit?homework=${h.id}&enrolment=${selectedChild.enrolmentId}`} className="mt-1 inline-block text-sm underline" data-testid={`homework-submit-${h.title}`}>
+                      Submit work
+                    </Link>
+                  )}
                   {attachmentsFor(h.id).length > 0 && (
                     <p className="mt-1 text-sm" data-testid="homework-feed-attachments">
                       {attachmentsFor(h.id).map((a) => (

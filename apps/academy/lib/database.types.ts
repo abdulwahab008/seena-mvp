@@ -12108,6 +12108,236 @@ export type Database = {
           },
         ]
       }
+      homework_submission: {
+        Row: {
+          campus_id: string
+          checked_at: string | null
+          checked_by: string | null
+          created_at: string
+          enrolment_id: string
+          homework_id: string
+          id: string
+          is_late: boolean
+          late_by_minutes: number
+          pending_text: string | null
+          pending_version: number | null
+          session_id: string
+          status: string
+          submission_text: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          tenant_id: string
+          version: number
+        }
+        Insert: {
+          campus_id: string
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          enrolment_id: string
+          homework_id: string
+          id?: string
+          is_late?: boolean
+          late_by_minutes?: number
+          pending_text?: string | null
+          pending_version?: number | null
+          session_id: string
+          status?: string
+          submission_text?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          tenant_id: string
+          version?: number
+        }
+        Update: {
+          campus_id?: string
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          enrolment_id?: string
+          homework_id?: string
+          id?: string
+          is_late?: boolean
+          late_by_minutes?: number
+          pending_text?: string | null
+          pending_version?: number | null
+          session_id?: string
+          status?: string
+          submission_text?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          tenant_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_submission_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submission_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "homework_submission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "homework_submission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "homework_submission_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "homework_submission_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "homework"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submission_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_homework_feed"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submission_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submission_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_submission_file: {
+        Row: {
+          created_at: string
+          id: string
+          mime_type: string
+          original_filename: string
+          size_bytes: number
+          storage_path: string
+          submission_id: string
+          tenant_id: string
+          uploaded_by: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mime_type: string
+          original_filename: string
+          size_bytes: number
+          storage_path: string
+          submission_id: string
+          tenant_id: string
+          uploaded_by?: string | null
+          version: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mime_type?: string
+          original_filename?: string
+          size_bytes?: number
+          storage_path?: string
+          submission_id?: string
+          tenant_id?: string
+          uploaded_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_submission_file_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "homework_submission"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submission_file_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_submission_version: {
+        Row: {
+          archived_at: string
+          id: string
+          snapshot: Json
+          submission_id: string
+          tenant_id: string
+          version: number
+        }
+        Insert: {
+          archived_at?: string
+          id?: string
+          snapshot: Json
+          submission_id: string
+          tenant_id: string
+          version: number
+        }
+        Update: {
+          archived_at?: string
+          id?: string
+          snapshot?: Json
+          submission_id?: string
+          tenant_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_submission_version_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "homework_submission"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submission_version_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       impersonation_consent: {
         Row: {
           expires_at: string
@@ -28097,6 +28327,15 @@ export type Database = {
         }
         Returns: string
       }
+      add_submission_file: {
+        Args: {
+          p_filename: string
+          p_mime_type: string
+          p_size_bytes: number
+          p_submission_id: string
+        }
+        Returns: Json
+      }
       add_ticket_message: {
         Args: { p_body: string; p_is_internal?: boolean; p_ticket_id: string }
         Returns: string
@@ -28260,6 +28499,10 @@ export type Database = {
           p_remark?: string
         }
         Returns: Json
+      }
+      begin_submission: {
+        Args: { p_enrolment_id: string; p_homework_id: string; p_text?: string }
+        Returns: string
       }
       book_interview: {
         Args: {
@@ -29346,6 +29589,7 @@ export type Database = {
         }
       }
       finalise_import_batch: { Args: { p_batch_id: string }; Returns: Json }
+      finalize_submission: { Args: { p_submission_id: string }; Returns: Json }
       finish_report_card_batch_item: {
         Args: {
           p_error_code?: string
@@ -30249,6 +30493,7 @@ export type Database = {
         Returns: boolean
       }
       homework_orphan_sweep: { Args: never; Returns: number }
+      homework_submission_sweep: { Args: never; Returns: number }
       impersonation_blocked_tables: { Args: never; Returns: string[] }
       impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
       ingest_payment_webhook: {
@@ -30897,6 +31142,10 @@ export type Database = {
       }
       remove_leave_attachment: {
         Args: { p_attachment_id: string }
+        Returns: undefined
+      }
+      remove_submission_file: {
+        Args: { p_file_id: string }
         Returns: undefined
       }
       render_template: {

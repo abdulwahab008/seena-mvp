@@ -17,6 +17,7 @@ export type HomeworkRow = {
   subjectLabel: string;
   attachments: AttachmentRow[];
   canEdit: boolean;
+  submissions: { id: string; studentName: string; status: string; isLate: boolean; lateBy: number; text: string | null; files: { id: string; name: string }[] }[];
 };
 
 function PublishButton({ id }: { id: string }) {
@@ -65,6 +66,23 @@ export function HomeworkList({ rows }: { rows: HomeworkRow[] }) {
             {h.status === 'draft' && <PublishButton id={h.id} />}
             </div>
             <AttachmentPanel homeworkId={h.id} attachments={h.attachments} canEdit={h.canEdit} />
+            {h.submissions.length > 0 && (
+              <div className="mt-3 space-y-1 border-t pt-3 text-sm" data-testid="homework-submissions">
+                <p className="font-medium">Submissions ({h.submissions.length})</p>
+                {h.submissions.map((s) => (
+                  <div key={s.id} data-testid="homework-submission">
+                    <span>{s.studentName}</span> · {s.status}
+                    {s.isLate ? ` · late by ${s.lateBy} min` : ''}
+                    {s.text ? <span dir="auto"> · {s.text}</span> : null}
+                    {s.files.map((f) => (
+                      <a key={f.id} href={`/api/homework-submissions/files/${f.id}`} className="ml-2 underline" target="_blank" rel="noreferrer">
+                        {f.name}
+                      </a>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}

@@ -73,6 +73,17 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
     : { data: [] as never[] };
 
   const homeworkIds = (homeworkRows ?? []).map((h) => h.id);
+  const { data: submissionRows } = homeworkIds.length
+    ? await supabase
+        .from('homework_submission')
+        .select('id, homework_id, version, status, submission_text, is_late, late_by_minutes, enrolment:enrolment_id(student:student_id(name_en))')
+        .in('homework_id', homeworkIds)
+        .order('submitted_at')
+    : { data: [] as never[] };
+  const submissionIds = (submissionRows ?? []).map((r) => r.id);
+  const { data: submissionFiles } = submissionIds.length
+    ? await supabase.from('homework_submission_file').select('id, submission_id, version, original_filename').in('submission_id', submissionIds)
+    : { data: [] as never[] };
   const { data: attachmentRows } = homeworkIds.length
     ? await supabase.from('homework_attachment').select('id, homework_id, original_filename, size_bytes').in('homework_id', homeworkIds).order('created_at')
     : { data: [] as never[] };
@@ -122,6 +133,21 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
             sectionLabel: `${level?.name_en ?? ''} · ${section?.name ?? ''}`,
             subjectLabel: subject?.name_en ?? '',
             canEdit: mine,
+            submissions: (submissionRows ?? [])
+              .filter((r) => r.homework_id === h.id)
+              .map((r) => {
+                const enrol = Array.isArray(r.enrolment) ? r.enrolment[0] : r.enrolment;
+                const student = enrol ? (Array.isArray(enrol.student) ? enrol.student[0] : enrol.student) : null;
+                return {
+                  id: r.id,
+                  studentName: student?.name_en ?? 'Student',
+                  status: r.status,
+                  isLate: r.is_late,
+                  lateBy: r.late_by_minutes,
+                  text: r.submission_text,
+                  files: (submissionFiles ?? []).filter((f) => f.submission_id === r.id && f.version === r.version).map((f) => ({ id: f.id, name: f.original_filename })),
+                };
+              }),
             attachments: (attachmentRows ?? []).filter((a) => a.homework_id === h.id).map((a) => ({ id: a.id, name: a.original_filename, sizeBytes: Number(a.size_bytes) })),
           };
         })}
