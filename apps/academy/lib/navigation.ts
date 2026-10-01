@@ -173,7 +173,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/terms', label: 'Exam Terms' },
       { href: '/exams/subjects', label: 'Subjects & Components' },
       { href: '/exams/marks', label: 'Mark Entry' },
-      { href: '/exams/papers', label: 'Paper Generation' },
+      { href: '/exams/paper-scope', label: 'Syllabus Paper Scope' },
       { href: '/exams/remarks', label: 'Teacher Remarks' },
       { href: '/exams/moderation', label: 'Moderation' },
       { href: '/exams/approvals', label: 'Mark Approval' },
@@ -259,6 +259,9 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/hostel/visitors', label: 'Visitors' },
       { href: '/hostel/mess', label: 'Mess Menu & Mess-off' },
       { href: '/hostel/fees', label: 'Hostel & Mess Fees' },
+    ],
+  },
+  {
     id: 'inventory',
     label: 'Stores & Assets',
     icon: Boxes,

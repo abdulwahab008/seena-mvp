@@ -28,7 +28,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <Link href="/exams/papers" className="text-sm text-muted-foreground hover:underline">
+        <Link href="/exams/paper-scope" className="text-sm text-muted-foreground hover:underline">
           ← All papers
         </Link>
         <h1 className="text-2xl font-semibold">{paper.title}</h1>
