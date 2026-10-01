@@ -3,7 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope, one } from '@/lib/exams/office-scope';
-import { CooldownSettingsForm, JobPoller, PatternForm, RequestForm, RetryButton } from './paper-forms';
+import { BuildSetsForm, CooldownSettingsForm, JobPoller, PatternForm, RequestForm, RetryButton } from './paper-forms';
 
 /**
  * FR-I05. Ask Seena Exams for a question paper from a board pattern and a list
@@ -75,6 +75,20 @@ export default async function PapersPage() {
           )}
         </CardContent>
       </Card>
+
+      {patterns.length > 0 && papers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Set A / Set B from the question bank</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              Builds blueprint-identical sets (same marks per section, same questions per chapter) from questions this class has not seen recently. Set B shares at most the number you allow with Set A; if the bank cannot supply that, nothing is built.
+            </p>
+            <BuildSetsForm papers={papers.map((p) => ({ id: p.id, label: p.label }))} patterns={patterns} />
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

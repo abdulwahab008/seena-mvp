@@ -54,6 +54,49 @@ export function ReplaceQuestionForm({ paperId, itemId }: { paperId: string; item
   );
 }
 
+/** FR-I07: render this set's paper and its own key, then download them; every name carries the set code. */
+export function PaperFilesPanel({ paperId, setCode }: { paperId: string; setCode: string }) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [rendered, setRendered] = useState(false);
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          disabled={pending}
+          data-testid="render-files"
+          onClick={() =>
+            startTransition(async () => {
+              const res = await fetch(`/api/exam-papers/${paperId}/render`, { method: 'POST' });
+              if (!res.ok) {
+                setError(((await res.json().catch(() => null)) as { error?: string } | null)?.error ?? 'Could not render the files.');
+                return;
+              }
+              setError(null);
+              setRendered(true);
+              toast.success(`Set ${setCode} paper and answer key rendered.`);
+            })
+          }
+        >
+          Render Set {setCode} paper and key
+        </Button>
+        {rendered && (
+          <>
+            <a className="text-sm underline" href={`/api/exam-papers/${paperId}/file?kind=paper`} data-testid="download-paper">
+              Download Set {setCode} paper
+            </a>
+            <a className="text-sm underline" href={`/api/exam-papers/${paperId}/file?kind=key`} data-testid="download-key">
+              Download Set {setCode} answer key
+            </a>
+          </>
+        )}
+      </div>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    </div>
+  );
+}
+
 /** FR-I06: publish, asking for an override reason only when flagged questions remain. */
 export function PublishPaperPanel({ paperId, flagged, mode }: { paperId: string; flagged: number; mode: string }) {
   const router = useRouter();
