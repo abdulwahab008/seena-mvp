@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { HomeworkRealtimeRefresher } from './homework-realtime-refresher';
+import { SubmissionRealtimeRefresher } from './submission-realtime-refresher';
 
 export default async function PortalHomeworkPage({ searchParams }: { searchParams: Promise<{ section?: string }> }) {
   const { section: sectionParam } = await searchParams;
@@ -47,6 +48,10 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
     ? await supabase.from('homework_attachment').select('id, homework_id, original_filename').in('homework_id', feedIds).order('created_at')
     : { data: [] as never[] };
   const attachmentsFor = (id: string | null) => (attachmentRows ?? []).filter((a) => a.homework_id === id);
+  const { data: mySubmissions } = selectedChild && feedIds.length
+    ? await supabase.from('homework_submission').select('homework_id, status, feedback_code').eq('enrolment_id', selectedChild.enrolmentId).in('homework_id', feedIds)
+    : { data: [] as never[] };
+  const submissionFor = (id: string | null) => (mySubmissions ?? []).find((m) => m.homework_id === id);
   const overdue = (feedRows ?? []).filter((r) => r.is_overdue);
   const pending = (feedRows ?? []).filter((r) => !r.is_overdue);
 
@@ -79,6 +84,7 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
           )}
 
           {selectedSectionId && <HomeworkRealtimeRefresher sectionId={selectedSectionId} />}
+          {selectedChild && <SubmissionRealtimeRefresher enrolmentId={selectedChild.enrolmentId} />}
 
           {overdue.length > 0 && (
             <div className="space-y-2">
@@ -89,6 +95,11 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
                     {h.title} <span className="text-muted-foreground">({h.subject_name_en})</span>
                   </p>
                   <p className="text-sm text-muted-foreground">Due {h.due_date}</p>
+                  {submissionFor(h.id) && (
+                    <span className="ml-2 rounded bg-muted px-2 py-0.5 text-xs capitalize" data-testid={`feed-status-${h.title}`}>
+                      {submissionFor(h.id)?.feedback_code ? submissionFor(h.id)?.feedback_code?.replace('_', ' ') : submissionFor(h.id)?.status}
+                    </span>
+                  )}
                   {selectedChild && (
                     <Link href={`/portal/homework/submit?homework=${h.id}&enrolment=${selectedChild.enrolmentId}`} className="mt-1 inline-block text-sm underline" data-testid={`homework-submit-${h.title}`}>
                       Submit work
@@ -120,6 +131,11 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
                   </p>
                   <p className="text-sm text-muted-foreground">Due {h.due_date}</p>
                   {h.description && <p className="mt-1 text-sm">{h.description}</p>}
+                  {submissionFor(h.id) && (
+                    <span className="ml-2 rounded bg-muted px-2 py-0.5 text-xs capitalize" data-testid={`feed-status-${h.title}`}>
+                      {submissionFor(h.id)?.feedback_code ? submissionFor(h.id)?.feedback_code?.replace('_', ' ') : submissionFor(h.id)?.status}
+                    </span>
+                  )}
                   {selectedChild && (
                     <Link href={`/portal/homework/submit?homework=${h.id}&enrolment=${selectedChild.enrolmentId}`} className="mt-1 inline-block text-sm underline" data-testid={`homework-submit-${h.title}`}>
                       Submit work

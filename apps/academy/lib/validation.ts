@@ -2193,3 +2193,20 @@ export const closeShortageSchema = z.object({
   reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(300),
 });
 export type CloseShortageInput = z.infer<typeof closeShortageSchema>;
+
+// FR-H06: teacher review of homework submissions.
+export const FEEDBACK_CODES = ['excellent', 'good', 'satisfactory', 'needs_improvement', 'incomplete'] as const;
+export const checkSubmissionSchema = z.object({
+  submissionId: z.string().uuid(),
+  feedbackCode: z.enum(FEEDBACK_CODES, { message: 'Choose a feedback' }),
+  remark: z.string().trim().max(500, 'Remark can be at most 500 characters').optional(),
+  score: z.number().min(0, 'Score cannot be negative').max(999.99).nullable().optional(),
+});
+export type CheckSubmissionInput = z.infer<typeof checkSubmissionSchema>;
+export const bulkCheckSchema = z.object({
+  homeworkId: z.string().uuid(),
+  submissionIds: z.array(z.string().uuid()).min(1, 'Nothing to check').max(300),
+  feedbackCode: z.enum(FEEDBACK_CODES, { message: 'Choose a feedback' }),
+  remark: z.string().trim().max(500).optional(),
+});
+export type BulkCheckInput = z.infer<typeof bulkCheckSchema>;

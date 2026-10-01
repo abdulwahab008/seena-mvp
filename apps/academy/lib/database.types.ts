@@ -11815,6 +11815,7 @@ export type Database = {
           estimated_minutes: number | null
           id: string
           load_warning_overridden: boolean
+          max_score: number | null
           overridden_by: string | null
           published_at: string | null
           section_id: string
@@ -11834,6 +11835,7 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           load_warning_overridden?: boolean
+          max_score?: number | null
           overridden_by?: string | null
           published_at?: string | null
           section_id: string
@@ -11853,6 +11855,7 @@ export type Database = {
           estimated_minutes?: number | null
           id?: string
           load_warning_overridden?: boolean
+          max_score?: number | null
           overridden_by?: string | null
           published_at?: string | null
           section_id?: string
@@ -12049,6 +12052,54 @@ export type Database = {
           },
         ]
       }
+      homework_feedback_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          feedback_code: string | null
+          feedback_remark: string | null
+          id: string
+          score: number | null
+          submission_id: string
+          tenant_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          feedback_code?: string | null
+          feedback_remark?: string | null
+          id?: string
+          score?: number | null
+          submission_id: string
+          tenant_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          feedback_code?: string | null
+          feedback_remark?: string | null
+          id?: string
+          score?: number | null
+          submission_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_feedback_history_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "homework_submission"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_feedback_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_load_policy: {
         Row: {
           campus_id: string
@@ -12115,12 +12166,15 @@ export type Database = {
           checked_by: string | null
           created_at: string
           enrolment_id: string
+          feedback_code: string | null
+          feedback_remark: string | null
           homework_id: string
           id: string
           is_late: boolean
           late_by_minutes: number
           pending_text: string | null
           pending_version: number | null
+          score: number | null
           session_id: string
           status: string
           submission_text: string | null
@@ -12135,12 +12189,15 @@ export type Database = {
           checked_by?: string | null
           created_at?: string
           enrolment_id: string
+          feedback_code?: string | null
+          feedback_remark?: string | null
           homework_id: string
           id?: string
           is_late?: boolean
           late_by_minutes?: number
           pending_text?: string | null
           pending_version?: number | null
+          score?: number | null
           session_id: string
           status?: string
           submission_text?: string | null
@@ -12155,12 +12212,15 @@ export type Database = {
           checked_by?: string | null
           created_at?: string
           enrolment_id?: string
+          feedback_code?: string | null
+          feedback_remark?: string | null
           homework_id?: string
           id?: string
           is_late?: boolean
           late_by_minutes?: number
           pending_text?: string | null
           pending_version?: number | null
+          score?: number | null
           session_id?: string
           status?: string
           submission_text?: string | null
@@ -28532,6 +28592,15 @@ export type Database = {
         Args: { p_enrolment_id: string }
         Returns: string
       }
+      bulk_check_submissions: {
+        Args: {
+          p_feedback_code: string
+          p_homework_id: string
+          p_remark?: string
+          p_submission_ids: string[]
+        }
+        Returns: number
+      }
       can_teach: {
         Args: {
           p_class_level_id: string
@@ -28597,6 +28666,15 @@ export type Database = {
       check_room_capacity: {
         Args: { p_room_id: string; p_section_id: string }
         Returns: Json
+      }
+      check_submission: {
+        Args: {
+          p_feedback_code: string
+          p_remark?: string
+          p_score?: number
+          p_submission_id: string
+        }
+        Returns: undefined
       }
       check_unmarked_attendance: {
         Args: { p_campus_id: string; p_date?: string }
@@ -31756,6 +31834,10 @@ export type Database = {
           p_session_id: string
         }
         Returns: string
+      }
+      set_homework_max_score: {
+        Args: { p_homework_id: string; p_max_score?: number }
+        Returns: undefined
       }
       set_leave_approval_chain_step: {
         Args: {

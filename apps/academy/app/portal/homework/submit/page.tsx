@@ -4,6 +4,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SubmitForm } from './submit-form';
+import { SubmissionRealtimeRefresher } from '../submission-realtime-refresher';
 
 export const metadata = { title: 'Submit homework | Parent Portal' };
 
@@ -16,8 +17,8 @@ export default async function SubmitHomeworkPage({ searchParams }: { searchParam
 
   const supabase = await supabaseServer();
   const [{ data: hw }, { data: submission }] = await Promise.all([
-    supabase.from('homework').select('id, title, description, due_date').eq('id', ids.data.homework).maybeSingle(),
-    supabase.from('homework_submission').select('id, status, version, pending_version, submission_text, submitted_at, is_late, late_by_minutes').eq('homework_id', ids.data.homework).eq('enrolment_id', ids.data.enrolment).maybeSingle(),
+    supabase.from('homework').select('id, title, description, due_date, max_score').eq('id', ids.data.homework).maybeSingle(),
+    supabase.from('homework_submission').select('id, status, version, pending_version, submission_text, submitted_at, is_late, late_by_minutes, feedback_code, feedback_remark, score').eq('homework_id', ids.data.homework).eq('enrolment_id', ids.data.enrolment).maybeSingle(),
   ]);
   if (!hw) return <p className="text-sm text-muted-foreground">This assignment is not available.</p>;
 
@@ -41,6 +42,8 @@ export default async function SubmitHomeworkPage({ searchParams }: { searchParam
         {hw.description && <p className="mt-1 text-sm">{hw.description}</p>}
       </div>
 
+      <SubmissionRealtimeRefresher enrolmentId={ids.data.enrolment} />
+
       {live && (
         <Card data-testid="current-submission">
           <CardHeader>
@@ -57,6 +60,23 @@ export default async function SubmitHomeworkPage({ searchParams }: { searchParam
               <p dir="auto" data-testid="submission-text">
                 {submission.submission_text}
               </p>
+            )}
+            {submission.feedback_code && (
+              <div className="rounded-md border p-2" data-testid="teacher-feedback">
+                <Badge variant="success" className="capitalize">
+                  {submission.feedback_code.replace('_', ' ')}
+                </Badge>
+                {submission.score !== null && hw.max_score !== null && (
+                  <span className="ml-2 font-medium">
+                    {Number(submission.score)} / {Number(hw.max_score)}
+                  </span>
+                )}
+                {submission.feedback_remark && (
+                  <p dir="auto" className="mt-1">
+                    {submission.feedback_remark}
+                  </p>
+                )}
+              </div>
             )}
             {currentFiles.map((f) => (
               <p key={f.id}>

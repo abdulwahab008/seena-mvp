@@ -6,6 +6,7 @@ import { publishHomework } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AttachmentPanel, type AttachmentRow } from './attachment-panel';
+import { BulkCheck, MaxScoreForm, ReviewForm } from './submission-review';
 
 export type HomeworkRow = {
   id: string;
@@ -17,7 +18,8 @@ export type HomeworkRow = {
   subjectLabel: string;
   attachments: AttachmentRow[];
   canEdit: boolean;
-  submissions: { id: string; studentName: string; status: string; isLate: boolean; lateBy: number; text: string | null; files: { id: string; name: string }[] }[];
+  maxScore: number | null;
+  submissions: { id: string; studentName: string; status: string; isLate: boolean; lateBy: number; text: string | null; feedbackCode: string | null; feedbackRemark: string | null; score: number | null; files: { id: string; name: string }[] }[];
 };
 
 function PublishButton({ id }: { id: string }) {
@@ -69,6 +71,8 @@ export function HomeworkList({ rows }: { rows: HomeworkRow[] }) {
             {h.submissions.length > 0 && (
               <div className="mt-3 space-y-1 border-t pt-3 text-sm" data-testid="homework-submissions">
                 <p className="font-medium">Submissions ({h.submissions.length})</p>
+                {h.canEdit && <MaxScoreForm homeworkId={h.id} current={h.maxScore} />}
+                {h.canEdit && h.submissions.length > 1 && <BulkCheck homeworkId={h.id} submissionIds={h.submissions.map((s) => s.id)} />}
                 {h.submissions.map((s) => (
                   <div key={s.id} data-testid="homework-submission">
                     <span>{s.studentName}</span> · {s.status}
@@ -79,6 +83,7 @@ export function HomeworkList({ rows }: { rows: HomeworkRow[] }) {
                         {f.name}
                       </a>
                     ))}
+                    <ReviewForm submissionId={s.id} maxScore={h.maxScore} feedbackCode={s.feedbackCode} remark={s.feedbackRemark} score={s.score} />
                   </div>
                 ))}
               </div>

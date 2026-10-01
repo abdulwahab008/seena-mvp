@@ -66,7 +66,7 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
   const { data: homeworkRows } = campusId
     ? await supabase
         .from('homework')
-        .select('id, title, status, teacher_id, assigned_date, due_date, class_section:section_id(name, class_level(name_en)), subject:subject_id(name_en)')
+        .select('id, title, status, teacher_id, max_score, assigned_date, due_date, class_section:section_id(name, class_level(name_en)), subject:subject_id(name_en)')
         .eq('campus_id', campusId)
         .order('due_date', { ascending: false })
         .limit(50)
@@ -76,7 +76,7 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
   const { data: submissionRows } = homeworkIds.length
     ? await supabase
         .from('homework_submission')
-        .select('id, homework_id, version, status, submission_text, is_late, late_by_minutes, enrolment:enrolment_id(student:student_id(name_en))')
+        .select('id, homework_id, version, status, submission_text, is_late, late_by_minutes, feedback_code, feedback_remark, score, enrolment:enrolment_id(student:student_id(name_en))')
         .in('homework_id', homeworkIds)
         .order('submitted_at')
     : { data: [] as never[] };
@@ -133,6 +133,7 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
             sectionLabel: `${level?.name_en ?? ''} · ${section?.name ?? ''}`,
             subjectLabel: subject?.name_en ?? '',
             canEdit: mine,
+            maxScore: h.max_score === null ? null : Number(h.max_score),
             submissions: (submissionRows ?? [])
               .filter((r) => r.homework_id === h.id)
               .map((r) => {
@@ -145,6 +146,9 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
                   isLate: r.is_late,
                   lateBy: r.late_by_minutes,
                   text: r.submission_text,
+                  feedbackCode: r.feedback_code,
+                  feedbackRemark: r.feedback_remark,
+                  score: r.score === null ? null : Number(r.score),
                   files: (submissionFiles ?? []).filter((f) => f.submission_id === r.id && f.version === r.version).map((f) => ({ id: f.id, name: f.original_filename })),
                 };
               }),

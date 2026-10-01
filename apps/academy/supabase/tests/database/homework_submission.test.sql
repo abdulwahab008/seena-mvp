@@ -119,7 +119,7 @@ select lives_ok(format($$ select public.begin_submission(%L, %L, 'My own words')
 
 -- ── AC4: a checked submission is final ────────────────────────────────────
 reset role;
-update public.homework_submission set status = 'checked', checked_at = now(), pending_version = null, pending_text = null where id = :'sub'::uuid;
+update public.homework_submission set status = 'checked', feedback_code = 'good', checked_by = :'teach_uid', checked_at = now(), pending_version = null, pending_text = null where id = :'sub'::uuid;
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', :'par1', 'tenant_id', :'tenant_id', 'app_role', 'parent')::text, true);
 select throws_ok(format($$ select public.begin_submission(%L, %L, 'again') $$, :'hw', :'e1'), 'SUBMISSION_CHECKED', 'AC4: a checked submission cannot be resubmitted');
