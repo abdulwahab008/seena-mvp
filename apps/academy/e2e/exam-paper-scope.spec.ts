@@ -39,7 +39,7 @@ test('an untaught chapter is refused, taught chapters generate a paper with per-
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).not.toHaveURL(/\/login/);
 
-  await page.goto('/exams/papers');
+  await page.goto('/exams/paper-scope');
   await page.getByTestId('paper-title').fill('Term 1 Physics');
   await page.getByLabel(/5\. Waves/).check();
   await page.getByTestId('request-paper').click();
@@ -65,7 +65,7 @@ test('an untaught chapter is refused, taught chapters generate a paper with per-
   await expect(page.getByTestId('question-source').first()).toContainText('topic: Speed');
 
   // Explicit override by the Exam Controller.
-  await page.goto('/exams/papers');
+  await page.goto('/exams/paper-scope');
   await page.getByTestId('paper-title').fill('Full syllabus');
   await page.getByLabel(/5\. Waves/).check();
   await page.getByTestId('untaught-override').check();
