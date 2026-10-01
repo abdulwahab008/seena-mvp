@@ -2424,5 +2424,29 @@ export const hostelSettingsSchema = z.object({
   retentionDays: tint('Retention days', 7, 3650),
   messNoticeHours: tint('Notice hours', 0, 720),
 });
+// FR-Q05
+const messSlot = z.object({
+  day: z.number().int().min(1).max(7),
+  meal: z.enum(['breakfast', 'lunch', 'dinner']),
+  items: z.string().trim().max(300),
+  items_ur: z.string().trim().max(300).optional(),
+});
+export const saveMessMenuSchema = z.object({
+  campusId: tuuid,
+  weekStart: tdate,
+  slots: z.string().transform((v, ctx) => {
+    try {
+      return z.array(messSlot).max(21).parse(JSON.parse(v));
+    } catch {
+      ctx.addIssue({ code: 'custom', message: 'The menu could not be read' });
+      return z.NEVER;
+    }
+  }),
+});
+export const publishMessMenuSchema = z.object({ campusId: tuuid, weekStart: tdate });
+export const messOffSchema = z
+  .object({ studentId: toptUuid, grNumber: toptText(40), from: tdate, to: tdate, reason: toptText(300) })
+  .refine((v) => v.to >= v.from, { message: 'The last day cannot be before the first day', path: ['to'] })
+  .refine((v) => v.studentId || v.grNumber, { message: 'Enter the GR number', path: ['grNumber'] });
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];
