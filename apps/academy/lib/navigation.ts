@@ -225,6 +225,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: ShieldCheck,
     items: [
       { href: '/audit-export', label: 'Audit Trail Export' },
+      { href: '/compliance/census', label: 'Census & EMIS Returns' },
       { href: '/impersonation', label: 'Support Access' },
     ],
   },
