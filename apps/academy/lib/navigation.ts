@@ -197,6 +197,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/expenses/vouchers', label: 'Vouchers', feature: 'module.expenses' },
       { href: '/expenses/approvals', label: 'Approvals', feature: 'module.expenses' },
+      { href: '/expenses/petty-cash', label: 'Petty Cash', feature: 'module.expenses' },
     ],
   },
   {

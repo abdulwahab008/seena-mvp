@@ -2133,3 +2133,29 @@ export type DisburseDepositInput = z.infer<typeof disburseDepositSchema>;
 // FR-K23: gateway settlement reconciliation.
 export const unsettledDaysSchema = z.object({ days: z.number({ message: 'Enter a number of days' }).int('Whole days only').min(1, 'At least 1 day').max(30, 'At most 30 days') });
 export type UnsettledDaysInput = z.infer<typeof unsettledDaysSchema>;
+
+// FR-L12: petty cash imprest.
+export const pettyCashPaymentSchema = z.object({
+  accountId: z.string().uuid(),
+  amountPkr: z.number({ message: 'Enter the amount' }).positive('Amount must be above zero').max(1_000_000),
+  headId: z.string().uuid('Choose an expense head'),
+  narrative: z.string().trim().max(200).optional(),
+});
+export type PettyCashPaymentInput = z.infer<typeof pettyCashPaymentSchema>;
+
+export const pettyCashReplenishSchema = z.object({
+  accountId: z.string().uuid(),
+  countedPkr: z.number({ message: 'Enter the cash counted in the tin' }).min(0, 'Cannot be negative').max(10_000_000),
+  explanation: z.string().trim().max(500).optional(),
+});
+export type PettyCashReplenishInput = z.infer<typeof pettyCashReplenishSchema>;
+
+export const pettyCashAccountSchema = z
+  .object({
+    campusId: z.string().uuid('Choose a campus'),
+    floatPkr: z.number({ message: 'Enter the float' }).positive('Float must be above zero').max(10_000_000),
+    capPkr: z.number({ message: 'Enter the per-payment cap' }).positive('Cap must be above zero').max(10_000_000),
+    custodianId: z.string().uuid('Choose the custodian'),
+  })
+  .refine((v) => v.capPkr <= v.floatPkr, { path: ['capPkr'], message: 'The cap cannot exceed the float' });
+export type PettyCashAccountInput = z.infer<typeof pettyCashAccountSchema>;

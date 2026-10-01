@@ -15671,6 +15671,239 @@ export type Database = {
         }
         Relationships: []
       }
+      petty_cash_account: {
+        Row: {
+          campus_id: string
+          created_at: string
+          current_balance_paisa: number
+          custodian_user_id: string
+          float_paisa: number
+          id: string
+          tenant_id: string
+          txn_cap_paisa: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          current_balance_paisa: number
+          custodian_user_id: string
+          float_paisa: number
+          id?: string
+          tenant_id: string
+          txn_cap_paisa: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          current_balance_paisa?: number
+          custodian_user_id?: string
+          float_paisa?: number
+          id?: string
+          tenant_id?: string
+          txn_cap_paisa?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "petty_cash_account_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_account_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "petty_cash_account_custodian_user_id_fkey"
+            columns: ["custodian_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "petty_cash_account_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      petty_cash_reconciliation: {
+        Row: {
+          account_id: string
+          campus_id: string
+          counted_paisa: number
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          explanation: string | null
+          id: string
+          requested_at: string
+          requested_by: string
+          status: string
+          system_balance_paisa: number
+          tenant_id: string
+          topup_paisa: number | null
+          variance_paisa: number
+        }
+        Insert: {
+          account_id: string
+          campus_id: string
+          counted_paisa: number
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          explanation?: string | null
+          id?: string
+          requested_at?: string
+          requested_by: string
+          status?: string
+          system_balance_paisa: number
+          tenant_id: string
+          topup_paisa?: number | null
+          variance_paisa: number
+        }
+        Update: {
+          account_id?: string
+          campus_id?: string
+          counted_paisa?: number
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          explanation?: string | null
+          id?: string
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          system_balance_paisa?: number
+          tenant_id?: string
+          topup_paisa?: number | null
+          variance_paisa?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "petty_cash_reconciliation_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "petty_cash_account"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_reconciliation_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_reconciliation_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "petty_cash_reconciliation_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      petty_cash_txn: {
+        Row: {
+          account_id: string
+          amount_paisa: number
+          balance_after_paisa: number
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          direction: string
+          expense_head_id: string | null
+          id: string
+          narrative: string | null
+          reconciliation_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          account_id: string
+          amount_paisa: number
+          balance_after_paisa: number
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          direction: string
+          expense_head_id?: string | null
+          id?: string
+          narrative?: string | null
+          reconciliation_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          account_id?: string
+          amount_paisa?: number
+          balance_after_paisa?: number
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          direction?: string
+          expense_head_id?: string | null
+          id?: string
+          narrative?: string | null
+          reconciliation_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "petty_cash_txn_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "petty_cash_account"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_txn_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_txn_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "petty_cash_txn_expense_head_id_fkey"
+            columns: ["expense_head_id"]
+            isOneToOne: false
+            referencedRelation: "expense_head"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_txn_reconciliation_id_fkey"
+            columns: ["reconciliation_id"]
+            isOneToOne: false
+            referencedRelation: "petty_cash_reconciliation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "petty_cash_txn_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       phi_access_log: {
         Row: {
           accessed_at: string
@@ -27142,6 +27375,10 @@ export type Database = {
         }[]
       }
       challan_check_digit: { Args: { p_digits: string }; Returns: number }
+      change_petty_cash_custodian: {
+        Args: { p_account_id: string; p_new_custodian_user_id: string }
+        Returns: undefined
+      }
       change_student_password: {
         Args: { p_new_password: string }
         Returns: boolean
@@ -27617,6 +27854,15 @@ export type Database = {
         Args: { p_challan_id: string; p_gateway: string }
         Returns: Json
       }
+      create_petty_cash_account: {
+        Args: {
+          p_campus_id: string
+          p_custodian_user_id: string
+          p_float_paisa: number
+          p_txn_cap_paisa: number
+        }
+        Returns: string
+      }
       create_room: {
         Args: {
           p_block_label?: string
@@ -27851,6 +28097,14 @@ export type Database = {
       decide_fee_settlement: {
         Args: { p_approve: boolean; p_note?: string; p_settlement_id: string }
         Returns: string
+      }
+      decide_petty_cash_replenishment: {
+        Args: {
+          p_approve: boolean
+          p_note?: string
+          p_reconciliation_id: string
+        }
+        Returns: Json
       }
       declare_competency: {
         Args: {
@@ -29233,6 +29487,10 @@ export type Database = {
         Args: { p_clearance_id: string; p_reason: string }
         Returns: undefined
       }
+      petty_cash_ledger_balance: {
+        Args: { p_account_id: string }
+        Returns: number
+      }
       pick_body: {
         Args: { p_lang?: string; p_version_id: string }
         Returns: string
@@ -29254,6 +29512,15 @@ export type Database = {
           p_value_date?: string
         }
         Returns: string
+      }
+      post_petty_cash: {
+        Args: {
+          p_account_id: string
+          p_amount_paisa: number
+          p_head_id: string
+          p_narrative?: string
+        }
+        Returns: Json
       }
       prefill_slot_defaults: {
         Args: { p_section_id: string; p_subject_id: string }
@@ -29652,6 +29919,14 @@ export type Database = {
           p_section_id: string
         }
         Returns: string
+      }
+      request_petty_cash_replenishment: {
+        Args: {
+          p_account_id: string
+          p_counted_paisa: number
+          p_explanation?: string
+        }
+        Returns: Json
       }
       request_report_export: {
         Args: {
@@ -30216,6 +30491,14 @@ export type Database = {
           p_item_id: string
           p_note?: string
           p_outstanding_paisa: number
+        }
+        Returns: undefined
+      }
+      set_petty_cash_limits: {
+        Args: {
+          p_account_id: string
+          p_float_paisa: number
+          p_txn_cap_paisa: number
         }
         Returns: undefined
       }
