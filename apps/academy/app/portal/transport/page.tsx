@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { getLang } from '@/lib/i18n/server';
 import { t } from '@/lib/i18n/messages';
 import { loose, todayPk } from '@/lib/transport/rpc';
+import { PositionPanel } from './position-panel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -40,12 +41,14 @@ export default async function PortalTransportPage() {
   const eventRows = (events ?? []) as Ev[];
   const stateText = (st: string) => (st === 'boarded' ? t(lang, 'transport.boarded') : st === 'dropped' ? t(lang, 'transport.dropped') : t(lang, 'transport.absent'));
   const clock = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Karachi' });
+  const { data: live } = await supabase.from('transport_vehicle_position_latest').select('vehicle_id, lat, lng, speed_kmh, pinged_at');
   const hhmm = (v: string | null) => v?.slice(0, 5) ?? '-';
   const stopName = (s: Stop) => (lang === 'ur' && s.stop_name_ur ? s.stop_name_ur : s.stop_name);
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">{t(lang, 'transport.title')}</h2>
+      <PositionPanel initial={(live ?? []) as { vehicle_id: string; lat: number; lng: number; speed_kmh: number | null; pinged_at: string }[]} lang={lang} />
       {rows.length === 0 && <p className="text-sm text-muted-foreground">{t(lang, 'transport.none')}</p>}
       {rows.map((a) => {
         const routeStops = stopRows.filter((s) => s.route_id === a.route_id);
