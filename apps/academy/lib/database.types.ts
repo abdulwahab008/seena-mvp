@@ -14943,6 +14943,100 @@ export type Database = {
           },
         ]
       }
+      report_audit: {
+        Row: {
+          contains_pii: boolean
+          dataset_key: string
+          destination: string
+          executed_at: string
+          filters_json: Json
+          id: string
+          ip: unknown
+          reason: string | null
+          report_key: string
+          row_count: number
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          contains_pii: boolean
+          dataset_key: string
+          destination?: string
+          executed_at?: string
+          filters_json?: Json
+          id?: string
+          ip?: unknown
+          reason?: string | null
+          report_key: string
+          row_count?: number
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          contains_pii?: boolean
+          dataset_key?: string
+          destination?: string
+          executed_at?: string
+          filters_json?: Json
+          id?: string
+          ip?: unknown
+          reason?: string | null
+          report_key?: string
+          row_count?: number
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_audit_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_audit_alert: {
+        Row: {
+          alert_day: string
+          created_at: string
+          id: string
+          pii_report_count: number
+          report_keys: string[]
+          tenant_id: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          alert_day: string
+          created_at?: string
+          id?: string
+          pii_report_count: number
+          report_keys: string[]
+          tenant_id: string
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          alert_day?: string
+          created_at?: string
+          id?: string
+          pii_report_count?: number
+          report_keys?: string[]
+          tenant_id?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_audit_alert_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_card: {
         Row: {
           campus_id: string
@@ -15374,6 +15468,21 @@ export type Database = {
             referencedColumns: ["section_id"]
           },
         ]
+      }
+      report_pii_column: {
+        Row: {
+          column_pattern: string
+          note: string | null
+        }
+        Insert: {
+          column_pattern: string
+          note?: string | null
+        }
+        Update: {
+          column_pattern?: string
+          note?: string | null
+        }
+        Relationships: []
       }
       result_position: {
         Row: {
@@ -25286,6 +25395,7 @@ export type Database = {
         }
         Returns: Json
       }
+      check_pii_export_alerts: { Args: never; Returns: number }
       check_room_capacity: {
         Args: { p_room_id: string; p_section_id: string }
         Returns: Json
@@ -26103,6 +26213,34 @@ export type Database = {
         Args: { p_circular_id: string; p_segment_name: string }
         Returns: string
       }
+      export_report_audit: {
+        Args: {
+          p_from?: string
+          p_ip?: string
+          p_to?: string
+          p_user_id?: string
+        }
+        Returns: {
+          contains_pii: boolean
+          dataset_key: string
+          destination: string
+          executed_at: string
+          filters_json: Json
+          id: string
+          ip: unknown
+          reason: string | null
+          report_key: string
+          row_count: number
+          tenant_id: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "report_audit"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       fail_audit_export: {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
@@ -26678,6 +26816,10 @@ export type Database = {
       fn_report_card_sheet: {
         Args: { p_exam_term_id: string; p_section_id: string }
         Returns: Json
+      }
+      fn_report_contains_pii: {
+        Args: { p_columns_json: Json; p_dataset_key: string }
+        Returns: boolean
       }
       fn_required_approver_role: {
         Args: { p_amount_paisa: number; p_campus_id: string; p_head_id: string }
@@ -27481,6 +27623,19 @@ export type Database = {
           p_mode: Database["public"]["Enums"]["fee_payment_mode"]
           p_reference_no?: string
           p_value_date?: string
+        }
+        Returns: string
+      }
+      record_report_run: {
+        Args: {
+          p_columns: Json
+          p_dataset_key: string
+          p_destination?: string
+          p_filters: Json
+          p_ip?: string
+          p_reason?: string
+          p_report_key: string
+          p_row_count: number
         }
         Returns: string
       }

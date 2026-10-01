@@ -247,6 +247,12 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/feature-flags', label: 'Modules' },
     ],
   },
+  {
+    id: 'reports',
+    label: 'Reports',
+    icon: FileBarChart,
+    items: [{ href: '/reports/audit', label: 'Export Audit' }],
+  },
 ];
 
 const ALL_ITEMS = NAV_SECTIONS.flatMap((s) => s.items.map((i) => ({ ...i, section: s })));
