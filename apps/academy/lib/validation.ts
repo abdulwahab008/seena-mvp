@@ -2275,3 +2275,31 @@ export const staffAttendanceRuleSchema = z.object({
   startTime: z.string().regex(/^\d{2}:\d{2}$/, "Enter a time like 08:00"),
   graceMinutes: z.coerce.number({ message: "Enter minutes" }).int().min(0).max(240),
 });
+
+// FR-D15: disciplinary records (append-only; corrections are new rows).
+export const DISCIPLINARY_ACTION_TYPES = ['warning', 'show_cause', 'inquiry', 'suspension', 'termination'] as const;
+export const issueDisciplinarySchema = z
+  .object({
+    staffId: z.string().uuid(),
+    actionType: z.enum(DISCIPLINARY_ACTION_TYPES, { message: 'Choose the type of action' }),
+    description: z.string().trim().min(1, 'Describe the matter').max(4000, 'At most 4000 characters'),
+    responseDays: z.coerce.number().int().min(1, 'Allow at least 1 day').max(60, 'At most 60 days').optional(),
+    suspendFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+    suspendTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+  })
+  .superRefine((v, ctx) => {
+    if (v.actionType === 'show_cause' && !v.responseDays) ctx.addIssue({ code: 'custom', path: ['responseDays'], message: 'Enter the response deadline in days' });
+    if (v.actionType === 'suspension') {
+      if (!v.suspendFrom || !v.suspendTo) ctx.addIssue({ code: 'custom', path: ['suspendFrom'], message: 'Enter the suspension dates' });
+      else if (v.suspendTo < v.suspendFrom) ctx.addIssue({ code: 'custom', path: ['suspendTo'], message: 'The end date is before the start date' });
+    }
+  });
+export const supersedeDisciplinarySchema = z.object({
+  recordId: z.string().uuid(),
+  description: z.string().trim().max(4000).optional(),
+  staffResponse: z.string().trim().max(4000).optional(),
+  outcome: z.string().trim().max(2000).optional(),
+  suspendFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+  suspendTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+});
+export const reinstateSchema = z.object({ recordId: z.string().uuid(), note: z.string().trim().max(1000).optional() });
