@@ -2266,3 +2266,21 @@ export const housePointsSchema = z.object({
   note: z.string().trim().max(200).optional(),
 });
 export type HousePointsInput = z.infer<typeof housePointsSchema>;
+
+// FR-H11: syllabus coverage.
+const isoDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter a valid date');
+export const coverageSchema = z
+  .object({
+    sectionId: z.string().uuid(),
+    subjectId: z.string().uuid(),
+    unitId: z.string().uuid(),
+    status: z.enum(['not_started', 'in_progress', 'completed']),
+    startedOn: isoDay.optional().or(z.literal('')),
+    completedOn: isoDay.optional().or(z.literal('')),
+    periodsUsed: z.number({ message: 'Enter the periods used' }).int('Whole periods only').min(0).max(1000).optional(),
+  })
+  .refine((v) => !v.startedOn || !v.completedOn || v.completedOn >= v.startedOn, {
+    message: 'Completion date cannot precede start date',
+    path: ['completedOn'],
+  });
+export type CoverageInput = z.input<typeof coverageSchema>;
