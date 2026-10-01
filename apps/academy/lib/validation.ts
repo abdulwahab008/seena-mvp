@@ -2343,6 +2343,27 @@ export const custodyAckSchema = z
   })
   .refine((v) => v.method !== 'otp' || !!v.otp, { message: 'Enter the 6-digit code', path: ['otp'] })
   .refine((v) => v.method === 'otp' || !!v.reference, { message: 'Enter the form or register reference', path: ['reference'] });
+// FR-R05: maintenance and repairs.
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a valid date');
+const optionalDate = isoDate.optional().or(z.literal(''));
+export const maintenanceSchema = z
+  .object({
+    assetId: z.string().uuid('Choose an asset'),
+    fault: z.string().trim().min(1, 'Describe the fault').max(1000),
+    reportedOn: optionalDate,
+    vendorId: z.string().uuid().optional().or(z.literal('')),
+    costPkr: z.coerce.number({ message: 'Enter the cost' }).min(0, 'Cost cannot be negative').default(0),
+    isCapitalised: z.boolean().default(false),
+    downtimeFrom: optionalDate,
+    downtimeTo: optionalDate,
+    nextServiceDue: optionalDate,
+    responsibleUserId: z.string().uuid().optional().or(z.literal('')),
+  })
+  .refine((v) => !v.downtimeTo || (!!v.downtimeFrom && v.downtimeTo >= v.downtimeFrom), { message: 'Downtime must end on or after it starts', path: ['downtimeTo'] })
+  .refine((v) => !v.isCapitalised || v.costPkr > 0, { message: 'A capital improvement needs a cost', path: ['costPkr'] });
+export type MaintenanceInput = z.input<typeof maintenanceSchema>;
+export const vendorSchema = z.object({ name: z.string().trim().min(1, 'Enter the vendor name').max(200), phone: z.string().trim().max(30).optional() });
+export const capitalisationThresholdSchema = z.object({ thresholdPkr: z.coerce.number({ message: 'Enter the threshold' }).min(0, 'Threshold cannot be negative') });
 export const assetDisposalSchema = z.object({
   assetId: z.string().uuid('Choose an asset'),
   disposedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the disposal date'),

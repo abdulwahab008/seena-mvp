@@ -2278,6 +2278,13 @@ export type Database = {
             foreignKeyName: "asset_custody_asset_id_fkey"
             columns: ["asset_id"]
             isOneToOne: false
+            referencedRelation: "v_asset_ledger"
+            referencedColumns: ["asset_id"]
+          },
+          {
+            foreignKeyName: "asset_custody_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
             referencedRelation: "v_asset_register"
             referencedColumns: ["asset_id"]
           },
@@ -2473,6 +2480,13 @@ export type Database = {
             foreignKeyName: "asset_depreciation_entry_asset_id_fkey"
             columns: ["asset_id"]
             isOneToOne: false
+            referencedRelation: "v_asset_ledger"
+            referencedColumns: ["asset_id"]
+          },
+          {
+            foreignKeyName: "asset_depreciation_entry_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
             referencedRelation: "v_asset_register"
             referencedColumns: ["asset_id"]
           },
@@ -2551,6 +2565,13 @@ export type Database = {
             foreignKeyName: "asset_disposal_asset_id_fkey"
             columns: ["asset_id"]
             isOneToOne: true
+            referencedRelation: "v_asset_ledger"
+            referencedColumns: ["asset_id"]
+          },
+          {
+            foreignKeyName: "asset_disposal_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: true
             referencedRelation: "v_asset_register"
             referencedColumns: ["asset_id"]
           },
@@ -2579,6 +2600,259 @@ export type Database = {
             foreignKeyName: "asset_disposal_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_maintenance: {
+        Row: {
+          asset_id: string
+          campus_id: string
+          closed_at: string | null
+          closed_by: string | null
+          cost: number
+          created_at: string
+          created_by: string | null
+          downtime_from: string | null
+          downtime_to: string | null
+          fault: string
+          id: string
+          is_capitalised: boolean
+          next_service_due: string | null
+          reported_on: string
+          responsible_user_id: string | null
+          tenant_id: string
+          vendor_id: string | null
+        }
+        Insert: {
+          asset_id: string
+          campus_id: string
+          closed_at?: string | null
+          closed_by?: string | null
+          cost?: number
+          created_at?: string
+          created_by?: string | null
+          downtime_from?: string | null
+          downtime_to?: string | null
+          fault: string
+          id?: string
+          is_capitalised?: boolean
+          next_service_due?: string | null
+          reported_on: string
+          responsible_user_id?: string | null
+          tenant_id: string
+          vendor_id?: string | null
+        }
+        Update: {
+          asset_id?: string
+          campus_id?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          cost?: number
+          created_at?: string
+          created_by?: string | null
+          downtime_from?: string | null
+          downtime_to?: string | null
+          fault?: string
+          id?: string
+          is_capitalised?: boolean
+          next_service_due?: string | null
+          reported_on?: string
+          responsible_user_id?: string | null
+          tenant_id?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_maintenance_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "asset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "v_asset_ledger"
+            referencedColumns: ["asset_id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "v_asset_register"
+            referencedColumns: ["asset_id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_responsible_user_id_fkey"
+            columns: ["responsible_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_maintenance_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "procurement_vendor"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_service_reminder: {
+        Row: {
+          asset_id: string
+          campus_id: string
+          created_at: string
+          due_on: string
+          id: string
+          lead_days: number
+          maintenance_id: string
+          read_at: string | null
+          recipient_role: string
+          recipient_user_id: string
+          tenant_id: string
+        }
+        Insert: {
+          asset_id: string
+          campus_id: string
+          created_at?: string
+          due_on: string
+          id?: string
+          lead_days: number
+          maintenance_id: string
+          read_at?: string | null
+          recipient_role: string
+          recipient_user_id: string
+          tenant_id: string
+        }
+        Update: {
+          asset_id?: string
+          campus_id?: string
+          created_at?: string
+          due_on?: string
+          id?: string
+          lead_days?: number
+          maintenance_id?: string
+          read_at?: string | null
+          recipient_role?: string
+          recipient_user_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_service_reminder_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "asset"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_service_reminder_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "v_asset_ledger"
+            referencedColumns: ["asset_id"]
+          },
+          {
+            foreignKeyName: "asset_service_reminder_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "v_asset_register"
+            referencedColumns: ["asset_id"]
+          },
+          {
+            foreignKeyName: "asset_service_reminder_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_service_reminder_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "asset_service_reminder_maintenance_id_fkey"
+            columns: ["maintenance_id"]
+            isOneToOne: false
+            referencedRelation: "asset_maintenance"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_service_reminder_recipient_user_id_fkey"
+            columns: ["recipient_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "asset_service_reminder_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_setting: {
+        Row: {
+          capitalisation_threshold: number
+          tenant_id: string
+        }
+        Insert: {
+          capitalisation_threshold?: number
+          tenant_id: string
+        }
+        Update: {
+          capitalisation_threshold?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_setting_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
@@ -5528,6 +5802,50 @@ export type Database = {
           },
         ]
       }
+      board_pattern_ref: {
+        Row: {
+          board: Database["public"]["Enums"]["board"]
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sections: NonNullable<Json>
+          tenant_id: string
+          total_marks: number
+        }
+        Insert: {
+          board: Database["public"]["Enums"]["board"]
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sections: NonNullable<Json>
+          tenant_id: string
+          total_marks: number
+        }
+        Update: {
+          board?: Database["public"]["Enums"]["board"]
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sections?: NonNullable<Json>
+          tenant_id?: string
+          total_marks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_pattern_ref_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       board_profile: {
         Row: {
           board_code: Database["public"]["Enums"]["board"]
@@ -5787,6 +6105,62 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "bank_mapping_profile"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      campus_branding: {
+        Row: {
+          address_en: string | null
+          address_ur: string | null
+          campus_id: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          address_en?: string | null
+          address_ur?: string | null
+          campus_id: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          address_en?: string | null
+          address_ur?: string | null
+          campus_id?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_branding_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campus_branding_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "campus_branding_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campus_branding_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -7258,6 +7632,41 @@ export type Database = {
           },
           {
             foreignKeyName: "class_subject_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clearance_item_template: {
+        Row: {
+          is_mandatory: boolean
+          item_code: string
+          item_name: string
+          owner_role: string
+          sort_order: number
+          tenant_id: string
+        }
+        Insert: {
+          is_mandatory?: boolean
+          item_code: string
+          item_name: string
+          owner_role: string
+          sort_order?: number
+          tenant_id: string
+        }
+        Update: {
+          is_mandatory?: boolean
+          item_code?: string
+          item_name?: string
+          owner_role?: string
+          sort_order?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clearance_item_template_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -9478,6 +9887,180 @@ export type Database = {
           },
           {
             foreignKeyName: "exam_hall_seat_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_paper: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string
+          exam_subject_id: string
+          id: string
+          job_id: string
+          pattern_snapshot: NonNullable<Json>
+          published_at: string | null
+          set_code: string
+          status: string
+          tenant_id: string
+          title: string
+          total_marks: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by: string
+          exam_subject_id: string
+          id?: string
+          job_id: string
+          pattern_snapshot: NonNullable<Json>
+          published_at?: string | null
+          set_code?: string
+          status?: string
+          tenant_id: string
+          title: string
+          total_marks: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string
+          exam_subject_id?: string
+          id?: string
+          job_id?: string
+          pattern_snapshot?: NonNullable<Json>
+          published_at?: string | null
+          set_code?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+          total_marks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_paper_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_paper_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "exam_paper_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_paper_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "exam_paper_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "exam_paper_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "exam_paper_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "paper_generation_job"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_paper_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_paper_item: {
+        Row: {
+          answer: string | null
+          bank_item_id: string | null
+          chapter: string | null
+          id: string
+          marks: number
+          options: Json | null
+          paper_id: string
+          question_no: number
+          question_text: string
+          question_type: string
+          section_no: number
+          slo_code: string | null
+          source_pages: NonNullable<Json>
+          tenant_id: string
+          topic_tag: string | null
+        }
+        Insert: {
+          answer?: string | null
+          bank_item_id?: string | null
+          chapter?: string | null
+          id?: string
+          marks: number
+          options?: Json | null
+          paper_id: string
+          question_no: number
+          question_text: string
+          question_type: string
+          section_no: number
+          slo_code?: string | null
+          source_pages?: NonNullable<Json>
+          tenant_id: string
+          topic_tag?: string | null
+        }
+        Update: {
+          answer?: string | null
+          bank_item_id?: string | null
+          chapter?: string | null
+          id?: string
+          marks?: number
+          options?: Json | null
+          paper_id?: string
+          question_no?: number
+          question_text?: string
+          question_type?: string
+          section_no?: number
+          slo_code?: string | null
+          source_pages?: NonNullable<Json>
+          tenant_id?: string
+          topic_tag?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_paper_item_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "exam_paper"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_paper_item_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -19543,6 +20126,126 @@ export type Database = {
           },
         ]
       }
+      paper_generation_job: {
+        Row: {
+          attempts: number
+          board_pattern_id: string
+          campus_id: string
+          chapters: string[]
+          created_at: string
+          exam_subject_id: string
+          finished_at: string | null
+          id: string
+          last_error: string | null
+          max_retries: number
+          next_attempt_at: string
+          pattern_snapshot: NonNullable<Json>
+          requested_by: string
+          set_count: number
+          started_at: string | null
+          status: string
+          tenant_id: string
+          total_marks: number
+        }
+        Insert: {
+          attempts?: number
+          board_pattern_id: string
+          campus_id: string
+          chapters: string[]
+          created_at?: string
+          exam_subject_id: string
+          finished_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_retries?: number
+          next_attempt_at?: string
+          pattern_snapshot: NonNullable<Json>
+          requested_by: string
+          set_count?: number
+          started_at?: string | null
+          status?: string
+          tenant_id: string
+          total_marks: number
+        }
+        Update: {
+          attempts?: number
+          board_pattern_id?: string
+          campus_id?: string
+          chapters?: string[]
+          created_at?: string
+          exam_subject_id?: string
+          finished_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_retries?: number
+          next_attempt_at?: string
+          pattern_snapshot?: NonNullable<Json>
+          requested_by?: string
+          set_count?: number
+          started_at?: string | null
+          status?: string
+          tenant_id?: string
+          total_marks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paper_generation_job_board_pattern_id_fkey"
+            columns: ["board_pattern_id"]
+            isOneToOne: false
+            referencedRelation: "board_pattern_ref"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paper_generation_job_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paper_generation_job_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "paper_generation_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paper_generation_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "paper_generation_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "paper_generation_job_exam_subject_id_fkey"
+            columns: ["exam_subject_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["exam_subject_id"]
+          },
+          {
+            foreignKeyName: "paper_generation_job_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       password_reset_request: {
         Row: {
           consumed_at: string | null
@@ -20588,6 +21291,41 @@ export type Database = {
           },
         ]
       }
+      procurement_vendor: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+          tenant_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+          tenant_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procurement_vendor_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promotion_decision: {
         Row: {
           aggregate_pct: number | null
@@ -20854,6 +21592,311 @@ export type Database = {
           rate_paisa?: number
         }
         Relationships: []
+      }
+      ptm_booking: {
+        Row: {
+          booked_at: string
+          campus_id: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          event_id: string
+          guardian_id: string
+          id: string
+          slot_id: string
+          status: string
+          student_id: string
+          teacher_id: string
+          tenant_id: string
+        }
+        Insert: {
+          booked_at?: string
+          campus_id: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          event_id: string
+          guardian_id: string
+          id?: string
+          slot_id: string
+          status?: string
+          student_id: string
+          teacher_id: string
+          tenant_id: string
+        }
+        Update: {
+          booked_at?: string
+          campus_id?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          event_id?: string
+          guardian_id?: string
+          id?: string
+          slot_id?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ptm_booking_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "ptm_event"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "ptm_slot"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ptm_booking_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ptm_event: {
+        Row: {
+          booking_cutoff_at: string
+          booking_opens_at: string | null
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          event_date: string
+          id: string
+          slot_minutes: number
+          starts_at: string
+          status: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          booking_cutoff_at: string
+          booking_opens_at?: string | null
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          event_date: string
+          id?: string
+          slot_minutes?: number
+          starts_at: string
+          status?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          booking_cutoff_at?: string
+          booking_opens_at?: string | null
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          event_date?: string
+          id?: string
+          slot_minutes?: number
+          starts_at?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ptm_event_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_event_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "ptm_event_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ptm_slot: {
+        Row: {
+          duration_min: number
+          event_id: string
+          id: string
+          starts_at: string
+          teacher_id: string
+          tenant_id: string
+        }
+        Insert: {
+          duration_min?: number
+          event_id: string
+          id?: string
+          starts_at: string
+          teacher_id: string
+          tenant_id: string
+        }
+        Update: {
+          duration_min?: number
+          event_id?: string
+          id?: string
+          starts_at?: string
+          teacher_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ptm_slot_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "ptm_event"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_slot_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "ptm_slot_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ptm_waitlist: {
+        Row: {
+          created_at: string
+          guardian_id: string
+          id: string
+          notified_at: string | null
+          slot_id: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          guardian_id: string
+          id?: string
+          notified_at?: string | null
+          slot_id: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          guardian_id?: string
+          id?: string
+          notified_at?: string | null
+          slot_id?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ptm_waitlist_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_waitlist_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "ptm_slot"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_waitlist_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ptm_waitlist_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "ptm_waitlist_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "ptm_waitlist_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_enquiry_attempt: {
         Row: {
@@ -21856,6 +22899,8 @@ export type Database = {
           finished_at: string | null
           format: string
           id: string
+          orientation: string | null
+          page_count: number | null
           params: NonNullable<Json>
           params_hash: string
           requested_by: string
@@ -21876,6 +22921,8 @@ export type Database = {
           finished_at?: string | null
           format?: string
           id?: string
+          orientation?: string | null
+          page_count?: number | null
           params?: NonNullable<Json>
           params_hash: string
           requested_by: string
@@ -21896,6 +22943,8 @@ export type Database = {
           finished_at?: string | null
           format?: string
           id?: string
+          orientation?: string | null
+          page_count?: number | null
           params?: NonNullable<Json>
           params_hash?: string
           requested_by?: string
@@ -23971,6 +25020,83 @@ export type Database = {
           },
         ]
       }
+      staff_clearance_item: {
+        Row: {
+          cleared_at: string | null
+          cleared_by: string | null
+          exit_id: string
+          id: string
+          is_mandatory: boolean
+          item_code: string
+          item_name: string
+          owner_role: string
+          sort_order: number
+          tenant_id: string
+          waived_at: string | null
+          waived_by: string | null
+          waiver_reason: string | null
+        }
+        Insert: {
+          cleared_at?: string | null
+          cleared_by?: string | null
+          exit_id: string
+          id?: string
+          is_mandatory?: boolean
+          item_code: string
+          item_name: string
+          owner_role: string
+          sort_order?: number
+          tenant_id: string
+          waived_at?: string | null
+          waived_by?: string | null
+          waiver_reason?: string | null
+        }
+        Update: {
+          cleared_at?: string | null
+          cleared_by?: string | null
+          exit_id?: string
+          id?: string
+          is_mandatory?: boolean
+          item_code?: string
+          item_name?: string
+          owner_role?: string
+          sort_order?: number
+          tenant_id?: string
+          waived_at?: string | null
+          waived_by?: string | null
+          waiver_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_clearance_item_cleared_by_fkey"
+            columns: ["cleared_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "staff_clearance_item_exit_id_fkey"
+            columns: ["exit_id"]
+            isOneToOne: false
+            referencedRelation: "staff_exit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_clearance_item_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_clearance_item_waived_by_fkey"
+            columns: ["waived_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       staff_contract: {
         Row: {
           contract_type: Database["public"]["Enums"]["contract_type"]
@@ -24332,6 +25458,110 @@ export type Database = {
           },
           {
             foreignKeyName: "staff_document_reminder_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_exit: {
+        Row: {
+          campus_id: string
+          completed_at: string | null
+          completed_by: string | null
+          exit_type: Database["public"]["Enums"]["staff_exit_type"]
+          id: string
+          initiated_at: string
+          initiated_by: string | null
+          last_working_date: string
+          notice_date: string | null
+          notice_period_days: number | null
+          notice_shortfall_days: number
+          reason: string | null
+          staff_id: string
+          status: Database["public"]["Enums"]["staff_exit_status"]
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          exit_type: Database["public"]["Enums"]["staff_exit_type"]
+          id?: string
+          initiated_at?: string
+          initiated_by?: string | null
+          last_working_date: string
+          notice_date?: string | null
+          notice_period_days?: number | null
+          notice_shortfall_days?: number
+          reason?: string | null
+          staff_id: string
+          status?: Database["public"]["Enums"]["staff_exit_status"]
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          exit_type?: Database["public"]["Enums"]["staff_exit_type"]
+          id?: string
+          initiated_at?: string
+          initiated_by?: string | null
+          last_working_date?: string
+          notice_date?: string | null
+          notice_period_days?: number | null
+          notice_shortfall_days?: number
+          reason?: string | null
+          staff_id?: string
+          status?: Database["public"]["Enums"]["staff_exit_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_exit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_exit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "staff_exit_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "staff_exit_initiated_by_fkey"
+            columns: ["initiated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "staff_exit_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_exit_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
+          },
+          {
+            foreignKeyName: "staff_exit_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -30204,6 +31434,54 @@ export type Database = {
           },
         ]
       }
+      v_asset_ledger: {
+        Row: {
+          accumulated_depreciation: number | null
+          asset_id: string | null
+          campus_id: string | null
+          capital_improvements: number | null
+          capitalised_cost: number | null
+          category: Database["public"]["Enums"]["asset_category"] | null
+          lifetime_maintenance: number | null
+          name: string | null
+          net_book_value: number | null
+          next_service_due: string | null
+          status: Database["public"]["Enums"]["asset_status"] | null
+          tag_no: string | null
+          tenant_id: string | null
+          vehicle_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "asset_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "transport_vehicle"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_asset_register: {
         Row: {
           accumulated_depreciation: number | null
@@ -32945,6 +34223,8 @@ export type Database = {
           finished_at: string | null
           format: string | null
           id: string | null
+          orientation: string | null
+          page_count: number | null
           params: Json | null
           requested_by: string | null
           row_count: number | null
@@ -32960,6 +34240,8 @@ export type Database = {
           finished_at?: string | null
           format?: string | null
           id?: string | null
+          orientation?: string | null
+          page_count?: number | null
           params?: Json | null
           requested_by?: string | null
           row_count?: number | null
@@ -32975,6 +34257,8 @@ export type Database = {
           finished_at?: string | null
           format?: string | null
           id?: string | null
+          orientation?: string | null
+          page_count?: number | null
           params?: Json | null
           requested_by?: string | null
           row_count?: number | null
@@ -35291,11 +36575,23 @@ export type Database = {
         Args: { p_staff_id: string }
         Returns: undefined
       }
+      assert_vehicle_available: {
+        Args: { p_on: string; p_vehicle_id: string }
+        Returns: undefined
+      }
       assert_vehicle_roadworthy: {
         Args: { p_on: string; p_vehicle_id: string }
         Returns: undefined
       }
       asset_depreciation_cron: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      asset_service_due_reminder_run: {
+        Args: { p_today?: string }
+        Returns: number
+      }
+      asset_status_refresh_run: {
         Args: Record<PropertyKey, never>
         Returns: number
       }
@@ -35434,6 +36730,10 @@ export type Database = {
         }
         Returns: string
       }
+      book_ptm_slot: {
+        Args: { p_slot_id: string; p_student_id: string }
+        Returns: Json
+      }
       build_challan_render_payload: {
         Args: { p_challan_id: string }
         Returns: Json
@@ -35474,6 +36774,7 @@ export type Database = {
         Args: { p_application_id: string }
         Returns: undefined
       }
+      cancel_ptm_booking: { Args: { p_booking_id: string }; Returns: undefined }
       cancel_student_leave: { Args: { p_leave_id: string }; Returns: undefined }
       certificate_merge_fields: {
         Args: { p_body_html: string }
@@ -35583,9 +36884,11 @@ export type Database = {
       claim_export_job: {
         Args: Record<PropertyKey, never>
         Returns: {
+          campus_id: string
           columns: Json
           dataset_key: string
           display_name: string
+          format: string
           job_id: string
           params: Json
           requested_by: string
@@ -35659,6 +36962,10 @@ export type Database = {
           variance_pct: number
         }[]
       }
+      clear_exit_item: {
+        Args: { p_exit_id: string; p_item_code: string }
+        Returns: undefined
+      }
       clear_no_dues_item: {
         Args: { p_item_id: string; p_note?: string }
         Returns: undefined
@@ -35698,6 +37005,10 @@ export type Database = {
       clone_timetable_version: {
         Args: { p_version_id: string }
         Returns: string
+      }
+      close_asset_maintenance: {
+        Args: { p_maintenance_id: string }
+        Returns: undefined
       }
       close_bank_import: { Args: { p_import_id: string }; Returns: undefined }
       close_shortage_warning: {
@@ -35740,7 +37051,13 @@ export type Database = {
         Returns: undefined
       }
       complete_export_job: {
-        Args: { p_job_id: string; p_row_count: number; p_storage_path: string }
+        Args: {
+          p_job_id: string
+          p_orientation?: string
+          p_page_count?: number
+          p_row_count: number
+          p_storage_path: string
+        }
         Returns: undefined
       }
       complete_onboarding_step: {
@@ -35754,6 +37071,7 @@ export type Database = {
         Args: { p_batch_id: string; p_page_count?: number; p_sha256?: string }
         Returns: Json
       }
+      complete_staff_exit: { Args: { p_exit_id: string }; Returns: undefined }
       complete_storage_delete: {
         Args: { p_error?: string; p_id: string }
         Returns: undefined
@@ -36129,6 +37447,22 @@ export type Database = {
           p_custodian_user_id: string
           p_float_paisa: number
           p_txn_cap_paisa: number
+        }
+        Returns: string
+      }
+      create_procurement_vendor: {
+        Args: { p_name: string; p_phone?: string }
+        Returns: string
+      }
+      create_ptm_event: {
+        Args: {
+          p_campus_id: string
+          p_cutoff_hours?: number
+          p_event_date: string
+          p_opens_at?: string
+          p_slot_minutes?: number
+          p_start_time: string
+          p_title: string
         }
         Returns: string
       }
@@ -36868,6 +38202,35 @@ export type Database = {
         Args: { p_application_id: string }
         Returns: Json
       }
+      fn_claim_paper_jobs: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          board_pattern_id: string
+          campus_id: string
+          chapters: string[]
+          created_at: string
+          exam_subject_id: string
+          finished_at: string | null
+          id: string
+          last_error: string | null
+          max_retries: number
+          next_attempt_at: string
+          pattern_snapshot: NonNullable<Json>
+          requested_by: string
+          set_count: number
+          started_at: string | null
+          status: string
+          tenant_id: string
+          total_marks: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "paper_generation_job"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       fn_close_enquiry: {
         Args: {
           p_enquiry_id: string
@@ -36994,6 +38357,10 @@ export type Database = {
       fn_extend_offer: {
         Args: { p_new_expires_at: string; p_offer_id: string; p_reason: string }
         Returns: undefined
+      }
+      fn_fail_stalled_paper_jobs: {
+        Args: { p_minutes?: number }
+        Returns: number
       }
       fn_fee_collection_trend: {
         Args: { p_campus_id?: string; p_months?: number }
@@ -37149,6 +38516,10 @@ export type Database = {
           hall_id: string
           name: string
         }[]
+      }
+      fn_ingest_generated_paper: {
+        Args: { p_job_id: string; p_payload: Json }
+        Returns: Json
       }
       fn_issue_offer: {
         Args: {
@@ -37352,6 +38723,10 @@ export type Database = {
       fn_record_ocr_review: {
         Args: { p_job_id: string; p_reviews: Json }
         Returns: Json
+      }
+      fn_record_paper_job_failure: {
+        Args: { p_error: string; p_job_id: string }
+        Returns: string
       }
       fn_refresh_subject_averages: {
         Args: { p_exam_term_id?: string }
@@ -37588,6 +38963,15 @@ export type Database = {
         Args: { p_campus_id: string; p_period_date: string }
         Returns: string
       }
+      generate_ptm_slots: {
+        Args: {
+          p_end_time: string
+          p_event_id: string
+          p_start_time: string
+          p_teacher_ids: string[]
+        }
+        Returns: number
+      }
       get_channel_chain: {
         Args: { p_message_class?: string; p_tenant_id: string }
         Returns: {
@@ -37691,6 +39075,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_outstanding_clearance_items: {
+        Args: { p_exit_id: string }
+        Returns: {
+          item_code: string
+          item_name: string
+          owner_role: string
+        }[]
       }
       get_preferred_language: {
         Args: Record<PropertyKey, never>
@@ -37818,6 +39210,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      initiate_contract_expiry_exits: {
+        Args: { p_today?: string }
+        Returns: number
+      }
+      initiate_staff_exit: {
+        Args: {
+          p_exit_type: Database["public"]["Enums"]["staff_exit_type"]
+          p_last_working_date: string
+          p_notice_date: string
+          p_reason?: string
+          p_staff_id: string
+        }
+        Returns: string
+      }
       inv_reorder_alert_run: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -37926,6 +39332,10 @@ export type Database = {
         }
         Returns: Json
       }
+      join_ptm_waitlist: {
+        Args: { p_slot_id: string; p_student_id: string }
+        Returns: undefined
+      }
       join_transport_waitlist: {
         Args: { p_route_id: string; p_student_id: string }
         Returns: string
@@ -38025,6 +39435,21 @@ export type Database = {
         Returns: undefined
       }
       lock_exam_term: { Args: { p_exam_term_id: string }; Returns: undefined }
+      log_asset_maintenance: {
+        Args: {
+          p_asset_id: string
+          p_cost?: number
+          p_downtime_from?: string
+          p_downtime_to?: string
+          p_fault: string
+          p_is_capitalised?: boolean
+          p_next_service_due?: string
+          p_reported_on?: string
+          p_responsible_user_id?: string
+          p_vendor_id?: string
+        }
+        Returns: string
+      }
       log_certificate_digest_mismatch: {
         Args: {
           p_issue_id: string
@@ -38335,6 +39760,10 @@ export type Database = {
       provision_tenant: {
         Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
         Returns: string
+      }
+      ptm_slot_list: {
+        Args: { p_event_id: string; p_student_id: string }
+        Returns: Json
       }
       publish_circular: {
         Args: { p_circular_id: string; p_publish_at?: string }
@@ -38733,6 +40162,10 @@ export type Database = {
         Args: { p_unit_ids: string[] }
         Returns: number
       }
+      report_job_branding: {
+        Args: { p_campus_id: string; p_job_id: string }
+        Returns: Json
+      }
       request_attendance_correction: {
         Args: {
           p_attendance_date: string
@@ -38778,6 +40211,16 @@ export type Database = {
         }
         Returns: string
       }
+      request_paper_generation: {
+        Args: {
+          p_board_pattern_id: string
+          p_chapters: string[]
+          p_exam_subject_id: string
+          p_set_count?: number
+          p_total_marks: number
+        }
+        Returns: string
+      }
       request_petty_cash_replenishment: {
         Args: {
           p_account_id: string
@@ -38787,6 +40230,15 @@ export type Database = {
         Returns: Json
       }
       request_report_export: {
+        Args: {
+          p_dataset_key: string
+          p_ip?: string
+          p_params: Json
+          p_reason?: string
+        }
+        Returns: Json
+      }
+      request_report_pdf: {
         Args: {
           p_dataset_key: string
           p_ip?: string
@@ -38926,6 +40378,7 @@ export type Database = {
         Args: { p_approve: boolean; p_claim_id: string; p_note?: string }
         Returns: Json
       }
+      resolve_report_branding: { Args: { p_campus_id: string }; Returns: Json }
       resolve_segment: {
         Args: { p_as_of?: string; p_segment_id: string }
         Returns: {
@@ -39008,6 +40461,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      retry_paper_job: { Args: { p_job_id: string }; Returns: undefined }
       retry_report_card_batch: {
         Args: { p_batch_id: string; p_remarks?: Json }
         Returns: Json
@@ -39095,6 +40549,15 @@ export type Database = {
           p_synced_at?: string
         }
         Returns: Json
+      }
+      save_board_pattern: {
+        Args: {
+          p_board: Database["public"]["Enums"]["board"]
+          p_code: string
+          p_name: string
+          p_sections: Json
+        }
+        Returns: string
       }
       save_certificate_template: {
         Args: {
@@ -39408,6 +40871,14 @@ export type Database = {
         }
         Returns: string
       }
+      set_campus_address: {
+        Args: {
+          p_address_en: string
+          p_address_ur: string
+          p_campus_id: string
+        }
+        Returns: undefined
+      }
       set_campus_board: {
         Args: {
           p_board: Database["public"]["Enums"]["board"]
@@ -39425,6 +40896,10 @@ export type Database = {
           p_grace_minutes: number
           p_start_time: string
         }
+        Returns: undefined
+      }
+      set_capitalisation_threshold: {
+        Args: { p_threshold_paisa: number }
         Returns: undefined
       }
       set_certificate_replacement: {
@@ -40370,6 +41845,10 @@ export type Database = {
         Args: { p_offer_id: string; p_reason: string }
         Returns: string
       }
+      waive_exit_item: {
+        Args: { p_exit_id: string; p_item_code: string; p_reason: string }
+        Returns: undefined
+      }
       waive_no_dues_item: {
         Args: { p_item_id: string; p_reason: string }
         Returns: undefined
@@ -40714,6 +42193,13 @@ export type Database = {
       section_medium: "ENGLISH" | "URDU"
       section_shift: "MORNING" | "AFTERNOON"
       session_status: "planned" | "active" | "closed" | "archived"
+      staff_exit_status: "initiated" | "clearance" | "completed"
+      staff_exit_type:
+        | "resignation"
+        | "termination"
+        | "contract_expiry"
+        | "retirement"
+        | "death"
       status_reason_code:
         | "admission"
         | "promotion"
@@ -41279,6 +42765,14 @@ export const Constants = {
       section_medium: ["ENGLISH", "URDU"],
       section_shift: ["MORNING", "AFTERNOON"],
       session_status: ["planned", "active", "closed", "archived"],
+      staff_exit_status: ["initiated", "clearance", "completed"],
+      staff_exit_type: [
+        "resignation",
+        "termination",
+        "contract_expiry",
+        "retirement",
+        "death",
+      ],
       status_reason_code: [
         "admission",
         "promotion",

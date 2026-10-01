@@ -14,6 +14,8 @@ export default async function AssetLedgerPage({ params }: { params: Promise<{ id
     .eq('asset_id', id)
     .maybeSingle();
   if (!asset) notFound();
+  const { data: ledger } = await supabase.from('v_asset_ledger').select('lifetime_maintenance, capital_improvements, next_service_due').eq('asset_id', id).maybeSingle();
+  const { data: repairs } = await supabase.from('asset_maintenance').select('id, reported_on, fault, cost, is_capitalised').eq('asset_id', id).order('reported_on', { ascending: false }).limit(20);
   const { data: entries } = await supabase.from('asset_depreciation_entry').select('period, amount, opening_wdv, closing_wdv').eq('asset_id', id).order('period', { ascending: false }).limit(120);
 
   return (
@@ -27,7 +29,7 @@ export default async function AssetLedgerPage({ params }: { params: Promise<{ id
             <Badge variant={asset.status === 'active' ? 'success' : 'outline'}>{(asset.status ?? '').replace('_', ' ')}</Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-3 text-sm sm:grid-cols-4" data-testid="asset-ledger">
+        <CardContent className="grid gap-3 text-sm sm:grid-cols-3" data-testid="asset-ledger">
           <div>
             <p className="text-muted-foreground">Capitalised cost</p>
             <p data-testid="ledger-cost" className="font-medium">
@@ -48,6 +50,35 @@ export default async function AssetLedgerPage({ params }: { params: Promise<{ id
             <p className="text-muted-foreground">Salvage value</p>
             <p className="font-medium">{pkr(asset.salvage_value)}</p>
           </div>
+          <div>
+            <p className="text-muted-foreground">Lifetime maintenance</p>
+            <p data-testid="ledger-maintenance" className="font-medium">
+              {pkr(ledger?.lifetime_maintenance)}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Capital improvements</p>
+            <p className="font-medium">{pkr(ledger?.capital_improvements)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Next service due</p>
+            <p className="font-medium">{ledger?.next_service_due ?? '—'}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Repairs</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1 text-sm">
+          {(repairs ?? []).length === 0 && <p className="text-muted-foreground">No repairs logged.</p>}
+          {(repairs ?? []).map((r) => (
+            <p key={r.id}>
+              {r.reported_on} · {r.fault} · {pkr(r.cost)}
+              {r.is_capitalised ? ' (capital improvement)' : ''}
+            </p>
+          ))}
         </CardContent>
       </Card>
 
