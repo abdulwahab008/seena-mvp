@@ -2301,3 +2301,29 @@ export const paperRequestSchema = z.object({
   untaughtOverride: z.boolean().optional(),
 });
 export type PaperRequestInput = z.input<typeof paperRequestSchema>;
+
+// FR-N11: PTM events and slots.
+export const ptmEventSchema = z.object({
+  title: z.string().trim().min(1, 'Enter a title').max(120),
+  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the meeting date'),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Choose the start time'),
+  cutoffHours: z.number({ message: 'Enter the cutoff in hours' }).int('Whole hours only').min(0).max(336),
+  opensAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, 'Choose when booking opens').optional().or(z.literal('')),
+  slotMinutes: z.number({ message: 'Enter the slot length' }).int().min(5, 'At least 5 minutes').max(60, 'At most 60 minutes'),
+});
+export type PtmEventInput = z.input<typeof ptmEventSchema>;
+export const ptmSlotsSchema = z
+  .object({
+    eventId: z.string().uuid(),
+    teacherIds: z.array(z.string().uuid()).min(1, 'Choose at least one teacher').max(100),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Choose the first slot time'),
+    endTime: z.string().regex(/^\d{2}:\d{2}$/, 'Choose the end time'),
+  })
+  .refine((v) => v.endTime > v.startTime, { message: 'The end time must be after the start time', path: ['endTime'] });
+export type PtmSlotsInput = z.input<typeof ptmSlotsSchema>;
+
+/** Karachi wall-clock "YYYY-MM-DDTHH:mm" to an ISO instant, or undefined when blank. */
+export function karachiLocalToIso(local: string | undefined): string | undefined {
+  if (!local) return undefined;
+  return new Date(`${local}:00+05:00`).toISOString();
+}
