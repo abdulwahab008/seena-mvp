@@ -2186,3 +2186,10 @@ export const leaveApplicationSchema = z
   })
   .refine((v) => v.toDate >= v.fromDate, { path: ['toDate'], message: 'leave.errEndBeforeStart' });
 export type LeaveApplicationInput = z.infer<typeof leaveApplicationSchema>;
+
+// FR-G16: closing an attendance shortage warning.
+export const closeShortageSchema = z.object({
+  warningId: z.string().uuid(),
+  reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(300),
+});
+export type CloseShortageInput = z.infer<typeof closeShortageSchema>;

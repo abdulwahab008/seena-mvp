@@ -143,6 +143,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/attendance/corrections', label: 'Corrections' },
       { href: '/attendance/unmarked', label: 'Unmarked Registers' },
       { href: '/attendance/monthly-summary', label: 'Monthly Summary' },
+      { href: '/attendance/shortage', label: 'Shortage Warnings' },
       { href: '/attendance/absentee-notifications', label: 'Absentee Alerts' },
       { href: '/academic-setup/attendance-policy', label: 'Attendance Policy' },
     ],

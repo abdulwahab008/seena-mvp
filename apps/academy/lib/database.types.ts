@@ -3567,6 +3567,111 @@ export type Database = {
           },
         ]
       }
+      attendance_shortage_warning: {
+        Row: {
+          campus_id: string
+          closed_at: string | null
+          closed_by: string | null
+          closed_reason: string | null
+          enrolment_id: string
+          id: string
+          last_escalated_at: string
+          level: number
+          pct_at_warning: number
+          raised_at: string
+          session_id: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          closed_at?: string | null
+          closed_by?: string | null
+          closed_reason?: string | null
+          enrolment_id: string
+          id?: string
+          last_escalated_at?: string
+          level: number
+          pct_at_warning: number
+          raised_at?: string
+          session_id: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          closed_reason?: string | null
+          enrolment_id?: string
+          id?: string
+          last_escalated_at?: string
+          level?: number
+          pct_at_warning?: number
+          raised_at?: string
+          session_id?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_shortage_warning_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_shortage_warning_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "attendance_shortage_warning_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_shortage_warning_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_shortage_warning_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_shortage_warning_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_shortage_warning_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_shortage_warning_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_status_weight: {
         Row: {
           campus_id: string
@@ -28240,6 +28345,10 @@ export type Database = {
         Returns: string
       }
       close_bank_import: { Args: { p_import_id: string }; Returns: undefined }
+      close_shortage_warning: {
+        Args: { p_reason: string; p_warning_id: string }
+        Returns: undefined
+      }
       collect_cash_payment: {
         Args: {
           p_amount_paisa: number
@@ -28977,6 +29086,11 @@ export type Database = {
         }[]
       }
       estimate_campaign_cost: { Args: { p_batch_id: string }; Returns: number }
+      evaluate_attendance_shortage: {
+        Args: { p_campus_id: string; p_session_id: string }
+        Returns: Json
+      }
+      evaluate_attendance_shortage_all: { Args: never; Returns: number }
       evaluate_date_based_rules: {
         Args: { p_run_date?: string; p_tenant_id?: string }
         Returns: {
