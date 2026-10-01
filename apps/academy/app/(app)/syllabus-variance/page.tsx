@@ -1,7 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AckControl, RefreshButton } from './variance-controls';
+import { AckControl, ParentVisibilityToggle, RefreshButton } from './variance-controls';
 
 type SearchParams = { status?: string };
 const LABEL: Record<string, string> = { behind: 'Behind', on_track: 'On track', no_plan: 'No plan' };
@@ -25,7 +25,9 @@ export default async function SyllabusVariancePage({ searchParams }: { searchPar
   const { data: all } = campusId ? await supabase.from('v_syllabus_variance').select('classification, ack_reason').eq('campus_id', campusId).limit(5000) : { data: [] };
   const count = (c: string) => (all ?? []).filter((r) => r.classification === c).length;
   const unacknowledged = (all ?? []).filter((r) => r.classification === 'behind' && !r.ack_reason).length;
-  const computedAt = rows[0]?.computed_at ? new Date(rows[0].computed_at).toLocaleString('en-GB', { timeZone: 'Asia/Karachi' }) : null;
+  const { data: flag } = campusId ? await supabase.from('campus_feature_flag').select('enabled').eq('campus_id', campusId).eq('flag_key', 'parent_syllabus_visibility').maybeSingle() : { data: null };
+  const parentVisible = flag?.enabled ?? false;
+  const computedAt =rows[0]?.computed_at ? new Date(rows[0].computed_at).toLocaleString('en-GB', { timeZone: 'Asia/Karachi' }) : null;
 
   return (
     <div className="space-y-6">
@@ -49,6 +51,8 @@ export default async function SyllabusVariancePage({ searchParams }: { searchPar
         {campusId && <RefreshButton campusId={campusId} />}
         {computedAt && <span className="text-xs text-muted-foreground">Computed {computedAt}</span>}
       </div>
+
+      {campusId && <ParentVisibilityToggle campusId={campusId} enabled={parentVisible} />}
 
       <form method="get" className="flex items-end gap-3 text-sm">
         <label className="space-y-1">

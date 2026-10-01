@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { acknowledgeVariance, clearAcknowledgement, refreshVariance } from './actions';
+import { acknowledgeVariance, clearAcknowledgement, refreshVariance, setParentSyllabusVisibility } from './actions';
 import { Button } from '@/components/ui/button';
 
 function useRun() {
@@ -31,6 +31,25 @@ export function RefreshButton({ campusId }: { campusId: string }) {
       </Button>
       {error && <span role="alert" className="text-xs text-destructive">{error}</span>}
     </span>
+  );
+}
+
+export function ParentVisibilityToggle({ campusId, enabled }: { campusId: string; enabled: boolean }) {
+  const { pending, error, run } = useRun();
+  return (
+    <div className="space-y-1 text-sm">
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          defaultChecked={enabled}
+          disabled={pending}
+          onChange={(e) => run(() => setParentSyllabusVisibility(campusId, e.target.checked), 'Setting saved.')}
+          data-testid="parent-visibility"
+        />
+        Show parents which chapters are covered (chapter titles, covered or pending, completion date only)
+      </label>
+      {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+    </div>
   );
 }
 

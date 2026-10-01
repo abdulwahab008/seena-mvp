@@ -71,6 +71,14 @@ export const en = {
   'fees.paid': 'Paid',
   'fees.unpaid': 'Unpaid',
   'fees.partPaid': 'Partially Paid',
+  'nav.syllabus': 'Syllabus',
+  'syllabus.title': 'Syllabus coverage',
+  'syllabus.child': 'Child',
+  'syllabus.covered': 'Covered',
+  'syllabus.pending': 'Pending',
+  'syllabus.coveredOn': 'Covered on {date}',
+  'syllabus.notShared': 'This information is not shared by your school',
+  'syllabus.empty': 'No syllabus has been published for your child\'s class yet.',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -136,6 +144,14 @@ export const ur: Partial<Record<MessageKey, string>> = {
   'fees.paid': 'ادا شدہ',
   'fees.unpaid': 'غیر ادا شدہ',
   'fees.partPaid': 'جزوی ادا شدہ',
+  'nav.syllabus': 'نصاب',
+  'syllabus.title': 'نصاب کی پیش رفت',
+  'syllabus.child': 'بچہ',
+  'syllabus.covered': 'مکمل',
+  'syllabus.pending': 'باقی',
+  'syllabus.coveredOn': '{date} کو مکمل',
+  'syllabus.notShared': 'آپ کے اسکول نے یہ معلومات شیئر نہیں کی ہیں',
+  'syllabus.empty': 'آپ کے بچے کی جماعت کا نصاب ابھی شائع نہیں ہوا۔',
 };
 
 export function t(lang: Lang, key: MessageKey, vars?: Record<string, string>): string {
