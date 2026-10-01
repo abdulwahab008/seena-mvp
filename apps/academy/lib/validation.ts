@@ -2394,5 +2394,20 @@ export const hostelAllocateSchema = z.object({
   to: toptDate,
   reason: toptText(300),
 });
+// FR-Q03
+const tlocal = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, 'Choose a date and time');
+export const issueGatePassSchema = z
+  .object({
+    grNumber: z.string().trim().min(1, 'Enter the GR number').max(40),
+    purpose: z.string().trim().min(3, 'Enter the purpose').max(200),
+    destination: toptText(200),
+    departsAt: tlocal,
+    expectedBackAt: tlocal,
+    collectorName: z.string().trim().min(2, 'Enter the name of the person collecting').max(120),
+    collectorCnic: z.string().trim().regex(/^\d{5}-?\d{7}-?\d$/, 'CNIC must be 13 digits, e.g. 35202-1234567-1'),
+    overrideReason: toptText(500),
+  })
+  .refine((v) => v.expectedBackAt > v.departsAt, { message: 'The return time must be after the departure', path: ['expectedBackAt'] });
+export const cancelGatePassSchema = z.object({ passId: tuuid, reason: z.string().trim().min(5, 'Give a reason').max(300) });
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];
