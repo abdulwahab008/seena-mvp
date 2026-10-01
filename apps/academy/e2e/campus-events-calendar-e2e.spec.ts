@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test.describe('FR-M14: Campus Events Calendar', () => {
   test('Principal manages events, creates campus override (AC 2), tests .ics feed token & 401 revocation (AC 3), and views portal calendar', async ({
@@ -6,10 +7,16 @@ test.describe('FR-M14: Campus Events Calendar', () => {
     request,
   }) => {
     // 1. Sign in as Owner / Principal
+    const owner = await seedSchoolOwner('campus-events');
+    // The owner previews the guardian .ics feed against the school's first guardian.
+    const { error: guardianError } = await owner.admin
+      .from('guardian')
+      .insert({ tenant_id: owner.tenantId, name_en: 'Calendar Parent', phone_e164: '+923001230014' });
+    if (guardianError) throw guardianError;
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
