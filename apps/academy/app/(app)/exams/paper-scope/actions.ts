@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
 import { nudgeWorker } from '@/lib/worker-nudge';
-import { paperRequestSchema, type PaperRequestInput } from '@/lib/validation';
+import { paperScopeRequestSchema, type PaperRequestInput } from '@/lib/validation';
 
 type Result = { error: string | null; id?: string };
 
@@ -17,7 +17,7 @@ function mapError(message: string): string {
 }
 
 export async function requestPaper(input: PaperRequestInput): Promise<Result> {
-  const p = paperRequestSchema.safeParse(input);
+  const p = paperScopeRequestSchema.safeParse(input);
   if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
   const supabase = await supabaseServer();
   const { data, error } = await supabase.rpc('submit_exam_paper_request', {
