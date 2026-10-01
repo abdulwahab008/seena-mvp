@@ -35,7 +35,7 @@ function mapError(message: string): string {
 }
 
 // The UI works with strings; the server's definition format uses typed JSON values.
-export function toServerDefinition(d: z.output<typeof reportDefinitionSchema>) {
+function toServerDefinition(d: z.output<typeof reportDefinitionSchema>) {
   return {
     columns: d.columns,
     group_by: d.groupBy,
