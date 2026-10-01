@@ -1,4 +1,4 @@
-import { NASTALIQ_FONT_FAMILY, nastaliqFontFaceCss, type ResolvedFont } from '@/lib/pdf/font';
+import { isUrduScriptCodepoint, NASTALIQ_FONT_FAMILY, nastaliqFontFaceCss, type ResolvedFont } from '@/lib/pdf/font';
 import type { PrintDocument } from '@/lib/pdf/render';
 import { escapeHtml } from '@/lib/certificates/merge';
 
@@ -118,6 +118,46 @@ export function collectReportCardStrings(snapshot: ReportCardSnapshot): (string 
     snapshot.remark,
     ...snapshot.subjects.flatMap((s) => [s.subject_name, s.subject_name_ur]),
   ];
+}
+
+const ARABIC_SCRIPT = '\\u0600-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF\\uFB50-\\uFDFF\\uFE70-\\uFEFF';
+const URDU_RUN = new RegExp(`[${ARABIC_SCRIPT}]+(?:[\\s\\u200C\\u200D]+[${ARABIC_SCRIPT}]+)*`, 'g');
+
+/**
+ * FR-J10: the class teacher's remark may be English, Urdu, or a mix of both
+ * with digits ("طالب علم کی کارکردگی 85% بہتر ہے"). Laid out as plain LTR text
+ * Urdu comes out reversed, and in a font without Nastaliq shaping it comes
+ * out as disconnected glyphs, which parents read as a corrupted document.
+ *
+ *   * no Arabic script       -> unchanged;
+ *   * Urdu is the majority   -> the whole block is RTL in the embedded Nastaliq
+ *                               font; Latin runs and digits stay left-to-right
+ *                               inside it, as the bidi algorithm lays them out;
+ *   * English is the majority -> an LTR block with each Urdu run isolated as an
+ *                               RTL Nastaliq span.
+ *
+ * Digits are never converted: they are read off paper as written.
+ */
+export function remarkDirection(text: string): 'rtl' | 'ltr' | null {
+  let arabic = 0;
+  let latin = 0;
+  for (const ch of text) {
+    const cp = ch.codePointAt(0)!;
+    if (isUrduScriptCodepoint(cp)) arabic += 1;
+    else if ((cp >= 0x41 && cp <= 0x5a) || (cp >= 0x61 && cp <= 0x7a)) latin += 1;
+  }
+  if (arabic === 0) return null;
+  return arabic >= latin ? 'rtl' : 'ltr';
+}
+
+export function remarkMarkup(remark: string | null): string {
+  const text = remark ?? '';
+  const direction = remarkDirection(text);
+  if (direction === null) return `<div data-remark>${escapeHtml(text)}</div>`;
+  if (direction === 'rtl') return `<div data-remark class="urdu" dir="rtl" lang="ur">${escapeHtml(text)}</div>`;
+  const runs = text.replace(URDU_RUN, (run) => `\u0000${run}\u0001`);
+  const body = escapeHtml(runs).replace(/\u0000/g, '<span class="urdu" dir="rtl" lang="ur">').replace(/\u0001/g, '</span>');
+  return `<div data-remark dir="ltr" lang="en">${body}</div>`;
 }
 
 function fmtNum(value: number | null, dp = 0): string {
@@ -348,7 +388,7 @@ ${letterheadHtml(snapshot, assets)}
 
 <div class="remark">
   <h3>Class teacher&rsquo;s remark</h3>
-  <div data-remark>${escapeHtml(snapshot.remark ?? '')}</div>
+  ${remarkMarkup(snapshot.remark)}
 </div>
 
 <div class="signatures">
