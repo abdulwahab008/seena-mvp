@@ -2338,5 +2338,16 @@ export const assignTripSchema = z.object({
   to: toptDate,
   overrideReason: toptText(500),
 });
+// FR-P04
+const grNumber = z.string().trim().min(1, 'Enter the GR number').max(40);
+export const allocateTransportSchema = z.object({
+  grNumber,
+  pickupStopId: tuuid,
+  dropStopId: toptUuid,
+  from: tdate,
+});
+export const transportWaitlistSchema = z.object({ grNumber, routeId: tuuid });
+export const transportProrateSchema = z.object({ mode: z.enum(['prorata', 'full_month'], { message: 'Choose a policy' }) });
+export const postTransportChargesSchema = z.object({ month: tdate });
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];

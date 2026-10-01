@@ -215,6 +215,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/transport/fleet', label: 'Fleet & Documents', feature: 'module.transport' },
       { href: '/transport/crew', label: 'Drivers & Crew', feature: 'module.transport' },
       { href: '/transport/assignments', label: 'Assignments', feature: 'module.transport' },
+      { href: '/transport/allocations', label: 'Student Allocation', feature: 'module.transport' },
     ],
   },
   {
