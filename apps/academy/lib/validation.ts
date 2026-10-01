@@ -2322,6 +2322,29 @@ export const ptmSlotsSchema = z
   .refine((v) => v.endTime > v.startTime, { message: 'The end time must be after the start time', path: ['endTime'] });
 export type PtmSlotsInput = z.input<typeof ptmSlotsSchema>;
 
+// FR-J10: class teacher remarks (250 characters, English or Urdu).
+export const REMARK_MAX_LENGTH = 250;
+export const remarkSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examTermId: z.string().uuid(),
+  text: z.string().trim().min(1, 'Write a remark').max(REMARK_MAX_LENGTH, `At most ${REMARK_MAX_LENGTH} characters`),
+  libraryId: z.string().uuid().optional().or(z.literal('')),
+});
+export type RemarkInput = z.input<typeof remarkSchema>;
+export const applyRemarkSchema = z.object({
+  examTermId: z.string().uuid(),
+  enrolmentIds: z.array(z.string().uuid()).min(1, 'Select at least one student').max(300),
+  text: z.string().trim().min(1, 'Write a remark').max(REMARK_MAX_LENGTH, `At most ${REMARK_MAX_LENGTH} characters`),
+  libraryId: z.string().uuid().optional().or(z.literal('')),
+});
+export type ApplyRemarkInput = z.input<typeof applyRemarkSchema>;
+export const libraryEntrySchema = z.object({
+  category: z.enum(['praise', 'improvement', 'behaviour', 'attendance', 'general']),
+  textEn: z.string().trim().min(1, 'Write the English text').max(REMARK_MAX_LENGTH),
+  textUr: z.string().trim().max(REMARK_MAX_LENGTH).optional(),
+});
+export type LibraryEntryInput = z.input<typeof libraryEntrySchema>;
+
 /** Karachi wall-clock "YYYY-MM-DDTHH:mm" to an ISO instant, or undefined when blank. */
 export function karachiLocalToIso(local: string | undefined): string | undefined {
   if (!local) return undefined;
