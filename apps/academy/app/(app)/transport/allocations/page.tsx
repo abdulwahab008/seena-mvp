@@ -112,7 +112,7 @@ export default async function AllocationsPage({ searchParams }: { searchParams: 
                   <td>{one(a.pickup)?.name}</td>
                   <td>{a.starts_on}</td>
                   <td>{a.ends_on ?? 'ongoing'}</td>
-                  {canAllocate && <td>{!a.ends_on && <ActionButton label="End today" variant="ghost" confirm="End this student's bus service today?" action={() => endAllocation(a.id)} />}</td>}
+                  {canAllocate && <td>{!a.ends_on && <ActionButton label="End today" variant="ghost" confirm="End this student's bus service today?" action={endAllocation} args={[a.id]} />}</td>}
                 </tr>
               ))}
             </tbody>

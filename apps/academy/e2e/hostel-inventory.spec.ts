@@ -34,7 +34,8 @@ test('the Principal builds a hostel block and takes a room out of service', asyn
   const room = page.getByTestId('room-form-105');
   await room.getByLabel(/Status/).selectOption('out_of_service');
   await page.getByTestId('room-form-105-submit').click();
-  await expect(page.getByText('out of service').first()).toBeVisible();
+  // The badge on room 105's row (the Status <option> also reads "Out of service", so scope and match exactly).
+  await expect(page.getByTestId('room-row').filter({ hasText: 'Room 105 ·' }).getByText('out of service', { exact: true })).toBeVisible();
 
   await page.goto('/hostel');
   await expect(page.getByTestId('block-row')).toContainText('4');

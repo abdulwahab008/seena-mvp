@@ -152,7 +152,7 @@ export default async function HostelFeesPage({ searchParams }: { searchParams: P
               </span>
               <span className="flex flex-wrap items-center gap-2">
                 {d.refunded_on ? <Badge variant="outline">refunded {d.refunded_on} · {d.refund_voucher_no}</Badge> : d.received_on ? <Badge variant="success">held since {d.received_on}</Badge> : <Badge variant="warning">not yet received</Badge>}
-                {canEdit && !d.received_on && <ActionButton label="Mark received" action={() => receiveDeposit(d.id)} />}
+                {canEdit && !d.received_on && <ActionButton label="Mark received" action={receiveDeposit} args={[d.id]} />}
                 {canEdit && d.received_on && !d.refunded_on && (
                   <SpecForm
                     testId={`refund-form-${one(d.student)?.gr_number}`}
