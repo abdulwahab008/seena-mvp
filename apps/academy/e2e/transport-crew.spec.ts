@@ -9,8 +9,11 @@ test('crew register enforces licence rules and masks the CNIC from a class teach
 
   const route = await owner$.rpc('save_transport_route', { p_campus_id: campusId, p_code: 'R-01', p_name: 'North', p_shift: 'morning' });
   const bus = await owner$.rpc('save_transport_vehicle', { p_campus_id: campusId, p_reg_no: 'BUS-42', p_seat_capacity: 42 });
+  // The documents must outlive the assignment date below (2030-08-10), otherwise the vehicle block
+  // (VEHICLE_BLOCKED: fitness certificate expired) fires before the licence-class check is reached.
   for (const t of ['fitness', 'insurance', 'token_tax']) {
-    await owner$.rpc('add_vehicle_document', { p_vehicle_id: bus.data as string, p_doc_type: t, p_expires_on: '2030-01-01' });
+    const doc = await owner$.rpc('add_vehicle_document', { p_vehicle_id: bus.data as string, p_doc_type: t, p_expires_on: '2031-12-31' });
+    expect(doc.error).toBeNull();
   }
   expect(route.error).toBeNull();
   expect(bus.error).toBeNull();
