@@ -188,6 +188,13 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/grading', label: 'Grading Schemes' },
       { href: '/exams/results', label: 'Term Results & Positions' },
       { href: '/exams/annual', label: 'Annual Results' },
+      { href: '/exams/promotion', label: 'Promotion Decisions' },
+      { href: '/exams/analytics', label: 'Subject Analytics' },
+      { href: '/exams/mastery', label: 'Topic Mastery' },
+      { href: '/exams/packets', label: 'Report Card Packets' },
+      { href: '/exams/resits', label: 'Re-sits & Improvements' },
+      { href: '/exams/board-forms', label: 'Board Exam Forms' },
+      { href: '/transcripts', label: 'Transcripts' },
     ],
   },
   {

@@ -31,6 +31,8 @@ export type ReportCardSubject = {
   pct: number | null;
   grade_label: string | null;
   report_symbol: string | null;
+  /** FR-J14: which attempt the published mark comes from (1 = the original paper). */
+  attempt_no?: number;
   is_pass: boolean | null;
   failed_components: { component: string; obtained: number; pass_marks: number; max_marks: number }[];
 };
@@ -90,10 +92,20 @@ export type ReportCardSnapshot = {
     to_date: string | null;
   };
   remark: string | null;
+  /**
+   * FR-J04. The end-of-session decision, present only on the session's final
+   * counting term and only once it is no longer Pending. The FINAL decision
+   * alone: never the system's own verdict, the override actor or the reason.
+   */
+  promotion?: { decision: PromotionDecisionValue; subjects: string[] } | null;
+  /** FR-J14: "Maths: result of re-sit dated 12-Aug-2026", one per subject whose mark came from a later attempt. */
+  attempt_notes?: string[];
   revision_no: number;
   supersedes_revision: number | null;
   rendered_at: string;
 };
+
+export type PromotionDecisionValue = 'promoted' | 'promoted_on_trial' | 'compartment' | 'detained' | 'pending';
 
 export type ReportCardAssets = {
   letterheadDataUri: string | null;
@@ -205,6 +217,21 @@ export function classPositionLine(p: ReportCardSnapshot['position']): string {
   return `${p.rank_in_class} of ${p.ranked_out_of_class}`;
 }
 
+/** FR-J04 AC4: the parent-facing line. Nothing about who decided or why. */
+export function promotionLine(p: ReportCardSnapshot['promotion']): string | null {
+  if (!p || p.decision === 'pending') return null;
+  switch (p.decision) {
+    case 'promoted':
+      return 'Promoted';
+    case 'promoted_on_trial':
+      return 'Promoted on trial';
+    case 'detained':
+      return 'Detained in the same class';
+    case 'compartment':
+      return p.subjects.length > 0 ? `Compartment in ${p.subjects.join(', ')}` : 'Compartment';
+  }
+}
+
 /** AC4's footer, and it reads off supersedes_revision rather than doing arithmetic. */
 export function revisionFooter(snapshot: ReportCardSnapshot): string | null {
   if (snapshot.supersedes_revision === null) return null;
@@ -274,6 +301,7 @@ table.marks tr.total td { font-weight: 700; background: #f4f4f4; }
 .signatures img { max-height: 14mm; max-width: 45mm; display: block; margin: 0 auto 1mm; }
 .stamp { position: fixed; right: 16mm; bottom: 26mm; width: 32mm; opacity: 0.75; }
 .footer { margin-top: 4mm; display: flex; justify-content: space-between; font-size: 8pt; color: #444; }
+.footnotes { margin-top: 2mm; font-size: 8pt; color: #333; }
 .revised { font-weight: 700; color: #a00; }`;
 }
 
@@ -301,17 +329,23 @@ function mergedCss(): string {
 
 function subjectRow(s: ReportCardSubject): string {
   const failed = (s.failed_components ?? []).map((c) => c.component).join(', ');
-  const marks = s.report_symbol
-    ? `<td class="mid" colspan="2">${escapeHtml(s.report_symbol)}</td>`
-    : `<td class="num">${fmtNum(s.obtained, 2)}</td><td class="num">${fmtNum(s.max_marks)}</td>`;
+  // AB / EX / DEB stand IN PLACE of marks; R (FR-J14) annotates a mark that is there.
+  const replacesMarks = !!s.report_symbol && s.report_symbol !== 'R';
+  const marks = replacesMarks
+    ? `<td class="mid" colspan="2">${escapeHtml(s.report_symbol ?? '')}</td>`
+    : `<td class="num">${fmtNum(s.obtained, 2)}${s.report_symbol === 'R' ? ' <sup data-attempt-mark>R</sup>' : ''}</td><td class="num">${fmtNum(s.max_marks)}</td>`;
+  const remark =
+    s.is_pass === false
+      ? escapeHtml(failed ? `Failed: ${failed}` : 'Failed')
+      : s.attempt_no && s.attempt_no > 1
+        ? `Attempt ${s.attempt_no}`
+        : '';
   return `<tr>
   <td>${escapeHtml(s.subject_name)}${s.subject_name_ur ? `<span class="urdu"> · ${escapeHtml(s.subject_name_ur)}</span>` : ''}</td>
   ${marks}
   <td class="num">${fmtNum(s.pct, 2)}</td>
   <td class="mid">${escapeHtml(s.grade_label ?? '—')}</td>
-  <td class="${s.is_pass === false ? 'fail' : ''}">${
-    s.is_pass === false ? escapeHtml(failed ? `Failed: ${failed}` : 'Failed') : ''
-  }</td>
+  <td class="${s.is_pass === false ? 'fail' : ''}">${remark}</td>
 </tr>`;
 }
 
@@ -373,6 +407,12 @@ ${letterheadHtml(snapshot, assets)}
   </tbody>
 </table>
 
+${
+  (snapshot.attempt_notes ?? []).length > 0
+    ? `<div class="footnotes" data-attempt-notes>${(snapshot.attempt_notes ?? []).map((n) => `<div>R — ${escapeHtml(n)}</div>`).join('')}</div>`
+    : ''
+}
+
 <div class="summary">
   <div class="panel">
     <h3>Position in section</h3>
@@ -385,6 +425,12 @@ ${letterheadHtml(snapshot, assets)}
     ${range ? `<div class="note" data-attendance-range>Covering ${escapeHtml(range)}</div>` : ''}
   </div>
 </div>
+
+${
+    promotionLine(snapshot.promotion)
+      ? `<div class="panel promotion" style="margin-top:4mm"><h3>Result</h3><div class="big" data-promotion>${escapeHtml(promotionLine(snapshot.promotion) ?? '')}</div></div>`
+      : ''
+  }
 
 <div class="remark">
   <h3>Class teacher&rsquo;s remark</h3>
@@ -471,3 +517,6 @@ ${body}
 
   return { html, pageFormat: 'A4', landscape: false };
 }
+
+/** FR-J11: the card without its document, for a packet that continues past it. */
+export { reportCardBody as reportCardBodyHtml, css as reportCardCss };
