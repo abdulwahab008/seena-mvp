@@ -18,10 +18,12 @@ test('an owner builds, previews and saves a report; an accountant cannot use gua
 
   await page.goto('/reports/builder');
   await page.waitForLoadState('networkidle');
+  // The dataset list is alphabetical (Exam results comes first), so pick Student enrolment explicitly.
+  await page.getByLabel('Dataset').selectOption('ds_student_enrolment');
   await expect(page.getByTestId('column-picker')).toContainText('Guardian CNIC');
   await page.getByLabel('Report name').fill('Class 1 roster');
-  await page.getByTestId('column-picker').getByLabel('GR number').check();
-  await page.getByTestId('column-picker').getByLabel('Student name').check();
+  await page.getByTestId('column-picker').getByLabel('GR number', { exact: true }).check();
+  await page.getByTestId('column-picker').getByLabel('Student name', { exact: true }).check();
   await page.getByTestId('add-filter').click();
   await page.getByLabel('Filter column').selectOption('class_code');
   await page.getByLabel('Filter value').fill('1');
