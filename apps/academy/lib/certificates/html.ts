@@ -51,6 +51,12 @@ export type CertificateAssets = {
   logoDataUri: string | null;
   signatureDataUri?: string | null;
   stampDataUri?: string | null;
+  /**
+   * FR-T10: the verification QR printed on an issued certificate. The payload is
+   * the opaque verify URL only; never the student id or GR number, because
+   * anyone can decode a QR.
+   */
+  verifyQr?: { svg: string; url: string } | null;
 };
 
 /**
@@ -137,6 +143,9 @@ body {
 .signatures { margin-top: 18mm; display: flex; justify-content: space-between; gap: 10mm; }
 .signatures div { flex: 1 1 0; border-top: 0.3mm solid #111; padding-top: 2mm; font-size: 10pt; text-align: center; }
 .signatures .signatory-name { border: 0; padding-top: 1mm; font-weight: 700; }
+.verify { margin-top: 10mm; display: flex; align-items: center; gap: 4mm; font-size: 8pt; color: #333; }
+.verify svg { width: 22mm; height: 22mm; flex: none; }
+.verify .verify-url { word-break: break-all; }
 /* FR-T09. The seal is painted BEHIND the page's text, which is what makes
    "without obscuring the serial number" true wherever the anchor is moved
    to and whatever the template's wording puts near it — z-order needs no
@@ -170,6 +179,12 @@ function sealHtml(seal: CertificateSeal | null | undefined, assets: CertificateA
   ${stampImg}
   <img class="seal-signature" src="${assets.signatureDataUri}" alt="" style="left:${signature.leftMm}mm;top:${signature.topMm}mm;width:${seal.signature_width_mm}mm;" />
 </div>`;
+}
+
+function verifyHtml(assets: CertificateAssets, rtl: boolean): string {
+  if (!assets.verifyQr) return '';
+  const caption = rtl ? 'اس سرٹیفکیٹ کی تصدیق کے لیے اسکین کریں' : 'Scan to verify this certificate';
+  return `<div class="verify" data-testid="certificate-verify">${assets.verifyQr.svg}<div><div>${escapeHtml(caption)}</div><div class="verify-url">${escapeHtml(assets.verifyQr.url)}</div></div></div>`;
 }
 
 export function buildCertificateHtml(
@@ -208,6 +223,7 @@ ${letterheadHtml(payload, assets)}
 <h1 class="doc-title">${escapeHtml(template.title)}</h1>
 <div class="body">${body}</div>
 <div class="signatures"><div>${escapeHtml(stampLabel)}</div>${signatoryCaption}</div>
+${verifyHtml(assets, rtl)}
 </div>
 </body></html>`;
 
