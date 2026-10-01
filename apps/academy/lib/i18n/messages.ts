@@ -79,6 +79,18 @@ export const en = {
   'syllabus.coveredOn': 'Covered on {date}',
   'syllabus.notShared': 'This information is not shared by your school',
   'syllabus.empty': 'No syllabus has been published for your child\'s class yet.',
+  'nav.ptm': 'Parent-Teacher Meeting',
+  'ptm.title': 'Parent-teacher meeting',
+  'ptm.noEvents': 'No parent-teacher meeting is open for booking.',
+  'ptm.bookingCloses': 'Booking closes {time}',
+  'ptm.book': 'Book',
+  'ptm.cancel': 'Cancel booking',
+  'ptm.taken': 'Taken',
+  'ptm.yours': 'Your booking',
+  'ptm.waitlist': 'Notify me if it opens',
+  'ptm.waiting': 'You will be notified',
+  'ptm.booked': 'Booked',
+  'ptm.noSlots': 'No slots have been published for this child yet.',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -152,6 +164,18 @@ export const ur: Partial<Record<MessageKey, string>> = {
   'syllabus.coveredOn': '{date} کو مکمل',
   'syllabus.notShared': 'آپ کے اسکول نے یہ معلومات شیئر نہیں کی ہیں',
   'syllabus.empty': 'آپ کے بچے کی جماعت کا نصاب ابھی شائع نہیں ہوا۔',
+  'nav.ptm': 'والدین اساتذہ ملاقات',
+  'ptm.title': 'والدین اساتذہ ملاقات',
+  'ptm.noEvents': 'بکنگ کے لیے کوئی ملاقات کھلی نہیں ہے۔',
+  'ptm.bookingCloses': 'بکنگ {time} پر بند ہوگی',
+  'ptm.book': 'بک کریں',
+  'ptm.cancel': 'بکنگ منسوخ کریں',
+  'ptm.taken': 'بک ہو چکا',
+  'ptm.yours': 'آپ کی بکنگ',
+  'ptm.waitlist': 'دستیاب ہونے پر اطلاع دیں',
+  'ptm.waiting': 'آپ کو اطلاع دی جائے گی',
+  'ptm.booked': 'بک ہو گیا',
+  'ptm.noSlots': 'اس بچے کے لیے ابھی کوئی وقت شائع نہیں ہوا۔',
 };
 
 export function t(lang: Lang, key: MessageKey, vars?: Record<string, string>): string {
