@@ -2259,3 +2259,19 @@ export const libraryTitleSchema = z.object({
   subjectId: z.string().uuid().optional().or(z.literal('')),
 });
 export type LibraryTitleInput = z.input<typeof libraryTitleSchema>;
+
+// FR-O02: library copy register.
+export const libraryCopySchema = z.object({
+  titleId: z.string().uuid('Choose a title'),
+  campusId: z.string().uuid('Choose a campus'),
+  accessionNo: z.string().trim().min(1, 'Enter the accession number').max(50, 'At most 50 characters'),
+  barcode: z.string().trim().min(1, 'Enter the barcode').max(50, 'At most 50 characters'),
+  shelf: z.string().trim().max(50, 'At most 50 characters').optional(),
+  purchaseCostPkr: z
+    .string()
+    .trim()
+    .regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter the cost in PKR, for example 850 or 850.50')
+    .optional(),
+  acquiredOn: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, 'Choose a date').optional(),
+});
+export type LibraryCopyInput = z.input<typeof libraryCopySchema>;

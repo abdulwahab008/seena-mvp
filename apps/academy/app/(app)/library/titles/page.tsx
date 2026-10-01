@@ -16,6 +16,13 @@ export default async function LibraryTitlesPage({ searchParams }: { searchParams
   ]);
   const titles = found ?? [];
   const subjectOptions = (subjects ?? []).map((s) => ({ id: s.id, name: s.name_en }));
+  // Availability comes from a security_invoker view, so it only ever counts the caller's own campuses.
+  const { data: stock } = titles.length ? await supabase.from('v_title_availability').select('title_id, available_copies, total_copies').in('title_id', titles.map((t) => t.id)) : { data: [] };
+  const availability = new Map<string, { available: number; total: number }>();
+  for (const s of stock ?? []) {
+    const cur = availability.get(s.title_id!) ?? { available: 0, total: 0 };
+    availability.set(s.title_id!, { available: cur.available + (s.available_copies ?? 0), total: cur.total + (s.total_copies ?? 0) });
+  }
 
   let editing: { id: string; row: Awaited<ReturnType<typeof loadTitle>> } | null = null;
   if (isStaff && sp.edit) editing = { id: sp.edit, row: await loadTitle(supabase, sp.edit) };
@@ -83,10 +90,16 @@ export default async function LibraryTitlesPage({ searchParams }: { searchParams
                   <p className="text-xs text-muted-foreground">
                     {[t.author, t.isbn13 ? `ISBN ${t.isbn13}` : 'No ISBN', t.language].filter(Boolean).join(' · ')}
                   </p>
+                  <p className="text-xs" data-testid="title-stock">
+                    {availability.has(t.id) ? `${availability.get(t.id)!.available} of ${availability.get(t.id)!.total} available` : 'No copies registered'}
+                  </p>
                 </div>
               </div>
               {isStaff && (
                 <div className="flex flex-col items-end gap-2">
+                  <a className="text-xs underline" href={`/library/copies?title=${t.id}`}>
+                    Copies
+                  </a>
                   <a className="text-xs underline" href={`/library/titles?edit=${t.id}`}>
                     Edit
                   </a>

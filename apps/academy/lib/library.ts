@@ -30,6 +30,56 @@ export function normaliseIsbn13(raw: string | null | undefined): string | null {
   return v;
 }
 
+export type CopyImportRow = {
+  accession_no: string;
+  barcode: string;
+  isbn?: string;
+  title_id?: string;
+  shelf?: string;
+  purchase_cost?: number;
+  acquired_on?: string;
+};
+
+export const COPY_IMPORT_HEADER = ['accession_no', 'barcode', 'isbn', 'title_id', 'shelf', 'purchase_cost_pkr', 'acquired_on'] as const;
+
+/**
+ * FR-O02: parse the copy import CSV (header + one row per copy). Row numbers in errors are
+ * 1-based data rows, the same numbering import_library_copies() reports back. PKR amounts
+ * become integer paisa here and never pass through floating point after that.
+ */
+export function parseCopyCsv(matrix: string[][]): { rows: CopyImportRow[]; errors: { row: number; message: string }[] } {
+  const errors: { row: number; message: string }[] = [];
+  const header = (matrix[0] ?? []).map((h) => h.trim().toLowerCase().replace(/\s+/g, '_'));
+  const idx = (name: string) => header.indexOf(name);
+  if (idx('accession_no') < 0 || idx('barcode') < 0) {
+    return { rows: [], errors: [{ row: 0, message: 'The header must contain accession_no and barcode.' }] };
+  }
+  const rows: CopyImportRow[] = [];
+  matrix.slice(1).forEach((cells) => {
+    if (cells.every((c) => c.trim() === '')) return;
+    const row = rows.length + 1;
+    const get = (name: string) => (idx(name) >= 0 ? (cells[idx(name)] ?? '').trim() : '');
+    const out: CopyImportRow = { accession_no: get('accession_no'), barcode: get('barcode') };
+    if (get('isbn')) out.isbn = get('isbn');
+    if (get('title_id')) out.title_id = get('title_id');
+    if (get('shelf')) out.shelf = get('shelf');
+    const cost = get('purchase_cost_pkr');
+    if (cost) {
+      if (!/^\d+(\.\d{1,2})?$/.test(cost)) errors.push({ row, message: `Purchase cost "${cost}" is not an amount in PKR.` });
+      else out.purchase_cost = Math.round(Number(cost) * 100);
+    }
+    const acquired = get('acquired_on');
+    if (acquired) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(acquired) || Number.isNaN(Date.parse(acquired))) errors.push({ row, message: `Date "${acquired}" must look like 2026-08-20.` });
+      else out.acquired_on = acquired;
+    }
+    if (!out.accession_no || !out.barcode) errors.push({ row, message: 'accession_no and barcode are both required.' });
+    if (!out.isbn && !out.title_id) errors.push({ row, message: 'Give the isbn or title_id of the title this copy belongs to.' });
+    rows.push(out);
+  });
+  return { rows, errors };
+}
+
 /** Postgres error text -> a sentence the librarian can act on. */
 export function libraryErrorMessage(message: string, details?: string | null): string {
   const has = (code: string) => message.includes(code);

@@ -13584,6 +13584,90 @@ export type Database = {
           },
         ]
       }
+      library_copy: {
+        Row: {
+          accession_no: string
+          acquired_on: string | null
+          barcode: string
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          purchase_cost: number | null
+          shelf: string | null
+          status: Database["public"]["Enums"]["library_copy_status"]
+          tenant_id: string
+          title_id: string
+          vendor_id: string | null
+        }
+        Insert: {
+          accession_no: string
+          acquired_on?: string | null
+          barcode: string
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          purchase_cost?: number | null
+          shelf?: string | null
+          status?: Database["public"]["Enums"]["library_copy_status"]
+          tenant_id: string
+          title_id: string
+          vendor_id?: string | null
+        }
+        Update: {
+          accession_no?: string
+          acquired_on?: string | null
+          barcode?: string
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          purchase_cost?: number | null
+          shelf?: string | null
+          status?: Database["public"]["Enums"]["library_copy_status"]
+          tenant_id?: string
+          title_id?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_copy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_copy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_copy_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "library_copy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_copy_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "library_title"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_title: {
         Row: {
           author: string | null
@@ -28700,6 +28784,45 @@ export type Database = {
           },
         ]
       }
+      v_title_availability: {
+        Row: {
+          available_copies: number | null
+          campus_id: string | null
+          tenant_id: string | null
+          title_id: string | null
+          total_copies: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_copy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_copy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_copy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_copy_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "library_title"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_unallocated_section_subject: {
         Row: {
           campus_id: string | null
@@ -31201,6 +31324,10 @@ export type Database = {
       homework_submission_sweep: { Args: never; Returns: number }
       impersonation_blocked_tables: { Args: never; Returns: string[] }
       impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
+      import_library_copies: {
+        Args: { p_campus_id: string; p_rows: Json }
+        Returns: Json
+      }
       ingest_payment_webhook: {
         Args: {
           p_gateway: string
@@ -31791,6 +31918,19 @@ export type Database = {
           p_size_bytes: number
         }
         Returns: Json
+      }
+      register_library_copy: {
+        Args: {
+          p_accession_no: string
+          p_acquired_on?: string
+          p_barcode: string
+          p_campus_id: string
+          p_purchase_cost?: number
+          p_shelf?: string
+          p_title_id: string
+          p_vendor_id?: string
+        }
+        Returns: string
       }
       register_login_attempt: {
         Args: { p_identifier: string; p_succeeded: boolean }
@@ -32537,6 +32677,13 @@ export type Database = {
       }
       set_lesson_plan_status: {
         Args: { p_plan_id: string; p_status: string }
+        Returns: undefined
+      }
+      set_library_copy_status: {
+        Args: {
+          p_copy_id: string
+          p_status: Database["public"]["Enums"]["library_copy_status"]
+        }
         Returns: undefined
       }
       set_library_title_cover: {
@@ -33387,6 +33534,13 @@ export type Database = {
         | "consumption"
         | "encashment"
         | "carry_forward"
+      library_copy_status:
+        | "available"
+        | "issued"
+        | "reserved_hold"
+        | "in_repair"
+        | "lost"
+        | "written_off"
       mark_component_code:
         | "theory"
         | "practical"
