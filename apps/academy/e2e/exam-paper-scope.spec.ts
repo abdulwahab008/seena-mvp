@@ -50,13 +50,26 @@ test('an untaught chapter is refused, taught chapters generate a paper with per-
   await page.getByTestId('request-paper').click();
   await expect(page.getByTestId('paper-row')).toHaveCount(1);
 
-  // The worker (stubbed by the dev generator) claims the request and answers it.
-  const { data: claimed } = await db.rpc('claim_exam_paper_request');
-  const job = claimed![0]!;
-  const payload = paperPayloadSchema.parse(job.payload);
+  // The worker (stubbed by the dev generator) claims the request and answers it. The queue is global and oldest-first, so like a real
+  // worker it first answers any older request left by an earlier run on this database, then reaches ours.
+  const { data: mine } = await db.from('exam_paper_request').select('id').eq('tenant_id', tenant).eq('title', 'Term 1 Physics').single();
+  let job: { request_id: string; tenant_id: string; payload: unknown } | undefined;
+  for (let i = 0; i < 100 && !job; i++) {
+    const { data: claimed } = await db.rpc('claim_exam_paper_request');
+    const next = claimed?.[0];
+    if (!next) break;
+    if (next.request_id === mine!.id) {
+      job = next;
+      break;
+    }
+    const olderPayload = paperPayloadSchema.parse(next.payload);
+    await db.rpc('record_generated_paper', { p_request_id: next.request_id, p_questions: await new DevPaperGenerator().generate(olderPayload) });
+  }
+  expect(job, 'the worker queue should reach this test\'s request').toBeDefined();
+  const payload = paperPayloadSchema.parse(job!.payload);
   expect(payload.metadata_filter.syllabus_unit_id).toHaveLength(4);
   const questions = await new DevPaperGenerator().generate(payload);
-  const { error: recordError } = await db.rpc('record_generated_paper', { p_request_id: job.request_id, p_questions: questions });
+  const { error: recordError } = await db.rpc('record_generated_paper', { p_request_id: job!.request_id, p_questions: questions });
   expect(recordError).toBeNull();
 
   await page.getByRole('link', { name: 'Term 1 Physics' }).click();
@@ -71,7 +84,7 @@ test('an untaught chapter is refused, taught chapters generate a paper with per-
   await page.getByTestId('untaught-override').check();
   await page.getByTestId('request-paper').click();
   await expect(page.getByTestId('paper-row')).toHaveCount(2);
-  const { data: over } = await db.from('exam_paper_request').select('untaught_override, override_by').eq('title', 'Full syllabus').single();
+  const { data: over } = await db.from('exam_paper_request').select('untaught_override, override_by').eq('tenant_id', tenant).eq('title', 'Full syllabus').single();
   expect(over!.untaught_override).toBe(true);
   expect(over!.override_by).toBe(created.user!.id);
 });
