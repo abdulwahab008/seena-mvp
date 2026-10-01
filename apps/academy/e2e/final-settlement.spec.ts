@@ -33,7 +33,8 @@ test('settlement lines match the AC figures and the approved PDF is served ident
   await expect(page.getByTestId('line-salary')).toContainText('51,612.90');
   await expect(page.getByTestId('line-leave_encashment')).toContainText('26,666.70');
   await expect(page.getByTestId('line-notice_recovery')).toContainText('66,666.75');
-  await expect(page.getByTestId('settlement-net')).toContainText('-15,053.85');
+  // Net = 51,612.90 + 26,666.70 - 66,666.75 (casual leave contributes nothing: not encashable).
+  await expect(page.getByTestId('settlement-net')).toContainText('11,612.85');
 
   await page.getByTestId('approve-settlement').click();
   await expect(page.getByTestId('settlement-status')).toContainText('approved');
