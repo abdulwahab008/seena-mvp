@@ -2097,3 +2097,35 @@ export const disburseSettlementSchema = z
   })
   .refine((v) => v.instrumentType === 'cash' || Boolean(v.instrumentRef), { path: ['instrumentRef'], message: 'A cheque or transfer needs its reference number' });
 export type DisburseSettlementInput = z.infer<typeof disburseSettlementSchema>;
+
+// FR-K28: security deposit and no-dues clearance.
+export const startClearanceSchema = z.object({ grNumber: z.string().trim().min(1, 'Enter the GR number').max(30) });
+export type StartClearanceInput = z.infer<typeof startClearanceSchema>;
+
+export const recordDepositSchema = z.object({
+  grNumber: z.string().trim().min(1, 'Enter the GR number').max(30),
+  amountPkr: z.number({ message: 'Enter the amount' }).positive('Amount must be above zero').max(10_000_000),
+  receivedOn: z.string().min(1, 'Choose the date received'),
+  mode: z.enum(['cash', 'cheque', 'transfer', 'bank_challan']),
+  receiptRef: z.string().trim().max(60).optional(),
+});
+export type RecordDepositInput = z.infer<typeof recordDepositSchema>;
+
+export const noDuesItemSchema = z.object({
+  itemId: z.string().uuid(),
+  outstandingPkr: z.number({ message: 'Enter the amount' }).min(0).max(10_000_000),
+  note: z.string().trim().max(200).optional(),
+});
+export type NoDuesItemInput = z.infer<typeof noDuesItemSchema>;
+
+export const decisionReasonSchema = z.object({ reason: z.string().trim().min(20, 'Give a reason of at least 20 characters').max(500) });
+export type DecisionReasonInput = z.infer<typeof decisionReasonSchema>;
+
+export const disburseDepositSchema = z
+  .object({
+    enrolmentId: z.string().uuid(),
+    instrumentType: z.enum(['cash', 'cheque', 'transfer']),
+    instrumentRef: z.string().trim().max(100).optional(),
+  })
+  .refine((v) => v.instrumentType === 'cash' || Boolean(v.instrumentRef), { path: ['instrumentRef'], message: 'A cheque or transfer needs its reference number' });
+export type DisburseDepositInput = z.infer<typeof disburseDepositSchema>;

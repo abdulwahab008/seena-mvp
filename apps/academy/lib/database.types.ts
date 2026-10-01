@@ -14065,6 +14065,196 @@ export type Database = {
         }
         Relationships: []
       }
+      no_dues_clearance: {
+        Row: {
+          campus_id: string
+          enrolment_id: string
+          id: string
+          override_at: string | null
+          override_by: string | null
+          override_reason: string | null
+          requested_at: string
+          requested_by: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          enrolment_id: string
+          id?: string
+          override_at?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          requested_at?: string
+          requested_by: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          enrolment_id?: string
+          id?: string
+          override_at?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "no_dues_clearance_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "no_dues_clearance_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "no_dues_clearance_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "no_dues_clearance_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "mv_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "no_dues_clearance_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "no_dues_clearance_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "no_dues_clearance_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "no_dues_clearance_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      no_dues_item: {
+        Row: {
+          campus_id: string
+          clearance_id: string
+          cleared_at: string | null
+          cleared_by: string | null
+          domain: string
+          id: string
+          netted_paisa: number
+          note: string | null
+          outstanding_paisa: number
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          clearance_id: string
+          cleared_at?: string | null
+          cleared_by?: string | null
+          domain: string
+          id?: string
+          netted_paisa?: number
+          note?: string | null
+          outstanding_paisa?: number
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          clearance_id?: string
+          cleared_at?: string | null
+          cleared_by?: string | null
+          domain?: string
+          id?: string
+          netted_paisa?: number
+          note?: string | null
+          outstanding_paisa?: number
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "no_dues_item_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "no_dues_item_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "no_dues_item_clearance_id_fkey"
+            columns: ["clearance_id"]
+            isOneToOne: false
+            referencedRelation: "no_dues_clearance"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "no_dues_item_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      no_dues_policy: {
+        Row: {
+          tc_requires_clearance: boolean
+          tenant_id: string
+        }
+        Insert: {
+          tc_requires_clearance?: boolean
+          tenant_id: string
+        }
+        Update: {
+          tc_requires_clearance?: boolean
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "no_dues_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocr_mark_job: {
         Row: {
           campus_id: string
@@ -17427,6 +17617,132 @@ export type Database = {
           },
           {
             foreignKeyName: "section_subject_teacher_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_deposit: {
+        Row: {
+          amount_paisa: number
+          approved_at: string | null
+          approved_by: string | null
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          disbursed_at: string | null
+          disbursed_by: string | null
+          enrolment_id: string
+          forfeit_reason: string | null
+          id: string
+          instrument_ref: string | null
+          instrument_type: string | null
+          mode: string
+          netted_paisa: number
+          receipt_ref: string | null
+          received_on: string
+          refund_paisa: number | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          approved_at?: string | null
+          approved_by?: string | null
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          disbursed_at?: string | null
+          disbursed_by?: string | null
+          enrolment_id: string
+          forfeit_reason?: string | null
+          id?: string
+          instrument_ref?: string | null
+          instrument_type?: string | null
+          mode: string
+          netted_paisa?: number
+          receipt_ref?: string | null
+          received_on: string
+          refund_paisa?: number | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          disbursed_at?: string | null
+          disbursed_by?: string | null
+          enrolment_id?: string
+          forfeit_reason?: string | null
+          id?: string
+          instrument_ref?: string | null
+          instrument_type?: string | null
+          mode?: string
+          netted_paisa?: number
+          receipt_ref?: string | null
+          received_on?: string
+          refund_paisa?: number | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_deposit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_deposit_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "mv_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "security_deposit_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "security_deposit_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -26649,6 +26965,10 @@ export type Database = {
         Args: { p_correction_id: string; p_note?: string }
         Returns: undefined
       }
+      approve_deposit_refund: {
+        Args: { p_enrolment_id: string }
+        Returns: number
+      }
       archive_campus: { Args: { p_campus_id: string }; Returns: undefined }
       assign_bank_mapping_profile: {
         Args: { p_bank_account_id: string; p_profile_id: string }
@@ -26753,6 +27073,10 @@ export type Database = {
       build_marketing_gallery_export: {
         Args: { p_campus_id: string; p_section_id?: string }
         Returns: Json
+      }
+      build_no_dues_checklist: {
+        Args: { p_enrolment_id: string }
+        Returns: string
       }
       can_teach: {
         Args: {
@@ -26892,6 +27216,10 @@ export type Database = {
       classify_password_reset_token: {
         Args: { p_token_hash: string }
         Returns: string
+      }
+      clear_no_dues_item: {
+        Args: { p_item_id: string; p_note?: string }
+        Returns: undefined
       }
       clear_timetable_slot: {
         Args: {
@@ -27539,6 +27867,14 @@ export type Database = {
       deprovision_on_tc: { Args: never; Returns: number }
       detect_sibling_groups: {
         Args: { p_campus_id: string; p_session_id: string }
+        Returns: Json
+      }
+      disburse_deposit_refund: {
+        Args: {
+          p_enrolment_id: string
+          p_instrument_ref?: string
+          p_instrument_type: string
+        }
         Returns: Json
       }
       disburse_fee_settlement: {
@@ -28477,6 +28813,10 @@ export type Database = {
         Args: { p_class_id: string; p_exam_term_id: string }
         Returns: Json
       }
+      forfeit_security_deposit: {
+        Args: { p_enrolment_id: string; p_reason: string }
+        Returns: undefined
+      }
       format_certificate_serial: {
         Args: {
           p_academic_year: number
@@ -28831,6 +29171,10 @@ export type Database = {
       }
       my_student_id: { Args: never; Returns: string }
       my_student_ids: { Args: never; Returns: string[] }
+      net_no_dues_item_against_deposit: {
+        Args: { p_item_id: string }
+        Returns: number
+      }
       new_grading_scheme_version: {
         Args: { p_effective_from: string; p_scheme_id: string }
         Returns: string
@@ -28852,6 +29196,10 @@ export type Database = {
       outstanding_balance_as_of: {
         Args: { p_as_of?: string; p_enrolment_id: string }
         Returns: number
+      }
+      override_no_dues_clearance: {
+        Args: { p_clearance_id: string; p_reason: string }
+        Returns: undefined
       }
       pick_body: {
         Args: { p_lang?: string; p_version_id: string }
@@ -29138,6 +29486,16 @@ export type Database = {
           p_reason?: string
           p_report_key: string
           p_row_count: number
+        }
+        Returns: string
+      }
+      record_security_deposit: {
+        Args: {
+          p_amount_paisa: number
+          p_enrolment_id: string
+          p_mode: string
+          p_receipt_ref?: string
+          p_received_on: string
         }
         Returns: string
       }
@@ -29577,6 +29935,10 @@ export type Database = {
           section_label: string
         }[]
       }
+      security_deposit_balance: {
+        Args: { p_enrolment_id: string }
+        Returns: number
+      }
       seed_default_class_levels: {
         Args: { p_tenant_id: string }
         Returns: undefined
@@ -29812,6 +30174,14 @@ export type Database = {
         Args: { p_campus_id: string; p_precision: number }
         Returns: undefined
       }
+      set_no_dues_item_outstanding: {
+        Args: {
+          p_item_id: string
+          p_note?: string
+          p_outstanding_paisa: number
+        }
+        Returns: undefined
+      }
       set_preferred_language: { Args: { p_lang: string }; Returns: string }
       set_rank_policy: {
         Args: {
@@ -29881,6 +30251,10 @@ export type Database = {
           p_board_code: string
           p_subject_id: string
         }
+        Returns: undefined
+      }
+      set_tc_requires_no_dues: {
+        Args: { p_required: boolean }
         Returns: undefined
       }
       set_tenant_feature: {
@@ -30378,6 +30752,10 @@ export type Database = {
       waive_admission_fee: {
         Args: { p_offer_id: string; p_reason: string }
         Returns: string
+      }
+      waive_no_dues_item: {
+        Args: { p_item_id: string; p_reason: string }
+        Returns: undefined
       }
       working_days_between: {
         Args: { p_campus_id: string; p_from: string; p_to: string }
