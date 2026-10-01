@@ -12159,6 +12159,142 @@ export type Database = {
           },
         ]
       }
+      homework_notification: {
+        Row: {
+          campus_id: string
+          channel: string
+          created_by: string | null
+          enrolment_id: string
+          homework_id: string
+          id: string
+          message_id: string | null
+          sent_at: string
+          sent_on: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          channel?: string
+          created_by?: string | null
+          enrolment_id: string
+          homework_id: string
+          id?: string
+          message_id?: string | null
+          sent_at?: string
+          sent_on?: string
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          channel?: string
+          created_by?: string | null
+          enrolment_id?: string
+          homework_id?: string
+          id?: string
+          message_id?: string | null
+          sent_at?: string
+          sent_on?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_notification_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_notification_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "homework_notification_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_notification_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "homework_notification_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "homework_notification_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "homework_notification_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "homework"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_notification_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_homework_feed"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_notification_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "message"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_notification_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_notification_policy: {
+        Row: {
+          daily_cap_per_campus: number
+          tenant_id: string
+        }
+        Insert: {
+          daily_cap_per_campus?: number
+          tenant_id: string
+        }
+        Update: {
+          daily_cap_per_campus?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_notification_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_submission: {
         Row: {
           campus_id: string
@@ -30570,6 +30706,18 @@ export type Database = {
         Args: { p_purpose: string; p_student_id: string }
         Returns: boolean
       }
+      homework_non_submitters: {
+        Args: { p_homework_id: string }
+        Returns: {
+          enrolment_id: string
+          gr_number: string
+          guardian_name: string
+          guardian_phone: string
+          notified_today: boolean
+          on_leave: boolean
+          student_name: string
+        }[]
+      }
       homework_orphan_sweep: { Args: never; Returns: number }
       homework_submission_sweep: { Args: never; Returns: number }
       impersonation_blocked_tables: { Args: never; Returns: string[] }
@@ -30789,6 +30937,14 @@ export type Database = {
         Returns: number
       }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
+      notify_non_submitters: {
+        Args: {
+          p_enrolment_ids: string[]
+          p_homework_id: string
+          p_include_on_leave?: boolean
+        }
+        Returns: Json
+      }
       outstanding_balance_as_of: {
         Args: { p_as_of?: string; p_enrolment_id: string }
         Returns: number
@@ -31837,6 +31993,10 @@ export type Database = {
       }
       set_homework_max_score: {
         Args: { p_homework_id: string; p_max_score?: number }
+        Returns: undefined
+      }
+      set_homework_notification_cap: {
+        Args: { p_cap: number }
         Returns: undefined
       }
       set_leave_approval_chain_step: {

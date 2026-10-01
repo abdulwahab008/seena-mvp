@@ -2210,3 +2210,11 @@ export const bulkCheckSchema = z.object({
   remark: z.string().trim().max(500).optional(),
 });
 export type BulkCheckInput = z.infer<typeof bulkCheckSchema>;
+
+// FR-H07: non-submission follow-up.
+export const notifyNonSubmittersSchema = z.object({
+  homeworkId: z.string().uuid(),
+  enrolmentIds: z.array(z.string().uuid()).min(1, 'Select at least one student').max(300),
+  includeOnLeave: z.boolean().optional(),
+});
+export type NotifyNonSubmittersInput = z.infer<typeof notifyNonSubmittersSchema>;

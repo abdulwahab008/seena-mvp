@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AttachmentPanel, type AttachmentRow } from './attachment-panel';
 import { BulkCheck, MaxScoreForm, ReviewForm } from './submission-review';
+import { NonSubmitters } from './non-submitters';
 
 export type HomeworkRow = {
   id: string;
@@ -68,6 +69,7 @@ export function HomeworkList({ rows }: { rows: HomeworkRow[] }) {
             {h.status === 'draft' && <PublishButton id={h.id} />}
             </div>
             <AttachmentPanel homeworkId={h.id} attachments={h.attachments} canEdit={h.canEdit} />
+            {h.status === 'published' && h.canEdit && <NonSubmitters homeworkId={h.id} pastDue={h.dueDate < new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' })} />}
             {h.submissions.length > 0 && (
               <div className="mt-3 space-y-1 border-t pt-3 text-sm" data-testid="homework-submissions">
                 <p className="font-medium">Submissions ({h.submissions.length})</p>
