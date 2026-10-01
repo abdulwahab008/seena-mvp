@@ -98,7 +98,7 @@ export default async function GatePassesPage({ searchParams }: { searchParams: P
                   <td>
                     <Badge variant={VARIANT[p.status as keyof typeof VARIANT] ?? 'outline'}>{p.status}</Badge>
                   </td>
-                  <td>{(p.status === 'open' || p.status === 'overdue') && <ActionButton label="Mark returned" testId={`return-${p.serial}`} action={() => returnPass(p.id)} />}</td>
+                  <td>{(p.status === 'open' || p.status === 'overdue') && <ActionButton label="Mark returned" testId={`return-${p.serial}`} action={returnPass} args={[p.id]} />}</td>
                 </tr>
               ))}
             </tbody>

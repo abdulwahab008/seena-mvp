@@ -76,7 +76,7 @@ export default async function VisitorsPage({ searchParams }: { searchParams: Pro
                     {v.relationship ?? '-'} {v.verified ? <Badge variant="success">verified</Badge> : <Badge variant="warning">unverified</Badge>}
                   </td>
                   <td>
-                    <ActionButton label="Sign out" testId={`signout-${v.visitor_name}`} action={() => signOutVisitor(v.id)} />
+                    <ActionButton label="Sign out" testId={`signout-${v.visitor_name}`} action={signOutVisitor} args={[v.id]} />
                   </td>
                 </tr>
               ))}
