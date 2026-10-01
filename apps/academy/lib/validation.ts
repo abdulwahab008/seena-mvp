@@ -2595,3 +2595,165 @@ export type BuildSetsInput = z.input<typeof buildSetsSchema>;
 export function parseChapters(text: string): string[] {
   return [...new Set(text.split(/[,;\n]/).map((c) => c.trim()).filter(Boolean))];
 }
+// FR-J04: promotion and compartment decision. Mirrors
+// supabase/migrations/20260802400100_promotion_decision.sql.
+export const PROMOTION_DECISIONS = ['promoted', 'promoted_on_trial', 'compartment', 'detained', 'pending'] as const;
+export type PromotionDecision = (typeof PROMOTION_DECISIONS)[number];
+export const evaluatePromotionSchema = z.object({
+  sessionId: z.string().uuid(),
+  classId: z.string().uuid(),
+});
+export type EvaluatePromotionInput = z.infer<typeof evaluatePromotionSchema>;
+export const promotionRuleSchema = z
+  .object({
+    campusId: z.string().uuid(),
+    classId: z.string().uuid().nullable(),
+    minAggregatePct: z.number({ message: 'Enter the minimum aggregate' }).min(0, 'At least 0').max(100, 'At most 100'),
+    maxFailedForCompartment: z.number({ message: 'Enter a number' }).int('Whole subjects only').min(0).max(30),
+    maxFailedForPromotion: z.number({ message: 'Enter a number' }).int('Whole subjects only').min(0).max(30),
+  })
+  .refine((v) => v.maxFailedForPromotion <= v.maxFailedForCompartment, {
+    message: 'Failures allowed for promotion cannot exceed those allowed for a compartment',
+    path: ['maxFailedForPromotion'],
+  });
+export type PromotionRuleInput = z.infer<typeof promotionRuleSchema>;
+export const overridePromotionSchema = z.object({
+  decisionId: z.string().uuid(),
+  decision: z.enum(['promoted', 'promoted_on_trial', 'compartment', 'detained']),
+  reason: z.string().trim().min(5, 'Give a reason of at least 5 characters').max(500),
+});
+export type OverridePromotionInput = z.infer<typeof overridePromotionSchema>;
+
+// FR-J11: report card + next-cycle challan packet. Mirrors
+// supabase/migrations/20260802400300_report_card_packet.sql.
+const billingPeriodField = z
+  .string()
+  .regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Choose a month')
+  .optional()
+  .or(z.literal(''));
+export const packetPlanSchema = z.object({
+  examTermId: z.string().uuid(),
+  sectionId: z.string().uuid(),
+  billingPeriod: billingPeriodField,
+});
+export type PacketPlanInput = z.infer<typeof packetPlanSchema>;
+export const assemblePacketSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examTermId: z.string().uuid(),
+  billingPeriod: billingPeriodField,
+});
+export type AssemblePacketInput = z.infer<typeof assemblePacketSchema>;
+
+// FR-J13: cumulative transcript issuance. Mirrors
+// supabase/migrations/20260802400400_cumulative_transcript.sql.
+export const TRANSCRIPT_PURPOSES = [
+  'Transfer Certificate',
+  'College admission',
+  'Scholarship application',
+  'Board registration',
+  'Other',
+] as const;
+export const issueTranscriptSchema = z.object({
+  studentId: z.string().uuid(),
+  purpose: z.string().trim().min(1, 'Say what the transcript is for').max(200),
+});
+export type IssueTranscriptInput = z.infer<typeof issueTranscriptSchema>;
+
+// FR-J14: re-sit and improvement substitution. Mirrors
+// supabase/migrations/20260802400500_resit_improvement_substitution.sql.
+export const RESIT_POLICIES = ['latest', 'best_of', 'capped_at_pass'] as const;
+export type ResitPolicy = (typeof RESIT_POLICIES)[number];
+export const ATTEMPT_TYPES = ['resit', 'improvement'] as const;
+export const setResitPolicySchema = z.object({
+  campusId: z.string().uuid(),
+  policy: z.enum(RESIT_POLICIES, { message: 'Choose a policy' }),
+});
+export type SetResitPolicyInput = z.infer<typeof setResitPolicySchema>;
+export const generateResitListSchema = z.object({ examTermId: z.string().uuid() });
+export const recordAttemptSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examSubjectId: z.string().uuid(),
+  attemptType: z.enum(ATTEMPT_TYPES, { message: 'Choose re-sit or improvement' }),
+  obtained: z.number({ message: 'Enter the marks' }).min(0, 'Marks cannot be negative').max(1000),
+  satOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the date it was sat'),
+});
+export type RecordAttemptInput = z.infer<typeof recordAttemptSchema>;
+export const grantResitExceptionSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examSubjectId: z.string().uuid(),
+  reason: z.string().trim().min(5, 'Give a reason of at least 5 characters').max(500),
+});
+export type GrantResitExceptionInput = z.infer<typeof grantResitExceptionSchema>;
+
+// FR-J07: topic mastery capture. Mirrors
+// supabase/migrations/20260802400600_topic_mastery.sql.
+export const examQuestionSchema = z.object({
+  question_no: z.number().int().min(1),
+  max_marks: z.number({ message: 'Enter the marks' }).positive('Marks must be above zero').max(1000),
+  chapter_no: z.number().int().min(1).nullable(),
+  chapter_title: z.string().trim().max(100),
+});
+export const saveExamQuestionsSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  questions: z.array(examQuestionSchema).min(1, 'Add at least one question').max(200),
+});
+export type SaveExamQuestionsInput = z.infer<typeof saveExamQuestionsSchema>;
+export const saveQuestionMarksSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  rows: z
+    .array(
+      z.object({
+        enrolment_id: z.string().uuid(),
+        marks: z.array(z.object({ question_no: z.number().int().min(1), obtained: z.number().min(0) })).min(1),
+      }),
+    )
+    .min(1, 'Enter at least one mark'),
+});
+export type SaveQuestionMarksInput = z.infer<typeof saveQuestionMarksSchema>;
+export const masterySheetSchema = z.object({ enrolmentId: z.string().uuid() });
+
+// FR-T12: board examination form export and fee reconciliation. Mirrors
+// supabase/migrations/20260802400700_board_exam_form_export.sql. Money is paisa;
+// the form takes rupees and converts once, here.
+export const BOARD_CODES = ['FBISE', 'PUNJAB', 'SINDH', 'KPK', 'BALOCHISTAN', 'AKU_EB', 'CAMBRIDGE'] as const;
+export const CANDIDATE_CATEGORIES = ['regular', 'improvement', 'private'] as const;
+export const REGISTRATION_ELECTIONS = ['compulsory', 'elective', 'improvement'] as const;
+export const boardFeeScheduleSchema = z
+  .object({
+    boardCode: z.enum(BOARD_CODES, { message: 'Choose a board' }),
+    sessionYear: z.number({ message: 'Enter the session year' }).int().min(2000).max(2100),
+    candidateCategory: z.enum(CANDIDATE_CATEGORIES, { message: 'Choose a category' }),
+    perCandidateRupees: z.number({ message: 'Enter the per-candidate fee' }).min(0, 'Cannot be negative').max(10_000_000),
+    perPaperRupees: z.number({ message: 'Enter the per-paper fee' }).min(0, 'Cannot be negative').max(10_000_000),
+    effectiveFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the effective date'),
+    note: z.string().trim().max(300).optional(),
+  })
+  .refine((v) => v.perCandidateRupees > 0 || v.perPaperRupees > 0, { message: 'A schedule must charge something', path: ['perCandidateRupees'] })
+  .transform((v) => ({ ...v, perCandidatePaisa: rupeesToPaisa(v.perCandidateRupees), perPaperPaisa: rupeesToPaisa(v.perPaperRupees) }));
+export type BoardFeeScheduleInput = z.input<typeof boardFeeScheduleSchema>;
+export const examRegistrationSchema = z.object({
+  studentId: z.string().uuid('Choose a student'),
+  sessionId: z.string().uuid(),
+  boardCode: z.enum(BOARD_CODES, { message: 'Choose a board' }),
+  sessionYear: z.number({ message: 'Enter the session year' }).int().min(2000).max(2100),
+  sessionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the exam session date'),
+  candidateCategory: z.enum(CANDIDATE_CATEGORIES, { message: 'Choose a category' }),
+  groupCode: z.string().trim().max(30).optional(),
+  rollNo: z.string().trim().max(30).optional(),
+  subjects: z
+    .array(
+      z.object({
+        subjectCode: z.string().trim().min(1, 'Enter the subject code').max(20),
+        election: z.enum(REGISTRATION_ELECTIONS),
+      }),
+    )
+    .min(1, 'Add at least one subject'),
+});
+export type ExamRegistrationInput = z.infer<typeof examRegistrationSchema>;
+export const boardExamExportSchema = z.object({
+  campusId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+  boardCode: z.enum(BOARD_CODES, { message: 'Choose a board' }),
+  sessionYear: z.number({ message: 'Enter the session year' }).int().min(2000).max(2100),
+});
+export type BoardExamExportInput = z.infer<typeof boardExamExportSchema>;
