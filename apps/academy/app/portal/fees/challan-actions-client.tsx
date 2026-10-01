@@ -59,7 +59,7 @@ export function ChallanActionsClient({ challan }: ChallanModalProps) {
 
       {/* Challan Slip Modal */}
       {showSlip && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" data-testid="challan-slip-modal">
           <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border bg-card p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-4">
               <div>
@@ -161,7 +161,7 @@ export function ChallanActionsClient({ challan }: ChallanModalProps) {
               <Button variant="outline" size="sm" onClick={() => window.print()}>
                 Print Slip
               </Button>
-              <Button size="sm" onClick={() => setShowSlip(false)}>
+              <Button size="sm" onClick={() => setShowSlip(false)} data-testid="btn-close-challan-slip">
                 Close
               </Button>
             </div>

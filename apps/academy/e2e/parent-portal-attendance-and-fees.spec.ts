@@ -62,12 +62,8 @@ test.describe('FR-N03 & FR-N04: Parent Portal Attendance and Fees', () => {
       password: PASSWORD,
       email_confirm: true,
     });
-    await db.from('app_user').insert({
-      user_id: parentUser.user!.id,
-      tenant_id: tenant,
-      app_role: 'parent',
-      full_name: 'Sadia Parent',
-    });
+    // A guardian has no app_user row by design: they are linked through
+    // guardian.auth_user_id below, and the access-token hook gives them app_role 'parent'.
 
     // 3. Create section
     const { data: section } = await db
@@ -101,10 +97,11 @@ test.describe('FR-N03 & FR-N04: Parent Portal Attendance and Fees', () => {
     });
     const enrolmentId = eId as string;
 
-    const { data: gId } = await ownerClient.rpc('create_guardian', {
+    const { data: gId, error: gError } = await ownerClient.rpc('fn_find_or_create_guardian', {
       p_name_en: 'Sadia Farooq',
-      p_phone: '03009988776',
+      p_phone_e164: '+923009988776',
     });
+    expect(gError).toBeNull();
     const guardianId = gId as string;
 
     await ownerClient.rpc('link_guardian', {
@@ -126,9 +123,10 @@ test.describe('FR-N03 & FR-N04: Parent Portal Attendance and Fees', () => {
       campus_id: campus!.id,
       session_id: session!.id,
       enrolment_id: enrolmentId,
+      section_id: section!.id,
       attendance_date: today,
       status: 'present',
-      time_in: '07:55:00',
+      arrival_time: '07:55:00',
     });
 
     // 6. Create fee challan for Hamza
@@ -148,27 +146,27 @@ test.describe('FR-N03 & FR-N04: Parent Portal Attendance and Fees', () => {
 
     // 7. Login as parent
     await page.goto('/login');
-    await page.fill('input[type="email"]', parentEmail);
-    await page.fill('input[type="password"]', PASSWORD);
+    await page.getByLabel('Email').fill(parentEmail);
+    await page.getByLabel('Password').fill(PASSWORD);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/portal**');
 
     // 8. Test Attendance Page (FR-N03)
     await page.goto('/portal/attendance');
-    await expect(page.locator('h1')).toContainText('Attendance');
-    await expect(page.locator('[data-testid="attendance-kpi-cards"]')).toBeVisible();
-    await expect(page.locator('[data-testid="attendance-log-table"]')).toBeVisible();
-    await expect(page.locator('[data-testid="attendance-log-table"]')).toContainText('Present');
+    await expect(page.getByRole('heading', { level: 2 })).toContainText('Attendance');
+    await expect(page.getByTestId('attendance-session-pct')).toHaveText('100%');
+    await expect(page.getByTestId('attendance-month-present')).toBeVisible();
+    await expect(page.getByTestId('attendance-records-table')).toBeVisible();
+    await expect(page.getByTestId('attendance-records-table')).toContainText('Present');
 
     // 9. Test Fees Page (FR-N04)
     await page.goto('/portal/fees');
-    await expect(page.locator('h1')).toContainText('Fee Dues & Challans');
-    await expect(page.locator('[data-testid="fees-dues-banner"]')).toBeVisible();
-    await expect(page.locator('[data-testid="fees-dues-banner"]')).toContainText('PKR 6,000');
+    await expect(page.getByRole('heading', { level: 2 })).toContainText('Fee Dues & Challans');
+    await expect(page.getByTestId('fees-outstanding-balance')).toContainText('6,000');
     await expect(page.locator('[data-testid="challan-card-CH-PORTAL-E2E-1"]')).toBeVisible();
 
     // Open Challan Slip Modal
-    await page.click('[data-testid="btn-view-challan-CH-PORTAL-E2E-1"]');
+    await page.click('[data-testid="view-slip-CH-PORTAL-E2E-1"]');
     await expect(page.locator('[data-testid="challan-slip-modal"]')).toBeVisible();
     await expect(page.locator('[data-testid="challan-slip-modal"]')).toContainText('CH-PORTAL-E2E-1');
     await expect(page.locator('[data-testid="challan-slip-modal"]')).toContainText('PKR 6,000');
