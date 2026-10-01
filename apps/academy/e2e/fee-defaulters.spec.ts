@@ -7,7 +7,16 @@ test('defaulters are bucketed by their oldest unpaid challan and exportable', as
   test.setTimeout(120000);
   const { db, email, tenant, challans } = await seedFeesTenant(2, 'defaulter-e2e');
   const [c1, c2] = challans;
-  const daysAgo = (n: number) => new Date(Date.now() - n * 86400_000).toISOString().slice(0, 10);
+  // Ageing is measured against the school's business date (app.fn_karachi_today(),
+  // Asia/Karachi), which runs a day ahead of UTC from 19:00 UTC — so "N days ago" has
+  // to be counted from the Karachi date, not the UTC one.
+  const daysAgo = (n: number) => {
+    const [y, m, d] = new Date()
+      .toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' })
+      .split('-')
+      .map(Number);
+    return new Date(Date.UTC(y!, m! - 1, d! - n)).toISOString().slice(0, 10);
+  };
 
   await db.from('fee_challan').update({ due_date: daysAgo(65) }).eq('id', c1!.id);
   await db.from('fee_challan').update({ due_date: daysAgo(10) }).eq('id', c2!.id);
