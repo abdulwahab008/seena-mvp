@@ -8918,6 +8918,74 @@ export type Database = {
           },
         ]
       }
+      fee_follow_up_task: {
+        Row: {
+          campus_id: string
+          completed_at: string | null
+          created_at: string
+          guardian_id: string
+          id: string
+          rung_code: string
+          status: string
+          summary: string
+          tenant_id: string
+          total_due_paisa: number
+        }
+        Insert: {
+          campus_id: string
+          completed_at?: string | null
+          created_at?: string
+          guardian_id: string
+          id?: string
+          rung_code: string
+          status?: string
+          summary: string
+          tenant_id: string
+          total_due_paisa: number
+        }
+        Update: {
+          campus_id?: string
+          completed_at?: string | null
+          created_at?: string
+          guardian_id?: string
+          id?: string
+          rung_code?: string
+          status?: string
+          summary?: string
+          tenant_id?: string
+          total_due_paisa?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_follow_up_task_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_follow_up_task_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "fee_follow_up_task_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_follow_up_task_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_head: {
         Row: {
           carry_forward_on_arrears: boolean
@@ -9817,6 +9885,153 @@ export type Database = {
             columns: ["receipt_id"]
             isOneToOne: false
             referencedRelation: "fee_receipt"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_reminder_log: {
+        Row: {
+          campus_id: string
+          challan_id: string
+          channel: string
+          created_at: string
+          guardian_id: string | null
+          id: string
+          message_id: string | null
+          rung_code: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          challan_id: string
+          channel: string
+          created_at?: string
+          guardian_id?: string | null
+          id?: string
+          message_id?: string | null
+          rung_code: string
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          challan_id?: string
+          channel?: string
+          created_at?: string
+          guardian_id?: string | null
+          id?: string
+          message_id?: string | null
+          rung_code?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_reminder_log_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_log_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_log_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_log_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_log_guardian_id_fkey"
+            columns: ["guardian_id"]
+            isOneToOne: false
+            referencedRelation: "guardian"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_log_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "message"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_reminder_rule: {
+        Row: {
+          campus_id: string | null
+          channel: string
+          created_at: string
+          id: string
+          is_active: boolean
+          offset_days: number
+          rung_code: string
+          template_code: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id?: string | null
+          channel: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          offset_days: number
+          rung_code: string
+          template_code?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          offset_days?: number
+          rung_code?: string
+          template_code?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_reminder_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_rule_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
         ]
@@ -27292,6 +27507,10 @@ export type Database = {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
       }
+      fees_reminder_escalation: {
+        Args: { p_now?: string; p_run_date?: string; p_tenant_id?: string }
+        Returns: Json
+      }
       finalise_cash_book_day: {
         Args: { p_book_date: string; p_campus_id: string }
         Returns: {
@@ -29148,6 +29367,10 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: undefined
       }
+      seed_default_fee_reminder_rules: {
+        Args: { p_campus_id?: string }
+        Returns: number
+      }
       seed_default_message_templates: {
         Args: { p_tenant_id: string }
         Returns: undefined
@@ -29313,6 +29536,10 @@ export type Database = {
           p_allow_negative_net?: boolean
           p_max_stacked_concession_pct?: number
         }
+        Returns: undefined
+      }
+      set_fee_reminder_rule_active: {
+        Args: { p_active: boolean; p_rule_id: string }
         Returns: undefined
       }
       set_gr_sequence: {
