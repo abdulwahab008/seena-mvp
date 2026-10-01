@@ -2166,3 +2166,11 @@ export const schemeThresholdSchema = z.object({
   minPct: z.number({ message: 'Enter a percentage, or clear the threshold' }).gt(0, 'Above 0').max(100, 'At most 100').nullable(),
 });
 export type SchemeThresholdInput = z.infer<typeof schemeThresholdSchema>;
+
+// FR-G03: period-wise attendance.
+export const periodAttendanceSchema = z.object({
+  slotId: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+  marks: z.array(z.object({ enrolmentId: z.string().uuid(), status: z.enum(['present', 'absent', 'late', 'half_day', 'excused']) })).min(1, 'No students to mark').max(300),
+});
+export type PeriodAttendanceInput = z.infer<typeof periodAttendanceSchema>;

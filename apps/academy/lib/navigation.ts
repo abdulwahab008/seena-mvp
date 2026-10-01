@@ -139,6 +139,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: BadgeCheck,
     items: [
       { href: '/attendance/register', label: 'Daily Register' },
+      { href: '/attendance/periods', label: 'Period Attendance' },
       { href: '/attendance/corrections', label: 'Corrections' },
       { href: '/attendance/unmarked', label: 'Unmarked Registers' },
       { href: '/attendance/monthly-summary', label: 'Monthly Summary' },

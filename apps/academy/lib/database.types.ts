@@ -2576,6 +2576,92 @@ export type Database = {
           },
         ]
       }
+      attendance_derivation_conflict: {
+        Row: {
+          attendance_date: string
+          campus_id: string
+          derived_status: Database["public"]["Enums"]["student_attendance_status"]
+          detected_at: string
+          enrolment_id: string
+          id: string
+          manual_source: Database["public"]["Enums"]["student_attendance_source"]
+          manual_status: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id: string
+        }
+        Insert: {
+          attendance_date: string
+          campus_id: string
+          derived_status: Database["public"]["Enums"]["student_attendance_status"]
+          detected_at?: string
+          enrolment_id: string
+          id?: string
+          manual_source: Database["public"]["Enums"]["student_attendance_source"]
+          manual_status: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id: string
+        }
+        Update: {
+          attendance_date?: string
+          campus_id?: string
+          derived_status?: Database["public"]["Enums"]["student_attendance_status"]
+          detected_at?: string
+          enrolment_id?: string
+          id?: string
+          manual_source?: Database["public"]["Enums"]["student_attendance_source"]
+          manual_status?: Database["public"]["Enums"]["student_attendance_status"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_derivation_conflict_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_derivation_conflict_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "attendance_derivation_conflict_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_derivation_conflict_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_derivation_conflict_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_derivation_conflict_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_derivation_conflict_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_eligibility_adjustment: {
         Row: {
           award_id: string
@@ -3243,6 +3329,154 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenant"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_period: {
+        Row: {
+          attendance_date: string
+          campus_id: string
+          enrolment_id: string
+          id: string
+          marked_at: string
+          marked_by: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["student_attendance_status"]
+          subject_id: string
+          tenant_id: string
+          timetable_slot_id: string
+        }
+        Insert: {
+          attendance_date: string
+          campus_id: string
+          enrolment_id: string
+          id?: string
+          marked_at?: string
+          marked_by?: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["student_attendance_status"]
+          subject_id: string
+          tenant_id: string
+          timetable_slot_id: string
+        }
+        Update: {
+          attendance_date?: string
+          campus_id?: string
+          enrolment_id?: string
+          id?: string
+          marked_at?: string
+          marked_by?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["student_attendance_status"]
+          subject_id?: string
+          tenant_id?: string
+          timetable_slot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_period_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_period_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "attendance_period_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_period_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_period_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_period_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_period_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "attendance_period_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_period_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_period_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_period_timetable_slot_id_fkey"
+            columns: ["timetable_slot_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_slot"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_period_timetable_slot_id_fkey"
+            columns: ["timetable_slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_daily_timetable"
+            referencedColumns: ["slot_id"]
+          },
+          {
+            foreignKeyName: "attendance_period_timetable_slot_id_fkey"
+            columns: ["timetable_slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_timetable"
+            referencedColumns: ["slot_id"]
+          },
+          {
+            foreignKeyName: "attendance_period_timetable_slot_id_fkey"
+            columns: ["timetable_slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_slot_clock_time"
+            referencedColumns: ["slot_id"]
+          },
+          {
+            foreignKeyName: "attendance_period_timetable_slot_id_fkey"
+            columns: ["timetable_slot_id"]
+            isOneToOne: false
+            referencedRelation: "v_teach_scope_exception"
+            referencedColumns: ["slot_id"]
           },
         ]
       }
@@ -28472,6 +28706,11 @@ export type Database = {
       }
       delete_stream: { Args: { p_id: string }; Returns: undefined }
       deprovision_on_tc: { Args: never; Returns: number }
+      derive_day_attendance_all: { Args: never; Returns: number }
+      derive_day_from_periods: {
+        Args: { p_campus_id: string; p_date: string }
+        Returns: number
+      }
       detect_sibling_groups: {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: Json
@@ -29820,6 +30059,25 @@ export type Database = {
         Args: { p_clearance_id: string; p_reason: string }
         Returns: undefined
       }
+      period_attendance_roster: {
+        Args: { p_date: string; p_slot_id: string }
+        Returns: {
+          enrolment_id: string
+          gr_number: string
+          status: Database["public"]["Enums"]["student_attendance_status"]
+          student_name: string
+        }[]
+      }
+      period_attendance_slots: {
+        Args: { p_date: string }
+        Returns: {
+          marked_count: number
+          period_no: number
+          section_label: string
+          slot_id: string
+          subject_name: string
+        }[]
+      }
       petty_cash_ledger_balance: {
         Args: { p_account_id: string }
         Returns: number
@@ -30546,6 +30804,10 @@ export type Database = {
           p_scheme_id?: string
         }
         Returns: string
+      }
+      save_period_attendance: {
+        Args: { p_date: string; p_marks: Json; p_slot_id: string }
+        Returns: Json
       }
       schedule_campaign: {
         Args: {
@@ -31749,6 +32011,7 @@ export type Database = {
         | "offline_sync"
         | "biometric"
         | "correction"
+        | "derived"
       student_attendance_status:
         | "present"
         | "absent"
@@ -32247,6 +32510,7 @@ export const Constants = {
         "offline_sync",
         "biometric",
         "correction",
+        "derived",
       ],
       student_attendance_status: [
         "present",
