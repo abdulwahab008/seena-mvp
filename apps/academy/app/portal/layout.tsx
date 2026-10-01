@@ -14,6 +14,7 @@ const PORTAL_LINKS: { href: string; key: MessageKey }[] = [
   { href: '/portal/circulars', key: 'nav.circulars' },
   { href: '/portal/calendar', key: 'nav.calendar' },
   { href: '/portal/leave', key: 'nav.leave' },
+  { href: '/portal/transport', key: 'nav.transport' },
   { href: '/portal/remarks', key: 'nav.remarks' },
   { href: '/portal/tickets', key: 'nav.tickets' },
   { href: '/portal/link-child', key: 'nav.linkChild' },
