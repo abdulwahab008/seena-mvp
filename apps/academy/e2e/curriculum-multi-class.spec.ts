@@ -1,11 +1,27 @@
 import { test, expect } from '@playwright/test';
+import { createClient } from '@supabase/supabase-js';
+import { seedFreshOwner } from './fixtures/fresh-owner';
 
-test('curriculum mapping: single-class one-by-one mapping and bulk multi-class assignment & copy', async ({ page }) => {
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
+
+test('curriculum mapping: single-class one-by-one mapping and bulk multi-class assignment & copy', async ({ page }, testInfo) => {
   // 1. Log in as School Owner
+  const owner = await seedFreshOwner('curriculum-e2e');
+
+  // provision_tenant seeds class levels but no subjects; the original run
+  // relied on English and Mathematics already existing in a long-lived dev
+  // tenant. Subjects are the input of this feature, so seed them.
+  const admin = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+  const { error: subjectError } = await admin.from('subject').insert([
+    { tenant_id: owner.tenantId, code: 'ENG', name_en: 'English', name_ur: 'انگریزی' },
+    { tenant_id: owner.tenantId, code: 'MTH', name_en: 'Mathematics', name_ur: 'ریاضی' },
+  ]);
+  if (subjectError) throw subjectError;
+
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
-  await page.getByLabel('Email').fill('owner@seena.academy');
-  await page.getByLabel('Password').fill('Password123!');
+  await page.getByLabel('Email').fill(owner.email);
+  await page.getByLabel('Password').fill(owner.password);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL('**/dashboard', { timeout: 15000 });
 
@@ -20,7 +36,7 @@ test('curriculum mapping: single-class one-by-one mapping and bulk multi-class a
 
   // Capture screenshot of single-class view
   await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/curriculum_full_page_view.png',
+    path: testInfo.outputPath('curriculum_full_page_view.png'),
     fullPage: true,
   });
 
@@ -67,7 +83,7 @@ test('curriculum mapping: single-class one-by-one mapping and bulk multi-class a
 
   // Capture screenshot of Copy Curriculum Modal
   await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/curriculum_copy_modal.png',
+    path: testInfo.outputPath('curriculum_copy_modal.png'),
   });
 
   // Click quick filter "Classes 1–5" (selects Classes 2, 3, 4, 5)
@@ -89,6 +105,6 @@ test('curriculum mapping: single-class one-by-one mapping and bulk multi-class a
 
   // Capture screenshot of Class 5 with copied curriculum
   await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/curriculum_multi_class_assigned.png',
+    path: testInfo.outputPath('curriculum_multi_class_assigned.png'),
   });
 });

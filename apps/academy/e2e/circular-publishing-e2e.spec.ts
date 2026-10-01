@@ -1,14 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { seedFreshOwner } from './fixtures/fresh-owner';
 
 test.describe('FR-M12: Circular Publishing with Attachments', () => {
   test('Principal publishes bilingual circular, validates 10MB attachment guard (AC 1), views published feed, and unpublishes (AC 4)', async ({
     page,
   }) => {
     // 1. Sign in as Owner / Principal
+    const owner = await seedFreshOwner('circular-e2e');
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
