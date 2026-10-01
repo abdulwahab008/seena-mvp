@@ -2364,6 +2364,35 @@ export const maintenanceSchema = z
 export type MaintenanceInput = z.input<typeof maintenanceSchema>;
 export const vendorSchema = z.object({ name: z.string().trim().min(1, 'Enter the vendor name').max(200), phone: z.string().trim().max(30).optional() });
 export const capitalisationThresholdSchema = z.object({ thresholdPkr: z.coerce.number({ message: 'Enter the threshold' }).min(0, 'Threshold cannot be negative') });
+// FR-R06: purchase requisitions, approval thresholds and goods receipts.
+export const APPROVER_ROLES = ['principal', 'vice_principal', 'accountant', 'hr_manager', 'owner'] as const;
+export const requisitionLineSchema = z.object({
+  itemId: z.string().uuid().optional().or(z.literal('')),
+  description: z.string().trim().min(1, 'Describe each item').max(300),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+  estUnitCostPkr: z.coerce.number({ message: 'Enter the estimated unit cost' }).min(0, 'Cost cannot be negative'),
+});
+export const requisitionSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  departmentId: z.string().uuid().optional().or(z.literal('')),
+  justification: z.string().trim().min(1, 'Explain why this is needed').max(2000),
+  lines: z.array(requisitionLineSchema).min(1, 'Add at least one item'),
+});
+export type RequisitionInput = z.input<typeof requisitionSchema>;
+export const thresholdTiersSchema = z.object({
+  campusId: z.string().uuid().optional().or(z.literal('')),
+  tiers: z
+    .array(z.object({ uptoPkr: z.coerce.number().positive('Limits must be more than zero').optional().or(z.literal('')), role: z.enum(APPROVER_ROLES, { message: 'Choose an approver' }) }))
+    .min(1, 'Add at least one tier')
+    .max(6),
+});
+export type ThresholdTiersInput = z.input<typeof thresholdTiersSchema>;
+export const goodsReceiptSchema = z.object({
+  poId: z.string().uuid('Choose a purchase order'),
+  storeId: z.string().uuid('Choose a store'),
+  lines: z.array(z.object({ poLineId: z.string().uuid(), qtyReceived: z.coerce.number().positive() })).min(1, 'Enter a received quantity for at least one line'),
+});
+export type GoodsReceiptInput = z.input<typeof goodsReceiptSchema>;
 export const assetDisposalSchema = z.object({
   assetId: z.string().uuid('Choose an asset'),
   disposedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the disposal date'),
