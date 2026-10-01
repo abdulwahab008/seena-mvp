@@ -2819,3 +2819,219 @@ export const libraryWriteOffSchema = z
   })
   .refine((v) => v.basis !== 'market' || !!v.marketValuePkr, { message: 'Enter the market value for this basis', path: ['marketValuePkr'] });
 export type LibraryWriteOffInput = z.input<typeof libraryWriteOffSchema>;
+// ── Transport and hostel (FR-P01..P06, FR-Q01..Q06) ────────────────────────
+// Forms post strings; these schemas shape them before the RPC. Every business
+// rule is enforced in the database, not here.
+const tuuid = z.string().uuid('Invalid selection');
+const toptUuid = z.string().optional().transform((v) => (v && v.length > 0 ? v : undefined)).pipe(z.string().uuid('Invalid selection').optional());
+const tdate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date');
+const toptDate = z.string().optional().transform((v) => (v && v.length > 0 ? v : undefined)).pipe(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date').optional());
+const toptTime = z.string().optional().transform((v) => (v && v.length > 0 ? v : undefined)).pipe(z.string().regex(/^\d{2}:\d{2}$/, 'Use HH:MM').optional());
+const toptText = (max: number) => z.string().trim().max(max, `At most ${max} characters`).optional().transform((v) => (v && v.length > 0 ? v : undefined));
+const toptNumber = (label: string) =>
+  z.string().optional().transform((v) => (v && v.trim().length > 0 ? v.trim() : undefined)).pipe(z.string().regex(/^-?\d+(\.\d+)?$/, `Enter a valid ${label}`).transform(Number).optional());
+const trupees = (label: string) =>
+  z.string().trim().regex(/^\d+(\.\d{1,2})?$/, `Enter ${label} in rupees`).transform(Number).refine((n) => n > 0, `${label} must be above zero`);
+const tint = (label: string, min = 0, max = 10000) =>
+  z.string().trim().regex(/^\d+$/, `Enter ${label} as a whole number`).transform(Number).refine((n) => n >= min && n <= max, `${label} must be between ${min} and ${max}`);
+const tbool = z.string().optional().transform((v) => v === 'true' || v === 'on');
+
+// FR-P01
+export const transportRouteSchema = z.object({
+  campusId: tuuid,
+  code: z.string().trim().min(1, 'Enter a route code').max(20),
+  name: z.string().trim().min(1, 'Enter a route name').max(120),
+  shift: z.enum(['morning', 'afternoon'], { message: 'Choose a shift' }),
+  active: tbool,
+});
+export const fareSlabSchema = z.object({
+  campusId: tuuid,
+  code: z.string().trim().min(1, 'Enter a slab code').max(20),
+  name: z.string().trim().min(1, 'Enter a slab name').max(80),
+  amount: trupees('Monthly fare'),
+  effectiveFrom: tdate,
+});
+export const transportStopSchema = z.object({
+  routeId: tuuid,
+  name: z.string().trim().min(1, 'Enter a stop name').max(120),
+  nameUr: toptText(120),
+  lat: toptNumber('latitude'),
+  lng: toptNumber('longitude'),
+  pickupTime: toptTime,
+  dropTime: toptTime,
+  fareSlabId: toptUuid,
+  seq: toptNumber('position'),
+});
+// FR-P02
+export const transportVehicleSchema = z.object({
+  campusId: tuuid,
+  regNo: z.string().trim().min(3, 'Enter the registration number').max(20),
+  make: toptText(60),
+  model: toptText(60),
+  seatCapacity: tint('Seat capacity', 1, 100),
+  fuel: z.enum(['petrol', 'diesel', 'cng', 'lpg', 'hybrid', 'electric']),
+  ownership: z.enum(['owned', 'contracted']),
+  active: tbool,
+});
+export const vehicleDocumentSchema = z.object({
+  vehicleId: tuuid,
+  docType: z.enum(['permit', 'fitness', 'token_tax', 'insurance'], { message: 'Choose a document type' }),
+  docNo: toptText(60),
+  issuedOn: toptDate,
+  expiresOn: tdate,
+  filePath: toptText(300),
+  mandatory: tbool,
+});
+export const vehicleOverrideSchema = z.object({
+  vehicleId: tuuid,
+  from: tdate,
+  to: tdate,
+  reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(500),
+});
+export const tokenTaxSettingSchema = z.object({ mandatory: tbool });
+// FR-P03
+export const transportCrewSchema = z.object({
+  campusId: tuuid,
+  fullName: z.string().trim().min(2, 'Enter the full name').max(120),
+  cnic: z.string().trim().regex(/^\d{5}-?\d{7}-?\d$/, 'CNIC must be 13 digits, e.g. 35202-1234567-1'),
+  crewRole: z.enum(['driver', 'conductor', 'attendant'], { message: 'Choose a role' }),
+  phone: toptText(20),
+  licenceNo: toptText(40),
+  licenceClass: z.enum(['LTV', 'HTV', 'PSV']).optional().or(z.literal('').transform(() => undefined)),
+  licenceExpiresOn: toptDate,
+  policeVerifiedOn: toptDate,
+  bloodGroup: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']).optional().or(z.literal('').transform(() => undefined)),
+});
+export const assignTripSchema = z.object({
+  routeId: tuuid,
+  vehicleId: tuuid,
+  driverId: tuuid,
+  conductorId: toptUuid,
+  attendantId: toptUuid,
+  from: tdate,
+  to: toptDate,
+  overrideReason: toptText(500),
+});
+// FR-P04
+const grNumber = z.string().trim().min(1, 'Enter the GR number').max(40);
+export const allocateTransportSchema = z.object({
+  grNumber,
+  pickupStopId: tuuid,
+  dropStopId: toptUuid,
+  from: tdate,
+});
+export const transportWaitlistSchema = z.object({ grNumber, routeId: tuuid });
+export const transportProrateSchema = z.object({ mode: z.enum(['prorata', 'full_month'], { message: 'Choose a policy' }) });
+export const postTransportChargesSchema = z.object({ month: tdate });
+// FR-P05
+export const boardingEventSchema = z.object({
+  device_event_id: tuuid,
+  trip_leg_id: tuuid,
+  student_id: tuuid,
+  state: z.enum(['boarded', 'absent', 'dropped']),
+  marked_at: z.string().datetime({ message: 'Invalid time' }),
+});
+export const boardingBatchSchema = z.array(boardingEventSchema).min(1, 'Nothing to submit').max(300);
+export const openLegSchema = z.object({ routeId: tuuid, legType: z.enum(['pickup', 'drop'], { message: 'Choose pickup or drop' }) });
+// FR-Q01
+const roomTypeEnum = z.enum(['single', 'double', 'triple', 'quad', 'dorm'], { message: 'Choose a room type' });
+export const hostelBlockSchema = z.object({
+  campusId: tuuid,
+  code: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,6}$/, 'Code is 1 to 6 letters or digits'),
+  name: z.string().trim().min(1, 'Enter a block name').max(80),
+  gender: z.enum(['male', 'female'], { message: 'Choose boys or girls' }),
+  rooms: tint('Number of rooms', 1, 400),
+  bedsPerRoom: tint('Beds per room', 1, 40),
+  roomsPerFloor: tint('Rooms per floor', 1, 99).optional().or(z.literal('').transform(() => undefined)),
+  roomType: roomTypeEnum,
+  wardenStaffId: toptUuid,
+});
+export const hostelRoomUpdateSchema = z.object({
+  roomId: tuuid,
+  bedCount: tint('Bed count', 1, 40),
+  roomType: roomTypeEnum,
+  status: z.enum(['in_service', 'out_of_service']),
+});
+export const hostelAddRoomSchema = z.object({
+  blockId: tuuid,
+  roomNo: z.string().trim().regex(/^[A-Za-z0-9]{1,8}$/, 'Room number is letters and digits'),
+  bedCount: tint('Bed count', 1, 40),
+  roomType: roomTypeEnum,
+  floor: tint('Floor', 0, 30).optional().or(z.literal('').transform(() => undefined)),
+});
+export const hostelBlockUpdateSchema = z.object({ blockId: tuuid, name: z.string().trim().min(1).max(80), wardenStaffId: toptUuid, active: tbool });
+// FR-Q02
+export const hostelAllocateSchema = z.object({
+  grNumber: z.string().trim().min(1, 'Enter the GR number').max(40),
+  bedCode: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,6}-[A-Z0-9]{1,8}-B\d{1,2}$/, 'Bed code looks like IQ-105-B3'),
+  from: tdate,
+  to: toptDate,
+  reason: toptText(300),
+});
+// FR-Q03
+const tlocal = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, 'Choose a date and time');
+export const issueGatePassSchema = z
+  .object({
+    grNumber: z.string().trim().min(1, 'Enter the GR number').max(40),
+    purpose: z.string().trim().min(3, 'Enter the purpose').max(200),
+    destination: toptText(200),
+    departsAt: tlocal,
+    expectedBackAt: tlocal,
+    collectorName: z.string().trim().min(2, 'Enter the name of the person collecting').max(120),
+    collectorCnic: z.string().trim().regex(/^\d{5}-?\d{7}-?\d$/, 'CNIC must be 13 digits, e.g. 35202-1234567-1'),
+    overrideReason: toptText(500),
+  })
+  .refine((v) => v.expectedBackAt > v.departsAt, { message: 'The return time must be after the departure', path: ['expectedBackAt'] });
+export const cancelGatePassSchema = z.object({ passId: tuuid, reason: z.string().trim().min(5, 'Give a reason').max(300) });
+// FR-Q04
+export const visitorEntrySchema = z.object({
+  studentId: tuuid,
+  visitId: tuuid,
+  visitorName: z.string().trim().min(2, 'Enter the visitor\'s name').max(120),
+  visitorCnic: z.string().trim().regex(/^\d{5}-?\d{7}-?\d$/, 'CNIC must be 13 digits, e.g. 35202-1234567-1'),
+  relationship: toptText(60),
+  phone: toptText(20),
+  photoPath: toptText(300),
+});
+export const hostelSettingsSchema = z.object({
+  visitingClose: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM'),
+  retentionDays: tint('Retention days', 7, 3650),
+  messNoticeHours: tint('Notice hours', 0, 720),
+});
+// FR-Q05
+const messSlot = z.object({
+  day: z.number().int().min(1).max(7),
+  meal: z.enum(['breakfast', 'lunch', 'dinner']),
+  items: z.string().trim().max(300),
+  items_ur: z.string().trim().max(300).optional(),
+});
+export const saveMessMenuSchema = z.object({
+  campusId: tuuid,
+  weekStart: tdate,
+  slots: z.string().transform((v, ctx) => {
+    try {
+      return z.array(messSlot).max(21).parse(JSON.parse(v));
+    } catch {
+      ctx.addIssue({ code: 'custom', message: 'The menu could not be read' });
+      return z.NEVER;
+    }
+  }),
+});
+export const publishMessMenuSchema = z.object({ campusId: tuuid, weekStart: tdate });
+export const messOffSchema = z
+  .object({ studentId: toptUuid, grNumber: toptText(40), from: tdate, to: tdate, reason: toptText(300) })
+  .refine((v) => v.to >= v.from, { message: 'The last day cannot be before the first day', path: ['to'] })
+  .refine((v) => v.studentId || v.grNumber, { message: 'Enter the GR number', path: ['grNumber'] });
+// FR-Q06
+export const hostelTariffSchema = z.object({
+  campusId: tuuid,
+  roomType: z.enum(['single', 'double', 'triple', 'quad', 'dorm'], { message: 'Choose a room type' }),
+  monthly: trupees('Monthly room fee'),
+  messRate: z.string().trim().regex(/^\d+(\.\d{1,2})?$/, 'Enter the mess rate per day in rupees').transform(Number),
+  deposit: z.string().trim().regex(/^\d+(\.\d{1,2})?$/, 'Enter the deposit in rupees (0 for none)').transform(Number),
+  effectiveFrom: tdate,
+});
+export const postHostelChargesSchema = z.object({ month: tdate });
+export const hostelDepositRefundSchema = z.object({ depositId: tuuid, voucherNo: z.string().trim().min(3, 'Enter the refund voucher number').max(40) });
+// ── end of transport and hostel schemas ──
+void [toptDate, tint];
