@@ -161,7 +161,7 @@ test.describe('FR-N03 & FR-N04: Parent Portal Attendance and Fees', () => {
 
     // 9. Test Fees Page (FR-N04)
     await page.goto('/portal/fees');
-    await expect(page.getByRole('heading', { level: 2 })).toContainText('Fee Dues & Challans');
+    await expect(page.getByRole('heading', { level: 2 })).toContainText('Fee Dues & Billing');
     await expect(page.getByTestId('fees-outstanding-balance')).toContainText('6,000');
     await expect(page.locator('[data-testid="challan-card-CH-PORTAL-E2E-1"]')).toBeVisible();
 

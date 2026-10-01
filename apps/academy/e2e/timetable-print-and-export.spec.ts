@@ -177,7 +177,7 @@ test('a principal exports section, teacher and master-grid timetables as real PD
   await expect(sectionExport.result).toContainText(`${sectionCount} pages`);
 
   // ── AC4: the Nastaliq face is embedded, with zero missing glyphs ─────
-  expect(pdfBaseFonts(sectionExport.body)).toContain('NotoNastaliqUrdu');
+  expect(pdfBaseFonts(sectionExport.body).some((f) => f.startsWith('NotoNastaliqUrdu'))).toBe(true);
   await expect(sectionExport.result).toContainText('0 missing glyphs');
 
   // ── AC2: one page per teacher, same A4 portrait sheet ────────────────
