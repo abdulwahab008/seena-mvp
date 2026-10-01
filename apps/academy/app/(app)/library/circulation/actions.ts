@@ -36,3 +36,15 @@ export async function issueCopy(barcode: string, borrowerId: string): Promise<Is
   revalidatePath('/library/circulation');
   return { error: null, loan: { title: r.title, dueOn: r.due_on, borrower: r.borrower_name, openLoans: r.open_loans, maxLoans: r.max_loans, accessionNo: r.accession_no } };
 }
+
+export type ReturnResult = { error: string | null; summary?: { title: string; borrower: string; fine: number; daysLate: number; copyStatus: string } };
+
+export async function returnCopy(barcode: string, condition: 'good' | 'damaged'): Promise<ReturnResult> {
+  if (barcode.trim() === '') return { error: 'Scan the barcode.' };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('return_copy', { p_barcode: barcode.trim(), p_condition: condition });
+  if (error) return { error: describe(error.message, error.details) };
+  const r = data as unknown as { title: string; borrower_name: string; fine_amount: number; days_late: number; copy_status: string };
+  revalidatePath('/library/circulation');
+  return { error: null, summary: { title: r.title, borrower: r.borrower_name, fine: Number(r.fine_amount), daysLate: r.days_late, copyStatus: r.copy_status } };
+}
