@@ -2361,3 +2361,49 @@ export const saveQuestionMarksSchema = z.object({
 });
 export type SaveQuestionMarksInput = z.infer<typeof saveQuestionMarksSchema>;
 export const masterySheetSchema = z.object({ enrolmentId: z.string().uuid() });
+
+// FR-T12: board examination form export and fee reconciliation. Mirrors
+// supabase/migrations/20260802400700_board_exam_form_export.sql. Money is paisa;
+// the form takes rupees and converts once, here.
+export const BOARD_CODES = ['FBISE', 'PUNJAB', 'SINDH', 'KPK', 'BALOCHISTAN', 'AKU_EB', 'CAMBRIDGE'] as const;
+export const CANDIDATE_CATEGORIES = ['regular', 'improvement', 'private'] as const;
+export const REGISTRATION_ELECTIONS = ['compulsory', 'elective', 'improvement'] as const;
+export const boardFeeScheduleSchema = z
+  .object({
+    boardCode: z.enum(BOARD_CODES, { message: 'Choose a board' }),
+    sessionYear: z.number({ message: 'Enter the session year' }).int().min(2000).max(2100),
+    candidateCategory: z.enum(CANDIDATE_CATEGORIES, { message: 'Choose a category' }),
+    perCandidateRupees: z.number({ message: 'Enter the per-candidate fee' }).min(0, 'Cannot be negative').max(10_000_000),
+    perPaperRupees: z.number({ message: 'Enter the per-paper fee' }).min(0, 'Cannot be negative').max(10_000_000),
+    effectiveFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the effective date'),
+    note: z.string().trim().max(300).optional(),
+  })
+  .refine((v) => v.perCandidateRupees > 0 || v.perPaperRupees > 0, { message: 'A schedule must charge something', path: ['perCandidateRupees'] })
+  .transform((v) => ({ ...v, perCandidatePaisa: rupeesToPaisa(v.perCandidateRupees), perPaperPaisa: rupeesToPaisa(v.perPaperRupees) }));
+export type BoardFeeScheduleInput = z.input<typeof boardFeeScheduleSchema>;
+export const examRegistrationSchema = z.object({
+  studentId: z.string().uuid('Choose a student'),
+  sessionId: z.string().uuid(),
+  boardCode: z.enum(BOARD_CODES, { message: 'Choose a board' }),
+  sessionYear: z.number({ message: 'Enter the session year' }).int().min(2000).max(2100),
+  sessionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the exam session date'),
+  candidateCategory: z.enum(CANDIDATE_CATEGORIES, { message: 'Choose a category' }),
+  groupCode: z.string().trim().max(30).optional(),
+  rollNo: z.string().trim().max(30).optional(),
+  subjects: z
+    .array(
+      z.object({
+        subjectCode: z.string().trim().min(1, 'Enter the subject code').max(20),
+        election: z.enum(REGISTRATION_ELECTIONS),
+      }),
+    )
+    .min(1, 'Add at least one subject'),
+});
+export type ExamRegistrationInput = z.infer<typeof examRegistrationSchema>;
+export const boardExamExportSchema = z.object({
+  campusId: z.string().uuid(),
+  sessionId: z.string().uuid(),
+  boardCode: z.enum(BOARD_CODES, { message: 'Choose a board' }),
+  sessionYear: z.number({ message: 'Enter the session year' }).int().min(2000).max(2100),
+});
+export type BoardExamExportInput = z.infer<typeof boardExamExportSchema>;
