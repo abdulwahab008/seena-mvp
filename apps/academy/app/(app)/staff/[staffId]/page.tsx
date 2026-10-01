@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabase/server';
-import { getCurrentActor, one } from '@/lib/hr/current-role';
+import { getCurrentActor, isHrWriter, one } from '@/lib/hr/current-role';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CorrectionForm, IssueForm, ReinstateForm } from './discipline-forms';
+import { InitiateExitForm } from '../exits/exit-forms';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,6 +68,10 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
   const showDiscipline = isReader || records.length > 0;
   const supersededIds = new Set(records.filter((r) => r.supersedes_id).map((r) => r.supersedes_id as string));
 
+  // FR-D16: an exit in progress (or the chance to start one) for HR.
+  const canHr = isHrWriter(actor?.role);
+  const { data: openExit } = canHr ? await supabase.from('staff_exit').select('id, status, exit_type, last_working_date').eq('staff_id', staffId).neq('status', 'completed').maybeSingle() : { data: null };
+
   const designation = one(staff.designation)?.name_en;
   const department = one(staff.department)?.name_en;
   const complianceStatus = compliance?.compliance_status ?? null;
@@ -102,6 +107,26 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
           </p>
         </CardContent>
       </Card>
+
+      {canHr && staff.employment_status !== 'exited' && (
+        <Card data-testid="exit-card">
+          <CardHeader>
+            <CardTitle className="text-base">Leaving the school</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {openExit ? (
+              <p className="text-sm">
+                An exit is in progress ({openExit.exit_type.replace('_', ' ')}, last day {openExit.last_working_date}).{' '}
+                <Link href={`/staff/exits/${openExit.id}`} className="underline" data-testid="open-exit-link">
+                  Open the clearance checklist
+                </Link>
+              </p>
+            ) : (
+              <InitiateExitForm staffId={staffId} />
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {canIssue && (
         <Card>
