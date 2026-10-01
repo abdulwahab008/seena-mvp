@@ -163,6 +163,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/datesheet', label: 'Datesheet' },
       { href: '/exams/invigilation', label: 'Invigilation' },
       { href: '/exams/seating', label: 'Seating Plans' },
+      { href: '/exams/papers', label: 'Question Papers' },
     ],
   },
   {

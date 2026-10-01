@@ -2298,3 +2298,34 @@ export const invigilationDutySchema = z.object({
   staffUserId: z.string().uuid({ message: 'Choose a staff member' }),
 });
 export type InvigilationDutyInput = z.infer<typeof invigilationDutySchema>;
+
+// FR-I05: board patterns and paper generation requests.
+export const BOARD_CODES = ['FBISE', 'PUNJAB', 'SINDH', 'KPK', 'BALOCHISTAN', 'AKU_EB', 'CAMBRIDGE'] as const;
+const sectionCount = z.number({ message: 'Enter a number' }).int('Whole numbers only').min(0).max(200);
+const sectionMarks = z.number({ message: 'Enter a number' }).int('Whole marks only').min(0).max(100);
+export const boardPatternSchema = z
+  .object({
+    code: z.string().trim().min(1, 'Enter a pattern code').max(40),
+    name: z.string().trim().min(1, 'Enter a pattern name').max(120),
+    board: z.enum(BOARD_CODES, { message: 'Choose a board' }),
+    mcqCount: sectionCount,
+    mcqMarks: sectionMarks,
+    shortCount: sectionCount,
+    shortMarks: sectionMarks,
+    longCount: sectionCount,
+    longMarks: sectionMarks,
+  })
+  .refine((v) => v.mcqCount * v.mcqMarks + v.shortCount * v.shortMarks + v.longCount * v.longMarks > 0, { message: 'The pattern needs at least one question', path: ['mcqCount'] });
+export type BoardPatternInput = z.infer<typeof boardPatternSchema>;
+export const paperRequestSchema = z.object({
+  examSubjectId: z.string().uuid({ message: 'Choose a paper' }),
+  boardPatternId: z.string().uuid({ message: 'Choose a pattern' }),
+  chaptersText: z.string().trim().min(1, 'Enter at least one chapter'),
+  totalMarks: z.number({ message: 'Enter the total marks' }).int('Whole marks only').min(1).max(1000),
+  setCount: z.number({ message: 'Enter the number of sets' }).int().min(1).max(4),
+});
+export type PaperRequestFormInput = z.infer<typeof paperRequestSchema>;
+/** "Ch.1, Ch.2; Ch.3" -> ["Ch.1", "Ch.2", "Ch.3"] */
+export function parseChapters(text: string): string[] {
+  return [...new Set(text.split(/[,;\n]/).map((c) => c.trim()).filter(Boolean))];
+}
