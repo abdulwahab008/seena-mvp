@@ -2309,6 +2309,27 @@ export const issueLeavingCertificateSchema = z.object({
 });
 export type IssueLeavingCertificateInput = z.infer<typeof issueLeavingCertificateSchema>;
 
+// FR-T06: bonafide certificate request. "Other" needs a real justification (15+ characters), matching the table's CHECK.
+export const BONAFIDE_PURPOSES = ['passport', 'bank', 'embassy/visa', 'school_admission', 'scholarship', 'other'] as const;
+export const certificateRequestSchema = z
+  .object({
+    studentId: z.string().uuid('Choose a child'),
+    purpose: z.enum(BONAFIDE_PURPOSES, { message: 'Choose what the certificate is for' }),
+    justification: z.string().trim().max(500).optional(),
+  })
+  .refine((v) => v.purpose !== 'other' || (v.justification ?? '').length >= 15, {
+    message: 'Please explain in at least 15 characters',
+    path: ['justification'],
+  });
+export type CertificateRequestInput = z.input<typeof certificateRequestSchema>;
+export const certificateRequestDecisionSchema = z.object({
+  requestId: z.string().uuid(),
+  decision: z.enum(['approve', 'reject']),
+  reason: z.string().trim().max(500).optional(),
+  language: z.enum(['en', 'ur']).default('en'),
+});
+export type CertificateRequestDecisionInput = z.input<typeof certificateRequestDecisionSchema>;
+
 // FR-R03: fixed asset register and depreciation. Rupees on the screen, paisa in the database.
 export const ASSET_CATEGORIES = ['furniture', 'it', 'lab', 'vehicle', 'building', 'other'] as const;
 export const assetSchema = z
