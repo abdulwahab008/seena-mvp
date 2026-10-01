@@ -5,6 +5,12 @@ import { randomUUID } from 'node:crypto';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// The billing period is today's month, not a hardcoded 2026-08: the fee plan's
+// effective_from defaults to current_date at enrol time, so a period that ends
+// before "today" finds zero applicable charges once real time drifts past it
+// (same fix as arrears-carry-forward.spec.ts).
+const BILLING_PERIOD = new Date().toISOString().slice(0, 7);
+
 async function seedOwnerWithPublishedStructure() {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const runId = randomUUID().slice(0, 8);
@@ -110,7 +116,7 @@ test('an accountant collects a cash payment at the counter and prints a receipt,
 
   await page.goto('/fees/challans');
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('challan-period-input').fill('2026-08');
+  await page.getByTestId('challan-period-input').fill(BILLING_PERIOD);
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
 
