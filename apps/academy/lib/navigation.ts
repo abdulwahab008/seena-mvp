@@ -109,6 +109,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/staff/exits', label: 'Exits' },
       { href: '/staff/certificates', label: 'Certificates' },
       { href: '/staff/workload', label: 'Teacher Workload' },
+      { href: '/staff/appraisals', label: 'Appraisals' },
       { href: '/leave', label: 'Leave' },
       { href: '/academic-setup/competency', label: 'Teacher Competency' },
       { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects' },
