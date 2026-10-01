@@ -87,7 +87,7 @@ export default async function HostelAllocationsPage({ searchParams }: { searchPa
                   <td>{one(r.bed)?.bed_code}</td>
                   <td>{r.starts_on}</td>
                   <td>{r.ends_on ?? 'open'}</td>
-                  <td>{!r.ends_on && <ActionButton label="End today" variant="ghost" confirm="End this student's hostel stay tonight?" action={() => vacate(r.id)} />}</td>
+                  <td>{!r.ends_on && <ActionButton label="End today" variant="ghost" confirm="End this student's hostel stay tonight?" action={vacate} args={[r.id]} />}</td>
                 </tr>
               ))}
             </tbody>

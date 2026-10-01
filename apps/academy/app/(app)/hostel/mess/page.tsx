@@ -97,8 +97,8 @@ export default async function MessPage({ searchParams }: { searchParams: Promise
                   <td className="space-x-1">
                     {o.status === 'pending' && (
                       <>
-                        <ActionButton label="Approve" testId={`approve-${one(o.student)?.gr_number}`} action={() => decideAway(o.id, true)} />
-                        <ActionButton label="Reject" variant="ghost" action={() => decideAway(o.id, false)} />
+                        <ActionButton label="Approve" testId={`approve-${one(o.student)?.gr_number}`} action={decideAway} args={[o.id, true]} />
+                        <ActionButton label="Reject" variant="ghost" action={decideAway} args={[o.id, false]} />
                       </>
                     )}
                   </td>
