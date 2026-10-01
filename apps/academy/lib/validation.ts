@@ -2273,3 +2273,23 @@ export const overridePromotionSchema = z.object({
   reason: z.string().trim().min(5, 'Give a reason of at least 5 characters').max(500),
 });
 export type OverridePromotionInput = z.infer<typeof overridePromotionSchema>;
+
+// FR-J11: report card + next-cycle challan packet. Mirrors
+// supabase/migrations/20260802400300_report_card_packet.sql.
+const billingPeriodField = z
+  .string()
+  .regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Choose a month')
+  .optional()
+  .or(z.literal(''));
+export const packetPlanSchema = z.object({
+  examTermId: z.string().uuid(),
+  sectionId: z.string().uuid(),
+  billingPeriod: billingPeriodField,
+});
+export type PacketPlanInput = z.infer<typeof packetPlanSchema>;
+export const assemblePacketSchema = z.object({
+  enrolmentId: z.string().uuid(),
+  examTermId: z.string().uuid(),
+  billingPeriod: billingPeriodField,
+});
+export type AssemblePacketInput = z.infer<typeof assemblePacketSchema>;
