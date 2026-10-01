@@ -59,7 +59,7 @@ export default async function PortalPtmPage({ searchParams }: { searchParams: Pr
               {t(lang, 'ptm.bookingCloses', { time: cutoff })}
             </p>
           </div>
-          <SlotBoard key={`${child.id}-${event.id}-${slots.map((s) => `${s.slot_id}${s.available}${s.mine}`).join('')}`} studentId={child.id} initial={slots} myBookings={myBookings} lang={lang} />
+          <SlotBoard key={`${child.id}-${event.id}`} studentId={child.id} initial={slots} myBookings={myBookings} lang={lang} />
         </>
       )}
     </div>
