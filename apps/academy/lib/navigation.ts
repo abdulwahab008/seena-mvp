@@ -178,6 +178,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/counter', label: 'Cash Counter' },
       { href: '/fees/defaulters', label: 'Defaulters' },
       { href: '/fees/reminders', label: 'Reminders' },
+      { href: '/fees/settlements', label: 'Withdrawal Settlements' },
       { href: '/fees/concessions', label: 'Concessions' },
       { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
       { href: '/fees/late-fee-rules', label: 'Late Fee Rules' },

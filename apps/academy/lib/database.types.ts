@@ -9001,6 +9001,7 @@ export type Database = {
           name_en: string
           name_ur: string
           tenant_id: string
+          withdrawal_treatment: string | null
         }
         Insert: {
           carry_forward_on_arrears?: boolean
@@ -9016,6 +9017,7 @@ export type Database = {
           name_en: string
           name_ur: string
           tenant_id: string
+          withdrawal_treatment?: string | null
         }
         Update: {
           carry_forward_on_arrears?: boolean
@@ -9031,6 +9033,7 @@ export type Database = {
           name_en?: string
           name_ur?: string
           tenant_id?: string
+          withdrawal_treatment?: string | null
         }
         Relationships: [
           {
@@ -10031,6 +10034,200 @@ export type Database = {
             foreignKeyName: "fee_reminder_rule_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_settlement: {
+        Row: {
+          basis: string
+          campus_id: string
+          created_at: string
+          credit_adjustment_paisa: number
+          disbursed_at: string | null
+          disbursed_by: string | null
+          enrolment_id: string
+          id: string
+          instrument_ref: string | null
+          instrument_type: string | null
+          leaving_date: string
+          ledger_balance_paisa: number
+          net_refund_paisa: number
+          proposal_note: string | null
+          proposed_by: string
+          remaining_dues_paisa: number
+          requires_owner: boolean
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          basis: string
+          campus_id: string
+          created_at?: string
+          credit_adjustment_paisa: number
+          disbursed_at?: string | null
+          disbursed_by?: string | null
+          enrolment_id: string
+          id?: string
+          instrument_ref?: string | null
+          instrument_type?: string | null
+          leaving_date: string
+          ledger_balance_paisa: number
+          net_refund_paisa: number
+          proposal_note?: string | null
+          proposed_by: string
+          remaining_dues_paisa: number
+          requires_owner: boolean
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          basis?: string
+          campus_id?: string
+          created_at?: string
+          credit_adjustment_paisa?: number
+          disbursed_at?: string | null
+          disbursed_by?: string | null
+          enrolment_id?: string
+          id?: string
+          instrument_ref?: string | null
+          instrument_type?: string | null
+          leaving_date?: string
+          ledger_balance_paisa?: number
+          net_refund_paisa?: number
+          proposal_note?: string | null
+          proposed_by?: string
+          remaining_dues_paisa?: number
+          requires_owner?: boolean
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_settlement_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_settlement_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "fee_settlement_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_settlement_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "mv_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_settlement_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_settlement_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_settlement_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "fee_settlement_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_settlement_approval: {
+        Row: {
+          decided_at: string
+          decided_by: string
+          decision: string
+          id: string
+          note: string | null
+          role: string
+          settlement_id: string
+          tenant_id: string
+        }
+        Insert: {
+          decided_at?: string
+          decided_by: string
+          decision: string
+          id?: string
+          note?: string | null
+          role: string
+          settlement_id: string
+          tenant_id: string
+        }
+        Update: {
+          decided_at?: string
+          decided_by?: string
+          decision?: string
+          id?: string
+          note?: string | null
+          role?: string
+          settlement_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_settlement_approval_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "fee_settlement"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_settlement_approval_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_settlement_policy: {
+        Row: {
+          owner_threshold_paisa: number
+          tenant_id: string
+        }
+        Insert: {
+          owner_threshold_paisa?: number
+          tenant_id: string
+        }
+        Update: {
+          owner_threshold_paisa?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_settlement_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
@@ -26789,6 +26986,14 @@ export type Database = {
         Args: { p_campus_id: string; p_month: number; p_year: number }
         Returns: number
       }
+      compute_withdrawal_settlement: {
+        Args: {
+          p_basis?: string
+          p_enrolment_id: string
+          p_leaving_date: string
+        }
+        Returns: Json
+      }
       confirm_branding_asset: {
         Args: { p_asset_id: string }
         Returns: undefined
@@ -27295,6 +27500,10 @@ export type Database = {
         Args: { p_approve: boolean; p_line_id: string }
         Returns: undefined
       }
+      decide_fee_settlement: {
+        Args: { p_approve: boolean; p_note?: string; p_settlement_id: string }
+        Returns: string
+      }
       declare_competency: {
         Args: {
           p_max_class_ordinal: number
@@ -27330,6 +27539,14 @@ export type Database = {
       deprovision_on_tc: { Args: never; Returns: number }
       detect_sibling_groups: {
         Args: { p_campus_id: string; p_session_id: string }
+        Returns: Json
+      }
+      disburse_fee_settlement: {
+        Args: {
+          p_instrument_ref?: string
+          p_instrument_type: string
+          p_settlement_id: string
+        }
         Returns: Json
       }
       dispatch_absentee_notifications: {
@@ -28699,6 +28916,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      propose_fee_settlement: {
+        Args: {
+          p_basis: string
+          p_enrolment_id: string
+          p_leaving_date: string
+          p_note?: string
+        }
+        Returns: string
+      }
       provision_student_accounts: {
         Args: { p_campus_id?: string }
         Returns: {
@@ -29531,6 +29757,10 @@ export type Database = {
         Args: { p_fee_head_id: string; p_priority: number }
         Returns: undefined
       }
+      set_fee_head_withdrawal_treatment: {
+        Args: { p_fee_head_id: string; p_treatment: string }
+        Returns: undefined
+      }
       set_fee_policy: {
         Args: {
           p_allow_negative_net?: boolean
@@ -29617,6 +29847,10 @@ export type Database = {
       }
       set_section_stream: {
         Args: { p_section_id: string; p_stream_id: string }
+        Returns: undefined
+      }
+      set_settlement_owner_threshold: {
+        Args: { p_paisa: number }
         Returns: undefined
       }
       set_sibling_discount_scheme: {

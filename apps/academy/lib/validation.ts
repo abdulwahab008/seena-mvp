@@ -2079,3 +2079,21 @@ export const exportRequestSchema = z.object({
   reason: z.string().trim().max(500).optional(),
 });
 export type ExportRequestInput = z.infer<typeof exportRequestSchema>;
+
+// FR-K27: withdrawal settlement.
+export const proposeSettlementSchema = z.object({
+  grNumber: z.string().trim().min(1, 'Enter the GR number').max(30),
+  leavingDate: z.string().min(1, 'Choose the leaving date'),
+  basis: z.enum(['full_month', 'half_month', 'daily']),
+  note: z.string().trim().max(500).optional(),
+});
+export type ProposeSettlementInput = z.infer<typeof proposeSettlementSchema>;
+
+export const disburseSettlementSchema = z
+  .object({
+    settlementId: z.string().uuid(),
+    instrumentType: z.enum(['cash', 'cheque', 'transfer']),
+    instrumentRef: z.string().trim().max(100).optional(),
+  })
+  .refine((v) => v.instrumentType === 'cash' || Boolean(v.instrumentRef), { path: ['instrumentRef'], message: 'A cheque or transfer needs its reference number' });
+export type DisburseSettlementInput = z.infer<typeof disburseSettlementSchema>;
