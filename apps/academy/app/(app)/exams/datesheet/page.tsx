@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope, one } from '@/lib/exams/office-scope';
 import type { SlotWarning } from './actions';
-import { CreateDatesheetForm, HallForm, PublishPanel, RemoveSlotButton, SlotForm, WarningList } from './datesheet-editor';
+import { CreateDatesheetForm, ExamSettingsForm, HallForm, PublishPanel, RemoveSlotButton, SlotForm, WarningList } from './datesheet-editor';
 
 /**
  * FR-I03. Build the datesheet of one exam term. Every save runs the clash
@@ -44,6 +44,12 @@ export default async function DatesheetPage({ searchParams }: { searchParams: Pr
 
   const { data: terms } = await supabase.from('exam_term').select('id, code, name, status').eq('campus_id', campus.id).eq('session_id', scope.session.id).order('sequence');
   const term = (terms ?? []).find((t) => t.id === sp.term) ?? terms?.[0] ?? null;
+
+  const { data: settings } = await supabase
+    .from('exam_settings')
+    .select('jummah_cutoff, invigilation_max_duties, paper_release_offset_minutes, max_moderation_delta, max_moderation_pct')
+    .eq('campus_id', campus.id)
+    .maybeSingle();
 
   const { data: halls } = await supabase.from('exam_hall').select('id, code, name, capacity, rows_count, seats_per_row').eq('campus_id', campus.id).eq('is_active', true).order('code');
 
@@ -202,6 +208,29 @@ export default async function DatesheetPage({ searchParams }: { searchParams: Pr
             </Card>
           )}
         </>
+      )}
+
+      {scope.canWrite && settings && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Exam office settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              Used across the examination screens: the Friday cut-off the datesheet warns against, the invigilation cap, when a published paper unseals, and the moderation limits.
+            </p>
+            <ExamSettingsForm
+              campusId={campus.id}
+              values={{
+                jummahCutoff: settings.jummah_cutoff.slice(0, 5),
+                invigilationMaxDuties: settings.invigilation_max_duties,
+                paperReleaseOffsetMinutes: settings.paper_release_offset_minutes,
+                maxModerationDelta: Number(settings.max_moderation_delta),
+                maxModerationPct: settings.max_moderation_pct === null ? null : Number(settings.max_moderation_pct),
+              }}
+            />
+          </CardContent>
+        </Card>
       )}
 
       {scope.canWrite && (
