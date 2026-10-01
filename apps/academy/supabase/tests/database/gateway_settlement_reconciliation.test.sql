@@ -34,22 +34,22 @@ select public.create_student(:'campus_id'::uuid, 'Online Kid B', '2015-01-02'::d
 select public.enrol_student(:'section_id'::uuid, :'sb'::uuid) as eb \gset
 select public.create_student(:'campus_id'::uuid, 'Online Kid C', '2015-01-03'::date, 'male') as sc \gset
 select public.enrol_student(:'section_id'::uuid, :'sc'::uuid) as ec \gset
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', current_date)::date + 14), false);
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date + 14), false);
 reset role;
 
 select app.fn_post_online_payment(:'tenant_id'::uuid, :'ea'::uuid, 850000::bigint, 'GW-TXN-A') as pay_a \gset
 select app.fn_post_online_payment(:'tenant_id'::uuid, :'eb'::uuid, 850000::bigint, 'GW-TXN-B') as pay_b \gset
 select app.fn_post_online_payment(:'tenant_id'::uuid, :'ec'::uuid, 850000::bigint, 'GW-TXN-C') as pay_c \gset
-update public.fee_payment set value_date = current_date - 4 where id = :'pay_b'::uuid;
-update public.fee_payment set value_date = current_date - 2 where id = :'pay_c'::uuid;
+update public.fee_payment set value_date = (now() at time zone 'Asia/Karachi')::date - 4 where id = :'pay_b'::uuid;
+update public.fee_payment set value_date = (now() at time zone 'Asia/Karachi')::date - 2 where id = :'pay_c'::uuid;
 
 -- ── AC1: 8,500 settled at 8,415 ───────────────────────────────────────────
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', :'acct_uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select public.start_gateway_settlement_import('jazzcash', repeat('a', 64), 'jc-settle-1.csv', 'gateway/x/1.csv') as imp1 \gset
 select public.add_gateway_settlement_lines(:'imp1'::uuid, jsonb_build_array(
-  jsonb_build_object('line_no', 2, 'gateway_txn_id', 'GW-TXN-A', 'settlement_date', current_date, 'gross_paisa', 850000, 'commission_paisa', 8500, 'net_paisa', 841500, 'raw_line', 'a'),
-  jsonb_build_object('line_no', 3, 'gateway_txn_id', 'GW-NOPE', 'settlement_date', current_date, 'gross_paisa', 100000, 'commission_paisa', 1000, 'net_paisa', 99000, 'raw_line', 'b'),
+  jsonb_build_object('line_no', 2, 'gateway_txn_id', 'GW-TXN-A', 'settlement_date', (now() at time zone 'Asia/Karachi')::date, 'gross_paisa', 850000, 'commission_paisa', 8500, 'net_paisa', 841500, 'raw_line', 'a'),
+  jsonb_build_object('line_no', 3, 'gateway_txn_id', 'GW-NOPE', 'settlement_date', (now() at time zone 'Asia/Karachi')::date, 'gross_paisa', 100000, 'commission_paisa', 1000, 'net_paisa', 99000, 'raw_line', 'b'),
   jsonb_build_object('line_no', 4, 'gateway_txn_id', null, 'settlement_date', null, 'gross_paisa', null, 'commission_paisa', null, 'net_paisa', null, 'raw_line', 'garbage', 'error', 'Amount is not a number')
 ), true);
 select is((public.reconcile_gateway_settlement(:'imp1'::uuid) ->> 'matched')::int, 1, 'AC1: the 8,500 payment settled at 8,415 is matched');
@@ -78,9 +78,9 @@ select lives_ok($$ select public.start_gateway_settlement_import('easypaisa', re
 -- ── gross mismatch, already settled, zero commission, bad arithmetic ──────
 select public.start_gateway_settlement_import('jazzcash', repeat('b', 64), 'jc-settle-2.csv', 'gateway/x/4.csv') as imp2 \gset
 select public.add_gateway_settlement_lines(:'imp2'::uuid, jsonb_build_array(
-  jsonb_build_object('line_no', 2, 'gateway_txn_id', 'GW-TXN-A', 'settlement_date', current_date, 'gross_paisa', 850000, 'commission_paisa', 8500, 'net_paisa', 841500, 'raw_line', 'a again'),
-  jsonb_build_object('line_no', 3, 'gateway_txn_id', 'GW-TXN-B', 'settlement_date', current_date, 'gross_paisa', 400000, 'commission_paisa', 4000, 'net_paisa', 396000, 'raw_line', 'b short'),
-  jsonb_build_object('line_no', 4, 'gateway_txn_id', 'GW-TXN-C', 'settlement_date', current_date, 'gross_paisa', 850000, 'commission_paisa', 0, 'net_paisa', 850000, 'raw_line', 'c free')
+  jsonb_build_object('line_no', 2, 'gateway_txn_id', 'GW-TXN-A', 'settlement_date', (now() at time zone 'Asia/Karachi')::date, 'gross_paisa', 850000, 'commission_paisa', 8500, 'net_paisa', 841500, 'raw_line', 'a again'),
+  jsonb_build_object('line_no', 3, 'gateway_txn_id', 'GW-TXN-B', 'settlement_date', (now() at time zone 'Asia/Karachi')::date, 'gross_paisa', 400000, 'commission_paisa', 4000, 'net_paisa', 396000, 'raw_line', 'b short'),
+  jsonb_build_object('line_no', 4, 'gateway_txn_id', 'GW-TXN-C', 'settlement_date', (now() at time zone 'Asia/Karachi')::date, 'gross_paisa', 850000, 'commission_paisa', 0, 'net_paisa', 850000, 'raw_line', 'c free')
 ), true);
 select public.reconcile_gateway_settlement(:'imp2'::uuid) as r2 \gset
 select is((:'r2'::jsonb ->> 'exceptions')::int, 2, 'a re-settled payment and a gross mismatch are both exceptions');

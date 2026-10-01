@@ -40,9 +40,9 @@ begin
     end loop;
   end loop;
 end $$;
-select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', current_date)::date + 14), false);
-select public.assign_class_teacher((select section_id from kid where sec = 'E' and n = 1), :'teacher1'::uuid, current_date - 30);
-select public.assign_class_teacher((select section_id from kid where sec = 'F' and n = 1), :'teacher2'::uuid, current_date - 30);
+select public.generate_challans(:'campus_id'::uuid, :'session_id'::uuid, (date_trunc('month', (now() at time zone 'Asia/Karachi')::date)::date + 14), false);
+select public.assign_class_teacher((select section_id from kid where sec = 'E' and n = 1), :'teacher1'::uuid, (now() at time zone 'Asia/Karachi')::date - 30);
+select public.assign_class_teacher((select section_id from kid where sec = 'F' and n = 1), :'teacher2'::uuid, (now() at time zone 'Asia/Karachi')::date - 30);
 reset role;
 
 select app.fn_karachi_today() as today \gset
