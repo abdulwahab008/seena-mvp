@@ -23,7 +23,9 @@ test('empty fields are caught client-side and never reach the server', async ({ 
 
   await page.getByRole('button', { name: 'Sign in' }).click();
 
-  await expect(page.getByText('Enter a valid email address')).toBeVisible();
+  // The identifier field accepts an email OR a student GR number (FR-N09), so its
+  // client-side message is "Enter email or GR number", not an email-format error.
+  await expect(page.getByText('Enter email or GR number')).toBeVisible();
   await expect(page.getByText('Required')).toBeVisible();
   await expect(page).toHaveURL(/\/login$/);
 

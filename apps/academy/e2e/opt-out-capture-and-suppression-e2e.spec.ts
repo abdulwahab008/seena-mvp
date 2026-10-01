@@ -1,14 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test.describe('FR-M11: Opt-Out Capture, PTA Inbound Keywords and Suppression Engine', () => {
   test('Principal / Owner manages suppressions, tests STOP and بند keywords (AC 1), transactional shield (AC 2), and portal resubscribe audit (AC 3)', async ({
     page,
   }) => {
     // 1. Sign in as Owner
+    const owner = await seedSchoolOwner('optout-capture');
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 

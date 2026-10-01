@@ -85,6 +85,12 @@ async function seedOwnerWithPublishedStructure() {
 test('an owner caps stacked concessions and the monthly challan job honours it', async ({ page }) => {
   const { email, password } = await seedOwnerWithPublishedStructure();
 
+  // The fee plan lines take effect today, so bill the current month, and let the
+  // awards span it (a hard-coded past month has nothing to charge and is skipped).
+  const period = new Date().toISOString().slice(0, 7);
+  const awardFrom = `${period}-01`;
+  const awardTo = `${Number(period.slice(0, 4)) + 1}-12-31`;
+
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
   await page.getByLabel('Email').fill(email);
@@ -136,16 +142,16 @@ test('an owner caps stacked concessions and the monthly challan job honours it',
   await page.getByTestId('award-scheme-trigger').click();
   await page.getByRole('option', { name: 'Sibling 30%' }).click();
   await page.getByLabel('Value').fill('30');
-  await page.getByLabel('From').fill('2026-08-01');
-  await page.getByLabel('To').fill('2026-12-31');
+  await page.getByLabel('From').fill(awardFrom);
+  await page.getByLabel('To', { exact: true }).fill(awardTo);
   await page.getByRole('button', { name: 'Request' }).click();
   await expect(page.getByText('Concession award requested.')).toBeVisible();
 
   await page.getByTestId('award-scheme-trigger').click();
   await page.getByRole('option', { name: 'Merit 40%' }).click();
   await page.getByLabel('Value').fill('40');
-  await page.getByLabel('From').fill('2026-08-01');
-  await page.getByLabel('To').fill('2026-12-31');
+  await page.getByLabel('From').fill(awardFrom);
+  await page.getByLabel('To', { exact: true }).fill(awardTo);
   await page.getByRole('button', { name: 'Request' }).click();
   await expect(page.getByText('Concession award requested.')).toBeVisible();
 
@@ -159,7 +165,7 @@ test('an owner caps stacked concessions and the monthly challan job honours it',
   // 500000-paisa TUITION line — exactly 250000 paisa, net 250000.
   await page.goto('/fees/challans');
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('challan-period-input').fill('2026-08');
+  await page.getByTestId('challan-period-input').fill(period);
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
 

@@ -28,7 +28,7 @@ async function seedOwner() {
   return { email, password };
 }
 
-test('an owner uploads a branding logo — too-small is refused, a valid one activates and renders via a signed link with no session', async ({ page }) => {
+test('an owner uploads a branding logo — too-small is refused, a valid one activates and renders via a signed link with no session', async ({ page, baseURL }) => {
   const { email, password } = await seedOwner();
 
   await page.goto('/login');
@@ -70,7 +70,7 @@ test('an owner uploads a branding logo — too-small is refused, a valid one act
 
   // AC5: rendering the asset via a signed link, with NO browser session at
   // all — a plain server-to-server fetch, not the logged-in page context.
-  const signedResponse = await fetch(`http://127.0.0.1:3011/api/branding-asset/${assetId}`);
+  const signedResponse = await fetch(`${baseURL}/api/branding-asset/${assetId}`);
   expect(signedResponse.status).toBe(200);
   const { url: signedUrl } = (await signedResponse.json()) as { url: string };
   expect(signedUrl).toContain('/storage/v1/object/sign/branding/');
