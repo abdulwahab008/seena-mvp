@@ -66,10 +66,15 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
   const { data: homeworkRows } = campusId
     ? await supabase
         .from('homework')
-        .select('id, title, status, assigned_date, due_date, class_section:section_id(name, class_level(name_en)), subject:subject_id(name_en)')
+        .select('id, title, status, teacher_id, assigned_date, due_date, class_section:section_id(name, class_level(name_en)), subject:subject_id(name_en)')
         .eq('campus_id', campusId)
         .order('due_date', { ascending: false })
         .limit(50)
+    : { data: [] as never[] };
+
+  const homeworkIds = (homeworkRows ?? []).map((h) => h.id);
+  const { data: attachmentRows } = homeworkIds.length
+    ? await supabase.from('homework_attachment').select('id, homework_id, original_filename, size_bytes').in('homework_id', homeworkIds).order('created_at')
     : { data: [] as never[] };
 
   // AC2: a 14-day per-section load calendar — deduped from `assignments`
@@ -104,6 +109,7 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
       )}
       <HomeworkList
         rows={(homeworkRows ?? []).map((h) => {
+          const mine = h.teacher_id === user!.id || isAdmin;
           const section = Array.isArray(h.class_section) ? h.class_section[0] : h.class_section;
           const level = section ? (Array.isArray(section.class_level) ? section.class_level[0] : section.class_level) : null;
           const subject = Array.isArray(h.subject) ? h.subject[0] : h.subject;
@@ -115,6 +121,8 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
             dueDate: h.due_date,
             sectionLabel: `${level?.name_en ?? ''} · ${section?.name ?? ''}`,
             subjectLabel: subject?.name_en ?? '',
+            canEdit: mine,
+            attachments: (attachmentRows ?? []).filter((a) => a.homework_id === h.id).map((a) => ({ id: a.id, name: a.original_filename, sizeBytes: Number(a.size_bytes) })),
           };
         })}
       />

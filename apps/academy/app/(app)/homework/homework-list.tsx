@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { publishHomework } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { AttachmentPanel, type AttachmentRow } from './attachment-panel';
 
 export type HomeworkRow = {
   id: string;
@@ -14,6 +15,8 @@ export type HomeworkRow = {
   dueDate: string;
   sectionLabel: string;
   subjectLabel: string;
+  attachments: AttachmentRow[];
+  canEdit: boolean;
 };
 
 function PublishButton({ id }: { id: string }) {
@@ -48,7 +51,8 @@ export function HomeworkList({ rows }: { rows: HomeworkRow[] }) {
     <div className="space-y-2">
       {rows.map((h) => (
         <Card key={h.id} data-testid={`homework-row-${h.title}`}>
-          <CardContent className="flex items-center justify-between p-4">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">
                 {h.title} <span className="text-muted-foreground">({h.subjectLabel})</span>
@@ -59,6 +63,8 @@ export function HomeworkList({ rows }: { rows: HomeworkRow[] }) {
               </p>
             </div>
             {h.status === 'draft' && <PublishButton id={h.id} />}
+            </div>
+            <AttachmentPanel homeworkId={h.id} attachments={h.attachments} canEdit={h.canEdit} />
           </CardContent>
         </Card>
       ))}

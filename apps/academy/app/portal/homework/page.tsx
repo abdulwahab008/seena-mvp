@@ -40,6 +40,11 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
         .order('due_date', { ascending: true })
     : { data: [] as never[] };
 
+  const feedIds = (feedRows ?? []).map((r) => r.id).filter((v): v is string => Boolean(v));
+  const { data: attachmentRows } = feedIds.length
+    ? await supabase.from('homework_attachment').select('id, homework_id, original_filename').in('homework_id', feedIds).order('created_at')
+    : { data: [] as never[] };
+  const attachmentsFor = (id: string | null) => (attachmentRows ?? []).filter((a) => a.homework_id === id);
   const overdue = (feedRows ?? []).filter((r) => r.is_overdue);
   const pending = (feedRows ?? []).filter((r) => !r.is_overdue);
 
@@ -82,6 +87,15 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
                     {h.title} <span className="text-muted-foreground">({h.subject_name_en})</span>
                   </p>
                   <p className="text-sm text-muted-foreground">Due {h.due_date}</p>
+                  {attachmentsFor(h.id).length > 0 && (
+                    <p className="mt-1 text-sm" data-testid="homework-feed-attachments">
+                      {attachmentsFor(h.id).map((a) => (
+                        <a key={a.id} href={`/api/homework-attachments/${a.id}`} className="mr-3 underline" target="_blank" rel="noreferrer">
+                          {a.original_filename}
+                        </a>
+                      ))}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -99,6 +113,15 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
                   </p>
                   <p className="text-sm text-muted-foreground">Due {h.due_date}</p>
                   {h.description && <p className="mt-1 text-sm">{h.description}</p>}
+                  {attachmentsFor(h.id).length > 0 && (
+                    <p className="mt-1 text-sm" data-testid="homework-feed-attachments">
+                      {attachmentsFor(h.id).map((a) => (
+                        <a key={a.id} href={`/api/homework-attachments/${a.id}`} className="mr-3 underline" target="_blank" rel="noreferrer">
+                          {a.original_filename}
+                        </a>
+                      ))}
+                    </p>
+                  )}
                 </div>
               ))
             )}

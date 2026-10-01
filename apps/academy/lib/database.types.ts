@@ -11964,6 +11964,91 @@ export type Database = {
           },
         ]
       }
+      homework_attachment: {
+        Row: {
+          campus_id: string
+          created_at: string
+          homework_id: string
+          id: string
+          mime_type: string
+          original_filename: string
+          session_id: string
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          homework_id: string
+          id?: string
+          mime_type: string
+          original_filename: string
+          session_id: string
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          homework_id?: string
+          id?: string
+          mime_type?: string
+          original_filename?: string
+          session_id?: string
+          size_bytes?: number
+          storage_path?: string
+          tenant_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_attachment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_attachment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "homework_attachment_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "homework"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_attachment_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_homework_feed"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_attachment_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_attachment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_load_policy: {
         Row: {
           campus_id: string
@@ -19890,6 +19975,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      storage_delete_queue: {
+        Row: {
+          attempts: number
+          bucket: string
+          done_at: string | null
+          enqueued_at: string
+          id: string
+          last_error: string | null
+          path: string
+        }
+        Insert: {
+          attempts?: number
+          bucket: string
+          done_at?: string | null
+          enqueued_at?: string
+          id?: string
+          last_error?: string | null
+          path: string
+        }
+        Update: {
+          attempts?: number
+          bucket?: string
+          done_at?: string | null
+          enqueued_at?: string
+          id?: string
+          last_error?: string | null
+          path?: string
+        }
+        Relationships: []
       }
       stream: {
         Row: {
@@ -28314,6 +28429,14 @@ export type Database = {
         Args: { p_batch_id: string }
         Returns: Json
       }
+      claim_storage_deletes: {
+        Args: { p_limit?: number }
+        Returns: {
+          bucket: string
+          id: string
+          path: string
+        }[]
+      }
       classify_password_reset_token: {
         Args: { p_token_hash: string }
         Returns: string
@@ -28398,6 +28521,10 @@ export type Database = {
       complete_report_card_batch: {
         Args: { p_batch_id: string; p_page_count?: number; p_sha256?: string }
         Returns: Json
+      }
+      complete_storage_delete: {
+        Args: { p_error?: string; p_id: string }
+        Returns: undefined
       }
       complete_timetable_export: {
         Args: {
@@ -28981,6 +29108,7 @@ export type Database = {
         Returns: undefined
       }
       delete_exam_term: { Args: { p_exam_term_id: string }; Returns: undefined }
+      delete_homework: { Args: { p_homework_id: string }; Returns: undefined }
       delete_staff_document: {
         Args: { p_document_id: string }
         Returns: undefined
@@ -30120,6 +30248,7 @@ export type Database = {
         Args: { p_purpose: string; p_student_id: string }
         Returns: boolean
       }
+      homework_orphan_sweep: { Args: never; Returns: number }
       impersonation_blocked_tables: { Args: never; Returns: string[] }
       impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
       ingest_payment_webhook: {
@@ -30695,6 +30824,15 @@ export type Database = {
         Args: { p_kind: string; p_token: string }
         Returns: undefined
       }
+      register_homework_attachment: {
+        Args: {
+          p_filename: string
+          p_homework_id: string
+          p_mime_type: string
+          p_size_bytes: number
+        }
+        Returns: Json
+      }
       register_login_attempt: {
         Args: { p_identifier: string; p_succeeded: boolean }
         Returns: undefined
@@ -30751,6 +30889,10 @@ export type Database = {
       }
       remove_from_waitlist: {
         Args: { p_reason: string; p_waitlist_id: string }
+        Returns: undefined
+      }
+      remove_homework_attachment: {
+        Args: { p_attachment_id: string }
         Returns: undefined
       }
       remove_leave_attachment: {
