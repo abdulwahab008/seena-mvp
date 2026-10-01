@@ -2325,6 +2325,23 @@ export const paperRequestSchema = z.object({
   setCount: z.number({ message: 'Enter the number of sets' }).int().min(1).max(4),
 });
 export type PaperRequestFormInput = z.infer<typeof paperRequestSchema>;
+// FR-I06: replacing a flagged question and publishing a paper.
+export const replaceQuestionSchema = z.object({
+  itemId: z.string().uuid(),
+  text: z.string().trim().min(1, 'Enter the replacement question').max(2000, 'At most 2000 characters'),
+});
+export type ReplaceQuestionInput = z.infer<typeof replaceQuestionSchema>;
+export const publishPaperSchema = z.object({
+  paperId: z.string().uuid(),
+  overrideReason: z.string().trim().max(500, 'At most 500 characters').optional(),
+});
+export type PublishPaperInput = z.infer<typeof publishPaperSchema>;
+export const cooldownSettingsSchema = z.object({
+  campusId: z.string().uuid(),
+  questionCooldownTerms: z.number({ message: 'Enter the number of terms' }).int('Whole terms only').min(0).max(40),
+  cooldownMode: z.enum(['warn', 'block']),
+});
+export type CooldownSettingsInput = z.infer<typeof cooldownSettingsSchema>;
 /** "Ch.1, Ch.2; Ch.3" -> ["Ch.1", "Ch.2", "Ch.3"] */
 export function parseChapters(text: string): string[] {
   return [...new Set(text.split(/[,;\n]/).map((c) => c.trim()).filter(Boolean))];

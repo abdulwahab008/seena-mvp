@@ -5,8 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { BOARD_CODES, boardPatternSchema, paperRequestSchema, type BoardPatternInput, type PaperRequestFormInput } from '@/lib/validation';
-import { requestPaper, retryJob, savePattern } from './actions';
+import {
+  BOARD_CODES,
+  boardPatternSchema,
+  cooldownSettingsSchema,
+  paperRequestSchema,
+  type BoardPatternInput,
+  type CooldownSettingsInput,
+  type PaperRequestFormInput,
+} from '@/lib/validation';
+import { requestPaper, retryJob, saveCooldownSettings, savePattern } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -156,6 +164,43 @@ export function PatternForm() {
         </Button>
       </div>
       {(error || firstError) && <p role="alert" className="text-sm text-destructive sm:col-span-6">{error ?? firstError}</p>}
+    </form>
+  );
+}
+
+/** FR-I06: how long a class is shielded from seeing a question again, and whether a repeat blocks publication. */
+export function CooldownSettingsForm({ campusId, terms, mode }: { campusId: string; terms: number; mode: 'warn' | 'block' }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const form = useForm<CooldownSettingsInput>({ resolver: zodResolver(cooldownSettingsSchema), defaultValues: { campusId, questionCooldownTerms: terms, cooldownMode: mode } });
+  const onSubmit = form.handleSubmit((v) =>
+    startTransition(async () => {
+      const r = await saveCooldownSettings(v);
+      setError(r.error);
+      if (!r.error) {
+        toast.success('Reuse cooldown saved.');
+        router.refresh();
+      }
+    }),
+  );
+  return (
+    <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3" noValidate>
+      <div className="space-y-1">
+        <Label htmlFor="cdTerms">Cooldown (terms)</Label>
+        <Input id="cdTerms" type="number" className="w-28" {...form.register('questionCooldownTerms', { valueAsNumber: true })} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="cdMode">When a flagged paper is published</Label>
+        <select id="cdMode" className="h-10 rounded-md border bg-background px-2 text-sm" {...form.register('cooldownMode')}>
+          <option value="warn">Warn only</option>
+          <option value="block">Block unless overridden with a reason</option>
+        </select>
+      </div>
+      <Button type="submit" variant="outline" disabled={pending} data-testid="save-cooldown">
+        Save
+      </Button>
+      {(error || form.formState.errors.questionCooldownTerms) && <p role="alert" className="text-sm text-destructive">{error ?? form.formState.errors.questionCooldownTerms?.message}</p>}
     </form>
   );
 }
