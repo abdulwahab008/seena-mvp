@@ -13584,6 +13584,82 @@ export type Database = {
           },
         ]
       }
+      library_title: {
+        Row: {
+          author: string | null
+          cover_path: string | null
+          created_at: string
+          created_by: string | null
+          dewey: string | null
+          edition: string | null
+          id: string
+          isbn13: string | null
+          language: string
+          publisher: string | null
+          raw_isbn: string | null
+          subject_id: string | null
+          tenant_id: string
+          title: string
+          title_ur: string | null
+        }
+        Insert: {
+          author?: string | null
+          cover_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          dewey?: string | null
+          edition?: string | null
+          id?: string
+          isbn13?: string | null
+          language?: string
+          publisher?: string | null
+          raw_isbn?: string | null
+          subject_id?: string | null
+          tenant_id: string
+          title: string
+          title_ur?: string | null
+        }
+        Update: {
+          author?: string | null
+          cover_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          dewey?: string | null
+          edition?: string | null
+          id?: string
+          isbn13?: string | null
+          language?: string
+          publisher?: string | null
+          raw_isbn?: string | null
+          subject_id?: string | null
+          tenant_id?: string
+          title?: string
+          title_ur?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_title_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "library_title_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_title_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_attempt: {
         Row: {
           created_at: string
@@ -31339,6 +31415,7 @@ export type Database = {
         Args: { p_run_id: string }
         Returns: number
       }
+      normalise_isbn13: { Args: { p_raw: string }; Returns: string }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
       notify_non_submitters: {
         Args: {
@@ -32131,6 +32208,21 @@ export type Database = {
         }
         Returns: string
       }
+      save_library_title: {
+        Args: {
+          p_author?: string
+          p_dewey?: string
+          p_edition?: string
+          p_id?: string
+          p_language?: string
+          p_publisher?: string
+          p_raw_isbn?: string
+          p_subject_id?: string
+          p_title: string
+          p_title_ur?: string
+        }
+        Returns: string
+      }
       save_period_attendance: {
         Args: { p_date: string; p_marks: Json; p_slot_id: string }
         Returns: Json
@@ -32160,6 +32252,18 @@ export type Database = {
           p_title: string
         }
         Returns: string
+      }
+      search_library_titles: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          author: string
+          cover_path: string
+          id: string
+          isbn13: string
+          language: string
+          title: string
+          title_ur: string
+        }[]
       }
       search_staff: {
         Args: { p_include_former?: boolean; p_q?: string }
@@ -32433,6 +32537,10 @@ export type Database = {
       }
       set_lesson_plan_status: {
         Args: { p_plan_id: string; p_status: string }
+        Returns: undefined
+      }
+      set_library_title_cover: {
+        Args: { p_cover_path: string; p_title_id: string }
         Returns: undefined
       }
       set_mark_precision: {
