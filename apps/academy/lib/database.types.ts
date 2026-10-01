@@ -25326,6 +25326,40 @@ export type Database = {
           },
         ]
       }
+      v_borrower_outstanding_fine: {
+        Row: {
+          block_threshold: number | null
+          borrower_id: string | null
+          campus_id: string | null
+          is_blocked: boolean | null
+          loans_with_fines: number | null
+          outstanding_paisa: number | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_fine_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_fine_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_fine_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_campaign_cost: {
         Row: {
           campaign_id: string | null
@@ -29442,6 +29476,7 @@ export type Database = {
         }[]
       }
       accept_invitation: { Args: { p_token: string }; Returns: string }
+      accrue_library_fines: { Args: { p_date?: string }; Returns: Json }
       activate_certificate_template: {
         Args: { p_template_id: string }
         Returns: string
@@ -33341,6 +33376,14 @@ export type Database = {
         Returns: string
       }
       set_unsettled_after_days: { Args: { p_days: number }; Returns: undefined }
+      settle_library_fines: {
+        Args: {
+          p_borrower_id: string
+          p_loan_id?: string
+          p_receipt_id?: string
+        }
+        Returns: number
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       sla_due: {
@@ -33837,6 +33880,10 @@ export type Database = {
       waive_admission_fee: {
         Args: { p_offer_id: string; p_reason: string }
         Returns: string
+      }
+      waive_library_fines: {
+        Args: { p_borrower_id: string; p_loan_id?: string; p_reason: string }
+        Returns: number
       }
       waive_no_dues_item: {
         Args: { p_item_id: string; p_reason: string }
