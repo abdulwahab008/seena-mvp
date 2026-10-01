@@ -2244,3 +2244,43 @@ export const lessonPlanSchema = z.object({
   topicIds: z.array(z.string().uuid()).default([]),
 });
 export type LessonPlanInput = z.input<typeof lessonPlanSchema>;
+
+// FR-I03: datesheet, exam halls and slots.
+const TIME_HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+export const createDatesheetSchema = z.object({
+  campusId: z.string().uuid(),
+  examTermId: z.string().uuid(),
+  title: z.string().trim().min(1, 'Enter a title').max(120),
+});
+export type CreateDatesheetInput = z.infer<typeof createDatesheetSchema>;
+export const examHallSchema = z.object({
+  campusId: z.string().uuid(),
+  code: z.string().trim().min(1, 'Enter a hall code').max(20),
+  name: z.string().trim().min(1, 'Enter a hall name').max(80),
+  rowsCount: z.number({ message: 'Enter the rows' }).int('Whole rows only').min(1, 'At least 1 row').max(100),
+  seatsPerRow: z.number({ message: 'Enter the seats per row' }).int('Whole seats only').min(1, 'At least 1 seat').max(100),
+});
+export type ExamHallInput = z.infer<typeof examHallSchema>;
+export const datesheetSlotSchema = z
+  .object({
+    datesheetId: z.string().uuid(),
+    examSubjectId: z.string().uuid({ message: 'Choose a paper' }),
+    examDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+    startTime: z.string().regex(TIME_HHMM, 'Enter a start time'),
+    endTime: z.string().regex(TIME_HHMM, 'Enter an end time'),
+    hallId: z.string().uuid().optional().or(z.literal('')),
+    invigilators: z.number({ message: 'Enter the invigilators' }).int('Whole numbers only').min(1, 'At least 1').max(50),
+  })
+  .refine((v) => v.endTime > v.startTime, { message: 'The paper must end after it starts', path: ['endTime'] });
+export type DatesheetSlotInput = z.input<typeof datesheetSlotSchema>;
+export const examSettingsSchema = z.object({
+  campusId: z.string().uuid(),
+  jummahCutoff: z.string().regex(TIME_HHMM, 'Enter a time').optional(),
+  questionCooldownTerms: z.number().int().min(0).max(40).optional(),
+  cooldownMode: z.enum(['warn', 'block']).optional(),
+  maxModerationDelta: z.number().min(0).max(100).optional(),
+  maxModerationPct: z.number().min(0).max(100).nullable().optional(),
+  paperReleaseOffsetMinutes: z.number().int().min(0).max(1440).optional(),
+  invigilationMaxDuties: z.number().int().min(1).max(100).optional(),
+});
+export type ExamSettingsInput = z.infer<typeof examSettingsSchema>;
