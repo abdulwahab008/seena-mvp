@@ -6,7 +6,7 @@ import { seedFeesTenant, SEED_PASSWORD } from './support/fees-seed';
 
 test('the owner drills from the outstanding KPI to the challan rows, sees the stale-aggregate notice and exports', async ({ page }) => {
   test.setTimeout(120000);
-  const { db, email, tenant, campusId } = await seedFeesTenant(3, 'drill-e2e');
+  const { db, email, tenant, campusId, challans } = await seedFeesTenant(3, 'drill-e2e');
 
   // Real aggregates, then one made stale: as if a back-dated receipt arrived after the refresh.
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
@@ -31,7 +31,10 @@ test('the owner drills from the outstanding KPI to the challan rows, sees the st
   await expect(page).toHaveURL(/\/dashboard\/drilldown\/outstanding/);
 
   await expect(page.getByTestId('drilldown-row')).toHaveCount(3);
-  await expect(page.getByTestId('drilldown-row').first()).toContainText('CH');
+  // Every row carries the real challan number (11 digits + check digit) of a seeded challan.
+  expect(challans).toHaveLength(3);
+  const listed = await page.getByTestId('drilldown-row').evaluateAll((rows) => rows.map((r) => r.querySelector('td')?.textContent ?? ''));
+  expect([...listed].sort()).toEqual(challans.map((c) => c.challan_no as string).sort());
   await expect(page.getByTestId('drilldown-summary')).toContainText('3 rows');
   await expect(page.getByTestId('drilldown-summary')).toContainText('25,500.00');
 

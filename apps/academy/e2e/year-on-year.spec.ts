@@ -12,8 +12,13 @@ test('the owner compares two sessions by month-of-session and sees no-data month
     expect(error).toBeNull();
     return data!.id as string;
   };
-  await mk('2020-21', '2020-04-01', '2021-03-31');
-  await mk('2021-22', '2021-04-01', '2022-03-31');
+  const prior = await mk('2020-21', '2020-04-01', '2021-03-31');
+  const current = await mk('2021-22', '2021-04-01', '2022-03-31');
+
+  // The seeded campus was provisioned just now; the series ignores months before a campus
+  // existed (a range refresh writes zero rows for them), so it must predate both sessions.
+  const { error: campusError } = await db.from('campus').update({ created_at: '2020-01-01T00:00:00Z' }).eq('id', campusId);
+  expect(campusError).toBeNull();
 
   // Prior session has data only from October (index 7); this one has the whole year.
   const rows: Record<string, unknown>[] = [];
@@ -32,7 +37,8 @@ test('the owner compares two sessions by month-of-session and sees no-data month
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 
-  await page.goto('/reports/year-on-year');
+  // The seeded school already has its own (newer) session, which the page would pick by default.
+  await page.goto(`/reports/year-on-year?current=${current}&prior=${prior}`);
   await expect(page.getByTestId('yoy-row')).toHaveCount(12);
   const first = page.getByTestId('yoy-row').first();
   await expect(first).toContainText('Apr 2021');
