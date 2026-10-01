@@ -112,7 +112,7 @@ set local role service_role;
 select public.fail_export_job((select id from public.report_export_job where error = 'renderer crashed'), 'renderer crashed again');
 reset role;
 select is((select status from public.report_export_job where error = 'renderer crashed again'), 'failed', 'after 3 attempts it fails for good');
-select is((select count(*)::int from public.user_notification where kind = 'report_export_failed'), 1, 'and the requester is told');
+select is((select count(*)::int from public.user_notification where kind = 'report_export_failed' and tenant_id = :'tenant_id'), 1, 'and the requester is told');
 
 update public.report_export_job set status = 'running', started_at = now() - interval '11 minutes', attempts = 1 where error = 'renderer crashed again';
 set local role service_role;
