@@ -3,10 +3,10 @@ import { supabaseServer } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const circularId = params.id;
+    const { id: circularId } = await params;
     if (!circularId) {
       return NextResponse.json({ error: 'Circular ID required' }, { status: 400 });
     }
