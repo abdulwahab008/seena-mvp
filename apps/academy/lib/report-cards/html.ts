@@ -127,7 +127,7 @@ function fmtNum(value: number | null, dp = 0): string {
 /** AC1's "168 of 180 days (93.3%)" — one decimal place, as the AC writes it. */
 export function attendanceLine(a: ReportCardSnapshot['attendance']): string {
   if (a.months_counted === 0 || a.working_days === 0) {
-    return 'No attendance has been summarised for this session yet.';
+    return 'N/A';
   }
   return `${fmtNum(a.present_days, Number.isInteger(Number(a.present_days)) ? 0 : 1)} of ${a.working_days} days (${fmtNum(a.pct, 1)}%)`;
 }

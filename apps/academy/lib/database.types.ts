@@ -15049,6 +15049,8 @@ export type Database = {
           rendered_by: string | null
           revision_no: number
           section_id: string
+          stale_at: string | null
+          stale_reason: string | null
           status: Database["public"]["Enums"]["report_card_status"]
           storage_path: string
           supersedes_revision: number | null
@@ -15066,6 +15068,8 @@ export type Database = {
           rendered_by?: string | null
           revision_no: number
           section_id: string
+          stale_at?: string | null
+          stale_reason?: string | null
           status?: Database["public"]["Enums"]["report_card_status"]
           storage_path: string
           supersedes_revision?: number | null
@@ -15083,6 +15087,8 @@ export type Database = {
           rendered_by?: string | null
           revision_no?: number
           section_id?: string
+          stale_at?: string | null
+          stale_reason?: string | null
           status?: Database["public"]["Enums"]["report_card_status"]
           storage_path?: string
           supersedes_revision?: number | null
@@ -26952,6 +26958,18 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_portal_report_cards: {
+        Args: { p_enrolment_id: string }
+        Returns: {
+          exam_term_id: string
+          report_card_id: string
+          revised_on: string
+          revision_no: number
+          status: string
+          term_name: string
+          under_review: boolean
+        }[]
+      }
       fn_portal_term_result: {
         Args: { p_enrolment_id: string; p_exam_term_id?: string }
         Returns: Json
@@ -29387,7 +29405,7 @@ export type Database = {
         | "failed"
       report_card_batch_scope: "section" | "class" | "campus"
       report_card_batch_status: "queued" | "running" | "completed" | "failed"
-      report_card_status: "pending" | "issued" | "superseded" | "void"
+      report_card_status: "pending" | "issued" | "superseded" | "void" | "stale"
       result_withhold_reason: "fee_default" | "discipline" | "document_pending"
       result_withhold_release: "paid" | "hardship"
       rollover_decision: "promote" | "retain" | "pass_out" | "hold"
@@ -29883,7 +29901,7 @@ export const Constants = {
       ],
       report_card_batch_scope: ["section", "class", "campus"],
       report_card_batch_status: ["queued", "running", "completed", "failed"],
-      report_card_status: ["pending", "issued", "superseded", "void"],
+      report_card_status: ["pending", "issued", "superseded", "void", "stale"],
       result_withhold_reason: ["fee_default", "discipline", "document_pending"],
       result_withhold_release: ["paid", "hardship"],
       rollover_decision: ["promote", "retain", "pass_out", "hold"],

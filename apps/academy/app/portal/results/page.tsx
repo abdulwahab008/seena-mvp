@@ -73,6 +73,9 @@ export default async function PortalResultsPage({ searchParams }: { searchParams
   const result = data as unknown as PortalTermResult | null;
   const termRows = result?.terms ?? [];
 
+  const { data: cardRows } = child ? await supabase.rpc('fn_portal_report_cards', { p_enrolment_id: child.enrolmentId }) : { data: null };
+  const card = (cardRows ?? []).find((c) => c.exam_term_id === result?.exam_term_id) ?? null;
+
   return (
     <div className="space-y-6">
       <div>
@@ -114,6 +117,24 @@ export default async function PortalResultsPage({ searchParams }: { searchParams
                   {t.name}
                 </Link>
               ))}
+            </div>
+          )}
+
+          {card && (
+            <div className="space-y-2 rounded-md border p-3 text-sm" data-testid="portal-report-card">
+              {card.under_review && (
+                <p className="rounded bg-amber-50 p-2 font-medium text-amber-900" role="status" data-testid="card-under-review">
+                  Result under review — a correction is being made to this term&apos;s marks. The card below is the previous version and a revised card will replace it.
+                </p>
+              )}
+              {card.revised_on && (
+                <p className="text-muted-foreground" data-testid="card-revised-on">
+                  Revised on {card.revised_on} (revision {card.revision_no}).
+                </p>
+              )}
+              <a className="underline-offset-2 hover:underline" href={`/api/report-cards/${card.report_card_id}/download`} data-testid="card-download">
+                Download report card (PDF)
+              </a>
             </div>
           )}
 

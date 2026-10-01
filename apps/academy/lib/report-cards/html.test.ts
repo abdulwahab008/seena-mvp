@@ -102,7 +102,7 @@ describe('attendance', () => {
 
   it('says nothing has been summarised rather than reporting 0%', () => {
     const a = { months_counted: 0, present_days: 0, working_days: 0, pct: null, from_date: null, to_date: null };
-    expect(attendanceLine(a)).toBe('No attendance has been summarised for this session yet.');
+    expect(attendanceLine(a)).toBe('N/A');
     expect(attendanceRange(a)).toBe('');
   });
 

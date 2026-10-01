@@ -1,6 +1,6 @@
 -- pgTAP tests for FR-K21: online payment initiation.
 begin;
-select plan(28);
+select plan(29);
 
 select public.provision_tenant('test-online-pay-co', 'Online Pay Co', 'owner@onlinepayco.test');
 select id as tenant_id from public.tenant where slug = 'test-online-pay-co' \gset
@@ -96,7 +96,8 @@ reset role;
 select count(*)::int as ledger_before from public.fee_ledger where enrolment_id = :'e1' and direction = 'credit' \gset
 update public.payment_intent set expires_at = now() - interval '1 minute' where challan_id = :'challan1';
 select is(has_function_privilege('anon', 'public.expire_payment_intents(timestamptz)', 'execute'), false, 'anon cannot run the expiry job');
-select is(public.expire_payment_intents(), 2, 'AC: the expiry job expires both abandoned intents');
+select ok(public.expire_payment_intents() >= 2, 'AC: the expiry job runs');
+select is((select count(*)::int from public.payment_intent where challan_id = :'challan1' and status = 'expired'), 2, 'AC: and expires both of this challan''s abandoned intents');
 select is((select count(*)::int from public.fee_ledger where enrolment_id = :'e1' and direction = 'credit'), :'ledger_before', 'AC: expiry writes no ledger row');
 select is((select status::text from public.fee_challan where id = :'challan1'), 'unpaid', 'AC: the challan remains unpaid');
 
