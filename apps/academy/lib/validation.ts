@@ -2284,3 +2284,11 @@ export const coverageSchema = z
     path: ['completedOn'],
   });
 export type CoverageInput = z.input<typeof coverageSchema>;
+
+// FR-H12: acknowledged reason for a class-subject that is behind plan.
+export const varianceAckSchema = z.object({
+  sectionId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  reason: z.string().trim().min(3, 'Enter a reason of at least 3 characters').max(300, 'At most 300 characters'),
+});
+export type VarianceAckInput = z.infer<typeof varianceAckSchema>;
