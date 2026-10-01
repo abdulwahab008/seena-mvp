@@ -2292,3 +2292,12 @@ export const varianceAckSchema = z.object({
   reason: z.string().trim().min(3, 'Enter a reason of at least 3 characters').max(300, 'At most 300 characters'),
 });
 export type VarianceAckInput = z.infer<typeof varianceAckSchema>;
+
+// FR-H09: syllabus scope for a generated exam paper.
+export const paperRequestSchema = z.object({
+  title: z.string().trim().min(1, 'Enter a title for the paper').max(200),
+  unitIds: z.array(z.string().uuid()).min(1, 'Select at least one chapter').max(100),
+  sectionId: z.string().uuid().optional().or(z.literal('')),
+  untaughtOverride: z.boolean().optional(),
+});
+export type PaperRequestInput = z.input<typeof paperRequestSchema>;
