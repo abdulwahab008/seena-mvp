@@ -10,9 +10,9 @@ const MANAGE_ROLES = ['super_admin', 'owner', 'principal'];
 export default async function RoomsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ campus_id?: string }> | { campus_id?: string };
+  searchParams?: Promise<{ campus_id?: string }>;
 }) {
-  const resolvedParams = searchParams ? await Promise.resolve(searchParams) : {};
+  const resolvedParams = searchParams ? await searchParams : {};
   const supabase = await supabaseServer();
 
   // Role check
