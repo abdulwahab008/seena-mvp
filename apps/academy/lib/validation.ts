@@ -2254,3 +2254,24 @@ export const complianceDocumentSchema = z.object({
 });
 export type ComplianceDocumentInput = z.infer<typeof complianceDocumentSchema>;
 export const renewDocumentSchema = z.object({ documentId: z.string().uuid(), expiresOn: isoDateField("Enter the new expiry date") });
+
+// FR-D08: biometric devices, code mapping and the campus start-time rule.
+export const registerBiometricDeviceSchema = z.object({
+  campusId: z.string().uuid(),
+  deviceSerial: z.string().trim().regex(/^[A-Za-z0-9._-]{3,64}$/, "Serial: 3 to 64 letters, digits, dot, dash or underscore"),
+  label: z.string().trim().max(80).optional(),
+});
+export const mapDeviceCodeSchema = z.object({
+  deviceId: z.string().uuid(),
+  staffId: z.string().uuid({ message: "Choose a staff member" }),
+  code: z.string().trim().min(1, "Enter the code on the device").max(40),
+});
+export const clockOffsetSchema = z.object({
+  deviceId: z.string().uuid(),
+  offsetSeconds: z.coerce.number({ message: "Enter seconds" }).int("Whole seconds only").min(-86400).max(86400),
+});
+export const staffAttendanceRuleSchema = z.object({
+  campusId: z.string().uuid(),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/, "Enter a time like 08:00"),
+  graceMinutes: z.coerce.number({ message: "Enter minutes" }).int().min(0).max(240),
+});
