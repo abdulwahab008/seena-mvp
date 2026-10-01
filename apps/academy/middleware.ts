@@ -42,6 +42,8 @@ const PUBLIC_PATHS = new Set([
  *  - /admin/provision — bootstrap tenant creation, gated by ADMIN_SETUP_TOKEN
  *    in its action. It cannot require a session: it is what creates the first
  *    account there is.
+ *  - /api/internal/ — worker endpoints (FR-S08) with no user session; each route
+ *    authenticates with EXPORT_WORKER_SECRET and rejects everything without it.
  *  - /api/branding-asset — deliberately session-less signed-URL minting
  *    (FR-A18 AC5), asserted by e2e/tenant-branding-assets.spec.ts.
  */
@@ -54,6 +56,7 @@ const PUBLIC_PREFIXES = [
   '/api/branding-asset/',
   '/api/calendar/feed/',
   '/api/webhooks/',
+  '/api/internal/',
 ];
 
 function isPublic(pathname: string) {

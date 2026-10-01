@@ -251,7 +251,10 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'reports',
     label: 'Reports',
     icon: FileBarChart,
-    items: [{ href: '/reports/audit', label: 'Export Audit' }],
+    items: [
+      { href: '/reports/exports', label: 'Excel Exports' },
+      { href: '/reports/audit', label: 'Export Audit' },
+    ],
   },
 ];
 

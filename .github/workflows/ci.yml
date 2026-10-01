@@ -64,6 +64,7 @@ jobs:
           echo "ADMIN_SETUP_TOKEN=ci-$(openssl rand -hex 12)" >> .env.local
           echo "COMM_WEBHOOK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
           echo "PAY_SECRET_JAZZCASH=ci-$(openssl rand -hex 16)" >> .env.local
+          echo "EXPORT_WORKER_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
 
       - name: Typecheck
         working-directory: apps/academy

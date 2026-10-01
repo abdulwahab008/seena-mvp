@@ -15469,6 +15469,112 @@ export type Database = {
           },
         ]
       }
+      report_dataset: {
+        Row: {
+          allowed_roles: string[]
+          columns: Json
+          dataset_key: string
+          display_name: string
+        }
+        Insert: {
+          allowed_roles: string[]
+          columns: Json
+          dataset_key: string
+          display_name: string
+        }
+        Update: {
+          allowed_roles?: string[]
+          columns?: Json
+          dataset_key?: string
+          display_name?: string
+        }
+        Relationships: []
+      }
+      report_export_job: {
+        Row: {
+          attempts: number
+          audit_id: string | null
+          claims: Json
+          created_at: string
+          dataset_key: string
+          error: string | null
+          expires_at: string | null
+          finished_at: string | null
+          format: string
+          id: string
+          params: Json
+          params_hash: string
+          requested_by: string
+          row_count: number | null
+          started_at: string | null
+          status: string
+          storage_path: string | null
+          tenant_id: string
+        }
+        Insert: {
+          attempts?: number
+          audit_id?: string | null
+          claims: Json
+          created_at?: string
+          dataset_key: string
+          error?: string | null
+          expires_at?: string | null
+          finished_at?: string | null
+          format?: string
+          id?: string
+          params?: Json
+          params_hash: string
+          requested_by: string
+          row_count?: number | null
+          started_at?: string | null
+          status?: string
+          storage_path?: string | null
+          tenant_id: string
+        }
+        Update: {
+          attempts?: number
+          audit_id?: string | null
+          claims?: Json
+          created_at?: string
+          dataset_key?: string
+          error?: string | null
+          expires_at?: string | null
+          finished_at?: string | null
+          format?: string
+          id?: string
+          params?: Json
+          params_hash?: string
+          requested_by?: string
+          row_count?: number | null
+          started_at?: string | null
+          status?: string
+          storage_path?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_export_job_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "report_audit"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_export_job_dataset_key_fkey"
+            columns: ["dataset_key"]
+            isOneToOne: false
+            referencedRelation: "report_dataset"
+            referencedColumns: ["dataset_key"]
+          },
+          {
+            foreignKeyName: "report_export_job_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_pii_column: {
         Row: {
           column_pattern: string
@@ -20890,6 +20996,50 @@ export type Database = {
           },
         ]
       }
+      user_notification: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          tenant_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          tenant_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          tenant_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wa_compliance_alert: {
         Row: {
           alert_type: string
@@ -23687,6 +23837,69 @@ export type Database = {
           },
         ]
       }
+      v_report_export_job: {
+        Row: {
+          created_at: string | null
+          dataset_key: string | null
+          downloadable: boolean | null
+          error: string | null
+          expires_at: string | null
+          finished_at: string | null
+          format: string | null
+          id: string | null
+          params: Json | null
+          requested_by: string | null
+          row_count: number | null
+          status: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dataset_key?: string | null
+          downloadable?: never
+          error?: string | null
+          expires_at?: string | null
+          finished_at?: string | null
+          format?: string | null
+          id?: string | null
+          params?: Json | null
+          requested_by?: string | null
+          row_count?: number | null
+          status?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dataset_key?: string | null
+          downloadable?: never
+          error?: string | null
+          expires_at?: string | null
+          finished_at?: string | null
+          format?: string | null
+          id?: string | null
+          params?: Json | null
+          requested_by?: string | null
+          row_count?: number | null
+          status?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_export_job_dataset_key_fkey"
+            columns: ["dataset_key"]
+            isOneToOne: false
+            referencedRelation: "report_dataset"
+            referencedColumns: ["dataset_key"]
+          },
+          {
+            foreignKeyName: "report_export_job_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_result_position: {
         Row: {
           campus_id: string | null
@@ -25414,6 +25627,19 @@ export type Database = {
         Args: { p_cnic_last6: string; p_gr_no: string }
         Returns: Json
       }
+      claim_export_job: {
+        Args: never
+        Returns: {
+          columns: Json
+          dataset_key: string
+          display_name: string
+          job_id: string
+          params: Json
+          requested_by: string
+          requester_name: string
+          tenant_id: string
+        }[]
+      }
       claim_message_batch: {
         Args: {
           p_channel?: Database["public"]["Enums"]["comm_channel"]
@@ -25521,6 +25747,10 @@ export type Database = {
           p_row_count: number
           p_run_id: string
         }
+        Returns: undefined
+      }
+      complete_export_job: {
+        Args: { p_job_id: string; p_row_count: number; p_storage_path: string }
         Returns: undefined
       }
       complete_onboarding_step: {
@@ -26213,6 +26443,17 @@ export type Database = {
         Args: { p_circular_id: string; p_segment_name: string }
         Returns: string
       }
+      export_job_page: {
+        Args: { p_job_id: string; p_limit: number; p_offset: number }
+        Returns: Json
+      }
+      export_jobs_to_purge: {
+        Args: { p_limit?: number }
+        Returns: {
+          job_id: string
+          storage_path: string
+        }[]
+      }
       export_report_audit: {
         Args: {
           p_from?: string
@@ -26247,6 +26488,10 @@ export type Database = {
       }
       fail_board_export_run: {
         Args: { p_error: string; p_run_id: string }
+        Returns: undefined
+      }
+      fail_export_job: {
+        Args: { p_error: string; p_job_id: string }
         Returns: undefined
       }
       fail_report_card_batch: {
@@ -27299,6 +27544,8 @@ export type Database = {
         Args: { p_paid_reference?: string; p_voucher_id: string }
         Returns: Json
       }
+      mark_export_purged: { Args: { p_job_id: string }; Returns: undefined }
+      mark_notifications_read: { Args: never; Returns: number }
       mark_outbound_message_failed: {
         Args: { p_failure_code: string; p_message_id: string }
         Returns: undefined
@@ -27754,6 +28001,15 @@ export type Database = {
           p_section_id: string
         }
         Returns: string
+      }
+      request_report_export: {
+        Args: {
+          p_dataset_key: string
+          p_ip?: string
+          p_params: Json
+          p_reason?: string
+        }
+        Returns: Json
       }
       request_timetable_export: {
         Args: {
