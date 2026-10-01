@@ -2359,5 +2359,32 @@ export const boardingEventSchema = z.object({
 });
 export const boardingBatchSchema = z.array(boardingEventSchema).min(1, 'Nothing to submit').max(300);
 export const openLegSchema = z.object({ routeId: tuuid, legType: z.enum(['pickup', 'drop'], { message: 'Choose pickup or drop' }) });
+// FR-Q01
+const roomTypeEnum = z.enum(['single', 'double', 'triple', 'quad', 'dorm'], { message: 'Choose a room type' });
+export const hostelBlockSchema = z.object({
+  campusId: tuuid,
+  code: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,6}$/, 'Code is 1 to 6 letters or digits'),
+  name: z.string().trim().min(1, 'Enter a block name').max(80),
+  gender: z.enum(['male', 'female'], { message: 'Choose boys or girls' }),
+  rooms: tint('Number of rooms', 1, 400),
+  bedsPerRoom: tint('Beds per room', 1, 40),
+  roomsPerFloor: tint('Rooms per floor', 1, 99).optional().or(z.literal('').transform(() => undefined)),
+  roomType: roomTypeEnum,
+  wardenStaffId: toptUuid,
+});
+export const hostelRoomUpdateSchema = z.object({
+  roomId: tuuid,
+  bedCount: tint('Bed count', 1, 40),
+  roomType: roomTypeEnum,
+  status: z.enum(['in_service', 'out_of_service']),
+});
+export const hostelAddRoomSchema = z.object({
+  blockId: tuuid,
+  roomNo: z.string().trim().regex(/^[A-Za-z0-9]{1,8}$/, 'Room number is letters and digits'),
+  bedCount: tint('Bed count', 1, 40),
+  roomType: roomTypeEnum,
+  floor: tint('Floor', 0, 30).optional().or(z.literal('').transform(() => undefined)),
+});
+export const hostelBlockUpdateSchema = z.object({ blockId: tuuid, name: z.string().trim().min(1).max(80), wardenStaffId: toptUuid, active: tbool });
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];

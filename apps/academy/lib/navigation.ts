@@ -4,6 +4,7 @@ import {
   BookOpen,
   Building2,
   Bus,
+  BedDouble,
   CalendarClock,
   ClipboardCheck,
   FileBarChart,
@@ -218,6 +219,14 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/transport/allocations', label: 'Student Allocation', feature: 'module.transport' },
       { href: '/transport/boarding', label: 'Boarding', feature: 'module.transport' },
       { href: '/transport/live', label: 'Live Tracking', feature: 'module.transport' },
+    ],
+  },
+  {
+    id: 'hostel',
+    label: 'Hostel',
+    icon: BedDouble,
+    items: [
+      { href: '/hostel', label: 'Blocks & Beds' },
     ],
   },
   {
