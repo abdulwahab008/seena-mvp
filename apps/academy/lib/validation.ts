@@ -2233,3 +2233,14 @@ export const syllabusTopicSchema = z.object({
   plannedPeriods: z.number({ message: 'Enter the planned periods' }).int('Whole periods only').min(0).max(100),
 });
 export type SyllabusTopicInput = z.infer<typeof syllabusTopicSchema>;
+
+// FR-H10: weekly lesson plan.
+export const lessonPlanSchema = z.object({
+  sectionId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a week'),
+  objectives: z.string().trim().max(1000, 'At most 1000 characters').optional(),
+  resources: z.string().trim().max(1000, 'At most 1000 characters').optional(),
+  topicIds: z.array(z.string().uuid()).default([]),
+});
+export type LessonPlanInput = z.input<typeof lessonPlanSchema>;

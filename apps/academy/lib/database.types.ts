@@ -13401,6 +13401,189 @@ export type Database = {
           },
         ]
       }
+      lesson_plan: {
+        Row: {
+          campus_id: string
+          completed_at: string | null
+          completion_date: string | null
+          created_at: string
+          id: string
+          objectives: string | null
+          resources: string | null
+          section_id: string
+          session_id: string
+          status: string
+          subject_id: string
+          teacher_id: string
+          tenant_id: string
+          week_start_date: string
+        }
+        Insert: {
+          campus_id: string
+          completed_at?: string | null
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          objectives?: string | null
+          resources?: string | null
+          section_id: string
+          session_id: string
+          status?: string
+          subject_id: string
+          teacher_id: string
+          tenant_id: string
+          week_start_date: string
+        }
+        Update: {
+          campus_id?: string
+          completed_at?: string | null
+          completion_date?: string | null
+          created_at?: string
+          id?: string
+          objectives?: string | null
+          resources?: string | null
+          section_id?: string
+          session_id?: string
+          status?: string
+          subject_id?: string
+          teacher_id?: string
+          tenant_id?: string
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "class_section"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_section_subject_setup"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_subject_section"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_scheduled_vs_required_periods"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_section_seat_availability"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "v_unallocated_section_subject"
+            referencedColumns: ["section_id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plan_topic: {
+        Row: {
+          lesson_plan_id: string
+          syllabus_topic_id: string
+          tenant_id: string
+        }
+        Insert: {
+          lesson_plan_id: string
+          syllabus_topic_id: string
+          tenant_id: string
+        }
+        Update: {
+          lesson_plan_id?: string
+          syllabus_topic_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_topic_lesson_plan_id_fkey"
+            columns: ["lesson_plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_topic_syllabus_topic_id_fkey"
+            columns: ["syllabus_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topic"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_topic_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_attempt: {
         Row: {
           created_at: string
@@ -29482,6 +29665,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_lesson_plan: {
+        Args: {
+          p_objectives?: string
+          p_resources?: string
+          p_section_id: string
+          p_subject_id: string
+          p_topic_ids?: string[]
+          p_week_start: string
+        }
+        Returns: string
+      }
       create_next_structure_version: {
         Args: { p_effective_from: string; p_prior_structure_id: string }
         Returns: string
@@ -32237,6 +32431,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_lesson_plan_status: {
+        Args: { p_plan_id: string; p_status: string }
+        Returns: undefined
+      }
       set_mark_precision: {
         Args: { p_campus_id: string; p_precision: number }
         Returns: undefined
@@ -32661,6 +32859,15 @@ export type Database = {
           p_parent_id?: string
           p_requires_approval?: boolean
           p_set_parent?: boolean
+        }
+        Returns: undefined
+      }
+      update_lesson_plan: {
+        Args: {
+          p_objectives?: string
+          p_plan_id: string
+          p_resources?: string
+          p_topic_ids?: string[]
         }
         Returns: undefined
       }
