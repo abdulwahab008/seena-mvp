@@ -2275,3 +2275,22 @@ export const libraryCopySchema = z.object({
   acquiredOn: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, 'Choose a date').optional(),
 });
 export type LibraryCopyInput = z.input<typeof libraryCopySchema>;
+
+// FR-O03: borrowing policy. Money fields are entered in PKR and converted to paisa on the server.
+const pkrField = z.string().trim().regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter an amount in PKR, for example 5 or 7.50');
+export const LIBRARY_BORROWER_ROLES = ['student', 'teacher', 'staff'] as const;
+export const libraryPolicySchema = z.object({
+  role: z.enum(LIBRARY_BORROWER_ROLES),
+  campusId: z.string().uuid().optional().or(z.literal('')),
+  bandFrom: z.string().regex(/^\d{0,2}$/, 'Choose a class').optional(),
+  bandTo: z.string().regex(/^\d{0,2}$/, 'Choose a class').optional(),
+  maxLoans: z.number({ message: 'Enter the loan limit' }).int('Whole numbers only').min(0).max(100),
+  loanDays: z.number({ message: 'Enter the loan period' }).int('Whole days only').min(1, 'At least 1 day').max(365),
+  maxRenewals: z.number({ message: 'Enter the renewal limit' }).int('Whole numbers only').min(0).max(20),
+  finePerDayPkr: pkrField,
+  fineCapPkr: pkrField.optional(),
+  blockThresholdPkr: pkrField.optional(),
+  countWorkingDaysOnly: z.boolean().default(false),
+  effectiveFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the date it takes effect'),
+});
+export type LibraryPolicyInput = z.input<typeof libraryPolicySchema>;

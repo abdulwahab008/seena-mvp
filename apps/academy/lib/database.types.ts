@@ -13584,6 +13584,92 @@ export type Database = {
           },
         ]
       }
+      library_borrower_policy: {
+        Row: {
+          block_threshold: number | null
+          campus_id: string | null
+          class_band_from: number | null
+          class_band_to: number | null
+          count_working_days_only: boolean
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          fine_cap: number | null
+          fine_per_day: number
+          id: string
+          loan_days: number
+          max_loans: number
+          max_renewals: number
+          role: string
+          tenant_id: string
+        }
+        Insert: {
+          block_threshold?: number | null
+          campus_id?: string | null
+          class_band_from?: number | null
+          class_band_to?: number | null
+          count_working_days_only?: boolean
+          created_at?: string
+          created_by?: string | null
+          effective_from: string
+          fine_cap?: number | null
+          fine_per_day?: number
+          id?: string
+          loan_days: number
+          max_loans: number
+          max_renewals?: number
+          role: string
+          tenant_id: string
+        }
+        Update: {
+          block_threshold?: number | null
+          campus_id?: string | null
+          class_band_from?: number | null
+          class_band_to?: number | null
+          count_working_days_only?: boolean
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          fine_cap?: number | null
+          fine_per_day?: number
+          id?: string
+          loan_days?: number
+          max_loans?: number
+          max_renewals?: number
+          role?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_borrower_policy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_borrower_policy_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_borrower_policy_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "library_borrower_policy_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_copy: {
         Row: {
           accession_no: string
@@ -32148,6 +32234,33 @@ export type Database = {
         }
         Returns: string
       }
+      resolve_borrower_policy: {
+        Args: { p_at?: string; p_borrower_id: string; p_campus_id?: string }
+        Returns: {
+          block_threshold: number | null
+          campus_id: string | null
+          class_band_from: number | null
+          class_band_to: number | null
+          count_working_days_only: boolean
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          fine_cap: number | null
+          fine_per_day: number
+          id: string
+          loan_days: number
+          max_loans: number
+          max_renewals: number
+          role: string
+          tenant_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "library_borrower_policy"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       resolve_branding: {
         Args: {
           p_asset_type: Database["public"]["Enums"]["branding_asset_type"]
@@ -32526,6 +32639,23 @@ export type Database = {
         Returns: undefined
       }
       set_bell_template_default: { Args: { p_id: string }; Returns: undefined }
+      set_borrower_policy: {
+        Args: {
+          p_block_threshold?: number
+          p_campus_id?: string
+          p_class_band_from?: number
+          p_class_band_to?: number
+          p_count_working_days_only?: boolean
+          p_effective_from: string
+          p_fine_cap?: number
+          p_fine_per_day: number
+          p_loan_days: number
+          p_max_loans: number
+          p_max_renewals: number
+          p_role: string
+        }
+        Returns: string
+      }
       set_campus_board: {
         Args: {
           p_board: Database["public"]["Enums"]["board"]
