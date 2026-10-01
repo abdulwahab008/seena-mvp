@@ -1,14 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test.describe('FR-M08: Event-Triggered Message Rules & Asynchronous Deduplication Engine', () => {
   test('Principal / Owner manages trigger rules, tests exact deduplication (AC 1), overdue rules (AC 2), non-blocking save SLA (AC 3), and re-enablement without backfill (AC 4)', async ({
     page,
   }) => {
     // 1. Sign in as Owner
+    const owner = await seedSchoolOwner('trigger-rules');
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 

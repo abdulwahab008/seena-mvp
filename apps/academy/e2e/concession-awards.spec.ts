@@ -97,7 +97,7 @@ test('an owner requests a concession award and approves it', async ({ page }) =>
   await page.getByRole('option', { name: 'Hardship Award' }).click();
   await page.getByLabel('Value').fill('10');
   await page.getByLabel('From').fill('2026-09-01');
-  await page.getByLabel('To').fill('2027-03-31');
+  await page.getByLabel('To', { exact: true }).fill('2027-03-31');
   await page.getByRole('button', { name: 'Request' }).click();
   await expect(page.getByText('Concession award requested.')).toBeVisible();
 
