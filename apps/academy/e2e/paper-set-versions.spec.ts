@@ -62,8 +62,11 @@ test('build two sets from the bank, compare them and download the Set B key', as
   // AC4: the key downloads as this set's own file.
   await page.getByTestId('render-files').click();
   await expect(page.getByTestId('download-key')).toBeVisible();
-  const key = await page.request.get(`/api/exam-papers/${setB.id}/file?kind=key`);
+  const key = await page.request.get(`/api/exam-papers/${setB.id}/file?kind=key&format=json`);
   expect(key.status()).toBe(200);
-  expect(key.headers()['content-disposition']).toContain('answer-key-physics-set-b.pdf');
-  expect(key.headers()['x-paper-set']).toBe('B');
+  const issued = (await key.json()) as { filename: string; set_code: string; url: string; expires_in: number };
+  expect(issued.filename).toBe('answer-key-physics-set-b.pdf');
+  expect(issued.set_code).toBe('B');
+  expect(issued.expires_in).toBe(900);
+  expect(issued.url).toContain('key-B.pdf');
 });

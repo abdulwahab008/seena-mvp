@@ -13,18 +13,21 @@ import { RendererUnavailableError, renderPdf, stampPdfTimestamps } from '@/lib/p
  * filed beside the Set A key.
  *
  * Who may render: whoever can see the paper (its requester or the exam office of
- * the campus), because the paper's row-level security is what the read below
- * runs under. Nothing here hands the file to anyone; FR-I08's download gate does.
+ * the campus), checked first through fn_exam_paper_file_paths(). The content is
+ * then read as the system, because a PUBLISHED paper's questions are sealed from
+ * clients until its exam window opens (FR-I08) and the sealed file still has to
+ * be produced. Rendering hands the file to nobody: FR-I08's download gate does,
+ * and records every request.
  */
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ paperId: string }> }) {
   const { paperId } = await params;
   const supabase = await supabaseServer();
-  const payload = await loadPaperPrintPayload(supabase, paperId);
-  if (!payload) return NextResponse.json({ error: 'Paper not found.' }, { status: 404 });
 
   const { data: paths, error: pathError } = await supabase.rpc('fn_exam_paper_file_paths', { p_paper_id: paperId });
   const where = paths?.[0];
   if (pathError || !where) return NextResponse.json({ error: 'Paper not available.' }, { status: 403 });
+  const payload = await loadPaperPrintPayload(supabaseServiceRole(), paperId);
+  if (!payload) return NextResponse.json({ error: 'Paper not found.' }, { status: 404 });
 
   const font = resolveNastaliqFont();
   const missing = font ? checkGlyphCoverage(collectPaperStrings(payload), parseCmapRanges(font.bytes)).missing : [];
