@@ -170,6 +170,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/grading', label: 'Grading Schemes' },
       { href: '/exams/results', label: 'Term Results & Positions' },
       { href: '/exams/annual', label: 'Annual Results' },
+      { href: '/exams/promotion', label: 'Promotion Decisions' },
     ],
   },
   {
