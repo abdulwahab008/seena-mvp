@@ -40,14 +40,14 @@ test('a librarian issues books by scan; the loan limit and the fine block are en
   await expect(page.getByTestId('selected-borrower')).toContainText('Issue Kid');
 
   for (const bc of ['BC1', 'BC2']) {
-    await page.getByLabel('Book barcode').fill(bc);
+    await page.getByTestId('issue-desk').getByLabel('Book barcode').fill(bc);
     await page.getByTestId('issue-copy').click();
     await expect(page.getByTestId('issue-ok')).toContainText('Physics 9');
   }
   await expect(page.getByTestId('issue-ok')).toContainText('2 of 2 loans in use');
   await expect(page.getByTestId('loan-row')).toHaveCount(2);
 
-  await page.getByLabel('Book barcode').fill('BC3');
+  await page.getByTestId('issue-desk').getByLabel('Book barcode').fill('BC3');
   await page.getByTestId('issue-copy').click();
   await expect(page.getByTestId('issue-error')).toContainText('2 of 2');
 
@@ -55,7 +55,7 @@ test('a librarian issues books by scan; the loan limit and the fine block are en
   await page.getByLabel('Borrower card (GR number) or name').fill(debtor.gr_number);
   await page.getByTestId('find-borrower').click();
   await expect(page.getByTestId('selected-borrower')).toContainText('Unpaid fines PKR 350');
-  await page.getByLabel('Book barcode').fill('BC3');
+  await page.getByTestId('issue-desk').getByLabel('Book barcode').fill('BC3');
   await page.getByTestId('issue-copy').click();
   await expect(page.getByTestId('issue-error')).toContainText('PKR 350');
 });
