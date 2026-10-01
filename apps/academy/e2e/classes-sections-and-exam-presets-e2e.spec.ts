@@ -1,12 +1,32 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test.describe('Classes & Sections Management and Teacher Exam Presets E2E', () => {
   test('Academic Coordinator / Owner can manage sections and configure exam presets', async ({ page }) => {
     // 1. Sign in
+    const owner = await seedSchoolOwner('classes-sections');
+    // The exam subject setup screen only renders its presets against an activated term.
+    const { data: session, error: sessionError } = await owner.admin
+      .from('academic_session')
+      .select('id')
+      .eq('tenant_id', owner.tenantId)
+      .single();
+    if (sessionError || !session) throw sessionError ?? new Error('session not seeded');
+    const { error: termError } = await owner.admin.from('exam_term').insert({
+      tenant_id: owner.tenantId,
+      campus_id: owner.campusId,
+      session_id: session.id,
+      code: 'T1',
+      name: 'First Term',
+      sequence: 1,
+      weight_bp: 10000,
+      status: 'active',
+    });
+    if (termError) throw termError;
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard$/);
 
