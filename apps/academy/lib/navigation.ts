@@ -161,6 +161,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/terms', label: 'Exam Terms' },
       { href: '/exams/subjects', label: 'Subjects & Components' },
       { href: '/exams/marks', label: 'Mark Entry' },
+      { href: '/exams/papers', label: 'Paper Generation' },
       { href: '/exams/approvals', label: 'Mark Approval' },
       { href: '/exams/unlocks', label: 'Break-Glass Unlocks' },
     ],
