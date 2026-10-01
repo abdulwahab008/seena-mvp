@@ -137,7 +137,9 @@ test.describe('FR-N08: Moderated Teacher Remarks & Guardian Portal', () => {
       await page.context().clearCookies();
       await page.goto(`/login?redirectTo=${encodeURIComponent(targetPath)}`);
       await page.waitForLoadState('networkidle');
-      await page.fill('input[type="email"]', email);
+      // The sign-in identifier takes an email or a GR number (FR-N09), so it is a
+      // type="text" input; find it by its label rather than by input type.
+      await page.getByLabel('Email').fill(email);
       await page.fill('input[type="password"]', PASSWORD);
       await page.click('button[type="submit"]');
       await page.waitForURL(`**${targetPath}**`);
