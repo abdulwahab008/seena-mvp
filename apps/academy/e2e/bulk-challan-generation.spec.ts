@@ -85,6 +85,11 @@ async function seedOwnerWithPublishedStructure() {
 test('an owner generates monthly challans for enrolled students, and a re-run is a no-op', async ({ page }) => {
   const { email, password } = await seedOwnerWithPublishedStructure();
 
+  // A freshly built fee plan line takes effect today (effective_from defaults to
+  // current_date), so the billing month under test must be the current one — a
+  // hard-coded past month legitimately has nothing to charge and is skipped.
+  const period = new Date().toISOString().slice(0, 7);
+
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
   await page.getByLabel('Email').fill(email);
@@ -111,7 +116,7 @@ test('an owner generates monthly challans for enrolled students, and a re-run is
   await page.goto('/fees/challans');
   await page.waitForLoadState('networkidle');
 
-  await page.getByTestId('challan-period-input').fill('2026-08');
+  await page.getByTestId('challan-period-input').fill(period);
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
   await expect(page.getByTestId('generate-result')).toHaveText('Generated: 1 · Skipped: 0 · Failed: 0');
@@ -119,11 +124,11 @@ test('an owner generates monthly challans for enrolled students, and a re-run is
   const challanRow = page.locator('[data-testid^="challan-row-"]');
   await expect(challanRow).toHaveCount(1);
   await expect(challanRow).toContainText('Net PKR 5,000');
-  await expect(challanRow).toContainText('2026-08-01');
+  await expect(challanRow).toContainText(`${period}-01`);
 
   // Re-running the same month is fully idempotent: the existing challan is
   // reported skipped, and no second row appears.
-  await page.getByTestId('challan-period-input').fill('2026-08');
+  await page.getByTestId('challan-period-input').fill(period);
   await page.getByTestId('generate-button').click();
   await expect(page.getByTestId('generate-result')).toHaveText('Generated: 0 · Skipped: 1 · Failed: 0');
   await expect(page.locator('[data-testid^="challan-row-"]')).toHaveCount(1);
