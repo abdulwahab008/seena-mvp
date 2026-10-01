@@ -85,6 +85,10 @@ async function seedOwnerWithPublishedStructure() {
 test('an owner configures the challan template and previews the render payload for a real challan', async ({ page }) => {
   const { email, password } = await seedOwnerWithPublishedStructure();
 
+  // The enrolment's fee plan lines take effect today, so bill the current month
+  // (a hard-coded past month has nothing to charge and the job skips the student).
+  const period = new Date().toISOString().slice(0, 7);
+
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
   await page.getByLabel('Email').fill(email);
@@ -114,7 +118,7 @@ test('an owner configures the challan template and previews the render payload f
   await page.getByTestId('save-challan-template-button').click();
   await expect(page.getByText('Challan template saved.')).toBeVisible();
 
-  await page.getByTestId('challan-period-input').fill('2026-08');
+  await page.getByTestId('challan-period-input').fill(period);
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
 
