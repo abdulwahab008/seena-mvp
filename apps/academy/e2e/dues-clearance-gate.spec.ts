@@ -135,7 +135,7 @@ test.describe('FR-T04: Dues clearance gate before TC release', () => {
 
     // 6. Login as clerk and navigate to TC issue page
     await page.goto('/login');
-    await page.fill('input[type="email"]', clerkEmail);
+    await page.getByLabel('Email').fill(clerkEmail);
     await page.fill('input[type="password"]', PASSWORD);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard**');
@@ -145,7 +145,7 @@ test.describe('FR-T04: Dues clearance gate before TC release', () => {
 
     // Select Kamran (who has dues)
     await page.click('[data-testid="cert-issue-student-trigger"]');
-    await page.click(`[data-testid^="cert-issue-student-"]`);
+    await page.getByRole('option', { name: /Kamran Akmal/ }).click();
 
     // Verify Clearance Gate detects outstanding dues
     const gateContainer = page.locator('[data-testid="clearance-gate-container"]');
