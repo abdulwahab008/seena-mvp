@@ -3,6 +3,7 @@ import {
   BadgeCheck,
   BookOpen,
   Building2,
+  Bus,
   CalendarClock,
   ClipboardCheck,
   FileBarChart,
@@ -203,6 +204,14 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/expenses/vouchers', label: 'Vouchers', feature: 'module.expenses' },
       { href: '/expenses/approvals', label: 'Approvals', feature: 'module.expenses' },
       { href: '/expenses/petty-cash', label: 'Petty Cash', feature: 'module.expenses' },
+    ],
+  },
+  {
+    id: 'transport',
+    label: 'Transport',
+    icon: Bus,
+    items: [
+      { href: '/transport/routes', label: 'Routes & Fares', feature: 'module.transport' },
     ],
   },
   {

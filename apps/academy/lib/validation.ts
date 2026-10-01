@@ -2244,3 +2244,49 @@ export const lessonPlanSchema = z.object({
   topicIds: z.array(z.string().uuid()).default([]),
 });
 export type LessonPlanInput = z.input<typeof lessonPlanSchema>;
+
+// ── Transport and hostel (FR-P01..P06, FR-Q01..Q06) ────────────────────────
+// Forms post strings; these schemas shape them before the RPC. Every business
+// rule is enforced in the database, not here.
+const tuuid = z.string().uuid('Invalid selection');
+const toptUuid = z.string().optional().transform((v) => (v && v.length > 0 ? v : undefined)).pipe(z.string().uuid('Invalid selection').optional());
+const tdate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date');
+const toptDate = z.string().optional().transform((v) => (v && v.length > 0 ? v : undefined)).pipe(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date').optional());
+const toptTime = z.string().optional().transform((v) => (v && v.length > 0 ? v : undefined)).pipe(z.string().regex(/^\d{2}:\d{2}$/, 'Use HH:MM').optional());
+const toptText = (max: number) => z.string().trim().max(max, `At most ${max} characters`).optional().transform((v) => (v && v.length > 0 ? v : undefined));
+const toptNumber = (label: string) =>
+  z.string().optional().transform((v) => (v && v.trim().length > 0 ? v.trim() : undefined)).pipe(z.string().regex(/^-?\d+(\.\d+)?$/, `Enter a valid ${label}`).transform(Number).optional());
+const trupees = (label: string) =>
+  z.string().trim().regex(/^\d+(\.\d{1,2})?$/, `Enter ${label} in rupees`).transform(Number).refine((n) => n > 0, `${label} must be above zero`);
+const tint = (label: string, min = 0, max = 10000) =>
+  z.string().trim().regex(/^\d+$/, `Enter ${label} as a whole number`).transform(Number).refine((n) => n >= min && n <= max, `${label} must be between ${min} and ${max}`);
+const tbool = z.string().optional().transform((v) => v === 'true' || v === 'on');
+
+// FR-P01
+export const transportRouteSchema = z.object({
+  campusId: tuuid,
+  code: z.string().trim().min(1, 'Enter a route code').max(20),
+  name: z.string().trim().min(1, 'Enter a route name').max(120),
+  shift: z.enum(['morning', 'afternoon'], { message: 'Choose a shift' }),
+  active: tbool,
+});
+export const fareSlabSchema = z.object({
+  campusId: tuuid,
+  code: z.string().trim().min(1, 'Enter a slab code').max(20),
+  name: z.string().trim().min(1, 'Enter a slab name').max(80),
+  amount: trupees('Monthly fare'),
+  effectiveFrom: tdate,
+});
+export const transportStopSchema = z.object({
+  routeId: tuuid,
+  name: z.string().trim().min(1, 'Enter a stop name').max(120),
+  nameUr: toptText(120),
+  lat: toptNumber('latitude'),
+  lng: toptNumber('longitude'),
+  pickupTime: toptTime,
+  dropTime: toptTime,
+  fareSlabId: toptUuid,
+  seq: toptNumber('position'),
+});
+// ── end of transport and hostel schemas ──
+void [toptDate, tint];
