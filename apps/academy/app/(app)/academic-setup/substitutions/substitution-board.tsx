@@ -26,7 +26,8 @@ function todayIso() {
 // AC's own Notes: leave -> 'leave', suspension has no attendance-status
 // equivalent so it's never auto-picked, only 'other'/'official_duty' are
 // reachable from a manual absence mark.
-function defaultReason(status: string): 'leave' | 'other' {
+function defaultReason(status: string): 'leave' | 'suspension' | 'other' {
+  if (status === 'suspended') return 'suspension'; // FR-D15
   return status === 'on_leave' ? 'leave' : 'other';
 }
 
@@ -50,7 +51,7 @@ function CandidateRow({ candidate, onPick, disabled }: { candidate: Candidate; o
   );
 }
 
-function PeriodCard({ campusId, period, subDate, onAssigned }: { campusId: string; period: PeriodRow; subDate: string; onAssigned: () => void }) {
+function PeriodCard({ campusId, period, subDate, reason, onAssigned }: { campusId: string; period: PeriodRow; subDate: string; reason: 'leave' | 'suspension' | 'other'; onAssigned: () => void }) {
   const [pending, startTransition] = useTransition();
   const [expanded, setExpanded] = useState(false);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -73,7 +74,7 @@ function PeriodCard({ campusId, period, subDate, onAssigned }: { campusId: strin
 
   const onPick = (staffId: string) => {
     startTransition(async () => {
-      const result = await assignSubstitution({ slotId: period.slotId, subDate, substituteStaffId: staffId, reason: 'other' });
+      const result = await assignSubstitution({ slotId: period.slotId, subDate, substituteStaffId: staffId, reason });
       if (result.error) {
         toast.error(result.error);
         return;
@@ -206,6 +207,7 @@ export function SubstitutionBoard({ campusId }: { campusId: string }) {
                   data-testid={`absent-teacher-${t.fullName.replace(/\s+/g, '-')}`}
                 >
                   {t.fullName}
+                  {t.status === 'suspended' ? ' (suspended)' : ''}
                 </Button>
               ))}
             </div>
@@ -221,7 +223,7 @@ export function SubstitutionBoard({ campusId }: { campusId: string }) {
           ) : (
             <div className="space-y-2">
               {periods.map((p) => (
-                <PeriodCard key={p.slotId} campusId={campusId} period={p} subDate={subDate} onAssigned={refreshPeriods} />
+                <PeriodCard key={p.slotId} campusId={campusId} period={p} subDate={subDate} reason={defaultReason(selectedTeacher.status)} onAssigned={refreshPeriods} />
               ))}
             </div>
           )}

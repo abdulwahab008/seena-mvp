@@ -42,6 +42,14 @@ export async function loadAbsentTeachers(campusId: string, date: string): Promis
     if (staff?.user_id) teachers.push({ staffUserId: staff.user_id, fullName: staff.full_name, status: r.status });
   }
 
+  // FR-D15: a teacher on suspension is unavailable exactly like an absent one,
+  // so their periods must be coverable from the same screen (the call carries
+  // no disciplinary detail, only that they are suspended).
+  const { data: suspended } = await supabase.rpc('get_suspended_teachers', { p_campus_id: campusId, p_date: date });
+  for (const s of suspended ?? []) {
+    if (!teachers.some((t) => t.staffUserId === s.staff_user_id)) teachers.push({ staffUserId: s.staff_user_id, fullName: s.full_name, status: 'suspended' });
+  }
+
   return { error: null, teachers };
 }
 
