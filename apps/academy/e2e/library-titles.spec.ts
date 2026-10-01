@@ -32,7 +32,8 @@ test('a librarian catalogues titles, duplicate ISBNs are refused, Urdu search fi
   await expect(page.getByTestId('title-row')).toHaveCount(3);
 
   await page.getByTestId('title-search').fill('معاشرتی علوم');
-  await page.getByRole('button', { name: 'Search' }).click();
+  // scope to the catalogue search form: the app header also has a global "Search" button
+  await page.locator('form', { has: page.getByTestId('title-search') }).getByRole('button', { name: 'Search' }).click();
   await expect(page.getByTestId('title-row')).toHaveCount(1);
   await expect(page.getByTestId('title-row')).toContainText('Pakistan Studies 9');
 });
