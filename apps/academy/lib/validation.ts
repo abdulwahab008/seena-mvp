@@ -2329,3 +2329,17 @@ export const settlementLineSchema = z.object({
   amount: z.string().trim().min(1, 'Enter the amount'),
   sign: z.enum(['1', '-1']),
 });
+
+// FR-D18: staff certificates.
+export const STAFF_CERTIFICATE_TYPES = ['experience', 'service', 'noc'] as const;
+export const issueCertificateSchema = z.object({
+  staffId: z.string().uuid({ message: 'Choose a staff member' }),
+  certType: z.enum(STAFF_CERTIFICATE_TYPES, { message: 'Choose the certificate type' }),
+  overrideReason: z.string().trim().max(500).optional(),
+});
+export const certificateTemplateSchema = z.object({
+  certType: z.enum(STAFF_CERTIFICATE_TYPES),
+  title: z.string().trim().min(3, 'Enter a title').max(120),
+  bodyHtml: z.string().trim().min(20, 'The wording is too short').max(8000),
+  numberFormat: z.string().trim().max(60).refine((v) => v.includes('{seq4}'), 'The number format must contain {seq4}'),
+});
