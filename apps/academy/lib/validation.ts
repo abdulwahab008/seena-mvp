@@ -2301,6 +2301,14 @@ export const saleReturnSchema = z.object({
 });
 export type SaleReturnInput = z.input<typeof saleReturnSchema>;
 
+// FR-T07: School Leaving Certificate. The database decides eligibility (terminal class, completion status).
+export const issueLeavingCertificateSchema = z.object({
+  enrolmentId: z.string().uuid('Choose the leaving student'),
+  boardCode: boardCodeSchema.optional(),
+  language: z.enum(CERTIFICATE_LANGUAGES),
+});
+export type IssueLeavingCertificateInput = z.infer<typeof issueLeavingCertificateSchema>;
+
 // FR-R03: fixed asset register and depreciation. Rupees on the screen, paisa in the database.
 export const ASSET_CATEGORIES = ['furniture', 'it', 'lab', 'vehicle', 'building', 'other'] as const;
 export const assetSchema = z

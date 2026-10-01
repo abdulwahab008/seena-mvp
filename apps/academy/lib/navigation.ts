@@ -227,6 +227,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/certificates/issue', label: 'Issue Transfer Certificate' },
       { href: '/certificates/issue/character', label: 'Issue Character Certificate' },
+      { href: '/certificates/issue/leaving', label: 'Issue Leaving Certificate' },
       { href: '/certificates/register', label: 'Register' },
       { href: '/certificates/templates', label: 'Templates' },
       { href: '/certificates/serials', label: 'Serial Numbers' },
