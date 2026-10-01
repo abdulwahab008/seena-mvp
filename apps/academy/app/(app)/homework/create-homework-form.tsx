@@ -34,6 +34,9 @@ export function CreateHomeworkForm({ assignments }: { assignments: Assignment[] 
       sectionId: assignments[0]?.sectionId,
       subjectId: assignments[0]?.subjectId,
       assignedDate: todayIso(),
+      // '' not undefined: the DatePicker is only controlled while its value is a string, so an
+      // undefined (reset) value would leave the previous date on screen while the form is empty.
+      dueDate: '',
     },
   });
 
@@ -61,7 +64,7 @@ export function CreateHomeworkForm({ assignments }: { assignments: Assignment[] 
         // alone won't touch it — left checked, the next assignment would
         // silently publish too instead of defaulting back to draft.
         setPublishNow(false);
-        reset({ sectionId: values.sectionId, subjectId: values.subjectId, assignedDate: todayIso() });
+        reset({ sectionId: values.sectionId, subjectId: values.subjectId, assignedDate: todayIso(), dueDate: '' });
       }
     });
   });
