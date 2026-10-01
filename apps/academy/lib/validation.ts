@@ -2284,3 +2284,17 @@ export const examSettingsSchema = z.object({
   invigilationMaxDuties: z.number().int().min(1).max(100).optional(),
 });
 export type ExamSettingsInput = z.infer<typeof examSettingsSchema>;
+
+// FR-I10: invigilation roster.
+export const invigilationExclusionSchema = z.object({
+  examTermId: z.string().uuid(),
+  staffUserId: z.string().uuid({ message: 'Choose a staff member' }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+  reason: z.string().trim().min(1, 'Enter a reason').max(300),
+});
+export type InvigilationExclusionInput = z.infer<typeof invigilationExclusionSchema>;
+export const invigilationDutySchema = z.object({
+  slotId: z.string().uuid(),
+  staffUserId: z.string().uuid({ message: 'Choose a staff member' }),
+});
+export type InvigilationDutyInput = z.infer<typeof invigilationDutySchema>;
