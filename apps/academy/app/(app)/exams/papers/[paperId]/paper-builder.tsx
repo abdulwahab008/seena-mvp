@@ -54,11 +54,33 @@ export function ReplaceQuestionForm({ paperId, itemId }: { paperId: string; item
   );
 }
 
-/** FR-I07: render this set's paper and its own key, then download them; every name carries the set code. */
+/**
+ * FR-I07 / FR-I08: render this set's paper and its own key, then fetch them. Each
+ * fetch goes through the sealed-custody gate: it is recorded, refused before the
+ * release window, and otherwise answered with a 15-minute signed URL.
+ */
 export function PaperFilesPanel({ paperId, setCode }: { paperId: string; setCode: string }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [rendered, setRendered] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const fetchFile = (kind: 'paper' | 'key') =>
+    startTransition(async () => {
+      const res = await fetch(`/api/exam-papers/${paperId}/file?kind=${kind}&format=json`);
+      const body = (await res.json().catch(() => null)) as { url?: string; error?: string; filename?: string } | null;
+      if (!res.ok || !body?.url) {
+        setNotice(null);
+        setError(body?.error ?? 'Could not get the file.');
+        router.refresh();
+        return;
+      }
+      setError(null);
+      setNotice(`Link issued for ${body.filename} (valid for 15 minutes).`);
+      router.refresh();
+      window.location.assign(body.url);
+    });
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
@@ -74,25 +96,22 @@ export function PaperFilesPanel({ paperId, setCode }: { paperId: string; setCode
                 return;
               }
               setError(null);
-              setRendered(true);
+              setNotice(null);
               toast.success(`Set ${setCode} paper and answer key rendered.`);
             })
           }
         >
           Render Set {setCode} paper and key
         </Button>
-        {rendered && (
-          <>
-            <a className="text-sm underline" href={`/api/exam-papers/${paperId}/file?kind=paper`} data-testid="download-paper">
-              Download Set {setCode} paper
-            </a>
-            <a className="text-sm underline" href={`/api/exam-papers/${paperId}/file?kind=key`} data-testid="download-key">
-              Download Set {setCode} answer key
-            </a>
-          </>
-        )}
+        <Button variant="ghost" disabled={pending} onClick={() => fetchFile('paper')} data-testid="download-paper">
+          Download Set {setCode} paper
+        </Button>
+        <Button variant="ghost" disabled={pending} onClick={() => fetchFile('key')} data-testid="download-key">
+          Download Set {setCode} answer key
+        </Button>
       </div>
-      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      {notice && <p className="text-sm text-muted-foreground" data-testid="download-notice">{notice}</p>}
+      {error && <p role="alert" className="text-sm text-destructive" data-testid="download-error">{error}</p>}
     </div>
   );
 }

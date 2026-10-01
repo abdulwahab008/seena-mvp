@@ -82,7 +82,11 @@ select is((public.publish_exam_paper(:'p9_t1'::uuid) ->> 'flagged_count')::int, 
 select public.publish_exam_paper(:'p10_t1'::uuid);
 select is((select count(*) from public.question_bank_item where tenant_id = :'tenant_id'), 9::bigint, 'publishing puts every question in the bank');
 select is((select count(*) from public.question_usage where exam_paper_id = :'p9_t1'::uuid and class_level_id = :'class9'::uuid), 8::bigint, 'and records Class 9''s use of each of the 8');
+-- (a published paper's questions are sealed from clients until its exam window opens - FR-I08 - so read the links as the owner of the data)
+reset role;
 select is((select count(*) from public.exam_paper_item where paper_id = :'p9_t1'::uuid and bank_item_id is not null), 8::bigint, 'the paper''s questions are linked to their bank items');
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :'ec_uid', 'tenant_id', :'tenant_id', 'app_role', 'exam_controller', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is((select status from public.exam_paper where id = :'p9_t1'::uuid), 'published', 'the paper is published');
 select throws_ok(format($$ select public.publish_exam_paper(%L) $$, :'p9_t1'), 'PAPER_NOT_DRAFT', 'a published paper cannot be published again');
 

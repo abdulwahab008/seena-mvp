@@ -41,6 +41,11 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ pa
   const report = reportRows ?? [];
   const { data: divergence } = baseline ? await supabase.rpc('fn_paper_set_divergence', { p_paper_a: baseline.id, p_paper_b: paper.id }) : { data: null };
 
+  const { data: releaseRows } = paper.status === 'published' ? await supabase.rpc('fn_paper_release_info', { p_paper_id: paperId }) : { data: [] };
+  const release = releaseRows?.[0] ?? null;
+  const sealed = paper.status === 'published' && !!release && !release.window_open;
+  const { data: logRows } = scope.canWrite ? await supabase.rpc('fn_paper_access_log', { p_paper_id: paperId }) : { data: [] };
+
   const { data: override } = await supabase.from('paper_publish_override').select('reason, flagged_count, created_at, overridden_by').eq('exam_paper_id', paperId).maybeSingle();
   const { data: overrider } = override ? await supabase.from('app_user').select('full_name').eq('user_id', override.overridden_by).maybeSingle() : { data: null };
 
@@ -65,6 +70,16 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ pa
           {flags.size > 0
             ? `${flags.size} question${flags.size === 1 ? '' : 's'} flagged: this class saw ${flags.size === 1 ? 'it' : 'them'} within the last ${settings?.question_cooldown_terms ?? 4} terms.`
             : 'No question in this draft was used by this class within the cooldown.'}
+        </div>
+      )}
+
+      {paper.status === 'published' && (
+        <div className={sealed || !release?.release_at ? 'rounded-md border border-amber-500 bg-amber-50 p-3 text-sm text-amber-900' : 'rounded-md border p-3 text-sm text-muted-foreground'} role="status" data-testid="seal-status">
+          {!release?.release_at
+            ? 'Sealed: this paper has no scheduled exam, so it is not released.'
+            : sealed
+              ? `Sealed until ${new Date(release.release_at).toLocaleString('en-GB', { timeZone: scope.campus?.timezone ?? 'Asia/Karachi', weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })} (${release.offset_minutes} minutes before the exam). Its questions and files cannot be read before then.`
+              : 'Released: the release window is open. Every download is recorded.'}
         </div>
       )}
 
@@ -170,6 +185,24 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ pa
           <CardContent className="space-y-2 text-sm">
             <p className="text-muted-foreground">The paper and its answer key are stored per set ({`set-${paper.set_code}.pdf`}, {`key-${paper.set_code}.pdf`}); the key you download is always this set&rsquo;s own.</p>
             <PaperFilesPanel paperId={paper.id} setCode={paper.set_code} />
+          </CardContent>
+        </Card>
+      )}
+
+      {scope.canWrite && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Access log</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm" data-testid="access-log">
+            <p className="text-muted-foreground">Every attempt to obtain this paper or its key, oldest first. The log is append-only.</p>
+            {(logRows ?? []).length === 0 && <p className="text-muted-foreground">No one has asked for this paper yet.</p>}
+            {(logRows ?? []).map((l, i) => (
+              <p key={i} data-testid="access-row" data-outcome={l.outcome}>
+                {new Date(l.accessed_at).toLocaleString('en-GB', { timeZone: scope.campus?.timezone ?? 'Asia/Karachi', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' })} · {l.user_name} ({l.user_role.replace('_', ' ')}) · {l.kind} ·{' '}
+                <Badge variant={l.outcome === 'granted' ? 'success' : 'destructive'}>{l.outcome}</Badge> ({l.reason.replace('_', ' ')}){l.ip ? ` · ${l.ip}` : ''}
+              </p>
+            ))}
           </CardContent>
         </Card>
       )}
