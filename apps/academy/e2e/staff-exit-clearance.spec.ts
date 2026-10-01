@@ -35,7 +35,8 @@ test('an exit is blocked until every department signs off, then access is revoke
   await page.getByTestId('waive-it_assets').click();
   await expect(page.getByTestId('clearance-it_assets')).toContainText('waived');
   await page.getByTestId('clear-id_card_uniform').click();
-  await expect(page.getByTestId('clearance-id_card_uniform')).toContainText('cleared');
+  // Not just 'cleared': the button itself is labelled "Mark cleared", so that would pass before the action ran.
+  await expect(page.getByTestId('clearance-id_card_uniform')).toContainText(/· cleared \d/);
 
   const exitUrl = page.url();
   const clearAs = async (email: string, codes: string[]) => {
@@ -45,7 +46,9 @@ test('an exit is blocked until every department signs off, then access is revoke
     await p.goto(exitUrl);
     for (const code of codes) {
       await p.getByTestId(`clear-${code}`).click();
-      await expect(p.getByTestId(`clearance-${code}`)).toContainText('cleared');
+      // Wait for the server to record the clearance (the row gains its "· cleared <date>" note) before the
+      // context is closed; "Mark cleared" on the button would satisfy a plain 'cleared' match immediately.
+      await expect(p.getByTestId(`clearance-${code}`)).toContainText(/· cleared \d/);
     }
     await ctx.close();
   };
