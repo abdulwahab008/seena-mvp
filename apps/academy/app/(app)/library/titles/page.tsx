@@ -2,6 +2,7 @@ import { libraryViewer } from '@/lib/library-session';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CoverUpload, TitleForm } from './title-forms';
+import { ReserveSelfButton } from '../reservations/reservation-forms';
 
 type SearchParams = { q?: string; edit?: string };
 
@@ -93,6 +94,7 @@ export default async function LibraryTitlesPage({ searchParams }: { searchParams
                   <p className="text-xs" data-testid="title-stock">
                     {availability.has(t.id) ? `${availability.get(t.id)!.available} of ${availability.get(t.id)!.total} available` : 'No copies registered'}
                   </p>
+                  {!isStaff && availability.get(t.id) && availability.get(t.id)!.total > 0 && availability.get(t.id)!.available === 0 && <ReserveSelfButton titleId={t.id} />}
                 </div>
               </div>
               {isStaff && (

@@ -13957,6 +13957,93 @@ export type Database = {
           },
         ]
       }
+      library_reservation: {
+        Row: {
+          borrower_id: string
+          borrower_role: string
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          held_at: string | null
+          held_copy_id: string | null
+          hold_expires_at: string | null
+          id: string
+          queued_at: string
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["library_reservation_status"]
+          tenant_id: string
+          title_id: string
+        }
+        Insert: {
+          borrower_id: string
+          borrower_role: string
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          held_at?: string | null
+          held_copy_id?: string | null
+          hold_expires_at?: string | null
+          id?: string
+          queued_at?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["library_reservation_status"]
+          tenant_id: string
+          title_id: string
+        }
+        Update: {
+          borrower_id?: string
+          borrower_role?: string
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          held_at?: string | null
+          held_copy_id?: string | null
+          hold_expires_at?: string | null
+          id?: string
+          queued_at?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["library_reservation_status"]
+          tenant_id?: string
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_reservation_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservation_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_reservation_held_copy_id_fkey"
+            columns: ["held_copy_id"]
+            isOneToOne: false
+            referencedRelation: "library_copy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservation_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservation_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "library_title"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_title: {
         Row: {
           author: string | null
@@ -27032,6 +27119,59 @@ export type Database = {
           },
         ]
       }
+      v_library_queue: {
+        Row: {
+          borrower_id: string | null
+          campus_id: string | null
+          held_copy_id: string | null
+          hold_expires_at: string | null
+          id: string | null
+          queue_position: number | null
+          queued_at: string | null
+          status:
+            | Database["public"]["Enums"]["library_reservation_status"]
+            | null
+          tenant_id: string | null
+          title_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_reservation_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservation_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "library_reservation_held_copy_id_fkey"
+            columns: ["held_copy_id"]
+            isOneToOne: false
+            referencedRelation: "library_copy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservation_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_reservation_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "library_title"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_mark_unlock_exception: {
         Row: {
           approvers: string[] | null
@@ -29616,6 +29756,10 @@ export type Database = {
         Args: { p_application_id: string }
         Returns: undefined
       }
+      cancel_reservation: {
+        Args: { p_reservation_id: string }
+        Returns: undefined
+      }
       cancel_student_leave: { Args: { p_leave_id: string }; Returns: undefined }
       certificate_merge_fields: {
         Args: { p_body_html: string }
@@ -30598,6 +30742,7 @@ export type Database = {
         Returns: number
       }
       expire_payment_intents: { Args: { p_as_of?: string }; Returns: number }
+      expire_reservation_holds: { Args: never; Returns: number }
       expire_stale_attempts: {
         Args: { p_cutoff_interval?: string; p_tenant_id?: string }
         Returns: {
@@ -31951,6 +32096,10 @@ export type Database = {
         }
         Returns: string
       }
+      promote_reservation: {
+        Args: { p_campus_id: string; p_title_id: string }
+        Returns: number
+      }
       propose_fee_plan_override: {
         Args: {
           p_line_id: string
@@ -32310,6 +32459,7 @@ export type Database = {
         Args: { p_ctx: Json; p_lang?: string; p_version_id: string }
         Returns: string
       }
+      renew_loan: { Args: { p_loan_id: string }; Returns: string }
       reopen_ticket: {
         Args: { p_reason: string; p_ticket_id: string }
         Returns: boolean
@@ -32405,6 +32555,14 @@ export type Database = {
           p_mime_type: string
         }
         Returns: string
+      }
+      reserve_title: {
+        Args: {
+          p_borrower_id?: string
+          p_campus_id?: string
+          p_title_id: string
+        }
+        Returns: Json
       }
       resolve_attendance_holiday: {
         Args: { p_campus_id: string; p_date: string }
@@ -33898,6 +34056,12 @@ export type Database = {
         | "lost"
         | "written_off"
       library_fine_status: "outstanding" | "settled" | "waived"
+      library_reservation_status:
+        | "waiting"
+        | "held"
+        | "collected"
+        | "lapsed"
+        | "cancelled"
       mark_component_code:
         | "theory"
         | "practical"
