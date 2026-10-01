@@ -10,6 +10,9 @@ try {
   // Missing .env.local (e.g. CI providing real env vars directly) is fine.
 }
 
+// E2E_PORT / NEXT_DIST_DIR let several runs share one machine (one `next build` output per run).
+const PORT = process.env.E2E_PORT ?? '3011';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -20,13 +23,13 @@ export default defineConfig({
   // locally) prints nothing to disk.
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
-    baseURL: 'http://127.0.0.1:3011',
+    baseURL: `http://127.0.0.1:${PORT}`,
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'pnpm start',
-    url: 'http://127.0.0.1:3011',
+    command: `pnpm exec next start --port ${PORT}`,
+    url: `http://127.0.0.1:${PORT}`,
     // Refusing to bind a busy port fails loudly unless REUSE_EXISTING_SERVER is explicitly set
     reuseExistingServer: process.env.REUSE_EXISTING_SERVER === 'true',
     timeout: 60_000,
