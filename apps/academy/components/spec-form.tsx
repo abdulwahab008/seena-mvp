@@ -122,16 +122,25 @@ export function SpecForm({
   );
 }
 
-/** A one-click row action (move, close, approve) that reports failures inline. */
-export function ActionButton({
+/**
+ * A one-click row action (move, close, approve) that reports failures inline.
+ *
+ * Server pages must hand this a server action reference plus its serialisable
+ * `args` (`action={vacate} args={[row.id]}`): React cannot serialise an inline
+ * arrow function across the server/client boundary. Client components may still
+ * pass a closure (`action={() => moveStop(...)}`) with no `args`.
+ */
+export function ActionButton<A extends unknown[] = []>({
   label,
   action,
+  args,
   variant = 'outline',
   testId,
   confirm,
 }: {
   label: string;
-  action: () => Promise<SpecResult>;
+  action: (...args: A) => Promise<SpecResult>;
+  args?: A;
   variant?: 'outline' | 'default' | 'destructive' | 'ghost';
   testId?: string;
   confirm?: string;
@@ -150,7 +159,7 @@ export function ActionButton({
         onClick={() => {
           if (confirm && !window.confirm(confirm)) return;
           startTransition(async () => {
-            const r = await action();
+            const r = await action(...((args ?? []) as A));
             setError(r.error);
             if (!r.error) {
               if (r.message) toast.success(r.message);
