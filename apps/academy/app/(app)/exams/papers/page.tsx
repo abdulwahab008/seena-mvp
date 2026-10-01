@@ -3,7 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope, one } from '@/lib/exams/office-scope';
-import { JobPoller, PatternForm, RequestForm, RetryButton } from './paper-forms';
+import { CooldownSettingsForm, JobPoller, PatternForm, RequestForm, RetryButton } from './paper-forms';
 
 /**
  * FR-I05. Ask Seena Exams for a question paper from a board pattern and a list
@@ -48,6 +48,7 @@ export default async function PapersPage() {
   const { data: paperList } = await supabase.from('exam_paper').select('id, job_id, set_code, status, title, total_marks, created_at').order('created_at', { ascending: false }).limit(60);
   const papersByJob = new Map<string, { id: string; set_code: string; status: string }[]>();
   for (const p of paperList ?? []) papersByJob.set(p.job_id, [...(papersByJob.get(p.job_id) ?? []), p]);
+  const { data: cooldown } = scope.campus ? await supabase.from('exam_settings').select('question_cooldown_terms, cooldown_mode').eq('campus_id', scope.campus.id).maybeSingle() : { data: null };
   const active = (jobs ?? []).some((j) => j.status === 'queued' || j.status === 'running');
 
   return (
@@ -124,6 +125,20 @@ export default async function PapersPage() {
           })}
         </CardContent>
       </Card>
+
+      {scope.canWrite && scope.campus && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Question reuse cooldown</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              A question a class has already seen within this many terms is flagged amber in the paper builder. By default a flagged paper can still be published; choose &ldquo;block&rdquo; to require an override reason.
+            </p>
+            <CooldownSettingsForm campusId={scope.campus.id} terms={cooldown?.question_cooldown_terms ?? 4} mode={(cooldown?.cooldown_mode as 'warn' | 'block' | undefined) ?? 'warn'} />
+          </CardContent>
+        </Card>
+      )}
 
       {scope.canWrite && (
         <Card>

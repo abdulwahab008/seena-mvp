@@ -4,7 +4,19 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
 import { createPaperJob, paperRequestError } from '@/lib/exams/paper-request';
-import { boardPatternSchema, paperRequestSchema, parseChapters, type BoardPatternInput, type PaperRequestFormInput } from '@/lib/validation';
+import {
+  boardPatternSchema,
+  cooldownSettingsSchema,
+  paperRequestSchema,
+  parseChapters,
+  publishPaperSchema,
+  replaceQuestionSchema,
+  type BoardPatternInput,
+  type CooldownSettingsInput,
+  type PaperRequestFormInput,
+  type PublishPaperInput,
+  type ReplaceQuestionInput,
+} from '@/lib/validation';
 
 /**
  * FR-I05. A request is one RPC that writes a queued job row; the generation
@@ -36,6 +48,52 @@ export async function retryJob(jobId: string): Promise<Result> {
   const supabase = await supabaseServer();
   const { error } = await supabase.rpc('retry_paper_job', { p_job_id: jobId });
   if (error) return { error: paperRequestError(error.message) };
+  revalidatePath(PATH);
+  return { error: null };
+}
+
+// FR-I06.
+function publishError(message: string, details?: string | null): string {
+  if (message.includes('COOLDOWN_BLOCKED')) return `${details ?? 'Some questions were used by this class recently.'} Enter an override reason to publish anyway.`;
+  if (message.includes('OVERRIDE_REASON_TOO_SHORT')) return 'The override reason needs at least 10 characters.';
+  if (message.includes('PAPER_NOT_DRAFT')) return 'Only a draft paper can be changed or published.';
+  if (message.includes('PAPER_NOT_FOUND')) return 'Paper not found.';
+  if (message.includes('QUESTION_TEXT_INVALID')) return 'The question must be between 1 and 2000 characters.';
+  if (message.includes('QUESTION_NOT_FOUND')) return 'Question not found.';
+  return paperRequestError(message);
+}
+
+export async function publishPaper(input: PublishPaperInput): Promise<Result & { flagged?: number; overridden?: boolean }> {
+  const p = publishPaperSchema.safeParse(input);
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('publish_exam_paper', { p_paper_id: p.data.paperId, p_override_reason: p.data.overrideReason || undefined });
+  if (error) return { error: publishError(error.message, error.details) };
+  revalidatePath(PATH);
+  revalidatePath(`${PATH}/${p.data.paperId}`);
+  const result = data as unknown as { flagged_count: number; overridden: boolean };
+  return { error: null, flagged: result.flagged_count, overridden: result.overridden };
+}
+
+export async function replaceQuestion(paperId: string, input: ReplaceQuestionInput): Promise<Result> {
+  const p = replaceQuestionSchema.safeParse(input);
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('replace_paper_question', { p_item_id: p.data.itemId, p_text: p.data.text });
+  if (error) return { error: publishError(error.message) };
+  revalidatePath(`${PATH}/${paperId}`);
+  return { error: null };
+}
+
+export async function saveCooldownSettings(input: CooldownSettingsInput): Promise<Result> {
+  const p = cooldownSettingsSchema.safeParse(input);
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('save_exam_settings', {
+    p_campus_id: p.data.campusId,
+    p_settings: { question_cooldown_terms: p.data.questionCooldownTerms, cooldown_mode: p.data.cooldownMode },
+  });
+  if (error) return { error: error.message.includes('FORBIDDEN') ? 'You do not have permission to do that.' : 'One of the settings is out of range.' };
   revalidatePath(PATH);
   return { error: null };
 }
