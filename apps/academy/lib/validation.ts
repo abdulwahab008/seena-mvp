@@ -3035,3 +3035,186 @@ export const postHostelChargesSchema = z.object({ month: tdate });
 export const hostelDepositRefundSchema = z.object({ depositId: tuuid, voucherNo: z.string().trim().min(3, 'Enter the refund voucher number').max(40) });
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];
+// FR-R01: inventory item master, stores and stock movements. Amounts are
+// entered in rupees and converted to paisa at the server-action boundary.
+export const INV_CATEGORIES = ['uniform', 'textbook', 'stationery', 'consumable'] as const;
+export const STOCK_REASON_CODES = ['SHRINKAGE', 'DAMAGE', 'EXPIRED', 'FOUND', 'COUNT_ERROR', 'OTHER'] as const;
+const nonNegNumber = (msg: string) => z.coerce.number({ message: msg }).min(0, msg);
+export const invItemSchema = z.object({
+  itemCode: z.string().trim().min(1, 'Enter an item code').max(40),
+  name: z.string().trim().min(1, 'Enter an item name').max(200),
+  category: z.enum(INV_CATEGORIES, { message: 'Choose a category' }),
+  uom: z.string().trim().max(20).optional(),
+  size: z.string().trim().max(20).optional(),
+  classId: z.string().uuid().optional().or(z.literal('')),
+  subjectId: z.string().uuid().optional().or(z.literal('')),
+  reorderLevel: nonNegNumber('Enter a reorder level').default(0),
+  salePricePkr: nonNegNumber('Enter a sale price').default(0),
+});
+export type InvItemInput = z.input<typeof invItemSchema>;
+export const invStoreSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  name: z.string().trim().min(1, 'Enter a store name').max(100),
+});
+export type InvStoreInput = z.input<typeof invStoreSchema>;
+export const stockReceiptSchema = z.object({
+  storeId: z.string().uuid('Choose a store'),
+  itemId: z.string().uuid('Choose an item'),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+  unitCostPkr: nonNegNumber('Enter the unit cost').optional(),
+});
+export type StockReceiptInput = z.input<typeof stockReceiptSchema>;
+export const stockTakeSchema = z.object({
+  storeId: z.string().uuid('Choose a store'),
+  itemId: z.string().uuid('Choose an item'),
+  counted: z.coerce.number({ message: 'Enter the counted quantity' }).min(0, 'Count cannot be negative'),
+  reasonCode: z.enum(STOCK_REASON_CODES, { message: 'Choose a reason' }),
+});
+export type StockTakeInput = z.input<typeof stockTakeSchema>;
+
+// FR-R02: counter sale and returns.
+export const saleLineSchema = z.object({
+  itemId: z.string().uuid(),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+  fromPackage: z.boolean().default(false),
+});
+export const saleSchema = z.object({
+  studentId: z.string().uuid('Choose a student'),
+  settlement: z.enum(['cash', 'fee_ledger'], { message: 'Choose how the sale is settled' }),
+  lines: z.array(saleLineSchema).min(1, 'Add at least one item'),
+});
+export type SaleInput = z.input<typeof saleSchema>;
+export const saleReturnSchema = z.object({
+  saleId: z.string().uuid('Choose a receipt'),
+  itemId: z.string().uuid('Choose an item'),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+});
+export type SaleReturnInput = z.input<typeof saleReturnSchema>;
+
+// FR-T07: School Leaving Certificate. The database decides eligibility (terminal class, completion status).
+export const issueLeavingCertificateSchema = z.object({
+  enrolmentId: z.string().uuid('Choose the leaving student'),
+  boardCode: boardCodeSchema.optional(),
+  language: z.enum(CERTIFICATE_LANGUAGES),
+});
+export type IssueLeavingCertificateInput = z.infer<typeof issueLeavingCertificateSchema>;
+
+// FR-T06: bonafide certificate request. "Other" needs a real justification (15+ characters), matching the table's CHECK.
+export const BONAFIDE_PURPOSES = ['passport', 'bank', 'embassy/visa', 'school_admission', 'scholarship', 'other'] as const;
+export const certificateRequestSchema = z
+  .object({
+    studentId: z.string().uuid('Choose a child'),
+    purpose: z.enum(BONAFIDE_PURPOSES, { message: 'Choose what the certificate is for' }),
+    justification: z.string().trim().max(500).optional(),
+  })
+  .refine((v) => v.purpose !== 'other' || (v.justification ?? '').length >= 15, {
+    message: 'Please explain in at least 15 characters',
+    path: ['justification'],
+  });
+export type CertificateRequestInput = z.input<typeof certificateRequestSchema>;
+export const certificateRequestDecisionSchema = z.object({
+  requestId: z.string().uuid(),
+  decision: z.enum(['approve', 'reject']),
+  reason: z.string().trim().max(500).optional(),
+  language: z.enum(['en', 'ur']).default('en'),
+});
+export type CertificateRequestDecisionInput = z.input<typeof certificateRequestDecisionSchema>;
+
+// FR-R03: fixed asset register and depreciation. Rupees on the screen, paisa in the database.
+export const ASSET_CATEGORIES = ['furniture', 'it', 'lab', 'vehicle', 'building', 'other'] as const;
+export const assetSchema = z
+  .object({
+    campusId: z.string().uuid('Choose a campus'),
+    tagNo: z.string().trim().min(1, 'Enter a tag number').max(40),
+    name: z.string().trim().min(1, 'Enter a name').max(200),
+    category: z.enum(ASSET_CATEGORIES, { message: 'Choose a category' }),
+    purchasedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the purchase date'),
+    costPkr: z.coerce.number({ message: 'Enter the cost' }).positive('Cost must be more than zero'),
+    lifeMonths: z.coerce.number({ message: 'Enter the useful life in months' }).int('Whole months only').min(1).max(1200),
+    salvagePkr: z.coerce.number({ message: 'Enter the salvage value' }).min(0).default(0),
+    method: z.enum(['SL', 'RB'], { message: 'Choose a method' }),
+    rate: z.coerce.number().min(0).max(100).optional().or(z.literal('')),
+    vehicleId: z.string().uuid().optional().or(z.literal('')),
+  })
+  .refine((v) => v.salvagePkr <= v.costPkr, { message: 'Salvage cannot exceed the cost', path: ['salvagePkr'] })
+  .refine((v) => v.method !== 'RB' || (typeof v.rate === 'number' && v.rate > 0), { message: 'Enter the annual rate for reducing balance', path: ['rate'] });
+export type AssetInput = z.input<typeof assetSchema>;
+export const depreciationRunSchema = z.object({ period: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Choose a month') });
+// FR-R04: custody. The custodian is one select whose value is "<type>:<uuid>".
+export const custodyIssueSchema = z.object({
+  assetId: z.string().uuid('Choose an asset'),
+  custodian: z.string().regex(/^(department|room|staff):[0-9a-f-]{36}$/i, 'Choose who is receiving the asset'),
+  issuedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+  remarks: z.string().trim().max(500).optional(),
+});
+export const custodyReturnSchema = z.object({
+  custodyId: z.string().uuid('Choose the custody'),
+  condition: z.enum(['good', 'fair', 'damaged', 'lost'], { message: 'Choose the condition' }),
+  returnedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+  remarks: z.string().trim().max(500).optional(),
+});
+export const custodyAckSchema = z
+  .object({
+    custodyId: z.string().uuid('Choose the custody'),
+    method: z.enum(['otp', 'signature', 'paper'], { message: 'Choose how it was acknowledged' }),
+    otp: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code').optional().or(z.literal('')),
+    reference: z.string().trim().max(100).optional(),
+  })
+  .refine((v) => v.method !== 'otp' || !!v.otp, { message: 'Enter the 6-digit code', path: ['otp'] })
+  .refine((v) => v.method === 'otp' || !!v.reference, { message: 'Enter the form or register reference', path: ['reference'] });
+// FR-R05: maintenance and repairs.
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a valid date');
+const optionalDate = isoDate.optional().or(z.literal(''));
+export const maintenanceSchema = z
+  .object({
+    assetId: z.string().uuid('Choose an asset'),
+    fault: z.string().trim().min(1, 'Describe the fault').max(1000),
+    reportedOn: optionalDate,
+    vendorId: z.string().uuid().optional().or(z.literal('')),
+    costPkr: z.coerce.number({ message: 'Enter the cost' }).min(0, 'Cost cannot be negative').default(0),
+    isCapitalised: z.boolean().default(false),
+    downtimeFrom: optionalDate,
+    downtimeTo: optionalDate,
+    nextServiceDue: optionalDate,
+    responsibleUserId: z.string().uuid().optional().or(z.literal('')),
+  })
+  .refine((v) => !v.downtimeTo || (!!v.downtimeFrom && v.downtimeTo >= v.downtimeFrom), { message: 'Downtime must end on or after it starts', path: ['downtimeTo'] })
+  .refine((v) => !v.isCapitalised || v.costPkr > 0, { message: 'A capital improvement needs a cost', path: ['costPkr'] });
+export type MaintenanceInput = z.input<typeof maintenanceSchema>;
+export const vendorSchema = z.object({ name: z.string().trim().min(1, 'Enter the vendor name').max(200), phone: z.string().trim().max(30).optional() });
+export const capitalisationThresholdSchema = z.object({ thresholdPkr: z.coerce.number({ message: 'Enter the threshold' }).min(0, 'Threshold cannot be negative') });
+// FR-R06: purchase requisitions, approval thresholds and goods receipts.
+export const APPROVER_ROLES = ['principal', 'vice_principal', 'accountant', 'hr_manager', 'owner'] as const;
+export const requisitionLineSchema = z.object({
+  itemId: z.string().uuid().optional().or(z.literal('')),
+  description: z.string().trim().min(1, 'Describe each item').max(300),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+  estUnitCostPkr: z.coerce.number({ message: 'Enter the estimated unit cost' }).min(0, 'Cost cannot be negative'),
+});
+export const requisitionSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  departmentId: z.string().uuid().optional().or(z.literal('')),
+  justification: z.string().trim().min(1, 'Explain why this is needed').max(2000),
+  lines: z.array(requisitionLineSchema).min(1, 'Add at least one item'),
+});
+export type RequisitionInput = z.input<typeof requisitionSchema>;
+export const thresholdTiersSchema = z.object({
+  campusId: z.string().uuid().optional().or(z.literal('')),
+  tiers: z
+    .array(z.object({ uptoPkr: z.coerce.number().positive('Limits must be more than zero').optional().or(z.literal('')), role: z.enum(APPROVER_ROLES, { message: 'Choose an approver' }) }))
+    .min(1, 'Add at least one tier')
+    .max(6),
+});
+export type ThresholdTiersInput = z.input<typeof thresholdTiersSchema>;
+export const goodsReceiptSchema = z.object({
+  poId: z.string().uuid('Choose a purchase order'),
+  storeId: z.string().uuid('Choose a store'),
+  lines: z.array(z.object({ poLineId: z.string().uuid(), qtyReceived: z.coerce.number().positive() })).min(1, 'Enter a received quantity for at least one line'),
+});
+export type GoodsReceiptInput = z.input<typeof goodsReceiptSchema>;
+export const assetDisposalSchema = z.object({
+  assetId: z.string().uuid('Choose an asset'),
+  disposedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the disposal date'),
+  proceedsPkr: z.coerce.number({ message: 'Enter the proceeds' }).min(0).default(0),
+  writeOff: z.boolean().default(false),
+});

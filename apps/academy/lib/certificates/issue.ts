@@ -4,6 +4,7 @@ import { buildCertificateHtml, collectCertificateStrings, snapshotToPayload, typ
 import { checkGlyphCoverage, parseCmapRanges, resolveNastaliqFont } from '@/lib/pdf/font';
 import { RendererUnavailableError, renderPdf } from '@/lib/pdf/render';
 import { checkSealResolution, sha256Hex } from './seal';
+import { verifyQrFor } from './verify';
 
 /**
  * FR-T03/FR-T05: everything that happens AFTER the issuance transaction has
@@ -124,7 +125,12 @@ export async function renderAndStoreCertificate(
     );
   }
 
+  // FR-T10: the opaque token lives on the register row; the QR carries only the URL built from it.
+  const { data: tokenRow } = await supabase.from('certificate_issue').select('verify_token').eq('id', issued.issue_id).maybeSingle();
+  const verifyQr = tokenRow?.verify_token ? await verifyQrFor(tokenRow.verify_token).catch(() => null) : null;
+
   const doc = buildCertificateHtml(payload, font, {
+    verifyQr,
     letterheadDataUri: await assetDataUri(supabase, issued.payload_snapshot.letterhead_storage_path),
     logoDataUri: await assetDataUri(supabase, issued.payload_snapshot.logo_storage_path),
     signatureDataUri,

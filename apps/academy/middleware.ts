@@ -46,6 +46,11 @@ const PUBLIC_PATHS = new Set([
  *    authenticates with EXPORT_WORKER_SECRET and rejects everything without it.
  *  - /api/branding-asset — deliberately session-less signed-URL minting
  *    (FR-A18 AC5), asserted by e2e/tenant-branding-assets.spec.ts.
+ *  - /api/certificates/share/ — FR-T06: a 7-day opaque link a guardian opens from
+ *    WhatsApp's in-app browser, so there can be no login wall. The token (stored
+ *    only as a hash) is the credential.
+ *  - /verify/ — FR-T10: public certificate verification by QR; deliberately
+ *    unauthenticated, rate limited and enumeration-resistant in the database.
  */
 const PUBLIC_PREFIXES = [
   '/apply/',
@@ -57,6 +62,8 @@ const PUBLIC_PREFIXES = [
   '/api/calendar/feed/',
   '/api/webhooks/',
   '/api/internal/',
+  '/api/certificates/share/',
+  '/verify/',
 ];
 
 function isPublic(pathname: string) {
