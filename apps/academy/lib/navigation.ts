@@ -257,6 +257,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/branding', label: 'Branding' },
       { href: '/roles', label: 'Roles' },
       { href: '/feature-flags', label: 'Modules' },
+      { href: '/settings/data-export', label: 'Export School Data' },
     ],
   },
   {
