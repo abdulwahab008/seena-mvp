@@ -1,14 +1,21 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test.describe('FR-M03 · FR-M04: Message Template Library & SMS Segment Engine End-to-End Flow', () => {
   test('Principal / Owner can browse templates, compose with whitelisted tokens, preview Urdu/English, and publish immutable versions', async ({
     page,
   }) => {
     // 1. Sign in as Owner
+    const owner = await seedSchoolOwner('comm-templates');
+    // The library's starter templates are only backfilled for tenants that existed when the migration ran.
+    const { error: seedError } = await owner.admin.rpc('seed_default_versioned_templates', {
+      p_tenant_id: owner.tenantId,
+    });
+    if (seedError) throw seedError;
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
