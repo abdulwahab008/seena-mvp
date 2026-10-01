@@ -252,7 +252,10 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'library',
     label: 'Library',
     icon: Library,
-    items: [{ href: '/library/titles', label: 'Catalogue' }],
+    items: [
+      { href: '/library/titles', label: 'Catalogue' },
+      { href: '/library/copies', label: 'Copies' },
+    ],
   },
   {
     id: 'settings',
