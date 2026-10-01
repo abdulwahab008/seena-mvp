@@ -2321,6 +2321,28 @@ export const assetSchema = z
   .refine((v) => v.method !== 'RB' || (typeof v.rate === 'number' && v.rate > 0), { message: 'Enter the annual rate for reducing balance', path: ['rate'] });
 export type AssetInput = z.input<typeof assetSchema>;
 export const depreciationRunSchema = z.object({ period: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Choose a month') });
+// FR-R04: custody. The custodian is one select whose value is "<type>:<uuid>".
+export const custodyIssueSchema = z.object({
+  assetId: z.string().uuid('Choose an asset'),
+  custodian: z.string().regex(/^(department|room|staff):[0-9a-f-]{36}$/i, 'Choose who is receiving the asset'),
+  issuedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+  remarks: z.string().trim().max(500).optional(),
+});
+export const custodyReturnSchema = z.object({
+  custodyId: z.string().uuid('Choose the custody'),
+  condition: z.enum(['good', 'fair', 'damaged', 'lost'], { message: 'Choose the condition' }),
+  returnedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+  remarks: z.string().trim().max(500).optional(),
+});
+export const custodyAckSchema = z
+  .object({
+    custodyId: z.string().uuid('Choose the custody'),
+    method: z.enum(['otp', 'signature', 'paper'], { message: 'Choose how it was acknowledged' }),
+    otp: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code').optional().or(z.literal('')),
+    reference: z.string().trim().max(100).optional(),
+  })
+  .refine((v) => v.method !== 'otp' || !!v.otp, { message: 'Enter the 6-digit code', path: ['otp'] })
+  .refine((v) => v.method === 'otp' || !!v.reference, { message: 'Enter the form or register reference', path: ['reference'] });
 export const assetDisposalSchema = z.object({
   assetId: z.string().uuid('Choose an asset'),
   disposedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the disposal date'),
