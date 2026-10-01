@@ -1,11 +1,28 @@
 import { test, expect } from '@playwright/test';
+import { createClient } from '@supabase/supabase-js';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test('dynamic leave policy quota customization and recalculation', async ({ page }) => {
   // 1. Log in as Owner
+  const owner = await seedSchoolOwner('leave-quota');
+  // The standard leave policies (Casual 10, Sick 8, ...) are created by the owner-only
+  // initialize_school_leave_policies(); a freshly provisioned school starts without them.
+  const ownerClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false } },
+  );
+  const { error: signInError } = await ownerClient.auth.signInWithPassword({
+    email: owner.email,
+    password: owner.password,
+  });
+  if (signInError) throw signInError;
+  const { error: policyError } = await ownerClient.rpc('initialize_school_leave_policies');
+  if (policyError) throw policyError;
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
-  await page.getByLabel('Email').fill('owner@seena.academy');
-  await page.getByLabel('Password').fill('Password123!');
+  await page.getByLabel('Email').fill(owner.email);
+  await page.getByLabel('Password').fill(owner.password);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL('**/dashboard', { timeout: 15000 });
 
@@ -18,10 +35,6 @@ test('dynamic leave policy quota customization and recalculation', async ({ page
   await policiesTab.click();
   await page.waitForTimeout(300);
 
-  // Take screenshot of initial policies tab
-  await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/dynamic_leave_policies_initial.png',
-  });
 
   // 4. Click "Edit" on Casual Leave (row with CASUAL)
   const casualRow = page.locator('tr:has-text("CASUAL")');
@@ -31,10 +44,6 @@ test('dynamic leave policy quota customization and recalculation', async ({ page
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByText('Edit Policy Quota: Casual Leave')).toBeVisible();
 
-  // Screenshot of Edit Policy Modal
-  await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/leave_policy_modal_edit.png',
-  });
 
   // Change quota from 10 to 12 days
   await page.locator('#policy-days').fill('12');
@@ -55,10 +64,6 @@ test('dynamic leave policy quota customization and recalculation', async ({ page
   await page.locator('#policy-name').fill('Professional Study Leave');
   await page.locator('#policy-days').fill('5');
   
-  // Screenshot of Add Policy Modal
-  await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/leave_policy_modal_add.png',
-  });
 
   await page.getByRole('button', { name: 'Create Policy' }).click();
   await expect(page.getByText('Created leave policy "Professional Study Leave".')).toBeVisible();
@@ -66,10 +71,6 @@ test('dynamic leave policy quota customization and recalculation', async ({ page
   // 7. Verify the banner dynamically recalculated to 25 Days (12 + 8 + 5 = 25)
   await expect(page.getByText(/School Annual Paid Leave Quota: 25 Days per Year/i)).toBeVisible();
 
-  // Screenshot of dynamically updated dashboard
-  await page.screenshot({
-    path: '/Users/apple/.gemini/antigravity-ide/brain/de9e9246-da95-45f4-b793-8e983c2bf942/dynamic_leave_policies_customized.png',
-  });
 
   // 8. Test resetting back to standard policies
   await page.getByRole('button', { name: 'Reset Standard Quotas' }).first().click();
