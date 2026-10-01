@@ -47,7 +47,7 @@ test('overlapping papers with shared candidates are blocked; a hall too small is
   await expect(page.getByTestId('hall-list')).toContainText('Small Hall');
 
   // First paper: saves, 3 candidates against a hall of 2 -> a capacity warning, not a block.
-  await page.getByLabel('Paper').selectOption({ index: 0 });
+  await page.getByLabel('Paper', { exact: true }).selectOption({ index: 0 });
   await page.getByLabel('Date').fill('2026-09-08');
   await page.getByLabel('Start').fill('09:00');
   await page.getByLabel('End').fill('11:00');
@@ -57,7 +57,7 @@ test('overlapping papers with shared candidates are blocked; a hall too small is
   await expect(page.getByTestId('slot-list')).toContainText('capacity short by 1');
 
   // Second paper overlaps and every class-1 pupil sits both: blocked, with the GR numbers.
-  await page.getByLabel('Paper').selectOption({ index: 1 });
+  await page.getByLabel('Paper', { exact: true }).selectOption({ index: 1 });
   await page.getByLabel('Start').fill('10:00');
   await page.getByLabel('End').fill('12:00');
   await page.getByLabel('Hall', { exact: true }).selectOption({ index: 0 });

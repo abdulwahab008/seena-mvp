@@ -60,7 +60,11 @@ test('build two sets from the bank, compare them and download the Set B key', as
   await expect(page.getByTestId('set-report').locator('tbody tr')).toHaveCount(2);
 
   // AC4: the key downloads as this set's own file.
+  // Rendering is asynchronous (two PDFs through the renderer): wait for the POST to finish, otherwise the key
+  // is requested before it exists in the bucket.
+  const rendered = page.waitForResponse((r) => r.url().includes(`/api/exam-papers/${setB.id}/render`) && r.request().method() === 'POST');
   await page.getByTestId('render-files').click();
+  expect((await rendered).status()).toBe(200);
   await expect(page.getByTestId('download-key')).toBeVisible();
   const key = await page.request.get(`/api/exam-papers/${setB.id}/file?kind=key&format=json`);
   expect(key.status()).toBe(200);
