@@ -54,8 +54,8 @@ insert into public.concession_scheme (tenant_id, code, name_en, name_ur, categor
 insert into public.concession_award (tenant_id, campus_id, enrolment_id, scheme_id, calc_type, value, effective_from, effective_to, status)
 values (:'tenant_id', :'campus_id', (select enrol_id from kid where n = 3), :'scheme_id', 'percentage', 100, current_date - 60, current_date + 60, 'approved');
 
-select has_materialized_view('public', 'mv_fee_defaulter', 'mv_fee_defaulter exists');
-select has_index('public', 'mv_fee_defaulter', 'mv_fee_defaulter_uq', 'AC: the unique index on enrolment_id exists');
+select has_materialized_view('app', 'mv_fee_defaulter', 'mv_fee_defaulter exists');
+select has_index('app', 'mv_fee_defaulter', 'mv_fee_defaulter_uq', 'AC: the unique index on enrolment_id exists');
 select ok((select reloptions::text like '%security_invoker=true%' from pg_class where oid = 'public.v_fee_defaulter'::regclass), 'the wrapping view is security_invoker');
 select is(has_function_privilege('authenticated', 'public.refresh_fee_defaulters()', 'execute'), false, 'a client cannot trigger the rebuild');
 

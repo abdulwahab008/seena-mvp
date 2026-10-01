@@ -768,13 +768,6 @@ export type Database = {
             foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
             columns: ["consumed_by_enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
-            columns: ["consumed_by_enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -881,13 +874,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admission_fee_waiver_consumed_by_enrolment_id_fkey"
-            columns: ["consumed_by_enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "admission_fee_waiver_consumed_by_enrolment_id_fkey"
@@ -1914,13 +1900,6 @@ export type Database = {
             foreignKeyName: "annual_result_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "annual_result_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -2252,13 +2231,6 @@ export type Database = {
             foreignKeyName: "attendance_audit_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_audit_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -2397,13 +2369,6 @@ export type Database = {
             foreignKeyName: "attendance_correction_request_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_correction_request_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -2517,13 +2482,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "attendance_day_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "attendance_day_enrolment_id_fkey"
@@ -2914,13 +2872,6 @@ export type Database = {
             foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -3021,13 +2972,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "attendance_notification_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "attendance_notification_enrolment_id_fkey"
@@ -5169,13 +5113,6 @@ export type Database = {
             foreignKeyName: "certificate_issue_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "certificate_issue_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -6643,13 +6580,6 @@ export type Database = {
             foreignKeyName: "concession_award_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "concession_award_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -7547,13 +7477,6 @@ export type Database = {
             foreignKeyName: "enrolment_previous_enrolment_id_fkey"
             columns: ["previous_enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "enrolment_previous_enrolment_id_fkey"
-            columns: ["previous_enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -7736,13 +7659,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "exam_attendance_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "exam_attendance_enrolment_id_fkey"
@@ -8615,13 +8531,6 @@ export type Database = {
             foreignKeyName: "fee_challan_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_challan_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -8797,13 +8706,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_challan_batch_error_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_challan_batch_error_enrolment_id_fkey"
@@ -9275,13 +9177,6 @@ export type Database = {
             foreignKeyName: "fee_ledger_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_ledger_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -9411,13 +9306,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_payment_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_payment_enrolment_id_fkey"
@@ -9571,13 +9459,6 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_plan_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: true
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_plan_enrolment_id_fkey"
@@ -10150,13 +10031,6 @@ export type Database = {
             foreignKeyName: "fee_settlement_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_settlement_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -10488,13 +10362,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "gateway_commission_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "gateway_commission_enrolment_id_fkey"
@@ -11920,13 +11787,6 @@ export type Database = {
             foreignKeyName: "import_row_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "import_row_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -12538,13 +12398,6 @@ export type Database = {
             foreignKeyName: "mark_entry_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "mark_entry_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -12690,13 +12543,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "mark_entry_audit_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "mark_entry_audit_enrolment_id_fkey"
@@ -14442,13 +14288,6 @@ export type Database = {
             foreignKeyName: "no_dues_clearance_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "no_dues_clearance_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -14827,13 +14666,6 @@ export type Database = {
             foreignKeyName: "ocr_mark_suggestion_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "ocr_mark_suggestion_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -14932,13 +14764,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "ocr_review_action_enrolment_id_fkey"
@@ -15393,13 +15218,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payment_intent_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "payment_intent_enrolment_id_fkey"
@@ -16359,13 +16177,6 @@ export type Database = {
             foreignKeyName: "report_card_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "report_card_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -16654,13 +16465,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "report_card_batch_item_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "report_card_batch_item_enrolment_id_fkey"
@@ -16970,13 +16774,6 @@ export type Database = {
             foreignKeyName: "result_position_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "result_position_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -17155,13 +16952,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "result_withhold_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "result_withhold_enrolment_id_fkey"
@@ -17392,13 +17182,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "roll_number_change_log_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "roll_number_change_log_enrolment_id_fkey"
@@ -17719,13 +17502,6 @@ export type Database = {
             foreignKeyName: "section_membership_history_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "section_membership_history_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -18031,13 +17807,6 @@ export type Database = {
             foreignKeyName: "security_deposit_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "security_deposit_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -18184,13 +17953,6 @@ export type Database = {
             foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
             columns: ["new_enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
-            columns: ["new_enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -18221,13 +17983,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "session_rollover_decision_source_enrolment_id_fkey"
-            columns: ["source_enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "session_rollover_decision_source_enrolment_id_fkey"
@@ -20414,13 +20169,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subject_result_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "subject_result_enrolment_id_fkey"
@@ -22809,176 +22557,6 @@ export type Database = {
           },
         ]
       }
-      mv_fee_collection_monthly: {
-        Row: {
-          billed_paisa: number | null
-          billing_period: string | null
-          campus_id: string | null
-          challan_count: number | null
-          class_id: string | null
-          collected_paisa: number | null
-          outstanding_paisa: number | null
-          refreshed_at: string | null
-          session_id: string | null
-          tenant_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "enrolment_class_level_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "class_level"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_class_level_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "v_rollover_decision_detail"
-            referencedColumns: ["source_class_id"]
-          },
-          {
-            foreignKeyName: "fee_challan_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "campus"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_challan_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "v_principal_today"
-            referencedColumns: ["campus_id"]
-          },
-          {
-            foreignKeyName: "fee_challan_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "academic_session"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_challan_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenant"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      mv_fee_defaulter: {
-        Row: {
-          bucket: string | null
-          campus_id: string | null
-          class_id: string | null
-          days_overdue: number | null
-          enrolment_id: string | null
-          gr_number: string | null
-          guardian_phone: string | null
-          has_active_concession: boolean | null
-          oldest_due_date: string | null
-          outstanding_paisa: number | null
-          refreshed_at: string | null
-          section_id: string | null
-          session_id: string | null
-          student_name: string | null
-          tenant_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "enrolment_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "campus"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "v_principal_today"
-            referencedColumns: ["campus_id"]
-          },
-          {
-            foreignKeyName: "enrolment_class_level_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "class_level"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_class_level_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "v_rollover_decision_detail"
-            referencedColumns: ["source_class_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "class_section"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_exam_result_input"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_exam_section_subject_setup"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_exam_subject_section"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_scheduled_vs_required_periods"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_section_seat_availability"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_unallocated_section_subject"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "academic_session"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenant"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       v_admission_merit_rank: {
         Row: {
           application_id: string | null
@@ -23073,13 +22651,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "annual_result_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "annual_result_enrolment_id_fkey"
@@ -23379,13 +22950,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "certificate_issue_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "certificate_issue_enrolment_id_fkey"
@@ -23861,13 +23425,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_ledger_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_ledger_enrolment_id_fkey"
@@ -25497,13 +25054,6 @@ export type Database = {
             foreignKeyName: "ocr_review_action_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -25665,13 +25215,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_challan_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_challan_enrolment_id_fkey"
@@ -25873,13 +25416,6 @@ export type Database = {
             foreignKeyName: "result_position_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "result_position_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -26007,13 +25543,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
-            columns: ["new_enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
@@ -26846,13 +26375,6 @@ export type Database = {
             foreignKeyName: "subject_result_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "subject_result_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_exam_result_input"
             referencedColumns: ["enrolment_id"]
           },
@@ -27284,13 +26806,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "enrolment"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_payment_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "mv_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
           },
           {
             foreignKeyName: "fee_payment_enrolment_id_fkey"
