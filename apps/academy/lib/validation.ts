@@ -2294,3 +2294,16 @@ export const libraryPolicySchema = z.object({
   effectiveFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the date it takes effect'),
 });
 export type LibraryPolicyInput = z.input<typeof libraryPolicySchema>;
+
+// FR-O08: lost copy write-off.
+export const LIBRARY_WRITE_OFF_BASES = ['multiple', 'purchase_cost', 'market'] as const;
+export const libraryWriteOffSchema = z
+  .object({
+    barcode: z.string().trim().min(1, 'Scan or type the barcode'),
+    basis: z.enum(LIBRARY_WRITE_OFF_BASES),
+    multiplier: z.string().trim().regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter a multiplier such as 1.5').optional(),
+    marketValuePkr: z.string().trim().regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter the value in PKR').optional(),
+    reason: z.string().trim().max(300, 'At most 300 characters').optional(),
+  })
+  .refine((v) => v.basis !== 'market' || !!v.marketValuePkr, { message: 'Enter the market value for this basis', path: ['marketValuePkr'] });
+export type LibraryWriteOffInput = z.input<typeof libraryWriteOffSchema>;
