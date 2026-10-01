@@ -17,6 +17,13 @@ export default async function RouteSheetPage({ params }: { params: Promise<{ rou
     .select('stop_id, seq, stop_name, stop_name_ur, pickup_time, drop_time, slab_code, monthly_amount_paisa')
     .eq('route_id', routeId)
     .order('seq');
+  const { data: assignment } = await supabase
+    .from('v_transport_route_crew')
+    .select('vehicle_reg_no, driver_name, driver_phone, driver_cnic, conductor_name, attendant_name')
+    .eq('route_id', routeId)
+    .limit(1);
+  const crew = ((assignment ?? []) as { vehicle_reg_no: string; driver_name: string; driver_phone: string | null; driver_cnic: string | null; conductor_name: string | null; attendant_name: string | null }[])[0];
+
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 print:p-0" data-testid="route-sheet">
       <div className="flex items-center justify-between print:hidden">
@@ -28,6 +35,13 @@ export default async function RouteSheetPage({ params }: { params: Promise<{ rou
           {route.code} · {route.name}
         </h2>
         <p className="text-sm">Shift: {route.shift}</p>
+        {crew && (
+          <p className="text-sm" data-testid="sheet-crew">
+            Vehicle {crew.vehicle_reg_no} · Driver {crew.driver_name} {crew.driver_phone ?? ''} · CNIC {crew.driver_cnic ?? '-'}
+            {crew.conductor_name ? ` · Conductor ${crew.conductor_name}` : ''}
+            {crew.attendant_name ? ` · Attendant ${crew.attendant_name}` : ''}
+          </p>
+        )}
       </header>
       <table className="w-full border-collapse text-sm">
         <thead>

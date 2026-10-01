@@ -2315,5 +2315,28 @@ export const vehicleOverrideSchema = z.object({
   reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(500),
 });
 export const tokenTaxSettingSchema = z.object({ mandatory: tbool });
+// FR-P03
+export const transportCrewSchema = z.object({
+  campusId: tuuid,
+  fullName: z.string().trim().min(2, 'Enter the full name').max(120),
+  cnic: z.string().trim().regex(/^\d{5}-?\d{7}-?\d$/, 'CNIC must be 13 digits, e.g. 35202-1234567-1'),
+  crewRole: z.enum(['driver', 'conductor', 'attendant'], { message: 'Choose a role' }),
+  phone: toptText(20),
+  licenceNo: toptText(40),
+  licenceClass: z.enum(['LTV', 'HTV', 'PSV']).optional().or(z.literal('').transform(() => undefined)),
+  licenceExpiresOn: toptDate,
+  policeVerifiedOn: toptDate,
+  bloodGroup: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']).optional().or(z.literal('').transform(() => undefined)),
+});
+export const assignTripSchema = z.object({
+  routeId: tuuid,
+  vehicleId: tuuid,
+  driverId: tuuid,
+  conductorId: toptUuid,
+  attendantId: toptUuid,
+  from: tdate,
+  to: toptDate,
+  overrideReason: toptText(500),
+});
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];
