@@ -2386,5 +2386,13 @@ export const hostelAddRoomSchema = z.object({
   floor: tint('Floor', 0, 30).optional().or(z.literal('').transform(() => undefined)),
 });
 export const hostelBlockUpdateSchema = z.object({ blockId: tuuid, name: z.string().trim().min(1).max(80), wardenStaffId: toptUuid, active: tbool });
+// FR-Q02
+export const hostelAllocateSchema = z.object({
+  grNumber: z.string().trim().min(1, 'Enter the GR number').max(40),
+  bedCode: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,6}-[A-Z0-9]{1,8}-B\d{1,2}$/, 'Bed code looks like IQ-105-B3'),
+  from: tdate,
+  to: toptDate,
+  reason: toptText(300),
+});
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];

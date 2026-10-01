@@ -227,6 +227,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: BedDouble,
     items: [
       { href: '/hostel', label: 'Blocks & Beds' },
+      { href: '/hostel/allocations', label: 'Bed Allocation' },
     ],
   },
   {
