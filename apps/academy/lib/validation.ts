@@ -2319,3 +2319,13 @@ export const initiateExitSchema = z
   });
 export const clearItemSchema = z.object({ exitId: z.string().uuid(), itemCode: z.string().regex(/^[a-z][a-z0-9_]{1,39}$/) });
 export const waiveItemSchema = clearItemSchema.extend({ reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(500) });
+
+// FR-D17: final settlement manual lines.
+export const SETTLEMENT_MANUAL_LINE_TYPES = ['gratuity', 'asset_recovery', 'advance_recovery', 'other'] as const;
+export const settlementLineSchema = z.object({
+  settlementId: z.string().uuid(),
+  lineType: z.enum(SETTLEMENT_MANUAL_LINE_TYPES, { message: 'Choose the line type' }),
+  description: z.string().trim().min(1, 'Describe the line').max(300),
+  amount: z.string().trim().min(1, 'Enter the amount'),
+  sign: z.enum(['1', '-1']),
+});

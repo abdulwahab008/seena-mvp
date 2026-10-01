@@ -89,6 +89,14 @@ export default async function StaffExitPage({ params }: { params: Promise<{ exit
         </CardContent>
       </Card>
 
+      {['super_admin', 'owner', 'hr_manager', 'accountant'].includes(actor?.role ?? '') && (
+        <p className="text-sm">
+          <Link href={`/staff/exits/${exitId}/settlement`} className="underline" data-testid="settlement-link">
+            Final settlement statement
+          </Link>
+        </p>
+      )}
+
       {open && canHr && (
         <Card>
           <CardHeader>

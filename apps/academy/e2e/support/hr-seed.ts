@@ -49,6 +49,14 @@ export async function seedHrTenant(label: string) {
   return { db, tenantId, campusId, runId, mkUser, owner };
 }
 
+/** A supabase-js client signed in as this user, for calling RPCs the way the app does. */
+export async function userClient(email: string) {
+  const c = createClient(SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+  const { error } = await c.auth.signInWithPassword({ email, password: HR_SEED_PASSWORD });
+  if (error) throw new Error(`sign-in ${email}: ${error.message}`);
+  return c;
+}
+
 export async function signInAs(page: Page, email: string) {
   await page.goto('/login');
   await page.waitForLoadState('networkidle');
