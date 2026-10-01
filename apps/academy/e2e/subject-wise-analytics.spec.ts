@@ -75,7 +75,8 @@ test('a parent sees their child against the section average; a small section is 
     .insert({ tenant_id: tenant, name_en: 'Trend Parent', phone_e164: '+923001239999', auth_user_id: user.user!.id })
     .select('id')
     .single();
-  await db.from('student_guardian').insert({ tenant_id: tenant, student_id: enrolment!.student_id, guardian_id: guardian!.id, relationship: 'mother', is_primary: true, receives_academic: true });
+  const { error: linkError } = await db.from('student_guardian').insert({ tenant_id: tenant, student_id: enrolment!.student_id, guardian_id: guardian!.id, relationship: 'mother', is_primary: true, receives_billing: true, receives_academic: true });
+  expect(linkError).toBeNull();
 
   const signIn = async (p: import('@playwright/test').Page, addr: string) => {
     await p.goto('/login');

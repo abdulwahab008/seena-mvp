@@ -9,7 +9,7 @@ import { seedFeesTenant, SEED_PASSWORD } from './support/fees-seed';
 //   AC3  the payable shown is the fee module's amount to the rupee.
 //   AC4  a withheld result -> nothing is produced.
 
-const snapshot = (name: string, grNumber: string) => ({
+const snapshot = (name: string, grNumber: string, renderedAt: string) => ({
   school: { name: 'Packet E2E School', campus_name: 'Main', campus_name_ur: null, campus_code: 'M', city: 'Lahore', address_line: null, phone: null },
   branding: { logo_storage_path: null, letterhead_storage_path: null, signature_storage_path: null, stamp_storage_path: null },
   student: { name_en: name, name_ur: null, father_name_en: 'Father', father_name_ur: null, gr_number: grNumber, roll_no: 1, photo_path: null, class_name: 'Class 1', section_name: 'A' },
@@ -22,7 +22,7 @@ const snapshot = (name: string, grNumber: string) => ({
   remark: null,
   revision_no: 1,
   supersedes_revision: null,
-  rendered_at: '2026-09-30T09:00:00.000Z',
+  rendered_at: renderedAt,
 });
 
 test('packet = card + challan; card alone without a challan; nothing for a withheld result', async ({ page }) => {
@@ -43,11 +43,15 @@ test('packet = card + challan; card alone without a challan; nothing for a withh
   });
   const [withChallan, cardOnly, withheld] = info;
 
+  // The card is issued now, in the same month as the seeded (current-cycle) challans, so the
+  // "next cycle" is the month after: a fixed date would drift into the past as the calendar moves
+  // and turn every current challan into a next-cycle one.
+  const cardIssuedAt = new Date().toISOString();
   for (const c of info) {
     const { error } = await db.from('report_card').insert({
       tenant_id: tenant, campus_id: campusId, exam_term_id: term!.id, section_id: section!.id, enrolment_id: c.enrolmentId,
       revision_no: 1, storage_path: `${tenant}/${campusId}/${term!.id}/card-${c.enrolmentId}.pdf`, checksum: 'c'.repeat(64),
-      status: 'issued', payload_snapshot: snapshot(c.name, c.gr), rendered_at: '2026-09-30T09:00:00.000Z',
+      status: 'issued', payload_snapshot: snapshot(c.name, c.gr, cardIssuedAt), rendered_at: cardIssuedAt,
     });
     expect(error).toBeNull();
   }
