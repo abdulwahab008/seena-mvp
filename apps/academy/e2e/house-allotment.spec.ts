@@ -35,13 +35,18 @@ test('a Principal creates houses, auto-assigns with sibling affinity and a move 
   const { data: reason } = await db.from('student_house_history').select('reason').eq('student_id', students![1]!.id).single();
   expect(reason!.reason).toBe('sibling_match');
 
+  // Placement is dated on the school's calendar day (Asia/Karachi, UTC+5), which is already
+  // "tomorrow" in UTC for part of every day, so the spec must date things the same way.
+  const karachiDay = (offsetDays = 0) =>
+    new Date(Date.now() + offsetDays * 86400000).toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
+
   // Points earned in November stay with the house of the day, whatever happens in February.
   const target = students![2]!;
   const { data: hist } = await db.from('student_house_history').select('house_id').eq('student_id', target.id).is('to_date', null).single();
-  const { error: awardError } = await owner$.rpc('award_house_points', { p_student_id: target.id, p_points: 10, p_awarded_on: new Date().toISOString().slice(0, 10) });
+  const { error: awardError } = await owner$.rpc('award_house_points', { p_student_id: target.id, p_points: 10, p_awarded_on: karachiDay() });
   expect(awardError).toBeNull();
   const { data: other } = await db.from('house').select('id').eq('campus_id', campusId).neq('id', hist!.house_id).single();
-  const future = new Date(Date.now() + 86400000 * 3).toISOString().slice(0, 10);
+  const future = karachiDay(3);
   await page.reload();
   await page.locator('#moveGr').fill(target.gr_number);
   await page.getByLabel('New house').selectOption(other!.id);
