@@ -8,6 +8,7 @@ import {
   FileBarChart,
   GraduationCap,
   LayoutDashboard,
+  Library,
   ListChecks,
   Receipt,
   ScrollText,
@@ -246,6 +247,12 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/communication/fallback-chains', label: 'Fallback Chains' },
       { href: '/communication/whatsapp', label: 'WhatsApp Compliance' },
     ],
+  },
+  {
+    id: 'library',
+    label: 'Library',
+    icon: Library,
+    items: [{ href: '/library/titles', label: 'Catalogue' }],
   },
   {
     id: 'settings',

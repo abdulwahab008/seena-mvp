@@ -2244,3 +2244,18 @@ export const lessonPlanSchema = z.object({
   topicIds: z.array(z.string().uuid()).default([]),
 });
 export type LessonPlanInput = z.input<typeof lessonPlanSchema>;
+
+// FR-O01: library title catalogue.
+export const LIBRARY_LANGUAGES = ['en', 'ur', 'ar', 'pa', 'sd', 'other'] as const;
+export const libraryTitleSchema = z.object({
+  title: z.string().trim().min(1, 'Enter the title').max(300, 'At most 300 characters'),
+  titleUr: z.string().trim().max(300, 'At most 300 characters').optional(),
+  rawIsbn: z.string().trim().max(20, 'At most 20 characters').optional(),
+  author: z.string().trim().max(200, 'At most 200 characters').optional(),
+  publisher: z.string().trim().max(200, 'At most 200 characters').optional(),
+  edition: z.string().trim().max(50, 'At most 50 characters').optional(),
+  language: z.enum(LIBRARY_LANGUAGES).default('en'),
+  dewey: z.string().trim().regex(/^([0-9]{1,3}(\.[0-9]+)?)?$/, 'Dewey class looks like 297 or 954.91').optional(),
+  subjectId: z.string().uuid().optional().or(z.literal('')),
+});
+export type LibraryTitleInput = z.input<typeof libraryTitleSchema>;
