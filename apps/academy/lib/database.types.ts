@@ -20147,6 +20147,168 @@ export type Database = {
           },
         ]
       }
+      student_leave_application: {
+        Row: {
+          applied_by_user_id: string
+          applied_via: string
+          campus_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          enrolment_id: string
+          from_date: string
+          id: string
+          reason_category: Database["public"]["Enums"]["student_leave_category"]
+          remarks: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["student_leave_status"]
+          tenant_id: string
+          to_date: string
+        }
+        Insert: {
+          applied_by_user_id: string
+          applied_via: string
+          campus_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          enrolment_id: string
+          from_date: string
+          id?: string
+          reason_category: Database["public"]["Enums"]["student_leave_category"]
+          remarks?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["student_leave_status"]
+          tenant_id: string
+          to_date: string
+        }
+        Update: {
+          applied_by_user_id?: string
+          applied_via?: string
+          campus_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          enrolment_id?: string
+          from_date?: string
+          id?: string
+          reason_category?: Database["public"]["Enums"]["student_leave_category"]
+          remarks?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["student_leave_status"]
+          tenant_id?: string
+          to_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_leave_application_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_leave_application_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "student_leave_application_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_leave_application_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "student_leave_application_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "student_leave_application_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "student_leave_application_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_leave_application_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_leave_attachment: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          leave_application_id: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          leave_application_id: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          leave_application_id?: string
+          mime_type?: string
+          size_bytes?: number
+          storage_path?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_leave_attachment_leave_application_id_fkey"
+            columns: ["leave_application_id"]
+            isOneToOne: false
+            referencedRelation: "student_leave_application"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_leave_attachment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_medical: {
         Row: {
           accommodations: Json
@@ -27679,6 +27841,15 @@ export type Database = {
         Args: { p_campus_id?: string; p_holiday_date: string; p_name: string }
         Returns: string
       }
+      add_leave_attachment: {
+        Args: {
+          p_file_name: string
+          p_leave_id: string
+          p_mime_type: string
+          p_size_bytes: number
+        }
+        Returns: Json
+      }
       add_staff_document: {
         Args: { p_label: string; p_staff_id: string; p_storage_path?: string }
         Returns: string
@@ -27912,6 +28083,7 @@ export type Database = {
         Args: { p_application_id: string }
         Returns: undefined
       }
+      cancel_student_leave: { Args: { p_leave_id: string }; Returns: undefined }
       certificate_merge_fields: {
         Args: { p_body_html: string }
         Returns: string[]
@@ -30467,6 +30639,10 @@ export type Database = {
         Args: { p_reason: string; p_waitlist_id: string }
         Returns: undefined
       }
+      remove_leave_attachment: {
+        Args: { p_attachment_id: string }
+        Returns: undefined
+      }
       render_template: {
         Args: { p_ctx: Json; p_lang?: string; p_version_id: string }
         Returns: string
@@ -31346,6 +31522,16 @@ export type Database = {
         }
         Returns: Json
       }
+      submit_student_leave: {
+        Args: {
+          p_enrolment_id: string
+          p_from_date: string
+          p_reason_category: Database["public"]["Enums"]["student_leave_category"]
+          p_remarks?: string
+          p_to_date: string
+        }
+        Returns: string
+      }
       submit_student_remark: {
         Args: { p_body: string; p_language?: string; p_student_id: string }
         Returns: Json
@@ -32018,6 +32204,13 @@ export type Database = {
         | "late"
         | "half_day"
         | "excused"
+      student_leave_category:
+        | "medical"
+        | "family"
+        | "travel"
+        | "religious"
+        | "other"
+      student_leave_status: "pending" | "approved" | "rejected" | "cancelled"
       student_status:
         | "active"
         | "inactive"
@@ -32519,6 +32712,14 @@ export const Constants = {
         "half_day",
         "excused",
       ],
+      student_leave_category: [
+        "medical",
+        "family",
+        "travel",
+        "religious",
+        "other",
+      ],
+      student_leave_status: ["pending", "approved", "rejected", "cancelled"],
       student_status: [
         "active",
         "inactive",

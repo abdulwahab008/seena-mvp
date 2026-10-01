@@ -9,6 +9,8 @@ const nextConfig = {
   // resolves its own browser binaries and driver relative to its package on
   // disk, so it must be required at runtime rather than traced into the
   // server bundle.
+  // Leave applications carry up to 10 MB of attachments through a server action.
+  experimental: { serverActions: { bodySizeLimit: '12mb' } },
   serverExternalPackages: ['@playwright/test', 'playwright', 'playwright-core'],
 };
 

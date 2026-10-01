@@ -2174,3 +2174,15 @@ export const periodAttendanceSchema = z.object({
   marks: z.array(z.object({ enrolmentId: z.string().uuid(), status: z.enum(['present', 'absent', 'late', 'half_day', 'excused']) })).min(1, 'No students to mark').max(300),
 });
 export type PeriodAttendanceInput = z.infer<typeof periodAttendanceSchema>;
+
+// FR-G07: leave application. Messages are portal message keys, rendered in the parent's language.
+export const leaveApplicationSchema = z
+  .object({
+    enrolmentId: z.string().uuid('leave.errChooseChild'),
+    fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'leave.errDates'),
+    toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'leave.errDates'),
+    category: z.enum(['medical', 'family', 'travel', 'religious', 'other']),
+    remarks: z.string().max(500, 'leave.errRemarks').optional(),
+  })
+  .refine((v) => v.toDate >= v.fromDate, { path: ['toDate'], message: 'leave.errEndBeforeStart' });
+export type LeaveApplicationInput = z.infer<typeof leaveApplicationSchema>;

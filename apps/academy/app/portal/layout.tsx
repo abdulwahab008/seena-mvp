@@ -13,6 +13,7 @@ const PORTAL_LINKS: { href: string; key: MessageKey }[] = [
   { href: '/portal/consent', key: 'nav.consent' },
   { href: '/portal/circulars', key: 'nav.circulars' },
   { href: '/portal/calendar', key: 'nav.calendar' },
+  { href: '/portal/leave', key: 'nav.leave' },
   { href: '/portal/remarks', key: 'nav.remarks' },
   { href: '/portal/tickets', key: 'nav.tickets' },
   { href: '/portal/link-child', key: 'nav.linkChild' },
