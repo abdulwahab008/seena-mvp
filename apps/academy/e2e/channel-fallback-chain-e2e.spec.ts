@@ -1,14 +1,23 @@
 import { test, expect } from '@playwright/test';
+import { seedSchoolOwner } from './support/school-owner-seed';
 
 test.describe('FR-M02: Channel Fallback Chains End-to-End Flow', () => {
   test('Principal / Owner can configure fallback rules, manage opt-outs, and review multi-hop audit', async ({
     page,
   }) => {
     // 1. Sign in as Owner
+    const owner = await seedSchoolOwner('fallback-chain');
+    // The school's baseline chain, which the desk lists as its 'default' class.
+    const { error: chainError } = await owner.admin.from('comm_channel_chain').insert({
+      tenant_id: owner.tenantId,
+      message_class: 'default',
+      ordered_channels: ['whatsapp', 'sms'],
+    });
+    if (chainError) throw chainError;
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.getByLabel('Email').fill('owner@seena.academy');
-    await page.getByLabel('Password').fill('Password123!');
+    await page.getByLabel('Email').fill(owner.email);
+    await page.getByLabel('Password').fill(owner.password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
