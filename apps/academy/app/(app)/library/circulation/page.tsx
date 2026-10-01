@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IssueDesk } from './issue-desk';
 import { ReturnDesk } from './return-desk';
+import { RenewButton } from '../reservations/reservation-forms';
 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 const todayIso = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
@@ -63,6 +64,7 @@ export default async function LibraryCirculationPage() {
                 <th className="pr-3">Accession</th>
                 <th className="pr-3">Borrower</th>
                 <th className="pr-3">Due</th>
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -77,12 +79,15 @@ export default async function LibraryCirculationPage() {
                     <td className="pr-3">
                       {l.due_on} {l.due_on < today && <Badge variant="destructive">Overdue</Badge>}
                     </td>
+                    <td>
+                      <RenewButton loanId={l.id} />
+                    </td>
                   </tr>
                 );
               })}
               {(loans ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-3 text-muted-foreground">
+                  <td colSpan={5} className="py-3 text-muted-foreground">
                     No books are out.
                   </td>
                 </tr>
