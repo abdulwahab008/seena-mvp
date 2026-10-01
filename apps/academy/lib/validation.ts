@@ -2467,3 +2467,131 @@ export const appraisalDisputeSchema = z.object({
   appraisalId: z.string().uuid(),
   comment: z.string().trim().min(1, 'Write your response').max(2000, 'At most 2000 characters'),
 });
+// FR-I03: datesheet, exam halls and slots.
+const TIME_HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+export const createDatesheetSchema = z.object({
+  campusId: z.string().uuid(),
+  examTermId: z.string().uuid(),
+  title: z.string().trim().min(1, 'Enter a title').max(120),
+});
+export type CreateDatesheetInput = z.infer<typeof createDatesheetSchema>;
+export const examHallSchema = z.object({
+  campusId: z.string().uuid(),
+  code: z.string().trim().min(1, 'Enter a hall code').max(20),
+  name: z.string().trim().min(1, 'Enter a hall name').max(80),
+  rowsCount: z.number({ message: 'Enter the rows' }).int('Whole rows only').min(1, 'At least 1 row').max(100),
+  seatsPerRow: z.number({ message: 'Enter the seats per row' }).int('Whole seats only').min(1, 'At least 1 seat').max(100),
+});
+export type ExamHallInput = z.infer<typeof examHallSchema>;
+export const datesheetSlotSchema = z
+  .object({
+    datesheetId: z.string().uuid(),
+    examSubjectId: z.string().uuid({ message: 'Choose a paper' }),
+    examDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+    startTime: z.string().regex(TIME_HHMM, 'Enter a start time'),
+    endTime: z.string().regex(TIME_HHMM, 'Enter an end time'),
+    hallId: z.string().uuid().optional().or(z.literal('')),
+    invigilators: z.number({ message: 'Enter the invigilators' }).int('Whole numbers only').min(1, 'At least 1').max(50),
+  })
+  .refine((v) => v.endTime > v.startTime, { message: 'The paper must end after it starts', path: ['endTime'] });
+export type DatesheetSlotInput = z.input<typeof datesheetSlotSchema>;
+export const examSettingsSchema = z.object({
+  campusId: z.string().uuid(),
+  jummahCutoff: z.string().regex(TIME_HHMM, 'Enter a time').optional(),
+  questionCooldownTerms: z.number().int().min(0).max(40).optional(),
+  cooldownMode: z.enum(['warn', 'block']).optional(),
+  maxModerationDelta: z.number().min(0).max(100).optional(),
+  maxModerationPct: z.number().min(0).max(100).nullable().optional(),
+  paperReleaseOffsetMinutes: z.number().int().min(0).max(1440).optional(),
+  invigilationMaxDuties: z.number().int().min(1).max(100).optional(),
+});
+export type ExamSettingsInput = z.infer<typeof examSettingsSchema>;
+
+// FR-I10: invigilation roster.
+export const invigilationExclusionSchema = z.object({
+  examTermId: z.string().uuid(),
+  staffUserId: z.string().uuid({ message: 'Choose a staff member' }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+  reason: z.string().trim().min(1, 'Enter a reason').max(300),
+});
+export type InvigilationExclusionInput = z.infer<typeof invigilationExclusionSchema>;
+export const invigilationDutySchema = z.object({
+  slotId: z.string().uuid(),
+  staffUserId: z.string().uuid({ message: 'Choose a staff member' }),
+});
+export type InvigilationDutyInput = z.infer<typeof invigilationDutySchema>;
+
+// FR-I05: board patterns and paper generation requests.
+export const BOARD_CODES = ['FBISE', 'PUNJAB', 'SINDH', 'KPK', 'BALOCHISTAN', 'AKU_EB', 'CAMBRIDGE'] as const;
+const sectionCount = z.number({ message: 'Enter a number' }).int('Whole numbers only').min(0).max(200);
+const sectionMarks = z.number({ message: 'Enter a number' }).int('Whole marks only').min(0).max(100);
+export const boardPatternSchema = z
+  .object({
+    code: z.string().trim().min(1, 'Enter a pattern code').max(40),
+    name: z.string().trim().min(1, 'Enter a pattern name').max(120),
+    board: z.enum(BOARD_CODES, { message: 'Choose a board' }),
+    mcqCount: sectionCount,
+    mcqMarks: sectionMarks,
+    shortCount: sectionCount,
+    shortMarks: sectionMarks,
+    longCount: sectionCount,
+    longMarks: sectionMarks,
+  })
+  .refine((v) => v.mcqCount * v.mcqMarks + v.shortCount * v.shortMarks + v.longCount * v.longMarks > 0, { message: 'The pattern needs at least one question', path: ['mcqCount'] });
+export type BoardPatternInput = z.infer<typeof boardPatternSchema>;
+export const paperRequestSchema = z.object({
+  examSubjectId: z.string().uuid({ message: 'Choose a paper' }),
+  boardPatternId: z.string().uuid({ message: 'Choose a pattern' }),
+  chaptersText: z.string().trim().min(1, 'Enter at least one chapter'),
+  totalMarks: z.number({ message: 'Enter the total marks' }).int('Whole marks only').min(1).max(1000),
+  setCount: z.number({ message: 'Enter the number of sets' }).int().min(1).max(4),
+});
+export type PaperRequestFormInput = z.infer<typeof paperRequestSchema>;
+// FR-I06: replacing a flagged question and publishing a paper.
+export const replaceQuestionSchema = z.object({
+  itemId: z.string().uuid(),
+  text: z.string().trim().min(1, 'Enter the replacement question').max(2000, 'At most 2000 characters'),
+});
+export type ReplaceQuestionInput = z.infer<typeof replaceQuestionSchema>;
+export const publishPaperSchema = z.object({
+  paperId: z.string().uuid(),
+  overrideReason: z.string().trim().max(500, 'At most 500 characters').optional(),
+});
+export type PublishPaperInput = z.infer<typeof publishPaperSchema>;
+export const cooldownSettingsSchema = z.object({
+  campusId: z.string().uuid(),
+  questionCooldownTerms: z.number({ message: 'Enter the number of terms' }).int('Whole terms only').min(0).max(40),
+  cooldownMode: z.enum(['warn', 'block']),
+});
+export type CooldownSettingsInput = z.infer<typeof cooldownSettingsSchema>;
+// FR-I15: moderation of a section's marks.
+export const moderationSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  sectionId: z.string().uuid(),
+  delta: z
+    .number({ message: 'Enter the adjustment in marks' })
+    .refine((n) => n !== 0, 'The adjustment cannot be zero')
+    .refine((n) => Math.abs(n) <= 100, 'Enter a smaller adjustment'),
+  reason: z.string().trim().min(20, 'Give a reason of at least 20 characters').max(500, 'At most 500 characters'),
+});
+export type ModerationInput = z.infer<typeof moderationSchema>;
+export const reverseModerationSchema = z.object({
+  moderationId: z.string().uuid(),
+  reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(500, 'At most 500 characters'),
+});
+export type ReverseModerationInput = z.infer<typeof reverseModerationSchema>;
+
+// FR-I07: build Set A / Set B from the question bank.
+export const buildSetsSchema = z.object({
+  examSubjectId: z.string().uuid({ message: 'Choose a paper' }),
+  boardPatternId: z.string().uuid({ message: 'Choose a pattern' }),
+  chaptersText: z.string().trim().min(1, 'Enter at least one chapter'),
+  setCount: z.number({ message: 'Enter the number of sets' }).int('Whole sets only').min(1).max(4),
+  maxIdentical: z.number({ message: 'Enter a number' }).int('Whole questions only').min(0).max(10),
+  replace: z.boolean().default(false),
+});
+export type BuildSetsInput = z.input<typeof buildSetsSchema>;
+/** "Ch.1, Ch.2; Ch.3" -> ["Ch.1", "Ch.2", "Ch.3"] */
+export function parseChapters(text: string): string[] {
+  return [...new Set(text.split(/[,;\n]/).map((c) => c.trim()).filter(Boolean))];
+}

@@ -171,8 +171,13 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/marks', label: 'Mark Entry' },
       { href: '/exams/papers', label: 'Paper Generation' },
       { href: '/exams/remarks', label: 'Teacher Remarks' },
+      { href: '/exams/moderation', label: 'Moderation' },
       { href: '/exams/approvals', label: 'Mark Approval' },
       { href: '/exams/unlocks', label: 'Break-Glass Unlocks' },
+      { href: '/exams/datesheet', label: 'Datesheet' },
+      { href: '/exams/invigilation', label: 'Invigilation' },
+      { href: '/exams/seating', label: 'Seating Plans' },
+      { href: '/exams/papers', label: 'Question Papers' },
     ],
   },
   {
