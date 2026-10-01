@@ -92,6 +92,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/students/promotion', label: 'Promotion' },
       { href: '/students/recycle-bin', label: 'Recycle Bin' },
       { href: '/consent', label: 'Consent' },
+      { href: '/houses', label: 'Houses' },
     ],
   },
   {

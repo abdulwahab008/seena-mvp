@@ -775,13 +775,6 @@ export type Database = {
             foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
             columns: ["consumed_by_enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "admission_fee_payment_consumed_by_enrolment_id_fkey"
-            columns: ["consumed_by_enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -880,13 +873,6 @@ export type Database = {
             columns: ["consumed_by_enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "admission_fee_waiver_consumed_by_enrolment_id_fkey"
-            columns: ["consumed_by_enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -1026,7 +1012,7 @@ export type Database = {
         Insert: {
           application_id: string
           created_at?: string
-          during?: unknown
+          during?: never
           ends_at: string
           id?: string
           panel_user_id: string
@@ -1038,7 +1024,7 @@ export type Database = {
         Update: {
           application_id?: string
           created_at?: string
-          during?: unknown
+          during?: never
           ends_at?: string
           id?: string
           panel_user_id?: string
@@ -1820,7 +1806,7 @@ export type Database = {
           is_blocked?: boolean
           is_pass?: boolean | null
           prorated_terms: number
-          proration_note?: string | null
+          proration_note?: never
           section_id: string
           session_id: string
           status: Database["public"]["Enums"]["annual_result_status"]
@@ -1843,7 +1829,7 @@ export type Database = {
           is_blocked?: boolean
           is_pass?: boolean | null
           prorated_terms?: number
-          proration_note?: string | null
+          proration_note?: never
           section_id?: string
           session_id?: string
           status?: Database["public"]["Enums"]["annual_result_status"]
@@ -1901,13 +1887,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "annual_result_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -2238,13 +2217,6 @@ export type Database = {
             foreignKeyName: "attendance_audit_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_audit_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -2376,13 +2348,6 @@ export type Database = {
             foreignKeyName: "attendance_correction_request_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_correction_request_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -2488,13 +2453,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_day_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -2643,13 +2601,6 @@ export type Database = {
             foreignKeyName: "attendance_derivation_conflict_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_derivation_conflict_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -2753,6 +2704,13 @@ export type Database = {
             foreignKeyName: "attendance_eligibility_adjustment_challan_id_fkey"
             columns: ["challan_id"]
             isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
             referencedRelation: "v_portal_dues"
             referencedColumns: ["challan_id"]
           },
@@ -2768,13 +2726,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_eligibility_adjustment_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -2873,13 +2824,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -3208,13 +3152,6 @@ export type Database = {
             foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_monthly_summary_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -3313,13 +3250,6 @@ export type Database = {
             foreignKeyName: "attendance_notification_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_notification_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -3399,13 +3329,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_period_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -3640,13 +3563,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_shortage_warning_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -4422,6 +4338,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_challan"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_recon_exception_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
           },
           {
             foreignKeyName: "bank_recon_exception_challan_id_fkey"
@@ -5696,13 +5619,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "certificate_issue_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -7169,13 +7085,6 @@ export type Database = {
             foreignKeyName: "concession_award_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "concession_award_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -8069,13 +7978,6 @@ export type Database = {
             foreignKeyName: "enrolment_previous_enrolment_id_fkey"
             columns: ["previous_enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "enrolment_previous_enrolment_id_fkey"
-            columns: ["previous_enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -8250,13 +8152,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "exam_attendance_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -8503,7 +8398,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["exam_term_status"]
           tenant_id: string
           weight_bp?: number
-          weight_pct?: number | null
+          weight_pct?: never
         }
         Update: {
           activated_at?: string | null
@@ -8520,7 +8415,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["exam_term_status"]
           tenant_id?: string
           weight_bp?: number
-          weight_pct?: number | null
+          weight_pct?: never
         }
         Relationships: [
           {
@@ -9035,7 +8930,7 @@ export type Database = {
           batch_id?: string | null
           billing_period: string
           campus_id: string
-          challan_digits?: string | null
+          challan_digits?: never
           challan_no: string
           concession_paisa?: number
           created_at?: string
@@ -9060,7 +8955,7 @@ export type Database = {
           batch_id?: string | null
           billing_period?: string
           campus_id?: string
-          challan_digits?: string | null
+          challan_digits?: never
           challan_no?: string
           concession_paisa?: number
           created_at?: string
@@ -9120,13 +9015,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_challan_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -9306,13 +9194,6 @@ export type Database = {
             foreignKeyName: "fee_challan_batch_error_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_challan_batch_error_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -9356,6 +9237,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_challan"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_line_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
           },
           {
             foreignKeyName: "fee_challan_line_challan_id_fkey"
@@ -9405,6 +9293,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_challan"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_pdf_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
           },
           {
             foreignKeyName: "fee_challan_pdf_challan_id_fkey"
@@ -9744,6 +9639,13 @@ export type Database = {
             foreignKeyName: "fee_ledger_challan_id_fkey"
             columns: ["challan_id"]
             isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
+          },
+          {
+            foreignKeyName: "fee_ledger_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
             referencedRelation: "v_portal_dues"
             referencedColumns: ["challan_id"]
           },
@@ -9766,13 +9668,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_ledger_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -9906,13 +9801,6 @@ export type Database = {
             foreignKeyName: "fee_payment_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_payment_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -9957,6 +9845,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "fee_challan"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payment_allocation_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
           },
           {
             foreignKeyName: "fee_payment_allocation_challan_id_fkey"
@@ -10053,13 +9948,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: true
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_plan_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: true
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -10445,6 +10333,13 @@ export type Database = {
             foreignKeyName: "fee_reminder_log_challan_id_fkey"
             columns: ["challan_id"]
             isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
+          },
+          {
+            foreignKeyName: "fee_reminder_log_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
             referencedRelation: "v_portal_dues"
             referencedColumns: ["challan_id"]
           },
@@ -10620,13 +10515,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_settlement_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -10956,13 +10844,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "gateway_commission_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -11447,37 +11328,37 @@ export type Database = {
         }
         Insert: {
           alt_phone?: string | null
-          alt_phone_last10?: string | null
+          alt_phone_last10?: never
           auth_user_id?: string | null
           cnic?: string | null
-          cnic_digits?: string | null
+          cnic_digits?: never
           created_at?: string
           email?: string | null
           id?: string
           name_en: string
           name_ur?: string | null
-          name_ur_roman?: string | null
+          name_ur_roman?: never
           occupation?: string | null
           phone_e164?: string | null
-          phone_last10?: string | null
+          phone_last10?: never
           preferred_language?: string
           tenant_id: string
         }
         Update: {
           alt_phone?: string | null
-          alt_phone_last10?: string | null
+          alt_phone_last10?: never
           auth_user_id?: string | null
           cnic?: string | null
-          cnic_digits?: string | null
+          cnic_digits?: never
           created_at?: string
           email?: string | null
           id?: string
           name_en?: string
           name_ur?: string | null
-          name_ur_roman?: string | null
+          name_ur_roman?: never
           occupation?: string | null
           phone_e164?: string | null
-          phone_last10?: string | null
+          phone_last10?: never
           preferred_language?: string
           tenant_id?: string
         }
@@ -12232,13 +12113,6 @@ export type Database = {
             foreignKeyName: "homework_notification_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "homework_notification_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -12398,13 +12272,6 @@ export type Database = {
             foreignKeyName: "homework_submission_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "homework_submission_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -12527,6 +12394,193 @@ export type Database = {
           },
           {
             foreignKeyName: "homework_submission_version_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      house: {
+        Row: {
+          campus_id: string
+          colour_hex: string
+          created_at: string
+          id: string
+          motto: string | null
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          colour_hex?: string
+          created_at?: string
+          id?: string
+          motto?: string | null
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          colour_hex?: string
+          created_at?: string
+          id?: string
+          motto?: string | null
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "house_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      house_point: {
+        Row: {
+          awarded_by: string | null
+          awarded_on: string
+          campus_id: string
+          category: string
+          created_at: string
+          house_id: string
+          id: string
+          note: string | null
+          points: number
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          awarded_by?: string | null
+          awarded_on: string
+          campus_id: string
+          category?: string
+          created_at?: string
+          house_id: string
+          id?: string
+          note?: string | null
+          points: number
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          awarded_by?: string | null
+          awarded_on?: string
+          campus_id?: string
+          category?: string
+          created_at?: string
+          house_id?: string
+          id?: string
+          note?: string | null
+          points?: number
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_point_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_point_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "house_point_house_id_fkey"
+            columns: ["house_id"]
+            isOneToOne: false
+            referencedRelation: "house"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_point_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_point_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "house_point_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "house_point_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      house_setting: {
+        Row: {
+          campus_id: string
+          capacity_balancing: boolean
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          campus_id: string
+          capacity_balancing?: boolean
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string
+          capacity_balancing?: boolean
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_setting_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_setting_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: true
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "house_setting_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -12893,13 +12947,6 @@ export type Database = {
             foreignKeyName: "import_row_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "import_row_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -12957,6 +13004,322 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "inbound_sms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_item: {
+        Row: {
+          active: boolean
+          category: Database["public"]["Enums"]["inv_item_category"]
+          class_id: string | null
+          created_at: string
+          id: string
+          item_code: string
+          name: string
+          reorder_level: number
+          sale_price: number
+          size: string | null
+          subject_id: string | null
+          tenant_id: string
+          uom: string
+        }
+        Insert: {
+          active?: boolean
+          category: Database["public"]["Enums"]["inv_item_category"]
+          class_id?: string | null
+          created_at?: string
+          id?: string
+          item_code: string
+          name: string
+          reorder_level?: number
+          sale_price?: number
+          size?: string | null
+          subject_id?: string | null
+          tenant_id: string
+          uom?: string
+        }
+        Update: {
+          active?: boolean
+          category?: Database["public"]["Enums"]["inv_item_category"]
+          class_id?: string | null
+          created_at?: string
+          id?: string
+          item_code?: string
+          name?: string
+          reorder_level?: number
+          sale_price?: number
+          size?: string | null
+          subject_id?: string | null
+          tenant_id?: string
+          uom?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_item_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_item_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "inv_item_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_item_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_reorder_alert: {
+        Row: {
+          campus_id: string
+          id: string
+          item_id: string
+          on_hand: number
+          raised_at: string
+          reorder_level: number
+          resolved_at: string | null
+          store_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          id?: string
+          item_id: string
+          on_hand: number
+          raised_at?: string
+          reorder_level: number
+          resolved_at?: string | null
+          store_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          id?: string
+          item_id?: string
+          on_hand?: number
+          raised_at?: string
+          reorder_level?: number
+          resolved_at?: string | null
+          store_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_reorder_alert_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_alert_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_alert_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_item"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_alert_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "inv_store"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_reorder_alert_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_stock_lock: {
+        Row: {
+          item_id: string
+          store_id: string
+        }
+        Insert: {
+          item_id: string
+          store_id: string
+        }
+        Update: {
+          item_id?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_stock_lock_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_item"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_stock_lock_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "inv_store"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_stock_movement: {
+        Row: {
+          campus_id: string
+          id: string
+          item_id: string
+          moved_at: string
+          moved_by: string | null
+          movement_type: Database["public"]["Enums"]["inv_movement_type"]
+          qty: number
+          reason_code: string | null
+          ref_id: string | null
+          ref_table: string | null
+          store_id: string
+          tenant_id: string
+          unit_cost: number | null
+        }
+        Insert: {
+          campus_id: string
+          id?: string
+          item_id: string
+          moved_at?: string
+          moved_by?: string | null
+          movement_type: Database["public"]["Enums"]["inv_movement_type"]
+          qty: number
+          reason_code?: string | null
+          ref_id?: string | null
+          ref_table?: string | null
+          store_id: string
+          tenant_id: string
+          unit_cost?: number | null
+        }
+        Update: {
+          campus_id?: string
+          id?: string
+          item_id?: string
+          moved_at?: string
+          moved_by?: string | null
+          movement_type?: Database["public"]["Enums"]["inv_movement_type"]
+          qty?: number
+          reason_code?: string | null
+          ref_id?: string | null
+          ref_table?: string | null
+          store_id?: string
+          tenant_id?: string
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_stock_movement_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_item"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_moved_by_fkey"
+            columns: ["moved_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "inv_store"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inv_store: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_store_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_store_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "inv_store_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
@@ -13584,6 +13947,82 @@ export type Database = {
           },
         ]
       }
+      library_title: {
+        Row: {
+          author: string | null
+          cover_path: string | null
+          created_at: string
+          created_by: string | null
+          dewey: string | null
+          edition: string | null
+          id: string
+          isbn13: string | null
+          language: string
+          publisher: string | null
+          raw_isbn: string | null
+          subject_id: string | null
+          tenant_id: string
+          title: string
+          title_ur: string | null
+        }
+        Insert: {
+          author?: string | null
+          cover_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          dewey?: string | null
+          edition?: string | null
+          id?: string
+          isbn13?: never
+          language?: string
+          publisher?: string | null
+          raw_isbn?: string | null
+          subject_id?: string | null
+          tenant_id: string
+          title: string
+          title_ur?: string | null
+        }
+        Update: {
+          author?: string | null
+          cover_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          dewey?: string | null
+          edition?: string | null
+          id?: string
+          isbn13?: never
+          language?: string
+          publisher?: string | null
+          raw_isbn?: string | null
+          subject_id?: string | null
+          tenant_id?: string
+          title?: string
+          title_ur?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_title_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "library_title_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subject"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_title_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_attempt: {
         Row: {
           created_at: string
@@ -13681,13 +14120,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "mark_entry_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -13831,13 +14263,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "mark_entry_audit_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -14710,7 +15135,7 @@ export type Database = {
           recipient_phone?: string | null
           recipient_type?: Database["public"]["Enums"]["comm_recipient_type"]
           scheduled_at?: string
-          segment_count?: number | null
+          segment_count?: never
           sender_id?: string | null
           status?: Database["public"]["Enums"]["message_status"]
           subject?: string | null
@@ -14739,7 +15164,7 @@ export type Database = {
           recipient_phone?: string | null
           recipient_type?: Database["public"]["Enums"]["comm_recipient_type"]
           scheduled_at?: string
-          segment_count?: number | null
+          segment_count?: never
           sender_id?: string | null
           status?: Database["public"]["Enums"]["message_status"]
           subject?: string | null
@@ -15487,23 +15912,32 @@ export type Database = {
         Row: {
           denominator_desc: string
           display_name: string
+          drilldown_roles: string[] | null
+          drilldown_view: string | null
           metric_key: string
           note: string | null
           numerator_desc: string
+          tolerance_pct: number
         }
         Insert: {
           denominator_desc: string
           display_name: string
+          drilldown_roles?: string[] | null
+          drilldown_view?: string | null
           metric_key: string
           note?: string | null
           numerator_desc: string
+          tolerance_pct?: number
         }
         Update: {
           denominator_desc?: string
           display_name?: string
+          drilldown_roles?: string[] | null
+          drilldown_view?: string | null
           metric_key?: string
           note?: string | null
           numerator_desc?: string
+          tolerance_pct?: number
         }
         Relationships: []
       }
@@ -15571,13 +16005,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "no_dues_clearance_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -15955,13 +16382,6 @@ export type Database = {
             foreignKeyName: "ocr_mark_suggestion_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "ocr_mark_suggestion_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -16052,13 +16472,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -16491,6 +16904,13 @@ export type Database = {
             foreignKeyName: "payment_intent_challan_id_fkey"
             columns: ["challan_id"]
             isOneToOne: false
+            referencedRelation: "v_drilldown_outstanding"
+            referencedColumns: ["challan_id"]
+          },
+          {
+            foreignKeyName: "payment_intent_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
             referencedRelation: "v_portal_dues"
             referencedColumns: ["challan_id"]
           },
@@ -16506,13 +16926,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "payment_intent_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -17287,6 +17700,240 @@ export type Database = {
           },
         ]
       }
+      promotion_decision: {
+        Row: {
+          aggregate_pct: number | null
+          campus_id: string
+          class_level_id: string
+          decision: Database["public"]["Enums"]["promotion_decision_type"]
+          enrolment_id: string
+          evaluated_at: string
+          failed_subjects: Json
+          handoff_conflict: boolean
+          id: string
+          overridden_at: string | null
+          overridden_by: string | null
+          override_reason: string | null
+          pending_reason: string | null
+          rule_snapshot: Json
+          session_id: string
+          student_id: string
+          system_decision: Database["public"]["Enums"]["promotion_decision_type"]
+          tenant_id: string
+        }
+        Insert: {
+          aggregate_pct?: number | null
+          campus_id: string
+          class_level_id: string
+          decision: Database["public"]["Enums"]["promotion_decision_type"]
+          enrolment_id: string
+          evaluated_at?: string
+          failed_subjects?: Json
+          handoff_conflict?: boolean
+          id?: string
+          overridden_at?: string | null
+          overridden_by?: string | null
+          override_reason?: string | null
+          pending_reason?: string | null
+          rule_snapshot?: Json
+          session_id: string
+          student_id: string
+          system_decision: Database["public"]["Enums"]["promotion_decision_type"]
+          tenant_id: string
+        }
+        Update: {
+          aggregate_pct?: number | null
+          campus_id?: string
+          class_level_id?: string
+          decision?: Database["public"]["Enums"]["promotion_decision_type"]
+          enrolment_id?: string
+          evaluated_at?: string
+          failed_subjects?: Json
+          handoff_conflict?: boolean
+          id?: string
+          overridden_at?: string | null
+          overridden_by?: string | null
+          override_reason?: string | null
+          pending_reason?: string | null
+          rule_snapshot?: Json
+          session_id?: string
+          student_id?: string
+          system_decision?: Database["public"]["Enums"]["promotion_decision_type"]
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_decision_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_class_level_id_fkey"
+            columns: ["class_level_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_overridden_by_fkey"
+            columns: ["overridden_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "promotion_decision_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotion_rule: {
+        Row: {
+          campus_id: string
+          class_id: string | null
+          id: string
+          max_failed_for_compartment: number
+          max_failed_for_promotion: number
+          min_aggregate_pct: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          campus_id: string
+          class_id?: string | null
+          id?: string
+          max_failed_for_compartment?: number
+          max_failed_for_promotion?: number
+          min_aggregate_pct?: number
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          campus_id?: string
+          class_id?: string | null
+          id?: string
+          max_failed_for_compartment?: number
+          max_failed_for_promotion?: number
+          min_aggregate_pct?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_rule_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "promotion_rule_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_rule_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "promotion_rule_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_rule_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "app_user"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       provider_rate_card: {
         Row: {
           channel: Database["public"]["Enums"]["comm_channel"]
@@ -17699,13 +18346,6 @@ export type Database = {
             foreignKeyName: "report_card_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "report_card_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -17992,13 +18632,6 @@ export type Database = {
             foreignKeyName: "report_card_batch_item_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "report_card_batch_item_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -18065,18 +18698,21 @@ export type Database = {
           allowed_roles: string[]
           columns: Json
           dataset_key: string
+          description: string | null
           display_name: string
         }
         Insert: {
           allowed_roles: string[]
           columns: Json
           dataset_key: string
+          description?: string | null
           display_name: string
         }
         Update: {
           allowed_roles?: string[]
           columns?: Json
           dataset_key?: string
+          description?: string | null
           display_name?: string
         }
         Relationships: []
@@ -18296,13 +18932,6 @@ export type Database = {
             foreignKeyName: "result_position_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "result_position_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -18473,13 +19102,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "result_withhold_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -18709,13 +19331,6 @@ export type Database = {
             foreignKeyName: "roll_number_change_log_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "roll_number_change_log_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -18873,7 +19488,7 @@ export type Database = {
           session_id: string
           staff_id?: string | null
           tenant_id: string
-          validity?: unknown
+          validity?: never
         }
         Update: {
           campus_id?: string
@@ -18885,7 +19500,7 @@ export type Database = {
           session_id?: string
           staff_id?: string | null
           tenant_id?: string
-          validity?: unknown
+          validity?: never
         }
         Relationships: [
           {
@@ -19024,13 +19639,6 @@ export type Database = {
             foreignKeyName: "section_membership_history_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "section_membership_history_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -19119,7 +19727,7 @@ export type Database = {
           staff_id?: string | null
           subject_id: string
           tenant_id: string
-          validity?: unknown
+          validity?: never
         }
         Update: {
           campus_id?: string
@@ -19133,7 +19741,7 @@ export type Database = {
           staff_id?: string | null
           subject_id?: string
           tenant_id?: string
-          validity?: unknown
+          validity?: never
         }
         Relationships: [
           {
@@ -19329,13 +19937,6 @@ export type Database = {
             foreignKeyName: "security_deposit_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "security_deposit_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -19475,13 +20076,6 @@ export type Database = {
             foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
             columns: ["new_enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
-            columns: ["new_enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -19504,13 +20098,6 @@ export type Database = {
             columns: ["source_enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "session_rollover_decision_source_enrolment_id_fkey"
-            columns: ["source_enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -19932,7 +20519,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender"]
           id?: string
           id_document_type?: Database["public"]["Enums"]["id_document_type"]
-          name_ur_roman?: string | null
+          name_ur_roman?: never
           passport_no?: string | null
           tenant_id: string
           user_id?: string | null
@@ -19954,7 +20541,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender"]
           id?: string
           id_document_type?: Database["public"]["Enums"]["id_document_type"]
-          name_ur_roman?: string | null
+          name_ur_roman?: never
           passport_no?: string | null
           tenant_id?: string
           user_id?: string | null
@@ -20692,7 +21279,7 @@ export type Database = {
         Insert: {
           address?: Json
           b_form_no?: string | null
-          bform_digits?: string | null
+          bform_digits?: never
           bform_override_reason?: string | null
           blood_group?: string | null
           campus_id: string
@@ -20704,13 +21291,13 @@ export type Database = {
           father_name_en?: string | null
           father_name_ur?: string | null
           gender: Database["public"]["Enums"]["gender"]
-          gr_digits?: string | null
+          gr_digits?: never
           gr_number: string
           house_id?: string | null
           id?: string
           name_en: string
           name_ur?: string | null
-          name_ur_roman?: string | null
+          name_ur_roman?: never
           nationality?: string
           no_readmission_flag?: boolean
           photo_path?: string | null
@@ -20721,7 +21308,7 @@ export type Database = {
         Update: {
           address?: Json
           b_form_no?: string | null
-          bform_digits?: string | null
+          bform_digits?: never
           bform_override_reason?: string | null
           blood_group?: string | null
           campus_id?: string
@@ -20733,13 +21320,13 @@ export type Database = {
           father_name_en?: string | null
           father_name_ur?: string | null
           gender?: Database["public"]["Enums"]["gender"]
-          gr_digits?: string | null
+          gr_digits?: never
           gr_number?: string
           house_id?: string | null
           id?: string
           name_en?: string
           name_ur?: string | null
-          name_ur_roman?: string | null
+          name_ur_roman?: never
           nationality?: string
           no_readmission_flag?: boolean
           photo_path?: string | null
@@ -20774,6 +21361,13 @@ export type Database = {
             columns: ["family_group_id"]
             isOneToOne: false
             referencedRelation: "family_group"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_house_fk"
+            columns: ["house_id"]
+            isOneToOne: false
+            referencedRelation: "house"
             referencedColumns: ["id"]
           },
           {
@@ -20976,6 +21570,95 @@ export type Database = {
           },
         ]
       }
+      student_house_history: {
+        Row: {
+          assigned_by: string | null
+          campus_id: string
+          created_at: string
+          from_date: string
+          house_id: string
+          id: string
+          reason: string
+          student_id: string
+          tenant_id: string
+          to_date: string | null
+        }
+        Insert: {
+          assigned_by?: string | null
+          campus_id: string
+          created_at?: string
+          from_date: string
+          house_id: string
+          id?: string
+          reason: string
+          student_id: string
+          tenant_id: string
+          to_date?: string | null
+        }
+        Update: {
+          assigned_by?: string | null
+          campus_id?: string
+          created_at?: string
+          from_date?: string
+          house_id?: string
+          id?: string
+          reason?: string
+          student_id?: string
+          tenant_id?: string
+          to_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_house_history_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_house_history_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "student_house_history_house_id_fkey"
+            columns: ["house_id"]
+            isOneToOne: false
+            referencedRelation: "house"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_house_history_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_house_history_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "student_house_history_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "student_house_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_leave_application: {
         Row: {
           applied_by_user_id: string
@@ -21058,13 +21741,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "student_leave_application_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -21882,13 +22558,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "subject_result_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -24014,7 +24683,7 @@ export type Database = {
           shift: Database["public"]["Enums"]["section_shift"]
           status?: Database["public"]["Enums"]["timetable_version_status"]
           tenant_id: string
-          validity?: unknown
+          validity?: never
           version_no: number
           warning_count?: number
         }
@@ -24031,7 +24700,7 @@ export type Database = {
           shift?: Database["public"]["Enums"]["section_shift"]
           status?: Database["public"]["Enums"]["timetable_version_status"]
           tenant_id?: string
-          validity?: unknown
+          validity?: never
           version_no?: number
           warning_count?: number
         }
@@ -24539,13 +25208,6 @@ export type Database = {
             foreignKeyName: "annual_result_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "annual_result_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -24687,13 +25349,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -24916,13 +25571,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "certificate_issue_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -25397,13 +26045,6 @@ export type Database = {
             foreignKeyName: "fee_ledger_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_ledger_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -25550,6 +26191,171 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "app_user"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      v_drilldown_absentees: {
+        Row: {
+          attendance_date: string | null
+          campus_id: string | null
+          campus_name: string | null
+          class_name: string | null
+          gr_number: string | null
+          section_name: string | null
+          status: string | null
+          student_id: string | null
+          student_name: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_day_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "attendance_day_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+        ]
+      }
+      v_drilldown_outstanding: {
+        Row: {
+          age_days: number | null
+          balance_paisa: number | null
+          bucket: string | null
+          campus_id: string | null
+          campus_name: string | null
+          challan_id: string | null
+          challan_no: string | null
+          class_name: string | null
+          due_date: string | null
+          gr_number: string | null
+          issue_date: string | null
+          section_name: string | null
+          student_id: string | null
+          student_name: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_guardian_children"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "enrolment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "v_sibling_rank"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_drilldown_staff_cost: {
+        Row: {
+          campus_id: string | null
+          campus_name: string | null
+          employee_code: string | null
+          full_name: string | null
+          gross_paisa: number | null
+          net_paisa: number | null
+          period_month: string | null
+          run_status: string | null
+          staff_id: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "payroll_run_line_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -26168,50 +26974,7 @@ export type Database = {
           session_id: string | null
           tenant_id: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "enrolment_class_level_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "class_level"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_class_level_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "v_rollover_decision_detail"
-            referencedColumns: ["source_class_id"]
-          },
-          {
-            foreignKeyName: "fee_challan_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "campus"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_challan_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "v_principal_today"
-            referencedColumns: ["campus_id"]
-          },
-          {
-            foreignKeyName: "fee_challan_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "academic_session"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_challan_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenant"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       v_fee_defaulter: {
         Row: {
@@ -26231,99 +26994,7 @@ export type Database = {
           student_name: string | null
           tenant_id: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "enrolment_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "campus"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_campus_id_fkey"
-            columns: ["campus_id"]
-            isOneToOne: false
-            referencedRelation: "v_principal_today"
-            referencedColumns: ["campus_id"]
-          },
-          {
-            foreignKeyName: "enrolment_class_level_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "class_level"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_class_level_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "v_rollover_decision_detail"
-            referencedColumns: ["source_class_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "class_section"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_exam_result_input"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_exam_section_subject_setup"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_exam_subject_section"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_scheduled_vs_required_periods"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_section_seat_availability"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "v_unallocated_section_subject"
-            referencedColumns: ["section_id"]
-          },
-          {
-            foreignKeyName: "enrolment_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "academic_session"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "enrolment_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenant"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       v_grading_scheme: {
         Row: {
@@ -27021,13 +27692,6 @@ export type Database = {
             foreignKeyName: "ocr_review_action_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "ocr_review_action_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -27181,13 +27845,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_challan_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -27383,13 +28040,6 @@ export type Database = {
             foreignKeyName: "result_position_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "result_position_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -27509,13 +28159,6 @@ export type Database = {
             columns: ["new_enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "session_rollover_decision_new_enrolment_id_fkey"
-            columns: ["new_enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -28126,6 +28769,59 @@ export type Database = {
           },
         ]
       }
+      v_stock_on_hand: {
+        Row: {
+          at_or_below_reorder: boolean | null
+          campus_id: string | null
+          category: Database["public"]["Enums"]["inv_item_category"] | null
+          item_code: string | null
+          item_id: string | null
+          item_name: string | null
+          movement_count: number | null
+          on_hand: number | null
+          reorder_level: number | null
+          size: string | null
+          store_id: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inv_stock_movement_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inv_item"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "inv_store"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inv_stock_movement_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_student_homework_feed: {
         Row: {
           assigned_date: string | null
@@ -28336,13 +29032,6 @@ export type Database = {
             columns: ["enrolment_id"]
             isOneToOne: false
             referencedRelation: "v_exam_result_input"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "subject_result_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
             referencedColumns: ["enrolment_id"]
           },
           {
@@ -28778,13 +29467,6 @@ export type Database = {
             foreignKeyName: "fee_payment_enrolment_id_fkey"
             columns: ["enrolment_id"]
             isOneToOne: false
-            referencedRelation: "v_fee_defaulter"
-            referencedColumns: ["enrolment_id"]
-          },
-          {
-            foreignKeyName: "fee_payment_enrolment_id_fkey"
-            columns: ["enrolment_id"]
-            isOneToOne: false
             referencedRelation: "v_student_outstanding"
             referencedColumns: ["enrolment_id"]
           },
@@ -28922,7 +29604,7 @@ export type Database = {
         Returns: undefined
       }
       agg_freshness: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           is_stale: boolean
           last_failure_at: string
@@ -29047,6 +29729,10 @@ export type Database = {
         }
         Returns: number
       }
+      auto_assign_houses: {
+        Args: { p_campus_id: string; p_session_id: string }
+        Returns: Json
+      }
       available_seats: {
         Args: {
           p_campus_id: string
@@ -29054,6 +29740,16 @@ export type Database = {
           p_session_id: string
         }
         Returns: number
+      }
+      award_house_points: {
+        Args: {
+          p_awarded_on?: string
+          p_category?: string
+          p_note?: string
+          p_points: number
+          p_student_id: string
+        }
+        Returns: string
       }
       begin_board_export_run: {
         Args: {
@@ -29175,7 +29871,10 @@ export type Database = {
         }
         Returns: Json
       }
-      check_pii_export_alerts: { Args: never; Returns: number }
+      check_pii_export_alerts: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       check_room_capacity: {
         Args: { p_room_id: string; p_section_id: string }
         Returns: Json
@@ -29204,7 +29903,7 @@ export type Database = {
         Returns: Json
       }
       claim_export_job: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           columns: Json
           dataset_key: string
@@ -29623,6 +30322,15 @@ export type Database = {
         }
         Returns: string
       }
+      create_house: {
+        Args: {
+          p_campus_id: string
+          p_colour_hex?: string
+          p_motto?: string
+          p_name: string
+        }
+        Returns: string
+      }
       create_import_batch: {
         Args: {
           p_campus_id: string
@@ -29631,6 +30339,24 @@ export type Database = {
           p_session_id: string
         }
         Returns: Json
+      }
+      create_inv_item: {
+        Args: {
+          p_category: Database["public"]["Enums"]["inv_item_category"]
+          p_class_id?: string
+          p_item_code: string
+          p_name: string
+          p_reorder_level?: number
+          p_sale_price?: number
+          p_size?: string
+          p_subject_id?: string
+          p_uom?: string
+        }
+        Returns: string
+      }
+      create_inv_store: {
+        Args: { p_campus_id: string; p_name: string }
+        Returns: string
       }
       create_late_fee_rule: {
         Args: {
@@ -29964,6 +30690,7 @@ export type Database = {
       }
       delete_exam_term: { Args: { p_exam_term_id: string }; Returns: undefined }
       delete_homework: { Args: { p_homework_id: string }; Returns: undefined }
+      delete_house: { Args: { p_house_id: string }; Returns: undefined }
       delete_staff_document: {
         Args: { p_document_id: string }
         Returns: undefined
@@ -29974,8 +30701,11 @@ export type Database = {
         Returns: undefined
       }
       delete_syllabus_unit: { Args: { p_unit_id: string }; Returns: undefined }
-      deprovision_on_tc: { Args: never; Returns: number }
-      derive_day_attendance_all: { Args: never; Returns: number }
+      deprovision_on_tc: { Args: Record<PropertyKey, never>; Returns: number }
+      derive_day_attendance_all: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       derive_day_from_periods: {
         Args: { p_campus_id: string; p_date: string }
         Returns: number
@@ -30063,7 +30793,7 @@ export type Database = {
         }
         Returns: string
       }
-      escalate_tickets: { Args: never; Returns: number }
+      escalate_tickets: { Args: Record<PropertyKey, never>; Returns: number }
       escalate_timed_out_attempts: {
         Args: { p_tenant_id?: string }
         Returns: {
@@ -30078,7 +30808,10 @@ export type Database = {
         Args: { p_campus_id: string; p_session_id: string }
         Returns: Json
       }
-      evaluate_attendance_shortage_all: { Args: never; Returns: number }
+      evaluate_attendance_shortage_all: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       evaluate_date_based_rules: {
         Args: { p_run_date?: string; p_tenant_id?: string }
         Returns: {
@@ -30180,7 +30913,10 @@ export type Database = {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
       }
-      fee_collection_refresh_due: { Args: never; Returns: boolean }
+      fee_collection_refresh_due: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       fees_reminder_escalation: {
         Args: { p_now?: string; p_run_date?: string; p_tenant_id?: string }
         Returns: Json
@@ -30397,6 +31133,10 @@ export type Database = {
         Args: { p_enquiry_a: string; p_enquiry_b: string }
         Returns: undefined
       }
+      fn_drilldown_permitted: {
+        Args: { p_metric_key: string }
+        Returns: boolean
+      }
       fn_enrol_from_offer: {
         Args: {
           p_b_form_no?: string
@@ -30414,7 +31154,10 @@ export type Database = {
         }
         Returns: Json
       }
-      fn_escalate_overdue_steps: { Args: never; Returns: number }
+      fn_escalate_overdue_steps: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       fn_evaluate_component: {
         Args: {
           p_basic_paisa: number
@@ -30427,6 +31170,10 @@ export type Database = {
           p_unpaid_days?: number
         }
         Returns: number
+      }
+      fn_evaluate_promotion: {
+        Args: { p_class_id: string; p_session_id: string }
+        Returns: Json
       }
       fn_exam_entry_readiness: {
         Args: {
@@ -30445,7 +31192,7 @@ export type Database = {
         Returns: number
       }
       fn_expense_head_is_leaf: { Args: { p_head_id: string }; Returns: boolean }
-      fn_expire_offers: { Args: never; Returns: number }
+      fn_expire_offers: { Args: Record<PropertyKey, never>; Returns: number }
       fn_extend_offer: {
         Args: { p_new_expires_at: string; p_offer_id: string; p_reason: string }
         Returns: undefined
@@ -30493,7 +31240,7 @@ export type Database = {
         Returns: string
       }
       fn_find_overdue_leave_students: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           days_on_leave: number
           student_id: string
@@ -30510,7 +31257,7 @@ export type Database = {
         }[]
       }
       fn_flag_probation_lapsed: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           contract_type: Database["public"]["Enums"]["contract_type"]
           contracted_periods_per_week: number | null
@@ -30633,6 +31380,17 @@ export type Database = {
         Args: { p_keep_id: string; p_merge_id: string }
         Returns: undefined
       }
+      fn_metric_reconcile: {
+        Args: { campus_id: string; metric_key: string; on_day: string }
+        Returns: {
+          agg_refreshed_at: string
+          agg_value: number
+          delta_pct: number
+          exceeds_tolerance: boolean
+          live_value: number
+          tolerance_pct: number
+        }[]
+      }
       fn_monthly_withholding_paisa: {
         Args: {
           p_monthly_taxable_paisa: number
@@ -30706,7 +31464,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      fn_process_sms_fallbacks: { Args: never; Returns: number }
+      fn_process_sms_fallbacks: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       fn_promote_ocr_marks: { Args: { p_job_id: string }; Returns: Json }
       fn_promote_waitlist: {
         Args: {
@@ -30716,10 +31477,20 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_promotion_sheet: {
+        Args: { p_class_id: string; p_session_id: string }
+        Returns: Json
+      }
       fn_public_school_info: { Args: { p_tenant_slug: string }; Returns: Json }
       fn_publish_merit_list: { Args: { p_sitting_id: string }; Returns: Json }
-      fn_queue_appointment_reminders: { Args: never; Returns: number }
-      fn_queue_followup_reminders: { Args: never; Returns: number }
+      fn_queue_appointment_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      fn_queue_followup_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       fn_quick_admission: {
         Args: {
           p_admission_fee?: number
@@ -31081,7 +31852,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_preferred_language: { Args: never; Returns: string }
+      get_preferred_language: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       global_search: {
         Args: { p_limit?: number; p_q: string }
         Returns: {
@@ -31121,9 +31895,32 @@ export type Database = {
           student_name: string
         }[]
       }
-      homework_orphan_sweep: { Args: never; Returns: number }
-      homework_submission_sweep: { Args: never; Returns: number }
-      impersonation_blocked_tables: { Args: never; Returns: string[] }
+      homework_orphan_sweep: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      homework_submission_sweep: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      house_on_date: {
+        Args: { p_on: string; p_student_id: string }
+        Returns: string
+      }
+      house_standings: {
+        Args: { p_campus_id: string; p_from: string; p_to: string }
+        Returns: {
+          colour_hex: string
+          house_id: string
+          house_name: string
+          members: number
+          points: number
+        }[]
+      }
+      impersonation_blocked_tables: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
       impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
       ingest_payment_webhook: {
         Args: {
@@ -31136,7 +31933,14 @@ export type Database = {
         }
         Returns: Json
       }
-      initialize_school_leave_policies: { Args: never; Returns: Json }
+      initialize_school_leave_policies: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      inv_reorder_alert_run: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       invite_user: {
         Args: {
           p_campus_ids?: string[]
@@ -31278,7 +32082,10 @@ export type Database = {
         Returns: Json
       }
       mark_export_purged: { Args: { p_job_id: string }; Returns: undefined }
-      mark_notifications_read: { Args: never; Returns: number }
+      mark_notifications_read: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       mark_outbound_message_failed: {
         Args: { p_failure_code: string; p_message_id: string }
         Returns: undefined
@@ -31291,9 +32098,12 @@ export type Database = {
         Args: { p_action: string; p_reason?: string; p_version_id: string }
         Returns: Json
       }
-      my_effective_permissions: { Args: never; Returns: string[] }
+      my_effective_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
       my_overdue_followups: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           assigned_to: string | null
           campus_id: string
@@ -31316,8 +32126,8 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      my_student_id: { Args: never; Returns: string }
-      my_student_ids: { Args: never; Returns: string[] }
+      my_student_id: { Args: Record<PropertyKey, never>; Returns: string }
+      my_student_ids: { Args: Record<PropertyKey, never>; Returns: string[] }
       net_no_dues_item_against_deposit: {
         Args: { p_item_id: string }
         Returns: number
@@ -31339,6 +32149,7 @@ export type Database = {
         Args: { p_run_id: string }
         Returns: number
       }
+      normalise_isbn13: { Args: { p_raw: string }; Returns: string }
       normalize_pk_phone: { Args: { p_phone: string }; Returns: string }
       notify_non_submitters: {
         Args: {
@@ -31354,6 +32165,14 @@ export type Database = {
       }
       override_no_dues_clearance: {
         Args: { p_clearance_id: string; p_reason: string }
+        Returns: undefined
+      }
+      override_promotion_decision: {
+        Args: {
+          p_decision_id: string
+          p_new_decision: Database["public"]["Enums"]["promotion_decision_type"]
+          p_reason: string
+        }
         Returns: undefined
       }
       period_attendance_roster: {
@@ -31409,6 +32228,28 @@ export type Database = {
           p_narrative?: string
         }
         Returns: Json
+      }
+      post_stock_movement: {
+        Args: {
+          p_item_id: string
+          p_qty: number
+          p_reason_code?: string
+          p_ref_id?: string
+          p_ref_table?: string
+          p_store_id: string
+          p_type: Database["public"]["Enums"]["inv_movement_type"]
+          p_unit_cost?: number
+        }
+        Returns: string
+      }
+      post_stock_variance: {
+        Args: {
+          p_counted: number
+          p_item_id: string
+          p_reason_code: string
+          p_store_id: string
+        }
+        Returns: number
       }
       prefill_slot_defaults: {
         Args: { p_section_id: string; p_subject_id: string }
@@ -31694,14 +32535,23 @@ export type Database = {
         Args: { p_from: string; p_tenant_id?: string; p_to: string }
         Returns: number
       }
-      refresh_agg_nightly: { Args: never; Returns: number }
+      refresh_agg_nightly: { Args: Record<PropertyKey, never>; Returns: number }
       refresh_attendance_eligibility: {
         Args: { p_campus_id: string; p_month: number; p_year: number }
         Returns: Json
       }
-      refresh_attendance_eligibility_all: { Args: never; Returns: number }
-      refresh_fee_collection_metrics: { Args: never; Returns: number }
-      refresh_fee_defaulters: { Args: never; Returns: number }
+      refresh_attendance_eligibility_all: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      refresh_fee_collection_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      refresh_fee_defaulters: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       register_guardian_otp_attempt: {
         Args: { p_kind: string; p_token: string }
         Returns: undefined
@@ -32041,7 +32891,10 @@ export type Database = {
         Args: { p_identity_id: string; p_valid_to?: string }
         Returns: Json
       }
-      retry_orphan_webhooks: { Args: never; Returns: number }
+      retry_orphan_webhooks: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       retry_report_card_batch: {
         Args: { p_batch_id: string; p_remarks?: Json }
         Returns: Json
@@ -32131,9 +32984,34 @@ export type Database = {
         }
         Returns: string
       }
+      save_library_title: {
+        Args: {
+          p_author?: string
+          p_dewey?: string
+          p_edition?: string
+          p_id?: string
+          p_language?: string
+          p_publisher?: string
+          p_raw_isbn?: string
+          p_subject_id?: string
+          p_title: string
+          p_title_ur?: string
+        }
+        Returns: string
+      }
       save_period_attendance: {
         Args: { p_date: string; p_marks: Json; p_slot_id: string }
         Returns: Json
+      }
+      save_promotion_rule: {
+        Args: {
+          p_campus_id: string
+          p_class_id: string
+          p_max_failed_for_compartment: number
+          p_max_failed_for_promotion: number
+          p_min_aggregate_pct: number
+        }
+        Returns: string
       }
       save_syllabus: {
         Args: {
@@ -32160,6 +33038,18 @@ export type Database = {
           p_title: string
         }
         Returns: string
+      }
+      search_library_titles: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          author: string
+          cover_path: string
+          id: string
+          isbn13: string
+          language: string
+          title: string
+          title_ur: string
+        }[]
       }
       search_staff: {
         Args: { p_include_former?: boolean; p_q?: string }
@@ -32421,6 +33311,10 @@ export type Database = {
         Args: { p_cap: number }
         Returns: undefined
       }
+      set_house_capacity_balancing: {
+        Args: { p_campus_id: string; p_enabled: boolean }
+        Returns: undefined
+      }
       set_leave_approval_chain_step: {
         Args: {
           p_approver_role: Database["public"]["Enums"]["app_role"]
@@ -32433,6 +33327,10 @@ export type Database = {
       }
       set_lesson_plan_status: {
         Args: { p_plan_id: string; p_status: string }
+        Returns: undefined
+      }
+      set_library_title_cover: {
+        Args: { p_cover_path: string; p_title_id: string }
         Returns: undefined
       }
       set_mark_precision: {
@@ -32518,6 +33416,15 @@ export type Database = {
         }
         Returns: string
       }
+      set_student_house: {
+        Args: {
+          p_effective_date?: string
+          p_house_id: string
+          p_reason?: string
+          p_student_id: string
+        }
+        Returns: undefined
+      }
       set_subject_active: {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
@@ -32572,7 +33479,7 @@ export type Database = {
         Returns: string
       }
       set_unsettled_after_days: { Args: { p_days: number }; Returns: undefined }
-      show_limit: { Args: never; Returns: number }
+      show_limit: { Args: Record<PropertyKey, never>; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       sla_due: {
         Args: { p_campus_id: string; p_from: string; p_hours?: number }
@@ -32763,7 +33670,10 @@ export type Database = {
         Args: { p_id_a: string; p_id_b: string }
         Returns: undefined
       }
-      sweep_attendance_locks: { Args: never; Returns: number }
+      sweep_attendance_locks: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       sync_wa_template_status: {
         Args: {
           p_new_status: Database["public"]["Enums"]["wa_template_status"]
@@ -32791,7 +33701,7 @@ export type Database = {
           weekday: number
         }[]
       }
-      timemultirange: { Args: never; Returns: unknown }
+      timemultirange: { Args: Record<PropertyKey, never>; Returns: unknown }
       timetable_export_payload: { Args: { p_job_id: string }; Returns: Json }
       toggle_leave_policy_status: {
         Args: { p_id: string; p_is_active: boolean }
@@ -32859,6 +33769,16 @@ export type Database = {
           p_parent_id?: string
           p_requires_approval?: boolean
           p_set_parent?: boolean
+        }
+        Returns: undefined
+      }
+      update_inv_item: {
+        Args: {
+          p_active: boolean
+          p_item_id: string
+          p_name: string
+          p_reorder_level: number
+          p_sale_price: number
         }
         Returns: undefined
       }
@@ -33264,6 +34184,14 @@ export type Database = {
         | "overall_impression"
       interview_recommendation: "accept" | "waitlist" | "reject"
       interview_status: "scheduled" | "cancelled"
+      inv_item_category: "uniform" | "textbook" | "stationery" | "consumable"
+      inv_movement_type:
+        | "receipt"
+        | "sale"
+        | "issue"
+        | "return"
+        | "adjustment"
+        | "writeoff"
       late_fee_basis: "flat" | "per_day" | "percentage"
       leave_accrual_method: "annual_grant" | "monthly_accrual" | "none"
       leave_application_status:
@@ -33333,6 +34261,12 @@ export type Database = {
         | "locked"
         | "paid"
         | "cancelled"
+      promotion_decision_type:
+        | "promoted"
+        | "promoted_on_trial"
+        | "compartment"
+        | "detained"
+        | "pending"
       qualification_level:
         | "matric"
         | "intermediate"
@@ -33758,6 +34692,15 @@ export const Constants = {
       ],
       interview_recommendation: ["accept", "waitlist", "reject"],
       interview_status: ["scheduled", "cancelled"],
+      inv_item_category: ["uniform", "textbook", "stationery", "consumable"],
+      inv_movement_type: [
+        "receipt",
+        "sale",
+        "issue",
+        "return",
+        "adjustment",
+        "writeoff",
+      ],
       late_fee_basis: ["flat", "per_day", "percentage"],
       leave_accrual_method: ["annual_grant", "monthly_accrual", "none"],
       leave_application_status: [
@@ -33834,6 +34777,13 @@ export const Constants = {
         "locked",
         "paid",
         "cancelled",
+      ],
+      promotion_decision_type: [
+        "promoted",
+        "promoted_on_trial",
+        "compartment",
+        "detained",
+        "pending",
       ],
       qualification_level: [
         "matric",
@@ -33946,4 +34896,3 @@ export const Constants = {
     },
   },
 } as const
-
