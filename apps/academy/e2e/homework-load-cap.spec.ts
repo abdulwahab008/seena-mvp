@@ -132,6 +132,9 @@ test('a teacher publishing past the daily section cap sees a non-blocking warnin
     // message from a prior loop iteration is still on screen — match the
     // newest one instead of asserting a single (now ambiguous) match.
     await expect(page.getByText('Homework saved as draft.').last()).toBeVisible();
+    // The toast of an earlier iteration may still be on screen; the new row only renders
+    // once this create has finished and the form has reset, so wait for it before the next fill.
+    await expect(page.getByTestId(`homework-row-${title}`)).toBeVisible();
   }
 
   // AC1: the first 2 (at the cap) publish clean — no warning toast.
