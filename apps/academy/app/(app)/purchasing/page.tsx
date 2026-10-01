@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { pkr } from '@/lib/rpc-action';
+import { loose } from '@/lib/transport/rpc';
 import { RequisitionForm, ThresholdForm } from './purchasing-forms';
 
 type Tier = { level: number; upto_amount: number | null; approver_role: string };
@@ -16,7 +17,8 @@ export default async function PurchasingPage() {
     supabase.from('v_requisition_approval_queue').select('req_id, req_no, est_total, justification, awaiting_role'),
     supabase.from('campus').select('id, name').order('name'),
     supabase.from('department').select('id, name_en').order('name_en'),
-    supabase.from('inv_item').select('id, item_code, name').eq('active', true).order('item_code'),
+    // a requester (a head of department, a teacher) cannot read inv_item itself, so the picker reads code + name through a definer function
+    loose(supabase).rpc('list_requisition_items'),
     supabase.from('purchase_threshold').select('level, upto_amount, approver_role, effective_from, campus_id').is('campus_id', null).order('effective_from', { ascending: false }).order('level'),
     supabase.auth.getUser(),
   ]);
@@ -85,7 +87,7 @@ export default async function PurchasingPage() {
             <RequisitionForm
               campuses={(campuses.data ?? []).map((c) => ({ value: c.id, label: c.name }))}
               departments={(departments.data ?? []).map((d) => ({ value: d.id, label: d.name_en }))}
-              items={(items.data ?? []).map((i) => ({ value: i.id, label: `${i.item_code} · ${i.name}`, name: i.name }))}
+              items={((items.data ?? []) as { id: string; item_code: string; name: string }[]).map((i) => ({ value: i.id, label: `${i.item_code} · ${i.name}`, name: i.name }))}
             />
           </CardContent>
         </Card>
