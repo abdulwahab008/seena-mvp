@@ -42,7 +42,7 @@ test('the transport office builds a route, re-orders a stop and prints the sheet
   for (const [i, name] of names.entries()) {
     const form = page.getByTestId('stop-form');
     await form.getByLabel(/Stop name$/).fill(name);
-    await form.getByLabel(/Pickup time/).fill(times[i]);
+    await form.getByLabel(/Pickup time/).fill(times[i]!);
     await form.getByLabel(/Drop time/).fill('14:10');
     await form.getByLabel(/Fare slab/).selectOption({ index: 1 });
     await page.getByTestId('stop-form-submit').click();
