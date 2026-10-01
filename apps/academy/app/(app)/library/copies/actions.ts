@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
 import { libraryCopySchema, type LibraryCopyInput } from '@/lib/validation';
-import { libraryErrorMessage, parseCopyCsv } from '@/lib/library';
+import { libraryErrorMessage, parseCopyCsv, pkrToPaisa } from '@/lib/library';
 import { parseCsv } from '@/lib/student-import';
 
 type Result = { error: string | null };
@@ -19,7 +19,7 @@ export async function registerCopy(input: LibraryCopyInput): Promise<Result> {
     p_accession_no: p.data.accessionNo,
     p_barcode: p.data.barcode,
     p_shelf: p.data.shelf || undefined,
-    p_purchase_cost: p.data.purchaseCostPkr ? Math.round(Number(p.data.purchaseCostPkr) * 100) : undefined,
+    p_purchase_cost: pkrToPaisa(p.data.purchaseCostPkr),
     p_acquired_on: p.data.acquiredOn || undefined,
   });
   if (error) return { error: libraryErrorMessage(error.message) };

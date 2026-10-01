@@ -255,6 +255,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/library/titles', label: 'Catalogue' },
       { href: '/library/copies', label: 'Copies' },
+      { href: '/library/policies', label: 'Borrowing Policy' },
     ],
   },
   {

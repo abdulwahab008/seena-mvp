@@ -30,6 +30,15 @@ export function normaliseIsbn13(raw: string | null | undefined): string | null {
   return v;
 }
 
+/** "7.50" -> 750. Integer paisa from a PKR string; undefined for blank, never goes through floating point. */
+export function pkrToPaisa(pkr: string | null | undefined): number | undefined {
+  const s = (pkr ?? '').trim();
+  if (s === '') return undefined;
+  const m = /^(\d+)(?:\.(\d{1,2}))?$/.exec(s);
+  if (!m) return undefined;
+  return Number(m[1]) * 100 + Number((m[2] ?? '').padEnd(2, '0') || '0');
+}
+
 export type CopyImportRow = {
   accession_no: string;
   barcode: string;

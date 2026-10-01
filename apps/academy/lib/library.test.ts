@@ -1,5 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { normaliseIsbn13, parseCopyCsv } from './library';
+import { normaliseIsbn13, parseCopyCsv, pkrToPaisa } from './library';
+
+describe('pkrToPaisa (FR-O03)', () => {
+  it('converts PKR strings to integer paisa without floating point', () => {
+    expect(pkrToPaisa('5')).toBe(500);
+    expect(pkrToPaisa('7.5')).toBe(750);
+    expect(pkrToPaisa('0.29')).toBe(29);
+    expect(pkrToPaisa('1395')).toBe(139500);
+  });
+  it('is undefined for blank or malformed input', () => {
+    expect(pkrToPaisa('')).toBeUndefined();
+    expect(pkrToPaisa(undefined)).toBeUndefined();
+    expect(pkrToPaisa('5.555')).toBeUndefined();
+    expect(pkrToPaisa('abc')).toBeUndefined();
+  });
+});
 import { parseCsv } from './student-import';
 
 describe('parseCopyCsv (FR-O02)', () => {
