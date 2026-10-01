@@ -141,6 +141,15 @@ test('a principal authors, is refused, fixes, activates and previews a certifica
 });
 
 test('AC4: an Urdu template previews right-to-left with an embedded Nastaliq face and no missing glyphs', async ({ page }) => {
+  // Environment, not behaviour: the font binary is resolved from the render
+  // host (lib/pdf/font.ts) and is not committed. A host without Noto
+  // Nastaliq Urdu cannot embed it, so the AC cannot be observed there.
+  const { resolveNastaliqFont } = await import('@/lib/pdf/font');
+  test.skip(
+    resolveNastaliqFont() === null,
+    'Noto Nastaliq Urdu is not installed on this host (set ACADEMY_NASTALIQ_FONT_PATH or install fonts-noto-core)',
+  );
+
   const { ownerEmail } = await seed();
   await signIn(page, ownerEmail);
 
