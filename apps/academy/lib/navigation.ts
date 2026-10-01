@@ -216,6 +216,8 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/assets', label: 'Asset Register' },
       { href: '/assets/custody', label: 'Asset Custody' },
       { href: '/assets/maintenance', label: 'Maintenance' },
+      { href: '/purchasing', label: 'Requisitions' },
+      { href: '/purchasing/orders', label: 'Purchase Orders' },
     ],
   },
   {

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 export type FieldDef = {
   name: string;
   label: string;
-  type?: 'text' | 'number' | 'date' | 'textarea' | 'select' | 'checkbox';
+  type?: 'text' | 'number' | 'date' | 'textarea' | 'select' | 'checkbox' | 'hidden';
   options?: { value: string; label: string }[];
   required?: boolean;
   placeholder?: string;
@@ -70,6 +70,7 @@ export function ActionForm({
       <div className="grid gap-3 sm:grid-cols-2">
         {fields.map((f) => {
           const id = `${testId}-${f.name}`;
+          if (f.type === 'hidden') return <input key={f.name} type="hidden" name={f.name} defaultValue={f.defaultValue} />;
           return (
             <div key={f.name} className={f.type === 'textarea' ? 'space-y-1 sm:col-span-2' : 'space-y-1'}>
               {f.type === 'checkbox' ? (
