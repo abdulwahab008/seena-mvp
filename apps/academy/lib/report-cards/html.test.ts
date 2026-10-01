@@ -7,6 +7,7 @@ import {
   classPositionLine,
   collectReportCardStrings,
   positionLine,
+  promotionLine,
   revisionFooter,
   type ReportCardSnapshot,
 } from './html';
@@ -279,5 +280,36 @@ describe('merged report cards', () => {
     const merged = buildMergedReportCardHtml([cards[0]!], null, noAssets, 'Class 5').html;
     const marksTable = single.slice(single.indexOf('<table class="marks">'), single.indexOf('</table>'));
     expect(merged).toContain(marksTable);
+  });
+});
+
+describe('promotion decision (FR-J04 AC4)', () => {
+  it('prints the final decision in words a parent understands', () => {
+    expect(promotionLine({ decision: 'promoted', subjects: [] })).toBe('Promoted');
+    expect(promotionLine({ decision: 'promoted_on_trial', subjects: [] })).toBe('Promoted on trial');
+    expect(promotionLine({ decision: 'detained', subjects: [] })).toBe('Detained in the same class');
+  });
+
+  it('names the compartment subjects', () => {
+    expect(promotionLine({ decision: 'compartment', subjects: ['Maths', 'Physics'] })).toBe(
+      'Compartment in Maths, Physics',
+    );
+  });
+
+  it('prints nothing for a pending candidate or an older snapshot', () => {
+    expect(promotionLine({ decision: 'pending', subjects: [] })).toBeNull();
+    expect(promotionLine(undefined)).toBeNull();
+    expect(promotionLine(null)).toBeNull();
+  });
+
+  it('puts the line on the card only when a decision exists', () => {
+    const withDecision = buildReportCardHtml(
+      snapshot({ promotion: { decision: 'promoted_on_trial', subjects: [] } }),
+      null,
+      noAssets,
+    ).html;
+    expect(withDecision).toContain('data-promotion');
+    expect(withDecision).toContain('Promoted on trial');
+    expect(buildReportCardHtml(snapshot(), null, noAssets).html).not.toContain('data-promotion');
   });
 });

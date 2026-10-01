@@ -2244,3 +2244,32 @@ export const lessonPlanSchema = z.object({
   topicIds: z.array(z.string().uuid()).default([]),
 });
 export type LessonPlanInput = z.input<typeof lessonPlanSchema>;
+
+// FR-J04: promotion and compartment decision. Mirrors
+// supabase/migrations/20260802400100_promotion_decision.sql.
+export const PROMOTION_DECISIONS = ['promoted', 'promoted_on_trial', 'compartment', 'detained', 'pending'] as const;
+export type PromotionDecision = (typeof PROMOTION_DECISIONS)[number];
+export const evaluatePromotionSchema = z.object({
+  sessionId: z.string().uuid(),
+  classId: z.string().uuid(),
+});
+export type EvaluatePromotionInput = z.infer<typeof evaluatePromotionSchema>;
+export const promotionRuleSchema = z
+  .object({
+    campusId: z.string().uuid(),
+    classId: z.string().uuid().nullable(),
+    minAggregatePct: z.number({ message: 'Enter the minimum aggregate' }).min(0, 'At least 0').max(100, 'At most 100'),
+    maxFailedForCompartment: z.number({ message: 'Enter a number' }).int('Whole subjects only').min(0).max(30),
+    maxFailedForPromotion: z.number({ message: 'Enter a number' }).int('Whole subjects only').min(0).max(30),
+  })
+  .refine((v) => v.maxFailedForPromotion <= v.maxFailedForCompartment, {
+    message: 'Failures allowed for promotion cannot exceed those allowed for a compartment',
+    path: ['maxFailedForPromotion'],
+  });
+export type PromotionRuleInput = z.infer<typeof promotionRuleSchema>;
+export const overridePromotionSchema = z.object({
+  decisionId: z.string().uuid(),
+  decision: z.enum(['promoted', 'promoted_on_trial', 'compartment', 'detained']),
+  reason: z.string().trim().min(5, 'Give a reason of at least 5 characters').max(500),
+});
+export type OverridePromotionInput = z.infer<typeof overridePromotionSchema>;

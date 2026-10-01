@@ -90,10 +90,18 @@ export type ReportCardSnapshot = {
     to_date: string | null;
   };
   remark: string | null;
+  /**
+   * FR-J04. The end-of-session decision, present only on the session's final
+   * counting term and only once it is no longer Pending. The FINAL decision
+   * alone: never the system's own verdict, the override actor or the reason.
+   */
+  promotion?: { decision: PromotionDecisionValue; subjects: string[] } | null;
   revision_no: number;
   supersedes_revision: number | null;
   rendered_at: string;
 };
+
+export type PromotionDecisionValue = 'promoted' | 'promoted_on_trial' | 'compartment' | 'detained' | 'pending';
 
 export type ReportCardAssets = {
   letterheadDataUri: string | null;
@@ -163,6 +171,21 @@ export function positionLine(p: ReportCardSnapshot['position']): string {
 export function classPositionLine(p: ReportCardSnapshot['position']): string {
   if (!p || !p.is_ranked || p.rank_in_class === null) return '—';
   return `${p.rank_in_class} of ${p.ranked_out_of_class}`;
+}
+
+/** FR-J04 AC4: the parent-facing line. Nothing about who decided or why. */
+export function promotionLine(p: ReportCardSnapshot['promotion']): string | null {
+  if (!p || p.decision === 'pending') return null;
+  switch (p.decision) {
+    case 'promoted':
+      return 'Promoted';
+    case 'promoted_on_trial':
+      return 'Promoted on trial';
+    case 'detained':
+      return 'Detained in the same class';
+    case 'compartment':
+      return p.subjects.length > 0 ? `Compartment in ${p.subjects.join(', ')}` : 'Compartment';
+  }
 }
 
 /** AC4's footer, and it reads off supersedes_revision rather than doing arithmetic. */
@@ -345,6 +368,12 @@ ${letterheadHtml(snapshot, assets)}
     ${range ? `<div class="note" data-attendance-range>Covering ${escapeHtml(range)}</div>` : ''}
   </div>
 </div>
+
+${
+    promotionLine(snapshot.promotion)
+      ? `<div class="panel promotion" style="margin-top:4mm"><h3>Result</h3><div class="big" data-promotion>${escapeHtml(promotionLine(snapshot.promotion) ?? '')}</div></div>`
+      : ''
+  }
 
 <div class="remark">
   <h3>Class teacher&rsquo;s remark</h3>
