@@ -55,6 +55,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/dashboard/owner', label: 'Owner KPIs' },
       { href: '/dashboard/today', label: 'Today' },
+      { href: '/dashboard/collection', label: 'Billing vs Collection' },
     ],
   },
   // Top level rather than inside Settings: a school that has not finished

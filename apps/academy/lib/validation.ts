@@ -2070,7 +2070,7 @@ export type ResolveBankExceptionInput = z.infer<typeof resolveBankExceptionSchem
 // FR-S08: requesting an asynchronous export. The reason is enforced again in
 // the database (FR-S11) for PII-bearing datasets; the form just says so early.
 export const exportRequestSchema = z.object({
-  datasetKey: z.enum(['students', 'fee_collection', 'fee_defaulters']),
+  datasetKey: z.enum(['students', 'fee_collection', 'fee_defaulters', 'fee_collection_monthly']),
   from: z.string().optional(),
   to: z.string().optional(),
   classId: z.string().uuid().optional(),

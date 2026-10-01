@@ -22809,6 +22809,64 @@ export type Database = {
           },
         ]
       }
+      mv_fee_collection_monthly: {
+        Row: {
+          billed_paisa: number | null
+          billing_period: string | null
+          campus_id: string | null
+          challan_count: number | null
+          class_id: string | null
+          collected_paisa: number | null
+          outstanding_paisa: number | null
+          refreshed_at: string | null
+          session_id: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrolment_class_level_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_class_level_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mv_fee_defaulter: {
         Row: {
           bucket: string | null
@@ -24575,6 +24633,65 @@ export type Database = {
             columns: ["voucher_id"]
             isOneToOne: false
             referencedRelation: "v_expense_voucher"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_fee_collection_monthly: {
+        Row: {
+          billed_paisa: number | null
+          billing_period: string | null
+          campus_id: string | null
+          challan_count: number | null
+          class_id: string | null
+          collected_paisa: number | null
+          collection_efficiency_pct: number | null
+          outstanding_paisa: number | null
+          refreshed_at: string | null
+          session_id: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrolment_class_level_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "class_level"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrolment_class_level_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "v_rollover_decision_detail"
+            referencedColumns: ["source_class_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "fee_challan_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_session"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_challan_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
             referencedColumns: ["id"]
           },
         ]
@@ -28448,6 +28565,7 @@ export type Database = {
         Args: { p_error: string; p_job_id: string }
         Returns: undefined
       }
+      fee_collection_refresh_due: { Args: never; Returns: boolean }
       fees_reminder_escalation: {
         Args: { p_now?: string; p_run_date?: string; p_tenant_id?: string }
         Returns: Json
@@ -28715,6 +28833,17 @@ export type Database = {
       fn_extend_offer: {
         Args: { p_new_expires_at: string; p_offer_id: string; p_reason: string }
         Returns: undefined
+      }
+      fn_fee_collection_trend: {
+        Args: { p_campus_id?: string; p_months?: number }
+        Returns: {
+          billed_paisa: number
+          billing_period: string
+          challan_count: number
+          collected_paisa: number
+          collection_efficiency_pct: number
+          outstanding_paisa: number
+        }[]
       }
       fn_find_duplicate_enquiries: {
         Args: {
@@ -29896,6 +30025,7 @@ export type Database = {
         Returns: number
       }
       refresh_agg_nightly: { Args: never; Returns: number }
+      refresh_fee_collection_metrics: { Args: never; Returns: number }
       refresh_fee_defaulters: { Args: never; Returns: number }
       register_guardian_otp_attempt: {
         Args: { p_kind: string; p_token: string }

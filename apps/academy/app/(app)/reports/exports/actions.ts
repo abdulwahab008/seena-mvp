@@ -26,6 +26,11 @@ export async function requestExport(input: ExportRequestInput): Promise<RequestE
     if (parsed.data.from) params.from = parsed.data.from;
     if (parsed.data.to) params.to = parsed.data.to;
   }
+  if (parsed.data.datasetKey === 'fee_collection_monthly') {
+    if (parsed.data.from) params.from = parsed.data.from;
+    if (parsed.data.to) params.to = parsed.data.to;
+    if (parsed.data.classId) params.class_id = parsed.data.classId;
+  }
   if (parsed.data.datasetKey === 'fee_defaulters') {
     if (parsed.data.classId) params.class_id = parsed.data.classId;
     if (parsed.data.bucket) params.bucket = parsed.data.bucket;
