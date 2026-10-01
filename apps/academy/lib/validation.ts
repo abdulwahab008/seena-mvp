@@ -2349,5 +2349,15 @@ export const allocateTransportSchema = z.object({
 export const transportWaitlistSchema = z.object({ grNumber, routeId: tuuid });
 export const transportProrateSchema = z.object({ mode: z.enum(['prorata', 'full_month'], { message: 'Choose a policy' }) });
 export const postTransportChargesSchema = z.object({ month: tdate });
+// FR-P05
+export const boardingEventSchema = z.object({
+  device_event_id: tuuid,
+  trip_leg_id: tuuid,
+  student_id: tuuid,
+  state: z.enum(['boarded', 'absent', 'dropped']),
+  marked_at: z.string().datetime({ message: 'Invalid time' }),
+});
+export const boardingBatchSchema = z.array(boardingEventSchema).min(1, 'Nothing to submit').max(300);
+export const openLegSchema = z.object({ routeId: tuuid, legType: z.enum(['pickup', 'drop'], { message: 'Choose pickup or drop' }) });
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];

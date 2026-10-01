@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export const dynamic = 'force-dynamic';
 
 type Alloc = {
-  id: string; route_id: string; pickup_stop_id: string; drop_stop_id: string; starts_on: string;
+  id: string; student_id: string; route_id: string; pickup_stop_id: string; drop_stop_id: string; starts_on: string;
   student: { name_en: string; name_ur: string | null } | { name_en: string; name_ur: string | null }[] | null;
 };
 type Stop = { route_id: string; stop_id: string; seq: number; stop_name: string; stop_name_ur: string | null; pickup_time: string | null; drop_time: string | null; route_code: string; route_name: string };
@@ -22,7 +22,7 @@ export default async function PortalTransportPage() {
   const today = todayPk();
   const { data: allocs } = await supabase
     .from('transport_allocation')
-    .select('id, route_id, pickup_stop_id, drop_stop_id, starts_on, student:student_id(name_en, name_ur)')
+    .select('id, student_id, route_id, pickup_stop_id, drop_stop_id, starts_on, student:student_id(name_en, name_ur)')
     .or(`ends_on.is.null,ends_on.gte.${today}`)
     .order('starts_on');
   const rows = (allocs ?? []) as Alloc[];
@@ -31,6 +31,15 @@ export default async function PortalTransportPage() {
     ? await supabase.from('v_transport_route_sheet').select('route_id, stop_id, seq, stop_name, stop_name_ur, pickup_time, drop_time, route_code, route_name').in('route_id', routeIds).order('seq')
     : { data: [] as Stop[] };
   const stopRows = (stops ?? []) as Stop[];
+  const { data: events } = await supabase
+    .from('transport_boarding_event')
+    .select('id, student_id, state, marked_at, trip_leg:trip_leg_id(leg_type, leg_date)')
+    .gte('marked_at', `${today}T00:00:00+05:00`)
+    .order('marked_at');
+  type Ev = { id: string; student_id: string; state: string; marked_at: string };
+  const eventRows = (events ?? []) as Ev[];
+  const stateText = (st: string) => (st === 'boarded' ? t(lang, 'transport.boarded') : st === 'dropped' ? t(lang, 'transport.dropped') : t(lang, 'transport.absent'));
+  const clock = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Karachi' });
   const hhmm = (v: string | null) => v?.slice(0, 5) ?? '-';
   const stopName = (s: Stop) => (lang === 'ur' && s.stop_name_ur ? s.stop_name_ur : s.stop_name);
 
@@ -50,6 +59,13 @@ export default async function PortalTransportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
+              <ul className="space-y-1" data-testid="boarding-today">
+                {eventRows.filter((e) => e.student_id === a.student_id).map((e) => (
+                  <li key={e.id}>
+                    {stateText(e.state)} · {clock(e.marked_at)}
+                  </li>
+                ))}
+              </ul>
               <table className="w-full">
                 <thead>
                   <tr className="text-start text-muted-foreground">
