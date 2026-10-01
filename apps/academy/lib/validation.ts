@@ -2077,6 +2077,8 @@ export const exportRequestSchema = z.object({
   bucket: z.enum(['1-30', '31-60', '61-90', '90+']).optional(),
   hideHardship: z.boolean().optional(),
   reason: z.string().trim().max(500).optional(),
+  // FR-S09: the same dataset, printed as a branded PDF instead of a workbook.
+  format: z.enum(['xlsx', 'pdf']).optional(),
 });
 export type ExportRequestInput = z.infer<typeof exportRequestSchema>;
 
@@ -2264,3 +2266,11 @@ export const digestSubscriptionSchema = z.object({
   languageCode: z.string().regex(/^[a-z]{2}(_[A-Z]{2})?$/, 'Use a code like en or ur').default('en'),
 });
 export type DigestSubscriptionInput = z.input<typeof digestSubscriptionSchema>;
+
+// FR-S09: campus address printed on report letterhead.
+export const campusAddressSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  addressEn: z.string().trim().max(300, 'At most 300 characters').optional(),
+  addressUr: z.string().trim().max(300, 'At most 300 characters').optional(),
+});
+export type CampusAddressInput = z.infer<typeof campusAddressSchema>;

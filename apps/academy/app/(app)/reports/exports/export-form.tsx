@@ -21,10 +21,11 @@ export function ExportForm({ datasets }: { datasets: DatasetOption[] }) {
   const form = useForm<ExportRequestInput>({ resolver: zodResolver(exportRequestSchema), defaultValues: { datasetKey: datasets[0]?.key ?? 'students', reason: '' } });
   const dataset = form.watch('datasetKey');
 
-  const onSubmit = form.handleSubmit((values) => {
+  const submit = (format: 'xlsx' | 'pdf') =>
+    form.handleSubmit((values) => {
     setServerError(null);
     startTransition(async () => {
-      const result = await requestExport(values);
+      const result = await requestExport({ ...values, format });
       if (result.error !== null) setServerError(result.error);
       else {
         toast.success(result.deduplicated ? 'That export is already being prepared.' : 'Export queued. You can leave this page — we will notify you.');
@@ -34,7 +35,7 @@ export function ExportForm({ datasets }: { datasets: DatasetOption[] }) {
   });
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2" noValidate>
+    <form onSubmit={submit('xlsx')} className="grid gap-4 sm:grid-cols-2" noValidate>
       <div className="space-y-2">
         <Label htmlFor="datasetKey">Export</Label>
         <select id="datasetKey" className="h-10 w-full rounded-md border bg-background px-3 text-sm" {...form.register('datasetKey')}>
@@ -69,6 +70,9 @@ export function ExportForm({ datasets }: { datasets: DatasetOption[] }) {
       <div className="sm:col-span-2">
         <Button type="submit" disabled={pending || datasets.length === 0}>
           {pending ? 'Queuing…' : 'Request Excel export'}
+        </Button>{' '}
+        <Button type="button" variant="outline" disabled={pending || datasets.length === 0} onClick={submit('pdf')} data-testid="request-pdf">
+          Request PDF
         </Button>
       </div>
     </form>
