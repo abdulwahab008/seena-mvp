@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { groupTrend } from '@/lib/exams/trend';
@@ -91,7 +92,11 @@ export default async function SubjectAnalyticsPage({ searchParams }: { searchPar
       <div>
         <h1 className="text-2xl font-semibold">Subject analytics</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J06 — section averages per subject and term, and one student&rsquo;s trend against them.
+          FR-J06 — section averages per subject and term, and one student&rsquo;s trend against them. For the chapters behind a subject&rsquo;s result, see{' '}
+          <Link href="/exams/mastery" className="underline">
+            topic mastery
+          </Link>
+          .
         </p>
       </div>
 

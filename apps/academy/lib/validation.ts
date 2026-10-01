@@ -2334,3 +2334,30 @@ export const grantResitExceptionSchema = z.object({
   reason: z.string().trim().min(5, 'Give a reason of at least 5 characters').max(500),
 });
 export type GrantResitExceptionInput = z.infer<typeof grantResitExceptionSchema>;
+
+// FR-J07: topic mastery capture. Mirrors
+// supabase/migrations/20260802400600_topic_mastery.sql.
+export const examQuestionSchema = z.object({
+  question_no: z.number().int().min(1),
+  max_marks: z.number({ message: 'Enter the marks' }).positive('Marks must be above zero').max(1000),
+  chapter_no: z.number().int().min(1).nullable(),
+  chapter_title: z.string().trim().max(100),
+});
+export const saveExamQuestionsSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  questions: z.array(examQuestionSchema).min(1, 'Add at least one question').max(200),
+});
+export type SaveExamQuestionsInput = z.infer<typeof saveExamQuestionsSchema>;
+export const saveQuestionMarksSchema = z.object({
+  examSubjectId: z.string().uuid(),
+  rows: z
+    .array(
+      z.object({
+        enrolment_id: z.string().uuid(),
+        marks: z.array(z.object({ question_no: z.number().int().min(1), obtained: z.number().min(0) })).min(1),
+      }),
+    )
+    .min(1, 'Enter at least one mark'),
+});
+export type SaveQuestionMarksInput = z.infer<typeof saveQuestionMarksSchema>;
+export const masterySheetSchema = z.object({ enrolmentId: z.string().uuid() });

@@ -86,6 +86,10 @@ export default async function PortalResultsPage({ searchParams }: { searchParams
             See progress across terms
           </Link>{' '}
           ·{' '}
+          <Link href="/portal/results/mastery" className="underline" data-testid="results-mastery-link">
+            Chapter mastery
+          </Link>{' '}
+          ·{' '}
           <Link href="/portal/results/transcripts" className="underline" data-testid="results-transcripts-link">
             Transcripts
           </Link>
