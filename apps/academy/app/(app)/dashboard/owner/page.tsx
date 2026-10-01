@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { formatPct, formatPkrCompact } from '@/lib/format-money';
 import { Badge } from '@/components/ui/badge';
@@ -55,15 +56,37 @@ export default async function OwnerDashboardPage() {
                   <td className="p-2">{formatPkrCompact(Number(r.billed_paisa ?? 0))}</td>
                   <td className="p-2">{formatPkrCompact(Number(r.collected_paisa ?? 0))}</td>
                   <td className="p-2" data-testid="collection-pct">{formatPct(r.collection_pct === null ? null : Number(r.collection_pct))}</td>
-                  <td className="p-2">{formatPkrCompact(Number(r.outstanding_paisa ?? 0))}</td>
-                  <td className="p-2">{formatPkrCompact(Number(r.outstanding_0_30_paisa ?? 0))}</td>
-                  <td className="p-2">{formatPkrCompact(Number(r.outstanding_31_60_paisa ?? 0))}</td>
-                  <td className="p-2">{formatPkrCompact(Number(r.outstanding_60plus_paisa ?? 0))}</td>
                   <td className="p-2">
-                    {r.staff_cost_ratio === null ? '—' : `${(Number(r.staff_cost_ratio) * 100).toFixed(1)}%`}{' '}
+                    <Link href={`/dashboard/drilldown/outstanding?campus=${r.campus_id}`} className="underline" data-testid="drill-outstanding">
+                      {formatPkrCompact(Number(r.outstanding_paisa ?? 0))}
+                    </Link>
+                  </td>
+                  <td className="p-2">
+                    <Link href={`/dashboard/drilldown/outstanding?campus=${r.campus_id}&bucket=0_30`} className="underline">
+                      {formatPkrCompact(Number(r.outstanding_0_30_paisa ?? 0))}
+                    </Link>
+                  </td>
+                  <td className="p-2">
+                    <Link href={`/dashboard/drilldown/outstanding?campus=${r.campus_id}&bucket=31_60`} className="underline">
+                      {formatPkrCompact(Number(r.outstanding_31_60_paisa ?? 0))}
+                    </Link>
+                  </td>
+                  <td className="p-2">
+                    <Link href={`/dashboard/drilldown/outstanding?campus=${r.campus_id}&bucket=60_plus`} className="underline">
+                      {formatPkrCompact(Number(r.outstanding_60plus_paisa ?? 0))}
+                    </Link>
+                  </td>
+                  <td className="p-2">
+                    <Link href={`/dashboard/drilldown/staff_cost?campus=${r.campus_id}`} className="underline">
+                      {r.staff_cost_ratio === null ? '—' : `${(Number(r.staff_cost_ratio) * 100).toFixed(1)}%`}
+                    </Link>{' '}
                     {!r.payroll_locked && r.payroll_status && r.payroll_status !== 'none' && <Badge variant="warning">payroll not locked</Badge>}
                   </td>
-                  <td className="p-2">{formatPct(r.attendance_pct === null ? null : Number(r.attendance_pct))}</td>
+                  <td className="p-2">
+                    <Link href={`/dashboard/drilldown/absentees?campus=${r.campus_id}`} className="underline">
+                      {formatPct(r.attendance_pct === null ? null : Number(r.attendance_pct))}
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -2244,3 +2244,12 @@ export const lessonPlanSchema = z.object({
   topicIds: z.array(z.string().uuid()).default([]),
 });
 export type LessonPlanInput = z.input<typeof lessonPlanSchema>;
+
+// FR-S04: KPI drill-down export. The filters on screen are the filters exported.
+export const drilldownExportSchema = z.object({
+  metric: z.enum(['outstanding', 'absentees', 'staff_cost']),
+  campusId: z.string().uuid().optional(),
+  bucket: z.enum(['0_30', '31_60', '60_plus']).optional(),
+  onDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+});
+export type DrilldownExportInput = z.infer<typeof drilldownExportSchema>;
