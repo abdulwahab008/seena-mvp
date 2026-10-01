@@ -2244,3 +2244,25 @@ export const lessonPlanSchema = z.object({
   topicIds: z.array(z.string().uuid()).default([]),
 });
 export type LessonPlanInput = z.input<typeof lessonPlanSchema>;
+
+// FR-C06: houses.
+export const houseSchema = z.object({
+  name: z.string().trim().min(1, 'Enter a house name').max(60),
+  colourHex: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Choose a colour'),
+  motto: z.string().trim().max(120).optional(),
+});
+export type HouseInput = z.infer<typeof houseSchema>;
+export const houseMoveSchema = z.object({
+  grNumber: z.string().trim().min(1, 'Enter the GR number'),
+  houseId: z.string().uuid('Choose a house'),
+  effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose the date the move takes effect'),
+});
+export type HouseMoveInput = z.infer<typeof houseMoveSchema>;
+export const housePointsSchema = z.object({
+  grNumber: z.string().trim().min(1, 'Enter the GR number'),
+  points: z.number({ message: 'Enter the points' }).int('Whole points only').min(-100).max(1000).refine((n) => n !== 0, 'Points cannot be zero'),
+  awardedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+  category: z.enum(['sports', 'academic', 'discipline', 'other']),
+  note: z.string().trim().max(200).optional(),
+});
+export type HousePointsInput = z.infer<typeof housePointsSchema>;
