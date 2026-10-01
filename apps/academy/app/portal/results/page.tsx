@@ -80,7 +80,12 @@ export default async function PortalResultsPage({ searchParams }: { searchParams
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold">Results</h2>
-        <p className="text-sm text-muted-foreground">FR-J08 — your child&apos;s result for the term.</p>
+        <p className="text-sm text-muted-foreground">
+          FR-J08 — your child&apos;s result for the term.{' '}
+          <Link href="/portal/results/trend" className="underline" data-testid="results-trend-link">
+            See progress across terms
+          </Link>
+        </p>
       </div>
 
       {children.length === 0 ? (

@@ -171,6 +171,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/results', label: 'Term Results & Positions' },
       { href: '/exams/annual', label: 'Annual Results' },
       { href: '/exams/promotion', label: 'Promotion Decisions' },
+      { href: '/exams/analytics', label: 'Subject Analytics' },
     ],
   },
   {
