@@ -2576,6 +2576,249 @@ export type Database = {
           },
         ]
       }
+      attendance_eligibility_adjustment: {
+        Row: {
+          award_id: string
+          billing_month: number
+          billing_year: number
+          campus_id: string
+          challan_id: string
+          created_at: string
+          enrolment_id: string
+          id: string
+          new_flag: boolean
+          new_pct: number | null
+          old_flag: boolean
+          old_pct: number | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          award_id: string
+          billing_month: number
+          billing_year: number
+          campus_id: string
+          challan_id: string
+          created_at?: string
+          enrolment_id: string
+          id?: string
+          new_flag: boolean
+          new_pct?: number | null
+          old_flag: boolean
+          old_pct?: number | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          award_id?: string
+          billing_month?: number
+          billing_year?: number
+          campus_id?: string
+          challan_id?: string
+          created_at?: string
+          enrolment_id?: string
+          id?: string
+          new_flag?: boolean
+          new_pct?: number | null
+          old_flag?: boolean
+          old_pct?: number | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_award_id_fkey"
+            columns: ["award_id"]
+            isOneToOne: false
+            referencedRelation: "concession_award"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "fee_challan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_challan_id_fkey"
+            columns: ["challan_id"]
+            isOneToOne: false
+            referencedRelation: "v_portal_dues"
+            referencedColumns: ["challan_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_adjustment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_eligibility_flag: {
+        Row: {
+          attendance_pct: number | null
+          award_id: string
+          billing_month: number
+          billing_year: number
+          campus_id: string
+          computed_at: string
+          eligible: boolean
+          enrolment_id: string
+          id: string
+          reason_code: string
+          required_pct: number
+          scheme_id: string
+          tenant_id: string
+        }
+        Insert: {
+          attendance_pct?: number | null
+          award_id: string
+          billing_month: number
+          billing_year: number
+          campus_id: string
+          computed_at?: string
+          eligible: boolean
+          enrolment_id: string
+          id?: string
+          reason_code: string
+          required_pct: number
+          scheme_id: string
+          tenant_id: string
+        }
+        Update: {
+          attendance_pct?: number | null
+          award_id?: string
+          billing_month?: number
+          billing_year?: number
+          campus_id?: string
+          computed_at?: string
+          eligible?: boolean
+          enrolment_id?: string
+          id?: string
+          reason_code?: string
+          required_pct?: number
+          scheme_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_eligibility_flag_award_id_fkey"
+            columns: ["award_id"]
+            isOneToOne: false
+            referencedRelation: "concession_award"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "concession_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_gap_log: {
         Row: {
           attendance_date: string
@@ -6675,6 +6918,7 @@ export type Database = {
           id: string
           is_active: boolean
           max_value: number | null
+          min_attendance_pct: number | null
           name_en: string
           name_ur: string
           requires_document: boolean
@@ -6693,6 +6937,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           max_value?: number | null
+          min_attendance_pct?: number | null
           name_en: string
           name_ur: string
           requires_document?: boolean
@@ -6711,6 +6956,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           max_value?: number | null
+          min_attendance_pct?: number | null
           name_en?: string
           name_ur?: string
           requires_document?: boolean
@@ -8438,6 +8684,7 @@ export type Database = {
           issue_date: string
           logo_asset_id: string | null
           net_paisa: number
+          note: string | null
           session_id: string
           status: Database["public"]["Enums"]["fee_challan_status"]
           student_id: string | null
@@ -8462,6 +8709,7 @@ export type Database = {
           issue_date?: string
           logo_asset_id?: string | null
           net_paisa: number
+          note?: string | null
           session_id: string
           status?: Database["public"]["Enums"]["fee_challan_status"]
           student_id?: string | null
@@ -8486,6 +8734,7 @@ export type Database = {
           issue_date?: string
           logo_asset_id?: string | null
           net_paisa?: number
+          note?: string | null
           session_id?: string
           status?: Database["public"]["Enums"]["fee_challan_status"]
           student_id?: string | null
@@ -22992,6 +23241,90 @@ export type Database = {
           },
         ]
       }
+      v_attendance_concession_eligibility: {
+        Row: {
+          attendance_eligible: boolean | null
+          attendance_pct: number | null
+          award_id: string | null
+          billing_month: number | null
+          billing_year: number | null
+          campus_id: string | null
+          computed_at: string | null
+          enrolment_id: string | null
+          id: string | null
+          reason_code: string | null
+          required_pct: number | null
+          scheme_code: string | null
+          scheme_id: string | null
+          scheme_name: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_eligibility_flag_award_id_fkey"
+            columns: ["award_id"]
+            isOneToOne: false
+            referencedRelation: "concession_award"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "campus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_campus_id_fkey"
+            columns: ["campus_id"]
+            isOneToOne: false
+            referencedRelation: "v_principal_today"
+            referencedColumns: ["campus_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "enrolment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_exam_result_input"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_fee_defaulter"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_enrolment_id_fkey"
+            columns: ["enrolment_id"]
+            isOneToOne: false
+            referencedRelation: "v_student_outstanding"
+            referencedColumns: ["enrolment_id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "concession_scheme"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_eligibility_flag_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_bank_recon_summary: {
         Row: {
           bank_account_id: string | null
@@ -29807,6 +30140,11 @@ export type Database = {
         Returns: number
       }
       refresh_agg_nightly: { Args: never; Returns: number }
+      refresh_attendance_eligibility: {
+        Args: { p_campus_id: string; p_month: number; p_year: number }
+        Returns: Json
+      }
+      refresh_attendance_eligibility_all: { Args: never; Returns: number }
       refresh_fee_collection_metrics: { Args: never; Returns: number }
       refresh_fee_defaulters: { Args: never; Returns: number }
       register_guardian_otp_attempt: {
@@ -30024,6 +30362,10 @@ export type Database = {
           p_language?: Database["public"]["Enums"]["certificate_language"]
         }
         Returns: string
+      }
+      resolve_eligibility_adjustment: {
+        Args: { p_note?: string; p_task_id: string }
+        Returns: undefined
       }
       resolve_fee_structure: {
         Args: {
@@ -30533,6 +30875,10 @@ export type Database = {
       }
       set_room_active: {
         Args: { p_id: string; p_inactive_from?: string; p_is_active: boolean }
+        Returns: undefined
+      }
+      set_scheme_min_attendance: {
+        Args: { p_min_pct?: number; p_scheme_id: string }
         Returns: undefined
       }
       set_section_stream: {

@@ -2159,3 +2159,10 @@ export const pettyCashAccountSchema = z
   })
   .refine((v) => v.capPkr <= v.floatPkr, { path: ['capPkr'], message: 'The cap cannot exceed the float' });
 export type PettyCashAccountInput = z.infer<typeof pettyCashAccountSchema>;
+
+// FR-G17: attendance-linked concession eligibility.
+export const schemeThresholdSchema = z.object({
+  schemeId: z.string().uuid(),
+  minPct: z.number({ message: 'Enter a percentage, or clear the threshold' }).gt(0, 'Above 0').max(100, 'At most 100').nullable(),
+});
+export type SchemeThresholdInput = z.infer<typeof schemeThresholdSchema>;

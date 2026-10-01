@@ -36,6 +36,11 @@ describe('buildChallanHtml', () => {
     expect(html).toContain('&lt;script&gt;');
     expect(html).toContain('School &amp; Co');
   });
+  it('prints the concession-withheld note, escaped, only when there is one', () => {
+    expect(html).not.toContain('class="note"');
+    const noted = buildChallanHtml({ ...payload, note: 'Merit concession withheld: attendance 87.4% below required 90% <b>' });
+    expect(noted).toContain('Merit concession withheld: attendance 87.4% below required 90% &lt;b&gt;');
+  });
   it('shows the payable amount and challan number', () => {
     expect(html).toContain('Payable PKR 8,000.00');
     expect(html).toContain('Challan 000000000017');

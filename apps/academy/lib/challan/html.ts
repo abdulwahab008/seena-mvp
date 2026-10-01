@@ -22,6 +22,7 @@ export const challanPayloadSchema = z.object({
   arrears_paisa: z.number(),
   net_paisa: z.number(),
   copies: z.array(z.string()),
+  note: z.string().nullable().optional(),
 });
 export type ChallanPayload = z.infer<typeof challanPayloadSchema>;
 
@@ -49,6 +50,7 @@ export function buildChallanHtml(p: ChallanPayload): string {
     <p>${escapeHtml(p.student.name_en)} · GR ${escapeHtml(p.student.gr_number)} · ${escapeHtml(p.student.class_name)} ${escapeHtml(p.student.section_name)}</p>
     <p>Period ${escapeHtml(p.billing_period)} · Due ${escapeHtml(p.due_date)}</p>
     <table><thead><tr><th>Fee head</th><th class="n">Amount</th><th class="n">Concession</th><th class="n">Net</th></tr></thead><tbody>${rows}</tbody></table>
+    ${p.note ? `<p class="note">${escapeHtml(p.note)}</p>` : ''}
     <p>Arrears ${formatPkr(p.arrears_paisa)} · <strong>Payable ${formatPkr(p.net_paisa)}</strong></p>
     <p class="bank">${escapeHtml(p.bank.bank_name)} · ${escapeHtml(p.bank.bank_account_title)} · ${escapeHtml(p.bank.bank_account_no)}</p>
     <p class="foot">${escapeHtml(p.bank.footer_note_en)}</p>
@@ -64,5 +66,6 @@ th, td { border-bottom: 1px solid #ccc; padding: 1mm 2mm; text-align: left; }
 .n { text-align: right; font-variant-numeric: tabular-nums; }
 .no { font-family: ui-monospace, monospace; letter-spacing: 1px; }
 .foot { color: #555; }
+.note { font-style: italic; }
 </style></head><body>${p.copies.map(copy).join('')}</body></html>`;
 }
