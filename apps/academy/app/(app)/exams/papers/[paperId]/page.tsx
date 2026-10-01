@@ -4,7 +4,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope } from '@/lib/exams/office-scope';
-import { PublishPaperPanel, ReplaceQuestionForm } from './paper-builder';
+import { PaperFilesPanel, PublishPaperPanel, ReplaceQuestionForm } from './paper-builder';
 
 /**
  * FR-I05 / FR-I06. One generated paper and its builder: sections and questions
@@ -19,7 +19,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ pa
   const { paperId } = await params;
   const supabase = await supabaseServer();
   const scope = await getExamOfficeScope(supabase);
-  const { data: paper } = await supabase.from('exam_paper').select('id, campus_id, set_code, status, title, total_marks, pattern_snapshot, created_at, published_at').eq('id', paperId).maybeSingle();
+  const { data: paper } = await supabase.from('exam_paper').select('id, campus_id, exam_subject_id, set_code, status, title, total_marks, pattern_snapshot, created_at, published_at').eq('id', paperId).maybeSingle();
   if (!paper) notFound();
   const { data: questions } = await supabase
     .from('exam_paper_item')
@@ -33,6 +33,13 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ pa
   const flags = new Map((flagRows ?? []).map((f) => [f.item_id, f]));
   const { data: settings } = await supabase.from('exam_settings').select('cooldown_mode, question_cooldown_terms').eq('campus_id', paper.campus_id).maybeSingle();
   const mode = settings?.cooldown_mode ?? 'warn';
+
+  const { data: siblingRows } = await supabase.from('exam_paper').select('id, set_code, status').eq('exam_subject_id', paper.exam_subject_id).neq('status', 'superseded').order('set_code');
+  const siblings = siblingRows ?? [];
+  const baseline = siblings.find((s) => s.set_code !== paper.set_code && s.set_code === 'A') ?? siblings.find((s) => s.set_code !== paper.set_code) ?? null;
+  const { data: reportRows } = baseline ? await supabase.rpc('fn_paper_set_report', { p_paper_a: baseline.id, p_paper_b: paper.id }) : { data: [] };
+  const report = reportRows ?? [];
+  const { data: divergence } = baseline ? await supabase.rpc('fn_paper_set_divergence', { p_paper_a: baseline.id, p_paper_b: paper.id }) : { data: null };
 
   const { data: override } = await supabase.from('paper_publish_override').select('reason, flagged_count, created_at, overridden_by').eq('exam_paper_id', paperId).maybeSingle();
   const { data: overrider } = override ? await supabase.from('app_user').select('full_name').eq('user_id', override.overridden_by).maybeSingle() : { data: null };
@@ -108,6 +115,64 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ pa
           </CardContent>
         </Card>
       ))}
+
+      {siblings.length > 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Sets of this paper</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm" data-testid="set-compare">
+            <p className="flex flex-wrap gap-3">
+              {siblings.map((s) => (
+                <Link key={s.id} href={`/exams/papers/${s.id}`} className={s.id === paper.id ? 'font-medium underline' : 'underline'} data-testid="set-link">
+                  Set {s.set_code} ({s.status})
+                </Link>
+              ))}
+            </p>
+            {baseline && report.length > 0 && (
+              <>
+                <p className="text-muted-foreground" data-testid="set-divergence">
+                  Set {paper.set_code} shares {Math.round(Number(divergence ?? 0) * 100)}% of its questions with Set {baseline.set_code}.
+                </p>
+                <table className="w-full text-xs" data-testid="set-report">
+                  <thead className="text-left text-muted-foreground">
+                    <tr>
+                      <th>Section</th>
+                      <th>Chapter</th>
+                      <th>Set {baseline.set_code}</th>
+                      <th>Set {paper.set_code}</th>
+                      <th>Identical</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {report.map((r) => (
+                      <tr key={`${r.section_no}-${r.chapter}`}>
+                        <td>{r.section_no}</td>
+                        <td>{r.chapter ?? '—'}</td>
+                        <td>{r.count_a}</td>
+                        <td>{r.count_b}</td>
+                        <td>{r.identical}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {scope.canWrite && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Files</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p className="text-muted-foreground">The paper and its answer key are stored per set ({`set-${paper.set_code}.pdf`}, {`key-${paper.set_code}.pdf`}); the key you download is always this set&rsquo;s own.</p>
+            <PaperFilesPanel paperId={paper.id} setCode={paper.set_code} />
+          </CardContent>
+        </Card>
+      )}
 
       {paper.status === 'draft' && scope.canWrite && (
         <Card>

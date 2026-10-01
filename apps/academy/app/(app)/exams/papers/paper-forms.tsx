@@ -8,13 +8,15 @@ import { toast } from 'sonner';
 import {
   BOARD_CODES,
   boardPatternSchema,
+  buildSetsSchema,
   cooldownSettingsSchema,
   paperRequestSchema,
   type BoardPatternInput,
+  type BuildSetsInput,
   type CooldownSettingsInput,
   type PaperRequestFormInput,
 } from '@/lib/validation';
-import { requestPaper, retryJob, saveCooldownSettings, savePattern } from './actions';
+import { buildSets, requestPaper, retryJob, saveCooldownSettings, savePattern } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -164,6 +166,77 @@ export function PatternForm() {
         </Button>
       </div>
       {(error || firstError) && <p role="alert" className="text-sm text-destructive sm:col-span-6">{error ?? firstError}</p>}
+    </form>
+  );
+}
+
+/** FR-I07: build Set A / Set B from the school's own question bank. */
+export function BuildSetsForm({ papers, patterns }: { papers: PaperOption[]; patterns: PatternOption[] }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const form = useForm<BuildSetsInput>({
+    resolver: zodResolver(buildSetsSchema),
+    defaultValues: { examSubjectId: papers[0]?.id ?? '', boardPatternId: patterns[0]?.id ?? '', chaptersText: '', setCount: 2, maxIdentical: 2, replace: false },
+  });
+  const onSubmit = form.handleSubmit((v) =>
+    startTransition(async () => {
+      const r = await buildSets(v);
+      setError(r.error);
+      if (!r.error) {
+        toast.success(`${r.paperIds?.length ?? 0} set papers built as drafts.`);
+        router.refresh();
+      }
+    }),
+  );
+  const firstError = Object.values(form.formState.errors)[0]?.message as string | undefined;
+  return (
+    <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-6" noValidate>
+      <div className="space-y-1 sm:col-span-2">
+        <Label htmlFor="setsPaper">Exam paper</Label>
+        <select id="setsPaper" className="h-10 w-full rounded-md border bg-background px-2 text-sm" {...form.register('examSubjectId')}>
+          {papers.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="space-y-1 sm:col-span-2">
+        <Label htmlFor="setsPattern">Board pattern</Label>
+        <select id="setsPattern" className="h-10 w-full rounded-md border bg-background px-2 text-sm" {...form.register('boardPatternId')}>
+          {patterns.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="setsCount">Sets</Label>
+        <Input id="setsCount" type="number" {...form.register('setCount', { valueAsNumber: true })} />
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="setsShared">Shared at most</Label>
+        <Input id="setsShared" type="number" {...form.register('maxIdentical', { valueAsNumber: true })} />
+      </div>
+      <div className="space-y-1 sm:col-span-5">
+        <Label htmlFor="setsChapters">Chapters (comma separated)</Label>
+        <Input id="setsChapters" placeholder="Ch.1, Ch.2" {...form.register('chaptersText')} />
+      </div>
+      <label className="flex items-end gap-2 pb-2 text-sm">
+        <input type="checkbox" {...form.register('replace')} /> Replace existing drafts
+      </label>
+      <div className="sm:col-span-6">
+        <Button type="submit" variant="outline" disabled={pending || papers.length === 0 || patterns.length === 0} data-testid="build-sets">
+          Build sets from the bank
+        </Button>
+      </div>
+      {(error || firstError) && (
+        <p role="alert" className="text-sm text-destructive sm:col-span-6" data-testid="build-sets-error">
+          {error ?? firstError}
+        </p>
+      )}
     </form>
   );
 }

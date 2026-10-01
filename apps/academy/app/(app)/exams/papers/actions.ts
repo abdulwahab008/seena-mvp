@@ -6,6 +6,8 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { createPaperJob, paperRequestError } from '@/lib/exams/paper-request';
 import {
   boardPatternSchema,
+  buildSetsSchema,
+  type BuildSetsInput,
   cooldownSettingsSchema,
   paperRequestSchema,
   parseChapters,
@@ -50,6 +52,36 @@ export async function retryJob(jobId: string): Promise<Result> {
   if (error) return { error: paperRequestError(error.message) };
   revalidatePath(PATH);
   return { error: null };
+}
+
+// FR-I07.
+function setsError(message: string, details?: string | null): string {
+  const pool = /insufficient_pool: (.+)/.exec(message);
+  if (pool) return `Not enough usable questions in the bank for ${pool[1]!.split('\n')[0]}. ${details ?? ''} The sets were not built, rather than building near-duplicates.`.trim();
+  if (message.includes('PAPER_SET_EXISTS')) return 'This paper already has draft sets. Tick "replace the existing drafts" to rebuild them.';
+  if (message.includes('PAPER_PUBLISHED')) return 'A paper for this subject is already published and cannot be replaced.';
+  if (message.includes('CELLS_MISMATCH')) return details ?? 'The chapter plan does not match the pattern.';
+  if (message.includes('CHAPTERS_REQUIRED')) return 'Choose at least one chapter.';
+  return paperRequestError(message);
+}
+
+export async function buildSets(input: BuildSetsInput): Promise<Result & { paperIds?: string[] }> {
+  const p = buildSetsSchema.safeParse(input);
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
+  const chapters = parseChapters(p.data.chaptersText);
+  if (chapters.length === 0) return { error: 'Enter at least one chapter' };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('build_paper_sets', {
+    p_exam_subject_id: p.data.examSubjectId,
+    p_board_pattern_id: p.data.boardPatternId,
+    p_chapters: chapters,
+    p_set_count: p.data.setCount,
+    p_max_identical: p.data.maxIdentical,
+    p_replace: p.data.replace,
+  });
+  if (error) return { error: setsError(error.message, error.details) };
+  revalidatePath(PATH);
+  return { error: null, paperIds: (data ?? []) as string[] };
 }
 
 // FR-I06.

@@ -2342,6 +2342,16 @@ export const cooldownSettingsSchema = z.object({
   cooldownMode: z.enum(['warn', 'block']),
 });
 export type CooldownSettingsInput = z.infer<typeof cooldownSettingsSchema>;
+// FR-I07: build Set A / Set B from the question bank.
+export const buildSetsSchema = z.object({
+  examSubjectId: z.string().uuid({ message: 'Choose a paper' }),
+  boardPatternId: z.string().uuid({ message: 'Choose a pattern' }),
+  chaptersText: z.string().trim().min(1, 'Enter at least one chapter'),
+  setCount: z.number({ message: 'Enter the number of sets' }).int('Whole sets only').min(1).max(4),
+  maxIdentical: z.number({ message: 'Enter a number' }).int('Whole questions only').min(0).max(10),
+  replace: z.boolean().default(false),
+});
+export type BuildSetsInput = z.input<typeof buildSetsSchema>;
 /** "Ch.1, Ch.2; Ch.3" -> ["Ch.1", "Ch.2", "Ch.3"] */
 export function parseChapters(text: string): string[] {
   return [...new Set(text.split(/[,;\n]/).map((c) => c.trim()).filter(Boolean))];
