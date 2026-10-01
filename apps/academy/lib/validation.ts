@@ -2288,5 +2288,32 @@ export const transportStopSchema = z.object({
   fareSlabId: toptUuid,
   seq: toptNumber('position'),
 });
+// FR-P02
+export const transportVehicleSchema = z.object({
+  campusId: tuuid,
+  regNo: z.string().trim().min(3, 'Enter the registration number').max(20),
+  make: toptText(60),
+  model: toptText(60),
+  seatCapacity: tint('Seat capacity', 1, 100),
+  fuel: z.enum(['petrol', 'diesel', 'cng', 'lpg', 'hybrid', 'electric']),
+  ownership: z.enum(['owned', 'contracted']),
+  active: tbool,
+});
+export const vehicleDocumentSchema = z.object({
+  vehicleId: tuuid,
+  docType: z.enum(['permit', 'fitness', 'token_tax', 'insurance'], { message: 'Choose a document type' }),
+  docNo: toptText(60),
+  issuedOn: toptDate,
+  expiresOn: tdate,
+  filePath: toptText(300),
+  mandatory: tbool,
+});
+export const vehicleOverrideSchema = z.object({
+  vehicleId: tuuid,
+  from: tdate,
+  to: tdate,
+  reason: z.string().trim().min(10, 'Give a reason of at least 10 characters').max(500),
+});
+export const tokenTaxSettingSchema = z.object({ mandatory: tbool });
 // ── end of transport and hostel schemas ──
 void [toptDate, tint];

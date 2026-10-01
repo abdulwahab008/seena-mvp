@@ -212,6 +212,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Bus,
     items: [
       { href: '/transport/routes', label: 'Routes & Fares', feature: 'module.transport' },
+      { href: '/transport/fleet', label: 'Fleet & Documents', feature: 'module.transport' },
     ],
   },
   {
