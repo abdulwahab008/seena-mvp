@@ -737,12 +737,14 @@ function EnrolmentPanel({
   payments,
   waivers,
   sections,
+  enrolled,
 }: {
   applicationId: string;
   offer: NonNullable<ApplicationRow['offer']>;
   payments: PaymentRow[];
   waivers: WaiverRow[];
   sections: SectionOption[];
+  enrolled: boolean;
 }) {
   const feeRupees = (offer.admission_fee_amount).toLocaleString();
   const totalReconciledRupees = payments
@@ -793,11 +795,17 @@ function EnrolmentPanel({
           ))}
         </ul>
       )}
-      <div className="flex flex-wrap items-center gap-2">
-        <RecordPaymentForm offerId={offer.id} />
-        <WaiveFeeForm offerId={offer.id} />
-      </div>
-      <EnrolForm offerId={offer.id} sections={sections} fundingOptions={fundingOptions} isFullyCovered={isFullyCovered} />
+      {/* Once the student is enrolled the fee is settled and consumed: taking another payment, waiving
+          it or enrolling again would only invite a refusal, so the controls go away. */}
+      {!enrolled && (
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <RecordPaymentForm offerId={offer.id} />
+            <WaiveFeeForm offerId={offer.id} />
+          </div>
+          <EnrolForm offerId={offer.id} sections={sections} fundingOptions={fundingOptions} isFullyCovered={isFullyCovered} />
+        </>
+      )}
     </div>
   );
 }
@@ -848,7 +856,7 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
             <ChecklistPanel applicationId={a.id} docTypes={a.checklistSnapshot.map((d) => d.doc_type)} />
             <DocumentsPanel applicationId={a.id} documents={a.documents} />
             {a.offer && a.offer.status === 'accepted' && (
-              <EnrolmentPanel applicationId={a.id} offer={a.offer} payments={a.payments} waivers={a.waivers} sections={a.sections} />
+              <EnrolmentPanel applicationId={a.id} offer={a.offer} payments={a.payments} waivers={a.waivers} sections={a.sections} enrolled={a.status === 'enrolled'} />
             )}
           </CardContent>
         </Card>
