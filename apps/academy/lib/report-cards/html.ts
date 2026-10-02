@@ -1,0 +1,522 @@
+import { isUrduScriptCodepoint, NASTALIQ_FONT_FAMILY, nastaliqFontFaceCss, type ResolvedFont } from '@/lib/pdf/font';
+import type { PrintDocument } from '@/lib/pdf/render';
+import { escapeHtml } from '@/lib/certificates/merge';
+
+/**
+ * FR-J09: the printed report card.
+ *
+ * Shape mirrors lib/certificates/html.ts (FR-T01) and
+ * lib/timetable-export/html.ts (FR-F15) — build one self-contained document
+ * with every asset inlined as a data: URI, hand it to lib/pdf/render.ts —
+ * because they share that renderer and there is no reason for a report card
+ * to paginate or embed fonts differently.
+ *
+ * What is deliberately NOT here is a template engine. FR-T01's
+ * certificate_template machinery substitutes merge fields into prose; a
+ * report card is a table of N subject rows plus computed totals, and AC2
+ * requires branding to come from campus branding with no per-report
+ * configuration. See the migration header for the full argument.
+ *
+ * AC1's "a single A4 page" is a layout constraint, not a hope, so the type
+ * scale and the row height are sized for a Pakistani school's usual eight to
+ * twelve subjects and the sheet is checked for page count in the e2e run
+ * rather than assumed.
+ */
+
+export type ReportCardSubject = {
+  subject_name: string;
+  subject_name_ur: string | null;
+  obtained: number | null;
+  max_marks: number | null;
+  pct: number | null;
+  grade_label: string | null;
+  report_symbol: string | null;
+  /** FR-J14: which attempt the published mark comes from (1 = the original paper). */
+  attempt_no?: number;
+  is_pass: boolean | null;
+  failed_components: { component: string; obtained: number; pass_marks: number; max_marks: number }[];
+};
+
+export type ReportCardSnapshot = {
+  school: {
+    name: string;
+    campus_name: string;
+    campus_name_ur: string | null;
+    campus_code: string;
+    city: string | null;
+    address_line: string | null;
+    phone: string | null;
+  } | null;
+  branding: {
+    logo_storage_path: string | null;
+    letterhead_storage_path: string | null;
+    signature_storage_path: string | null;
+    stamp_storage_path: string | null;
+  };
+  student: {
+    name_en: string;
+    name_ur: string | null;
+    father_name_en: string | null;
+    father_name_ur: string | null;
+    gr_number: string;
+    roll_no: number | null;
+    photo_path: string | null;
+    class_name: string;
+    section_name: string;
+  };
+  term: { exam_term_id: string; code: string; name: string; name_ur: string | null; session_name: string };
+  subjects: ReportCardSubject[];
+  aggregate: {
+    obtained: number | null;
+    max_marks: number | null;
+    pct: number | null;
+    grade_label: string | null;
+    gpa_point: number | null;
+    is_pass: boolean | null;
+  };
+  grading_scheme: { name: string; version: number; board: string } | null;
+  position: {
+    rank_in_section: number | null;
+    ranked_out_of: number | null;
+    rank_in_class: number | null;
+    ranked_out_of_class: number | null;
+    is_ranked: boolean;
+    exclusion_reason: string | null;
+  } | null;
+  attendance: {
+    months_counted: number;
+    present_days: number;
+    working_days: number;
+    pct: number | null;
+    from_date: string | null;
+    to_date: string | null;
+  };
+  remark: string | null;
+  /**
+   * FR-J04. The end-of-session decision, present only on the session's final
+   * counting term and only once it is no longer Pending. The FINAL decision
+   * alone: never the system's own verdict, the override actor or the reason.
+   */
+  promotion?: { decision: PromotionDecisionValue; subjects: string[] } | null;
+  /** FR-J14: "Maths: result of re-sit dated 12-Aug-2026", one per subject whose mark came from a later attempt. */
+  attempt_notes?: string[];
+  revision_no: number;
+  supersedes_revision: number | null;
+  rendered_at: string;
+};
+
+export type PromotionDecisionValue = 'promoted' | 'promoted_on_trial' | 'compartment' | 'detained' | 'pending';
+
+export type ReportCardAssets = {
+  letterheadDataUri: string | null;
+  logoDataUri: string | null;
+  signatureDataUri: string | null;
+  stampDataUri: string | null;
+  photoDataUri: string | null;
+};
+
+/** Everything on the page that could carry Arabic script, for the glyph check. */
+export function collectReportCardStrings(snapshot: ReportCardSnapshot): (string | null)[] {
+  return [
+    snapshot.school?.name ?? '',
+    snapshot.school?.campus_name ?? '',
+    snapshot.school?.campus_name_ur ?? '',
+    snapshot.student.name_en,
+    snapshot.student.name_ur,
+    snapshot.student.father_name_en,
+    snapshot.student.father_name_ur,
+    snapshot.term.name,
+    snapshot.term.name_ur,
+    snapshot.remark,
+    ...snapshot.subjects.flatMap((s) => [s.subject_name, s.subject_name_ur]),
+  ];
+}
+
+const ARABIC_SCRIPT = '\\u0600-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF\\uFB50-\\uFDFF\\uFE70-\\uFEFF';
+const URDU_RUN = new RegExp(`[${ARABIC_SCRIPT}]+(?:[\\s\\u200C\\u200D]+[${ARABIC_SCRIPT}]+)*`, 'g');
+
+/**
+ * FR-J10: the class teacher's remark may be English, Urdu, or a mix of both
+ * with digits ("طالب علم کی کارکردگی 85% بہتر ہے"). Laid out as plain LTR text
+ * Urdu comes out reversed, and in a font without Nastaliq shaping it comes
+ * out as disconnected glyphs, which parents read as a corrupted document.
+ *
+ *   * no Arabic script       -> unchanged;
+ *   * Urdu is the majority   -> the whole block is RTL in the embedded Nastaliq
+ *                               font; Latin runs and digits stay left-to-right
+ *                               inside it, as the bidi algorithm lays them out;
+ *   * English is the majority -> an LTR block with each Urdu run isolated as an
+ *                               RTL Nastaliq span.
+ *
+ * Digits are never converted: they are read off paper as written.
+ */
+export function remarkDirection(text: string): 'rtl' | 'ltr' | null {
+  let arabic = 0;
+  let latin = 0;
+  for (const ch of text) {
+    const cp = ch.codePointAt(0)!;
+    if (isUrduScriptCodepoint(cp)) arabic += 1;
+    else if ((cp >= 0x41 && cp <= 0x5a) || (cp >= 0x61 && cp <= 0x7a)) latin += 1;
+  }
+  if (arabic === 0) return null;
+  return arabic >= latin ? 'rtl' : 'ltr';
+}
+
+export function remarkMarkup(remark: string | null): string {
+  const text = remark ?? '';
+  const direction = remarkDirection(text);
+  if (direction === null) return `<div data-remark>${escapeHtml(text)}</div>`;
+  if (direction === 'rtl') return `<div data-remark class="urdu" dir="rtl" lang="ur">${escapeHtml(text)}</div>`;
+  const runs = text.replace(URDU_RUN, (run) => `\u0000${run}\u0001`);
+  const body = escapeHtml(runs).replace(/\u0000/g, '<span class="urdu" dir="rtl" lang="ur">').replace(/\u0001/g, '</span>');
+  return `<div data-remark dir="ltr" lang="en">${body}</div>`;
+}
+
+function fmtNum(value: number | null, dp = 0): string {
+  return value === null || value === undefined ? '—' : Number(value).toFixed(dp);
+}
+
+/** AC1's "168 of 180 days (93.3%)" — one decimal place, as the AC writes it. */
+export function attendanceLine(a: ReportCardSnapshot['attendance']): string {
+  if (a.months_counted === 0 || a.working_days === 0) {
+    return 'N/A';
+  }
+  return `${fmtNum(a.present_days, Number.isInteger(Number(a.present_days)) ? 0 : 1)} of ${a.working_days} days (${fmtNum(a.pct, 1)}%)`;
+}
+
+/**
+ * The Notes' whole point: the summary is routinely short of the term's last
+ * week, so the range it actually covers is printed beside the figure rather
+ * than left for a parent to assume.
+ */
+export function attendanceRange(a: ReportCardSnapshot['attendance']): string {
+  if (!a.from_date || !a.to_date) return '';
+  const fmt = (iso: string) =>
+    new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+  return `${fmt(a.from_date)} – ${fmt(a.to_date)}`;
+}
+
+/** AC1's "position 4 of 38", and FR-J05's dash-with-a-reason where there is none. */
+export function positionLine(p: ReportCardSnapshot['position']): string {
+  if (!p) return 'Not ranked yet';
+  if (!p.is_ranked) {
+    if (p.exclusion_reason === 'absent') return '— (absent in a paper)';
+    if (p.exclusion_reason === 'withheld') return '— (result withheld)';
+    return '—';
+  }
+  return `${p.rank_in_section} of ${p.ranked_out_of}`;
+}
+
+export function classPositionLine(p: ReportCardSnapshot['position']): string {
+  if (!p || !p.is_ranked || p.rank_in_class === null) return '—';
+  return `${p.rank_in_class} of ${p.ranked_out_of_class}`;
+}
+
+/** FR-J04 AC4: the parent-facing line. Nothing about who decided or why. */
+export function promotionLine(p: ReportCardSnapshot['promotion']): string | null {
+  if (!p || p.decision === 'pending') return null;
+  switch (p.decision) {
+    case 'promoted':
+      return 'Promoted';
+    case 'promoted_on_trial':
+      return 'Promoted on trial';
+    case 'detained':
+      return 'Detained in the same class';
+    case 'compartment':
+      return p.subjects.length > 0 ? `Compartment in ${p.subjects.join(', ')}` : 'Compartment';
+  }
+}
+
+/** AC4's footer, and it reads off supersedes_revision rather than doing arithmetic. */
+export function revisionFooter(snapshot: ReportCardSnapshot): string | null {
+  if (snapshot.supersedes_revision === null) return null;
+  return `Revised — supersedes revision ${snapshot.supersedes_revision}`;
+}
+
+function letterheadHtml(snapshot: ReportCardSnapshot, assets: ReportCardAssets): string {
+  if (assets.letterheadDataUri) {
+    return `<div class="letterhead"><img src="${assets.letterheadDataUri}" alt="" /></div>`;
+  }
+  const place = [snapshot.school?.campus_name, snapshot.school?.city].filter(Boolean).join(' · ');
+  return `<div class="letterhead">
+  ${assets.logoDataUri ? `<img class="logo" src="${assets.logoDataUri}" alt="" />` : ''}
+  <div class="head-text">
+    <div class="school">${escapeHtml(snapshot.school?.name ?? '')}</div>
+    ${place ? `<div class="place">${escapeHtml(place)}</div>` : ''}
+    ${snapshot.school?.address_line ? `<div class="place">${escapeHtml(snapshot.school.address_line)}</div>` : ''}
+  </div>
+</div>`;
+}
+
+function css(font: ResolvedFont | null): string {
+  return `${nastaliqFontFaceCss(font)}
+@page { size: A4 portrait; margin: 12mm 14mm; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Times New Roman', Times, Georgia, serif;
+  font-size: 10pt;
+  line-height: 1.35;
+  color: #111;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.urdu { font-family: '${NASTALIQ_FONT_FAMILY}', 'Noto Naskh Arabic', serif; direction: rtl; line-height: 2.1; }
+.letterhead { display: flex; align-items: center; gap: 6mm; border-bottom: 0.6mm solid #111; padding-bottom: 3mm; }
+.letterhead img { max-width: 100%; }
+.letterhead .logo { width: 18mm; height: 18mm; object-fit: contain; }
+.letterhead .head-text { flex: 1 1 auto; text-align: center; }
+.letterhead .school { font-size: 16pt; font-weight: 700; }
+.letterhead .place { font-size: 9pt; color: #333; }
+.doc-title { text-align: center; font-size: 12pt; font-weight: 700; letter-spacing: 0.3mm; margin: 4mm 0 3mm; text-transform: uppercase; }
+.identity { display: flex; gap: 5mm; align-items: flex-start; margin-bottom: 3mm; }
+.identity .fields { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6mm 5mm; }
+.identity .photo { width: 25mm; height: 30mm; object-fit: cover; border: 0.2mm solid #666; }
+.identity .photo-blank { width: 25mm; height: 30mm; border: 0.2mm dashed #999; }
+.field { display: flex; gap: 2mm; }
+.field .label { color: #444; min-width: 26mm; }
+.field .value { font-weight: 700; }
+table.marks { width: 100%; border-collapse: collapse; margin-top: 1mm; }
+table.marks th, table.marks td { border: 0.2mm solid #666; padding: 1.1mm 2mm; }
+table.marks th { background: #eee; font-size: 9pt; text-align: left; }
+table.marks td.num, table.marks th.num { text-align: right; }
+table.marks td.mid, table.marks th.mid { text-align: center; }
+table.marks tr.total td { font-weight: 700; background: #f4f4f4; }
+.fail { color: #a00; }
+.summary { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm 5mm; margin-top: 4mm; }
+.panel { border: 0.2mm solid #666; padding: 2mm 3mm; }
+.panel h3 { margin: 0 0 1mm; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.2mm; color: #444; }
+.panel .big { font-size: 12pt; font-weight: 700; }
+.panel .note { font-size: 8pt; color: #444; }
+.remark { margin-top: 4mm; border: 0.2mm solid #666; padding: 2mm 3mm; min-height: 14mm; }
+.remark h3 { margin: 0 0 1mm; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.2mm; color: #444; }
+.signatures { margin-top: 8mm; display: flex; justify-content: space-between; gap: 10mm; align-items: flex-end; }
+.signatures div { flex: 1 1 0; text-align: center; font-size: 9pt; }
+.signatures .rule { border-top: 0.3mm solid #111; padding-top: 1mm; }
+.signatures img { max-height: 14mm; max-width: 45mm; display: block; margin: 0 auto 1mm; }
+.stamp { position: fixed; right: 16mm; bottom: 26mm; width: 32mm; opacity: 0.75; }
+.footer { margin-top: 4mm; display: flex; justify-content: space-between; font-size: 8pt; color: #444; }
+.footnotes { margin-top: 2mm; font-size: 8pt; color: #333; }
+.revised { font-weight: 700; color: #a00; }`;
+}
+
+/**
+ * FR-J12. What the merged document adds to the single card's stylesheet, and
+ * nothing else — the cards themselves must paginate identically in both, or
+ * the sheet a parent is handed and the sheet in the Principal's print run
+ * would be two different documents.
+ *
+ * `.stamp` is the one rule that cannot carry over. On a single card it is
+ * `position: fixed`, which Chromium repeats on every page of the document —
+ * correct for a one-page card, and in a 120-card collation it would stamp the
+ * blank duplex fillers too. Inside a merged card it is absolute within the
+ * card's own box.
+ */
+function mergedCss(): string {
+  return `
+.card { position: relative; break-after: page; page-break-after: always; }
+.card:last-of-type { break-after: auto; page-break-after: auto; }
+.card .stamp { position: absolute; }
+/* AC3: a card that ended on an odd page gets a blank side, so the next card
+   starts on a new SHEET rather than on the back of this one. */
+.sheet-filler { break-after: page; page-break-after: always; height: 100%; }`;
+}
+
+function subjectRow(s: ReportCardSubject): string {
+  const failed = (s.failed_components ?? []).map((c) => c.component).join(', ');
+  // AB / EX / DEB stand IN PLACE of marks; R (FR-J14) annotates a mark that is there.
+  const replacesMarks = !!s.report_symbol && s.report_symbol !== 'R';
+  const marks = replacesMarks
+    ? `<td class="mid" colspan="2">${escapeHtml(s.report_symbol ?? '')}</td>`
+    : `<td class="num">${fmtNum(s.obtained, 2)}${s.report_symbol === 'R' ? ' <sup data-attempt-mark>R</sup>' : ''}</td><td class="num">${fmtNum(s.max_marks)}</td>`;
+  const remark =
+    s.is_pass === false
+      ? escapeHtml(failed ? `Failed: ${failed}` : 'Failed')
+      : s.attempt_no && s.attempt_no > 1
+        ? `Attempt ${s.attempt_no}`
+        : '';
+  return `<tr>
+  <td>${escapeHtml(s.subject_name)}${s.subject_name_ur ? `<span class="urdu"> · ${escapeHtml(s.subject_name_ur)}</span>` : ''}</td>
+  ${marks}
+  <td class="num">${fmtNum(s.pct, 2)}</td>
+  <td class="mid">${escapeHtml(s.grade_label ?? '—')}</td>
+  <td class="${s.is_pass === false ? 'fail' : ''}">${remark}</td>
+</tr>`;
+}
+
+/**
+ * The card itself, without the document around it. Extracted by FR-J12 so the
+ * merged print run and the single card are the same page — a second builder
+ * would be a second document, and a parent's copy would stop matching the
+ * copy in the Principal's pile.
+ */
+function reportCardBody(snapshot: ReportCardSnapshot, assets: ReportCardAssets): string {
+  const { student, term, aggregate, attendance } = snapshot;
+  const revised = revisionFooter(snapshot);
+  const range = attendanceRange(attendance);
+
+  const field = (label: string, value: string) =>
+    `<div class="field"><span class="label">${escapeHtml(label)}</span><span class="value">${escapeHtml(value)}</span></div>`;
+
+  return `${assets.stampDataUri ? `<img class="stamp" src="${assets.stampDataUri}" alt="" />` : ''}
+${letterheadHtml(snapshot, assets)}
+<h1 class="doc-title">Report Card — ${escapeHtml(term.name)} ${escapeHtml(term.session_name)}</h1>
+
+<div class="identity">
+  <div class="fields">
+    ${field('Name', student.name_en)}
+    ${field('GR No.', student.gr_number)}
+    ${field("Father's name", student.father_name_en ?? '—')}
+    ${field('Roll No.', student.roll_no === null ? '—' : String(student.roll_no))}
+    ${field('Class', `${student.class_name} · ${student.section_name}`)}
+    ${field('Session', term.session_name)}
+  </div>
+  ${
+    assets.photoDataUri
+      ? `<img class="photo" src="${assets.photoDataUri}" alt="" />`
+      : '<div class="photo-blank"></div>'
+  }
+</div>
+
+<table class="marks">
+  <thead>
+    <tr>
+      <th>Subject</th>
+      <th class="num">Obtained</th>
+      <th class="num">Maximum</th>
+      <th class="num">%</th>
+      <th class="mid">Grade</th>
+      <th>Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${snapshot.subjects.map(subjectRow).join('\n')}
+    <tr class="total">
+      <td>Total</td>
+      <td class="num" data-total-obtained>${fmtNum(aggregate.obtained, 2)}</td>
+      <td class="num" data-total-max>${fmtNum(aggregate.max_marks)}</td>
+      <td class="num" data-total-pct>${fmtNum(aggregate.pct, 2)}</td>
+      <td class="mid" data-total-grade>${escapeHtml(aggregate.grade_label ?? '—')}</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+${
+  (snapshot.attempt_notes ?? []).length > 0
+    ? `<div class="footnotes" data-attempt-notes>${(snapshot.attempt_notes ?? []).map((n) => `<div>R — ${escapeHtml(n)}</div>`).join('')}</div>`
+    : ''
+}
+
+<div class="summary">
+  <div class="panel">
+    <h3>Position in section</h3>
+    <div class="big" data-position>${escapeHtml(positionLine(snapshot.position))}</div>
+    <div class="note">In class: ${escapeHtml(classPositionLine(snapshot.position))}</div>
+  </div>
+  <div class="panel">
+    <h3>Attendance</h3>
+    <div class="big" data-attendance>${escapeHtml(attendanceLine(attendance))}</div>
+    ${range ? `<div class="note" data-attendance-range>Covering ${escapeHtml(range)}</div>` : ''}
+  </div>
+</div>
+
+${
+    promotionLine(snapshot.promotion)
+      ? `<div class="panel promotion" style="margin-top:4mm"><h3>Result</h3><div class="big" data-promotion>${escapeHtml(promotionLine(snapshot.promotion) ?? '')}</div></div>`
+      : ''
+  }
+
+<div class="remark">
+  <h3>Class teacher&rsquo;s remark</h3>
+  ${remarkMarkup(snapshot.remark)}
+</div>
+
+<div class="signatures">
+  <div><div class="rule">Parent / Guardian</div></div>
+  <div><div class="rule">Class teacher</div></div>
+  <div>
+    ${assets.signatureDataUri ? `<img src="${assets.signatureDataUri}" alt="" />` : ''}
+    <div class="rule">Principal</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>${escapeHtml(
+    snapshot.grading_scheme
+      ? `Graded on ${snapshot.grading_scheme.name} v${snapshot.grading_scheme.version} (${snapshot.grading_scheme.board})`
+      : '',
+  )}</span>
+  <span${revised ? ' class="revised" data-revision-note' : ''}>${escapeHtml(
+    revised ?? `Revision ${snapshot.revision_no}`,
+  )}</span>
+</div>`;
+}
+
+export function buildReportCardHtml(
+  snapshot: ReportCardSnapshot,
+  font: ResolvedFont | null,
+  assets: ReportCardAssets,
+): PrintDocument {
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(
+    `${snapshot.student.name_en} — ${snapshot.term.name}`,
+  )}</title><style>${css(font)}</style></head><body>
+${reportCardBody(snapshot, assets)}
+</body></html>`;
+
+  return { html, pageFormat: 'A4', landscape: false };
+}
+
+/**
+ * FR-J12 AC3: the print-ready collation.
+ *
+ * The cards arrive already ordered — the batch froze the order into
+ * item.seq at enumeration, so a section renamed halfway through results day
+ * cannot reorder a document that is already half printed — and each carries
+ * the page count read off its own rendered bytes.
+ *
+ * `pageCount` is what makes "a new sheet" true rather than hoped for. A
+ * one-page card followed only by a page break puts the next child on side 2
+ * of the same sheet, which under duplex is exactly the mixing the AC forbids,
+ * so a card that ended on an odd page is followed by a blank side.
+ *
+ * Branding is one set of assets for the whole document, not one per card: a
+ * batch is bounded to a single campus (the term's), so there is exactly one
+ * logo, one signature and one stamp to embed — and embedding them once is
+ * also why a 120-card merge is not 120 copies of the same PNG.
+ */
+export type MergedReportCard = { snapshot: ReportCardSnapshot; pageCount: number };
+
+export function buildMergedReportCardHtml(
+  cards: MergedReportCard[],
+  font: ResolvedFont | null,
+  assets: ReportCardAssets,
+  title: string,
+): PrintDocument {
+  const body = cards
+    .map(({ snapshot, pageCount }, index) => {
+      // No filler after the last card: nothing follows it that could land on
+      // the back of its sheet, and a trailing blank page is just waste.
+      const filler = pageCount % 2 === 1 && index < cards.length - 1 ? '<div class="sheet-filler">&nbsp;</div>' : '';
+      return `<section class="card" data-gr="${escapeHtml(snapshot.student.gr_number)}">
+${reportCardBody(snapshot, assets)}
+</section>${filler}`;
+    })
+    .join('\n');
+
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(
+    title,
+  )}</title><style>${css(font)}${mergedCss()}</style></head><body>
+${body}
+</body></html>`;
+
+  return { html, pageFormat: 'A4', landscape: false };
+}
+
+/** FR-J11: the card without its document, for a packet that continues past it. */
+export { reportCardBody as reportCardBodyHtml, css as reportCardCss };

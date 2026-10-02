@@ -1,0 +1,142 @@
+import Link from 'next/link';
+import { supabaseServer } from '@/lib/supabase/server';
+import { readMarkEntryOptions } from '@/lib/exams/mark-query';
+import { ResultBoard } from './result-board';
+import { PositionBoard } from './position-board';
+import { WithholdBoard } from './withhold-board';
+import { ReportCardBoard } from './report-card-board';
+
+/**
+ * FR-J02. The computed per-subject results for one section of one term.
+ *
+ * Nothing here computes on load: approving the last paper of a section already
+ * did that. This screen shows what came out, names the scale it was graded on,
+ * and is loud about a result a break-glass correction has left stale.
+ *
+ * FR-J05's merit list is on this page rather than on one of its own, because it
+ * is the same term's marks read a second way — a total instead of a subject,
+ * and a cohort instead of a candidate. It is a class wide where the board above
+ * is one section, which is the whole point of it.
+ */
+type SearchParams = { term?: string };
+
+export default async function SubjectResultsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const params = await searchParams;
+  const supabase = await supabaseServer();
+
+  const { data: campuses } = await supabase
+    .from('campus')
+    .select('id, name')
+    .eq('status', 'active')
+    .order('code')
+    .limit(1);
+  const campus = campuses?.[0];
+  const { data: sessions } = campus
+    ? await supabase
+        .from('academic_session')
+        .select('id, name')
+        .or(`campus_id.eq.${campus.id},campus_id.is.null`)
+        .eq('is_current', true)
+        .order('starts_on', { ascending: false })
+        .limit(1)
+    : { data: null };
+  const session = sessions?.[0];
+
+  const { data: terms } =
+    campus && session
+      ? await supabase
+          .from('v_exam_term_selectable')
+          .select('id, code, name')
+          .eq('campus_id', campus.id)
+          .eq('session_id', session.id)
+          .order('sequence')
+      : { data: [] };
+  const termRows = (terms ?? []).filter((t): t is { id: string; code: string; name: string } => t.id !== null);
+  const term = termRows.find((t) => t.id === params.term) ?? termRows[0];
+
+  if (!campus || !session || !term) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold">Term results</h1>
+        <p className="text-sm text-muted-foreground" data-testid="results-no-term">
+          No activated exam term found for this campus and session.
+        </p>
+      </div>
+    );
+  }
+
+  const { sections, classes } = await readMarkEntryOptions(supabase, campus.id, session.id);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Term results</h1>
+        <p className="text-sm text-muted-foreground">
+          FR-J02 — per-subject results are computed the moment a section&rsquo;s last paper is signed off. An exempt
+          subject leaves the denominator, an absence scores zero against the full maximum, and a subject can clear its
+          aggregate and still fail on a component&rsquo;s own pass mark. The grade comes from the{' '}
+          <Link href="/exams/grading" className="underline">
+            board grade scale
+          </Link>{' '}
+          that was in effect for this session, and stays on that version afterwards.
+        </p>
+      </div>
+
+      <p className="text-sm text-muted-foreground">
+        {campus.name} &middot; {session.name} &middot; {term.name}
+      </p>
+
+      <ResultBoard examTermId={term.id} termName={term.name} sections={sections} />
+
+      <div className="border-t pt-6">
+        <h2 className="text-xl font-semibold" id="merit-list">
+          Positions
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          FR-J05 — each candidate&rsquo;s position in their section and in their class, on total marks. Ranking waits for
+          every section of the class, because a class position taken against half a cohort would move the week the rest
+          were signed off. The year&rsquo;s figures are on the{' '}
+          <Link href="/exams/annual" className="underline">
+            annual results
+          </Link>{' '}
+          screen.
+        </p>
+        <div className="mt-4">
+          <PositionBoard examTermId={term.id} termName={term.name} campusId={campus.id} classes={classes} />
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <h2 className="text-xl font-semibold" id="withholds">
+          Withheld results
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          FR-J08 — a candidate whose outstanding balance is above the campus threshold has their result withheld from
+          the parent and from the report card, automatically, and released the moment the money lands. Withholding
+          stops disclosure and nothing else: the marks above and the positions beside them are computed and ranked for
+          a withheld candidate exactly as for anyone else, which is what keeps the internal gazette honest.
+        </p>
+        <div className="mt-4">
+          <WithholdBoard examTermId={term.id} termName={term.name} campusId={campus.id} classes={classes} />
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <h2 className="text-xl font-semibold" id="report-cards">
+          Report cards
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          FR-J09 — one branded A4 page per candidate, collecting the subject results above, the position beside them,
+          the term&rsquo;s attendance summary with the dates it actually covers, and the campus&rsquo;s own letterhead
+          and signature. A card refuses to print while the term is provisional, while a mark has moved under it, or
+          while the result is withheld; a correction issues the next revision rather than editing the last one.
+          FR-J12 turns the same card into a results-day run: a section, a class or the whole campus in one action,
+          with a merged print-ready file and a per-candidate account of anyone it could not print.
+        </p>
+        <div className="mt-4">
+          <ReportCardBoard examTermId={term.id} termName={term.name} campusId={campus.id} sections={sections} />
+        </div>
+      </div>
+    </div>
+  );
+}

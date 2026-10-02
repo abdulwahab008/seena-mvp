@@ -1,0 +1,26 @@
+-- Bugfix, discovered while verifying FR-K12: v_sibling_rank
+-- (supabase/migrations/20260730151340_guardians_and_families.sql) ranks
+-- siblings with row_number() over (order by student.created_at) — but
+-- student.created_at defaulted to now(), which is frozen at transaction
+-- start. Any bulk-admission flow that creates multiple siblings inside
+-- one transaction (a CSV import, a single API call admitting a whole
+-- family) gives every sibling the IDENTICAL created_at, making
+-- sibling_rank's tie order undefined rather than "eldest first" — the
+-- exact thing FR-K07's sibling-discount eligibility (eldest gets none,
+-- 2nd/3rd get the discount) depends on getting right. Caught via
+-- family_groups.test.sql intermittently failing only when the full
+-- pgTAP suite runs (many files, same class of transaction-local now()
+-- tie), never in isolation.
+--
+-- Same fix as FR-K12's late_fee_rule.created_at: clock_timestamp() reads
+-- the actual wall clock per row, not the transaction-start snapshot.
+--
+-- Scope: this migration fixes the one instance that surfaced as an
+-- actual failing assertion. Other created_at columns may share the same
+-- theoretical tie risk without an ordering dependency yet built on top
+-- of them (audit_log's ordering already uses a bigserial, not
+-- created_at, precisely to avoid this); auditing every timestamp column
+-- in the schema for a real, present dependency is a separate task, not
+-- bundled here.
+
+alter table public.student alter column created_at set default clock_timestamp();

@@ -10,8 +10,9 @@ import {
 import { db, schema } from '../db.js';
 import { downloadObject } from '../storage.js';
 import { extractPagesWithOcr } from '../extract-pipeline.js';
-import { embedTexts } from '../openai.js';
+import { embedTexts, estimateChatCostUsd, estimateEmbedCostUsd } from '../openai.js';
 import { getNamespace, pineconeIndex } from '../pinecone.js';
+import { env } from '../env.js';
 
 const MAX_CHUNKS_PER_BOOK = 1500;
 const PINECONE_BATCH = 100;
@@ -49,8 +50,25 @@ export async function processBook(job: BookProcessJob): Promise<void> {
         `PDF is ${Math.round(buffer.byteLength / 1e6)}MB; the limit is ${MAX_PDF_BYTES / 1e6}MB.`,
       );
     }
+    const extractStartedAt = Date.now();
     const extracted = await extractPagesWithOcr(buffer, { tag: bookId });
-    const { pages, numPages, ocrMethod, ocrModel, needsOcr } = extracted;
+    const { pages, numPages, ocrMethod, ocrModel, needsOcr, visionUsage } = extracted;
+    if (visionUsage) {
+      await db.insert(schema.generations).values({
+        orgId,
+        userId: book.uploadedBy,
+        kind: 'book-ocr',
+        model: ocrModel ?? env().OPENROUTER_VISION_MODEL,
+        inputTokens: visionUsage.inputTokens,
+        outputTokens: visionUsage.outputTokens,
+        latencyMs: Date.now() - extractStartedAt,
+        costUsd: estimateChatCostUsd(
+          ocrModel ?? env().OPENROUTER_VISION_MODEL,
+          visionUsage.inputTokens,
+          visionUsage.outputTokens,
+        ).toFixed(6),
+      });
+    }
 
     // 3. Persist raw page text. Skip empty pages.
     const pageRows = pages
@@ -111,10 +129,21 @@ export async function processBook(job: BookProcessJob): Promise<void> {
 
       const chunkIds = chunks.map(() => randomUUID());
 
-      const vectors = await embedTexts(chunks.map((c) => c.text));
+      const embedStartedAt = Date.now();
+      const { vectors, totalTokens: embedTokens } = await embedTexts(chunks.map((c) => c.text));
       if (vectors.length !== chunks.length) {
         throw new Error(`embedding count mismatch: ${vectors.length} vs ${chunks.length}`);
       }
+      await db.insert(schema.generations).values({
+        orgId,
+        userId: book.uploadedBy,
+        kind: 'book-embed',
+        model: DEFAULT_EMBEDDING_MODEL,
+        inputTokens: embedTokens,
+        outputTokens: 0,
+        latencyMs: Date.now() - embedStartedAt,
+        costUsd: estimateEmbedCostUsd(DEFAULT_EMBEDDING_MODEL, embedTokens).toFixed(6),
+      });
 
       const ix = getNamespace(orgId, DEFAULT_EMBEDDING_MODEL);
       for (let i = 0; i < chunks.length; i += PINECONE_BATCH) {

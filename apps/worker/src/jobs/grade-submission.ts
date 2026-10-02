@@ -2,9 +2,17 @@ import { eq } from 'drizzle-orm';
 import { Exam, GradedResult } from '@seena/shared';
 import { db, schema } from '../db.js';
 import { downloadObject } from '../storage.js';
-import { extractPagesWithOcr } from '../extract-pipeline.js';
-import { llm } from '../openai.js';
+import { extractPagesWithOcr, looksLikePdf } from '../extract-pipeline.js';
+import { ocrImageWithVisionLlm } from './vision-ocr.js';
+import { llm, estimateChatCostUsd } from '../openai.js';
 import { env } from '../env.js';
+
+function guessImageMimeType(storageKey: string): string {
+  const ext = storageKey.toLowerCase().split('.').pop() ?? '';
+  if (ext === 'png') return 'image/png';
+  if (ext === 'webp') return 'image/webp';
+  return 'image/jpeg';
+}
 
 export type GradeSubmissionJob = {
   submissionId: string;
@@ -161,10 +169,34 @@ export async function gradeSubmission(job: GradeSubmissionJob): Promise<void> {
     }
 
     const buffer = await downloadObject(submission.storageKey);
-    const extracted = await extractPagesWithOcr(buffer, { tag: submissionId });
-    const studentSheetText = extracted.pages
-      .map((p) => `[page ${p.page}]\n${p.text}`)
-      .join('\n\n');
+
+    let studentSheetText: string;
+    let ocrMethodForRow: string;
+    if (looksLikePdf(buffer)) {
+      const extracted = await extractPagesWithOcr(buffer, { tag: submissionId });
+      studentSheetText = extracted.pages.map((p) => `[page ${p.page}]\n${p.text}`).join('\n\n');
+      ocrMethodForRow = extracted.ocrMethod;
+    } else {
+      // Photographed/scanned answer sheets uploaded as an image rather than
+      // a PDF — pdf-parse cannot read these at all, so OCR them directly via
+      // the vision model instead of routing them through the PDF pipeline.
+      const visionModel = env().OPENROUTER_VISION_MODEL;
+      const imageStartedAt = Date.now();
+      const imageOcr = await ocrImageWithVisionLlm(buffer, guessImageMimeType(submission.storageKey));
+      studentSheetText = imageOcr.text;
+      ocrMethodForRow = `vision-llm-image-${visionModel}`;
+      await db.insert(schema.generations).values({
+        orgId,
+        userId: submission.createdBy,
+        examId,
+        kind: 'grade-submission-ocr',
+        model: visionModel,
+        inputTokens: imageOcr.inputTokens,
+        outputTokens: imageOcr.outputTokens,
+        latencyMs: Date.now() - imageStartedAt,
+        costUsd: estimateChatCostUsd(visionModel, imageOcr.inputTokens, imageOcr.outputTokens).toFixed(6),
+      });
+    }
 
     const model = env().OPENROUTER_MODEL;
     const startedAt = Date.now();
@@ -207,33 +239,50 @@ export async function gradeSubmission(job: GradeSubmissionJob): Promise<void> {
       throw new Error(`grader tool arguments not valid JSON: ${(e as Error).message}`);
     }
 
-    const keyByNumber = new Map(answerKey.map((q) => [q.number, q]));
     const rawQuestions = Array.isArray(raw.questions)
       ? (raw.questions as Array<Record<string, unknown>>)
       : [];
+    const rawByNumber = new Map(
+      rawQuestions
+        .filter((q) => typeof q.number === 'number')
+        .map((q) => [q.number as number, q]),
+    );
 
-    const questions = rawQuestions.map((q) => {
-      const number = typeof q.number === 'number' ? q.number : 0;
-      const keyQ = keyByNumber.get(number);
-      const max = keyQ ? keyQ.max : typeof q.max === 'number' ? q.max : 0;
-      const rawAwarded = typeof q.awarded === 'number' ? q.awarded : 0;
-      const awarded = Math.min(Math.max(rawAwarded, 0), max);
+    // The grader's response is untrusted output, not a source of truth for
+    // what the denominator is — drive the result from the answer key so
+    // every question is accounted for. A question the grader silently
+    // skipped is scored 0, not dropped from both sides of the fraction
+    // (which would otherwise inflate the percentage).
+    if (rawByNumber.size === 0) {
+      throw new Error('grader returned no questions — cannot grade');
+    }
+    const validNumbers = new Set(answerKey.map((k) => k.number));
+    const matchedCount = [...rawByNumber.keys()].filter((n) => validNumbers.has(n)).length;
+    if (matchedCount === 0) {
+      throw new Error(
+        `grader returned ${rawByNumber.size} question(s) but none matched the ${answerKey.length}-question answer key by number — response looks malformed`,
+      );
+    }
+
+    const questions = answerKey.map((keyQ) => {
+      const q = rawByNumber.get(keyQ.number);
+      const rawAwarded = q && typeof q.awarded === 'number' ? q.awarded : 0;
+      const awarded = Math.min(Math.max(rawAwarded, 0), keyQ.max);
       return {
-        number,
-        section: keyQ?.section ?? (typeof q.section === 'string' ? q.section : ''),
-        type: keyQ?.type ?? (typeof q.type === 'string' ? q.type : ''),
-        max,
+        number: keyQ.number,
+        section: keyQ.section,
+        type: keyQ.type,
+        max: keyQ.max,
         awarded,
-        studentAnswer: typeof q.studentAnswer === 'string' ? q.studentAnswer : '',
-        correctAnswer:
-          keyQ?.correctAnswer ?? (typeof q.correctAnswer === 'string' ? q.correctAnswer : ''),
-        correct: typeof q.correct === 'boolean' ? q.correct : awarded >= max && max > 0,
-        feedback: typeof q.feedback === 'string' ? q.feedback : '',
+        studentAnswer: q && typeof q.studentAnswer === 'string' ? q.studentAnswer : '',
+        correctAnswer: keyQ.correctAnswer,
+        correct: q && typeof q.correct === 'boolean' ? q.correct : awarded >= keyQ.max && keyQ.max > 0,
+        feedback: q && typeof q.feedback === 'string' ? q.feedback : 'No answer found',
       };
     });
 
     const totalAwarded = round2(questions.reduce((sum, q) => sum + q.awarded, 0));
-    const totalMax = round2(questions.reduce((sum, q) => sum + q.max, 0));
+    const totalMax = round2(answerKey.reduce((sum, k) => sum + k.max, 0));
     const percentage = totalMax > 0 ? Math.round((totalAwarded / totalMax) * 100) : 0;
 
     const result = GradedResult.parse({
@@ -251,7 +300,7 @@ export async function gradeSubmission(job: GradeSubmissionJob): Promise<void> {
         totalMarks: Math.round(result.totalMax),
         obtainedMarks: result.totalAwarded.toFixed(2),
         result,
-        ocrMethod: extracted.ocrMethod,
+        ocrMethod: ocrMethodForRow,
         gradedAt: new Date(),
       })
       .where(eq(schema.submissions.id, submissionId));

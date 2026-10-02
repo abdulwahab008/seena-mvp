@@ -11,6 +11,7 @@ import {
 } from '@seena/shared/rag/strategies';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/modal';
 
 export type ChunkingRow = {
   id: string;
@@ -64,13 +65,14 @@ function configSummary(config: unknown): string | null {
 export function ChunkingsList({ bookId, chunkings }: Props) {
   const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [chunkingToDelete, setChunkingToDelete] = useState<ChunkingRow | null>(null);
 
   async function setDefault(chunkingId: string) {
     setBusyId(chunkingId);
     try {
       const res = await fetch(`/api/books/${bookId}/chunkings/${chunkingId}`, {
         method: 'PATCH',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isDefault: true }),
       });
       if (!res.ok) {
@@ -86,14 +88,9 @@ export function ChunkingsList({ bookId, chunkings }: Props) {
     }
   }
 
-  async function remove(chunkingId: string) {
-    if (
-      !confirm(
-        'Delete this chunking? Its vectors will be removed from Pinecone. This cannot be undone.',
-      )
-    ) {
-      return;
-    }
+  async function confirmRemove() {
+    if (!chunkingToDelete) return;
+    const chunkingId = chunkingToDelete.id;
     setBusyId(chunkingId);
     try {
       const res = await fetch(`/api/books/${bookId}/chunkings/${chunkingId}`, {
@@ -104,6 +101,7 @@ export function ChunkingsList({ bookId, chunkings }: Props) {
         throw new Error(err.error ?? 'failed to delete chunking');
       }
       toast.success('Chunking deleted.');
+      setChunkingToDelete(null);
       router.refresh();
     } catch (e) {
       toast.error((e as Error).message);
@@ -188,8 +186,9 @@ export function ChunkingsList({ bookId, chunkings }: Props) {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => remove(c.id)}
+                        onClick={() => setChunkingToDelete(c)}
                         disabled={busy}
+                        className="text-red-700 hover:bg-red-50 hover:text-red-800"
                       >
                         {busy ? '…' : 'Delete'}
                       </Button>
@@ -201,6 +200,17 @@ export function ChunkingsList({ bookId, chunkings }: Props) {
           })}
         </tbody>
       </table>
+
+      <ConfirmDialog
+        open={Boolean(chunkingToDelete)}
+        onClose={() => setChunkingToDelete(null)}
+        onConfirm={() => void confirmRemove()}
+        title="Delete Chunking"
+        description="Are you sure you want to delete this chunking? Its vectors will be removed from Pinecone. This action cannot be undone."
+        confirmLabel="Delete Chunking"
+        destructive
+        pending={busyId !== null}
+      />
     </div>
   );
 }

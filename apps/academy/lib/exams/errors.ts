@@ -1,0 +1,419 @@
+/**
+ * FR-I01. The named errors upsert_exam_term(), activate_exam_terms(),
+ * set_exam_term_weight() and their triggers raise, turned into something a
+ * person can read.
+ *
+ * Two of them are passed through UNTRANSLATED and that is deliberate:
+ *
+ *   * "Term weightage must total 100.00%, currently 90.00%" is the sentence
+ *     FR-I01's acceptance criteria assert, down to the two decimal places.
+ *     Rewriting it here would mean the screen and the database disagree
+ *     about the wording of the one message this FR is explicit about.
+ *   * "exam term weightage is locked by approved marks — raise a
+ *     result-recompute request" already says what happened and what to do
+ *     next; a paraphrase would only make it vaguer.
+ *
+ * Lives in lib/ rather than in actions.ts because a 'use server' module may
+ * only export async functions.
+ */
+const PASS_THROUGH = ['Term weightage must total', 'exam term weightage is locked by approved marks'];
+
+export function examTermError(message: string): string {
+  const verbatim = PASS_THROUGH.find((p) => message.includes(p));
+  if (verbatim) return message.slice(message.indexOf(verbatim));
+
+  if (message.includes('WEIGHT_PRECISION')) {
+    return 'Weightage supports at most two decimal places.';
+  }
+  if (message.includes('WEIGHT_OUT_OF_RANGE')) return 'Weightage must be between 0 and 100.';
+  if (message.includes('EXAM_TERM_NAME_REQUIRED')) return 'A term needs a code and a name.';
+  if (message.includes('EXAM_TERM_NOT_DRAFT')) {
+    return 'This term is already activated — removing it now is a result correction, not a setup edit.';
+  }
+  if (message.includes('EXAM_TERM_NOT_ACTIVE')) return 'Only an activated term can be locked.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SESSION_NOT_FOUND')) return 'That academic session is not available for this campus.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('duplicate key') && message.includes('uq_exam_term_seq')) {
+    return 'Another term already holds that position in the sequence.';
+  }
+  if (message.includes('duplicate key') && message.includes('uq_exam_term_code')) {
+    return 'A term with that code already exists in this session.';
+  }
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to do that.';
+  return 'Could not complete that action.';
+}
+
+/**
+ * FR-I02. Same shape as examTermError above. 'pass marks cannot exceed
+ * maximum marks' and 'exam setup is locked by approved marks' are passed
+ * through untranslated for the same reason: the first is asserted wording,
+ * the second already says what to do next.
+ */
+const SUBJECT_PASS_THROUGH = ['pass marks cannot exceed maximum marks', 'exam setup is locked by approved marks'];
+
+export function examSubjectError(message: string): string {
+  const verbatim = SUBJECT_PASS_THROUGH.find((p) => message.includes(p));
+  if (verbatim) return message.slice(message.indexOf(verbatim));
+
+  if (message.includes('COMPONENTS_REQUIRED')) {
+    return 'Add at least one component — a subject with no components has no denominator.';
+  }
+  if (message.includes('COMPONENT_DUPLICATED')) return 'Each component can only be configured once.';
+  if (message.includes('MARKS_OUT_OF_RANGE')) {
+    return 'Maximum marks must be above zero and pass marks cannot be negative.';
+  }
+  if (message.includes('SUBJECT_NOT_EXAMINABLE')) return 'That subject is not examinable.';
+  if (message.includes('CLASS_SUBJECT_TERM_MISMATCH')) {
+    return 'That subject belongs to a different campus or session than this exam term.';
+  }
+  if (message.includes('CLASS_SUBJECT_NOT_FOUND')) return 'That class subject is not in the curriculum.';
+  if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'Exam subject not found.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to do that.';
+  return 'Could not complete that action.';
+}
+
+/**
+ * FR-I12. trg_mark_range_check raises the three sentences a teacher reads in
+ * a cell — "max 65", "whole numbers only", "marks cannot be negative" — so
+ * those pass through verbatim: the grid shows the same wording before the
+ * round trip, and the two disagreeing would be worse than either.
+ */
+const MARK_PASS_THROUGH = [
+  /^max \d+$/,
+  /^whole numbers only$/,
+  /^at most \d decimal places?$/,
+  /^marks cannot be negative$/,
+  /^marks are locked by approval/,
+  // FR-I11: both name the candidate's status or the way through, and a
+  // paraphrase would only make either vaguer.
+  /^candidate is marked (Absent|Exempt|Debarred) for this paper$/,
+  /^candidate exam status is locked by approved marks/,
+];
+
+export function markEntryError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (MARK_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  // FR-I16. 'marks_locked' is the acceptance criterion's own token rather
+  // than a sentence, so this is the one place it becomes one.
+  if (line === 'marks_locked') {
+    return 'These marks were approved and signed off — a correction needs a break-glass unlock.';
+  }
+
+  if (message.includes('MARK_COMPONENT_NOT_CONFIGURED')) {
+    return 'That component is not part of this paper — reload the grid.';
+  }
+  if (message.includes('MARK_ENROLMENT_MISMATCH')) {
+    return 'That candidate is not in the class this paper is set for.';
+  }
+  if (message.includes('MARK_PAYLOAD_INVALID')) return 'Could not read those marks — reload the grid.';
+  if (message.includes('EXAM_STATUS_OFFICE_ONLY')) {
+    return 'Only the exam office can record an exemption or a debarment.';
+  }
+  if (message.includes('ABSENCE_REASON_REQUIRED')) return 'Choose a reason code.';
+  if (message.includes('REASON_NOT_APPLICABLE')) return 'A candidate who sat the paper has no absence reason.';
+  if (message.includes('MARKS_ALREADY_ENTERED')) {
+    return 'Clear this candidate\u2019s marks for the paper before recording them as not present.';
+  }
+  if (message.includes('MARK_PRECISION_OUT_OF_RANGE')) return 'Mark precision must be 0, 1 or 2 decimal places.';
+  if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
+  if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'This paper has no exam setup yet.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not teach this class subject.';
+  return 'Could not save those marks.';
+}
+
+/**
+ * FR-I16. fn_approve_marks() builds two of its refusals as SENTENCES rather
+ * than as codes, because the acceptance criterion asserts the LISTING —
+ * "approval is refused and the 2 GR numbers are listed" — and a code the UI
+ * expands cannot name rows the database found. Those pass through verbatim.
+ */
+const APPROVAL_PASS_THROUGH = [
+  /^\d+ candidates? (has|have) neither a mark nor an exam status: /,
+  /^\d+ candidates? (is|are) missing a component mark: /,
+  // FR-I14, in the same shape and for the same reason: the refusal names the
+  // candidates whose scripts a machine read and nobody checked.
+  /^\d+ candidates? (has|have) an OCR mark no teacher has confirmed: /,
+];
+
+export function markApprovalError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (APPROVAL_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('MARKS_ALREADY_APPROVED')) {
+    return 'This set is already signed off. Reopening it is a break-glass unlock.';
+  }
+  if (message.includes('SECTION_NOT_IN_EXAM_SUBJECT')) {
+    return 'That section does not sit this paper — check the class and stream.';
+  }
+  if (message.includes('EXAM_SETUP_PENDING')) {
+    return 'This paper has no components configured, so it has no denominator to sign off.';
+  }
+  if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'This paper has no exam setup yet.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to approve marks.';
+  return 'Could not approve those marks.';
+}
+
+/**
+ * FR-I17. Every refusal on the break-glass path is a named code, deliberately:
+ * unlike FR-I16's completeness message there is nothing here the database
+ * knows and the screen does not, so a sentence built in SQL would only be a
+ * second place for the wording to live.
+ */
+export function markUnlockError(message: string): string {
+  if (message.includes('UNLOCK_SELF_APPROVAL')) {
+    return 'A break-glass request cannot be decided by the person who raised it.';
+  }
+  if (message.includes('UNLOCK_APPROVER_ONLY')) {
+    return 'Only a Principal, Owner or Super Admin can grant a break-glass unlock.';
+  }
+  if (message.includes('UNLOCK_REASON_REQUIRED')) {
+    return 'Say why in at least 10 characters — it is what the exceptions report shows.';
+  }
+  if (message.includes('UNLOCK_WINDOW_OUT_OF_RANGE')) return 'A break-glass window is 1 to 240 minutes.';
+  if (message.includes('UNLOCK_ALREADY_OPEN')) {
+    return 'This set already has a request awaiting a decision, or a window still open.';
+  }
+  if (message.includes('UNLOCK_NOT_PENDING')) return 'That request has already been decided.';
+  if (message.includes('UNLOCK_REQUEST_NOT_FOUND')) return 'Break-glass request not found.';
+  if (message.includes('MARKS_NOT_LOCKED')) {
+    return 'These marks were never signed off, so there is nothing to break the glass on.';
+  }
+  if (message.includes('break-glass request is append-only')) {
+    return 'A break-glass request records what was asked, by whom and why. None of those is editable afterwards.';
+  }
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to do that.';
+  return 'Could not complete that action.';
+}
+
+/**
+ * FR-I14. "0 of 40 scripts reviewed" is the one message the acceptance criteria
+ * assert word for word, and fn_promote_ocr_marks() composes it from counts only
+ * the database has — so it passes through untranslated, exactly as FR-I16's two
+ * completeness sentences do. Everything else on this path is a named code,
+ * because there is nothing in it the database knows and the screen does not.
+ */
+const OCR_PASS_THROUGH = [/^\d+ of \d+ scripts reviewed$/, /^max \d+$/, /^whole numbers only$/];
+
+export function ocrReviewError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (OCR_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (line === 'marks_locked') {
+    return 'These marks were approved and signed off — a correction needs a break-glass unlock.';
+  }
+  if (message.includes('a machine mark needs a named teacher')) {
+    return 'An OCR mark reaches a report card only through a teacher who confirmed it.';
+  }
+  if (message.includes('an OCR review action is append-only')) {
+    return 'A confirmation is a signature. It is written once and it stays.';
+  }
+  if (message.includes('an OCR suggestion is append-only')) return 'What the machine read cannot be rewritten.';
+  if (message.includes('an OCR batch is append-only')) return 'A batch is promoted once, or abandoned once.';
+  if (message.includes('OCR_CANCEL_REASON_REQUIRED')) {
+    return 'Say why in at least 10 characters — abandoning a scan is on the record.';
+  }
+  if (message.includes('OCR_JOB_ALREADY_OPEN')) return 'This paper already has a batch waiting for review.';
+  if (message.includes('OCR_JOB_NOT_OPEN')) return 'That batch has already been promoted or abandoned.';
+  if (message.includes('OCR_SUGGESTION_NOT_FOUND')) {
+    return 'That question is not one this batch read — reload the grid.';
+  }
+  if (message.includes('OCR_ENROLMENT_MISMATCH')) {
+    return 'Every scanned script must belong to a candidate in this section.';
+  }
+  if (message.includes('OCR_SUGGESTIONS_REQUIRED')) return 'A batch with nothing to review is not a batch.';
+  if (message.includes('OCR_REVIEW_EMPTY')) return 'Nothing was selected to confirm.';
+  if (message.includes('OCR_JOB_NOT_FOUND')) return 'That batch no longer exists.';
+  if (message.includes('MARK_COMPONENT_NOT_CONFIGURED')) return 'That component is not part of this paper.';
+  if (message.includes('SECTION_NOT_IN_EXAM_SUBJECT')) {
+    return 'That section does not sit this paper — check the class and stream.';
+  }
+  if (message.includes('EXAM_SUBJECT_NOT_FOUND')) return 'This paper has no exam setup yet.';
+  if (message.includes('FORBIDDEN')) return 'You do not teach this class subject.';
+  return 'Could not complete that review.';
+}
+
+/**
+ * FR-J01. Every coverage refusal passes through verbatim, for the reason
+ * FR-I16's completeness sentences do: AC2 asserts that the refusal NAMES the
+ * uncovered range, and a code the screen expands cannot name a range the
+ * database computed. The freeze sentence passes through for FR-I01's reason —
+ * it already says what happened and what to do next.
+ */
+const GRADING_PASS_THROUGH = [
+  /^grading bands /,
+  /^grading scheme is in use/,
+  /^a grading scheme needs at least one band$/,
+  /^band .+ bounds must have at most two decimal places$/,
+  /^band .+ has bounds /,
+];
+
+export function gradingSchemeError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  const verbatim = GRADING_PASS_THROUGH.find((p) => p.test(line));
+  if (verbatim) return line;
+
+  if (message.includes('GRADE_LABEL_DUPLICATED')) {
+    return 'Two bands of one scheme cannot carry the same grade.';
+  }
+  if (message.includes('EFFECTIVE_FROM_NOT_LATER')) {
+    return 'A new version has to start after the version it replaces.';
+  }
+  if (message.includes('EFFECTIVE_FROM_REQUIRED')) return 'Choose the date this scale starts applying.';
+  if (message.includes('SCHEME_NAME_REQUIRED')) return 'A scheme needs a name.';
+  if (message.includes('GRADING_SCHEME_RETIRED')) return 'That scheme was withdrawn and cannot be activated.';
+  if (message.includes('GRADING_SCHEME_NOT_FOUND')) return 'Grading scheme not found.';
+  if (message.includes('duplicate key') && message.includes('uq_grading_scheme_effective')) {
+    return 'That board already has a scheme starting on that date.';
+  }
+  if (message.includes('excl_grading_band_range')) return 'Two of those bands overlap.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to configure a grade scale.';
+  return 'Could not save that grading scheme.';
+}
+
+/**
+ * FR-J02. Three refusals are sentences the database composes from rows the
+ * screen does not have — which papers are still unlocked, which board has no
+ * scale, which paper is open under a break-glass window — so they pass through
+ * verbatim, the same call FR-I16's completeness messages make.
+ */
+const RESULT_PASS_THROUGH = [
+  /^term result computation waits on /,
+  /^no grading scheme is configured for /,
+  /^marks are open under a break-glass window on /,
+];
+
+export function subjectResultError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (RESULT_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to compute results.';
+  return 'Could not compute those results.';
+}
+
+/**
+ * FR-J03. Two refusals are sentences the database composes from rows the
+ * screen does not have — which paper is open under a break-glass window, and
+ * why an annual result cannot be published — so they pass through verbatim,
+ * the same call FR-J02 made about its three.
+ */
+const ANNUAL_PASS_THROUGH = [
+  /^marks are open under a break-glass window on /,
+  /^annual result is provisional/,
+  /^annual result is stale/,
+];
+
+export function annualResultError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (ANNUAL_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('CLASS_LEVEL_NOT_FOUND')) return 'That class is not part of this school.';
+  if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
+  if (message.includes('SESSION_NOT_FOUND')) return 'Academic session not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to compute annual results.';
+  return 'Could not compute the annual results.';
+}
+
+/**
+ * FR-J05. "positions wait on section B, C" names rows only the database has —
+ * which sections of the class are still being marked — so it passes through
+ * verbatim, the same call FR-J02 and FR-J03 made about theirs.
+ */
+const POSITION_PASS_THROUGH = [/^positions wait on section /, /^marks are open under a break-glass window on /];
+
+export function positionError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (POSITION_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('RANK_POLICY_REQUIRED')) return 'Choose whether absentees are ranked.';
+  if (message.includes('CLASS_LEVEL_NOT_FOUND')) return 'That class is not part of this school.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to compute positions.';
+  return 'Could not compute the positions.';
+}
+
+/**
+ * FR-J08. Every refusal this module raises is a sentence built in the
+ * database from the row that caused it — "outstanding dues of PKR 12,000 as
+ * at 30 Jun 2026 exceed the PKR 5,000 threshold" names an amount, a cut-off
+ * and a threshold that no screen holds. Rewriting them here would mean the
+ * counter and the database disagree about what a parent is being told, so
+ * they pass through, the call FR-J02, FR-J03 and FR-J05 each made about
+ * theirs.
+ */
+const WITHHOLD_PASS_THROUGH = [
+  /^result withheld/,
+  /^annual result is provisional/,
+  /^annual result is stale/,
+  /^a fee-default withhold is opened by the sync/,
+  /^a hardship release needs a reason/,
+  /^fee withholds can only be synced by a signed-in user/,
+];
+
+export function withholdError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (WITHHOLD_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('WITHHOLD_ALREADY_RELEASED')) return 'That withhold has already been released.';
+  if (message.includes('WITHHOLD_NOTE_REQUIRED')) return 'Say why this result is being held.';
+  if (message.includes('WITHHOLD_NOT_FOUND')) return 'That withhold no longer exists.';
+  if (message.includes('WITHHOLD_THRESHOLD_INVALID')) return 'The threshold must be zero or more.';
+  if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('CAMPUS_NOT_FOUND')) return 'Campus not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to change result withholds.';
+  return 'Could not update the result withholds.';
+}
+
+/**
+ * FR-J09. The refusals a report card can hit all name something the screen
+ * does not hold — which paper is still being marked, which classmate's mark
+ * moved, how much is outstanding as at which cut-off — so they pass through
+ * verbatim, the call every FR in this module has made about its own.
+ */
+const REPORT_CARD_PASS_THROUGH = [
+  /^result withheld/,
+  /^term result is provisional/,
+  /^term result is stale/,
+  /^position is stale/,
+  /^no term result has been computed/,
+  // FR-J12's scope guards name the campus mismatch the screen cannot see.
+  /^that section is not in this term/,
+  /^that campus is not this term/,
+];
+
+export function reportCardError(message: string): string {
+  const line = message.split('\n')[0]?.trim() ?? message;
+  if (REPORT_CARD_PASS_THROUGH.some((p) => p.test(line))) return line;
+
+  if (message.includes('REPORT_CARD_BATCH_NOT_FOUND')) return 'That batch no longer exists.';
+  if (message.includes('REPORT_CARD_BATCH_ITEM_NOT_CLAIMED')) return 'That candidate is not being rendered right now.';
+  if (message.includes('REPORT_CARD_BATCH_ITEM_NOT_FOUND')) return 'That candidate is no longer in the batch.';
+  if (message.includes('REPORT_CARD_BATCH_NOT_RUNNING')) return 'That batch is still running.';
+  if (message.includes('REPORT_CARD_BATCH_UNFINISHED')) return 'The batch still has candidates to render.';
+  if (message.includes('REPORT_CARD_BATCH_DIGEST_INVALID')) return 'The merged file could not be sealed.';
+  if (message.includes('REPORT_CARD_NOT_ISSUED')) return 'That card was not issued, so the batch did not count it.';
+  if (message.includes('REPORT_CARD_NOT_PENDING')) return 'That report card has already been issued or voided.';
+  if (message.includes('REPORT_CARD_NOT_FOUND')) return 'That report card no longer exists.';
+  if (message.includes('REPORT_CARD_DIGEST_INVALID')) return 'The report card could not be sealed.';
+  if (message.includes('CLASS_NOT_FOUND')) return 'Class not found.';
+  if (message.includes('ENROLMENT_NOT_FOUND')) return 'That candidate is no longer enrolled.';
+  if (message.includes('EXAM_TERM_NOT_FOUND')) return 'Exam term not found.';
+  if (message.includes('SECTION_NOT_FOUND')) return 'Section not found.';
+  if (message.includes('FORBIDDEN')) return 'You do not have permission to print report cards.';
+  return 'Could not produce the report card.';
+}

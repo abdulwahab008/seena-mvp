@@ -1,0 +1,2018 @@
+import { describe, expect, it } from 'vitest';
+import { markApprovalError, markEntryError, markUnlockError, ocrReviewError } from '@/lib/exams/errors';
+import {
+  cancelOcrJobSchema,
+  markSourceLabel,
+  ocrReviewProgressMessage,
+  recordOcrReviewSchema,
+  ABSENCE_REASONS_BY_STATUS,
+  breakGlassUnlockSchema,
+  DEFAULT_UNLOCK_WINDOW_MINUTES,
+  requestMarkUnlockSchema,
+  unlockMinutesLeft,
+  EXAM_ABSENCE_REASONS,
+  examReportSymbol,
+  setExamAttendanceSchema,
+  validateMarkCell,
+  markMaxMessage,
+  markPrecisionMessage,
+  upsertMarksSchema,
+  WHOLE_NUMBERS_ONLY,
+  examComponentSchema,
+  upsertExamSubjectSchema,
+  examSubjectTotalMax,
+  EXAM_SETUP_PENDING,
+  PASS_EXCEEDS_MAX,
+  pctToBasisPoints,
+  formatWeightPct,
+  upsertExamTermSchema,
+  provisionTenantSchema,
+  slugSchema,
+  createCampusSchema,
+  createSessionSchema,
+  termsSchema,
+  createEnquirySchema,
+  createStudentSchema,
+  issueOfferSchema,
+  respondToOfferSchema,
+  createFeeHeadSchema,
+  addStructureLineSchema,
+  proposeFeePlanOverrideSchema,
+  createConcessionSchemeSchema,
+  requestConcessionAwardSchema,
+  decideConcessionAwardSchema,
+  postLedgerEntrySchema,
+  reverseLedgerEntrySchema,
+  generateChallansSchema,
+  createLateFeeRuleSchema,
+  previewLateFeeSchema,
+  setFeePolicySchema,
+  setSiblingDiscountSchemeSchema,
+  createNextStructureVersionSchema,
+  updateStructureLineAmountSchema,
+  setChallanTemplateSchema,
+  recordPaymentSchema,
+  lookupChallanSchema,
+  collectCashPaymentSchema,
+  printReceiptSchema,
+  collectionReportSchema,
+  finaliseCashBookDaySchema,
+  upsertClassSubjectSchema,
+  createRoomSchema,
+  declareCompetencySchema,
+  suggestSubstitutesSchema,
+  cloneAcademicStructureSchema,
+  startRolloverSchema,
+  setDocumentRequirementSchema,
+  setDocumentSubmissionSchema,
+  createTestSittingSchema,
+  allocateTestSeatSchema,
+  setTestScoreSchema,
+  setTestAttendanceSchema,
+  bookInterviewSchema,
+  cancelInterviewSchema,
+  submitScorecardSchema,
+  uploadDocumentSchema,
+  rejectDocumentSchema,
+  publicEnquirySchema,
+  recordAdmissionFeePaymentSchema,
+  waiveAdmissionFeeSchema,
+  enrolFromOfferSchema,
+  uploadBrandingAssetSchema,
+  setTenantThemeSchema,
+  setAttendancePolicySchema,
+  bulkMarkAttendanceSchema,
+  requestAttendanceCorrectionSchema,
+  decideAttendanceCorrectionSchema,
+  recomputeMonthlyAttendanceSchema,
+  dispatchAbsenteeNotificationsSchema,
+  createHomeworkSchema,
+  bellSegmentSchema,
+  createBellTemplateSchema,
+  createBellCalendarRuleSchema,
+  createTimetableVersionSchema,
+  upsertTimetableSlotSchema,
+  createTeachableSubjectSchema,
+  assignSubstitutionSchema,
+  publishTimetableSchema,
+  requestAuditExportSchema,
+  recordConsentSchema,
+  buildGalleryExportSchema,
+} from './validation';
+
+describe('slugSchema', () => {
+  it('accepts a valid lowercase slug', () => {
+    expect(slugSchema.safeParse('beaconhouse-gulberg').success).toBe(true);
+  });
+
+  it('rejects uppercase (must match tenant_slug_format DB constraint)', () => {
+    expect(slugSchema.safeParse('Beaconhouse').success).toBe(false);
+  });
+
+  it('rejects spaces', () => {
+    expect(slugSchema.safeParse('not a valid slug!').success).toBe(false);
+  });
+
+  it('rejects a leading hyphen', () => {
+    expect(slugSchema.safeParse('-beaconhouse').success).toBe(false);
+  });
+
+  it('rejects fewer than 3 characters', () => {
+    expect(slugSchema.safeParse('ab').success).toBe(false);
+  });
+
+  it('rejects more than 50 characters', () => {
+    expect(slugSchema.safeParse('a'.repeat(51)).success).toBe(false);
+  });
+});
+
+describe('provisionTenantSchema', () => {
+  const valid = { slug: 'city-school-dha', legalName: 'City School DHA', ownerEmail: 'owner@city.test' };
+
+  it('accepts a fully valid payload', () => {
+    expect(provisionTenantSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it('rejects a missing legal name', () => {
+    expect(provisionTenantSchema.safeParse({ ...valid, legalName: '' }).success).toBe(false);
+  });
+
+  it('rejects a malformed email', () => {
+    expect(provisionTenantSchema.safeParse({ ...valid, ownerEmail: 'not-an-email' }).success).toBe(false);
+  });
+});
+
+describe('createCampusSchema', () => {
+  it('accepts a short alphanumeric code', () => {
+    expect(createCampusSchema.safeParse({ code: 'GUL', name: 'Gulberg Campus' }).success).toBe(true);
+  });
+
+  it('rejects a code with punctuation', () => {
+    expect(createCampusSchema.safeParse({ code: 'GUL-1', name: 'Gulberg Campus' }).success).toBe(false);
+  });
+
+  it('rejects an empty name', () => {
+    expect(createCampusSchema.safeParse({ code: 'GUL', name: '' }).success).toBe(false);
+  });
+});
+
+describe('createSessionSchema', () => {
+  it('accepts a valid range', () => {
+    expect(createSessionSchema.safeParse({ name: '2027-28', startsOn: '2027-01-01', endsOn: '2027-12-31' }).success).toBe(true);
+  });
+
+  it('rejects an end date on or before the start date', () => {
+    expect(createSessionSchema.safeParse({ name: '2027-28', startsOn: '2027-06-01', endsOn: '2027-01-01' }).success).toBe(false);
+  });
+});
+
+describe('termsSchema', () => {
+  const term = (name: string, weightage: number) => ({ name, startsOn: '2027-01-01', endsOn: '2027-04-30', weightage });
+
+  it('accepts terms summing to exactly 100', () => {
+    expect(termsSchema.safeParse({ terms: [term('First', 30), term('Mid', 30), term('Final', 40)] }).success).toBe(true);
+  });
+
+  it('rejects terms summing to 95 (matches the DB TERM_WEIGHTAGE_SUM check)', () => {
+    expect(termsSchema.safeParse({ terms: [term('First', 30), term('Mid', 30), term('Final', 35)] }).success).toBe(false);
+  });
+
+  it('rejects zero terms', () => {
+    expect(termsSchema.safeParse({ terms: [] }).success).toBe(false);
+  });
+
+  it('rejects more than 4 terms even if they sum to 100', () => {
+    expect(
+      termsSchema.safeParse({ terms: [term('A', 20), term('B', 20), term('C', 20), term('D', 20), term('E', 20)] }).success,
+    ).toBe(false);
+  });
+});
+
+describe('createEnquirySchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    childName: 'Ali Khan',
+    dob: '2020-01-01',
+    classAppliedId: '33333333-3333-3333-3333-333333333333',
+    parentName: 'Ahmed Khan',
+    phone: '03001234567',
+    whatsappOptIn: false,
+    source: 'walk_in' as const,
+  };
+
+  it('accepts a valid walk-in enquiry', () => {
+    expect(createEnquirySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a referral enquiry with no referrer name (matches the DB check)', () => {
+    expect(createEnquirySchema.safeParse({ ...base, source: 'referral' }).success).toBe(false);
+  });
+
+  it('accepts a referral enquiry once a referrer name is given', () => {
+    expect(createEnquirySchema.safeParse({ ...base, source: 'referral', referrerName: 'A. Student' }).success).toBe(true);
+  });
+
+  it('rejects a non-UUID campusId', () => {
+    expect(createEnquirySchema.safeParse({ ...base, campusId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('createStudentSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    nameEn: 'Ali Khan',
+    dob: '2015-01-01',
+    gender: 'male' as const,
+  };
+
+  it('accepts the minimal required fields', () => {
+    expect(createStudentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing name', () => {
+    expect(createStudentSchema.safeParse({ ...base, nameEn: '' }).success).toBe(false);
+  });
+
+  it('rejects an invalid gender value', () => {
+    expect(createStudentSchema.safeParse({ ...base, gender: 'unknown' }).success).toBe(false);
+  });
+});
+
+describe('issueOfferSchema', () => {
+  const base = { applicationId: '11111111-1111-1111-1111-111111111111', feeAmount: 5000 };
+
+  it('accepts a valid fee amount', () => {
+    expect(issueOfferSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a zero fee amount', () => {
+    expect(issueOfferSchema.safeParse({ ...base, feeAmount: 0 }).success).toBe(false);
+  });
+
+  it('rejects a negative fee amount', () => {
+    expect(issueOfferSchema.safeParse({ ...base, feeAmount: -100 }).success).toBe(false);
+  });
+});
+
+describe('respondToOfferSchema', () => {
+  const base = { offerId: '11111111-1111-1111-1111-111111111111', response: 'accepted' as const };
+
+  it('accepts an acceptance with no reason', () => {
+    expect(respondToOfferSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a decline with no reason (matches DECLINE_REASON_REQUIRED)', () => {
+    expect(respondToOfferSchema.safeParse({ ...base, response: 'declined' }).success).toBe(false);
+  });
+
+  it('accepts a decline once a reason is given', () => {
+    expect(respondToOfferSchema.safeParse({ ...base, response: 'declined', declineReason: 'fee_too_high' }).success).toBe(true);
+  });
+});
+
+describe('createFeeHeadSchema', () => {
+  const base = { code: 'TUITION', nameEn: 'Tuition Fee', nameUr: 'فیس تعلیم', isRefundable: false, defaultFrequency: 'monthly' as const };
+
+  it('accepts a valid fee head', () => {
+    expect(createFeeHeadSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a code with spaces or punctuation', () => {
+    expect(createFeeHeadSchema.safeParse({ ...base, code: 'TUITION FEE!' }).success).toBe(false);
+  });
+
+  it('rejects a missing Urdu name (mandatory from day one, per FR-K01)', () => {
+    expect(createFeeHeadSchema.safeParse({ ...base, nameUr: '' }).success).toBe(false);
+  });
+
+  it('rejects an invalid frequency', () => {
+    expect(createFeeHeadSchema.safeParse({ ...base, defaultFrequency: 'weekly' }).success).toBe(false);
+  });
+});
+
+describe('addStructureLineSchema', () => {
+  const base = {
+    structureId: '11111111-1111-1111-1111-111111111111',
+    classId: '22222222-2222-2222-2222-222222222222',
+    feeHeadId: '33333333-3333-3333-3333-333333333333',
+    amountRupees: 5000,
+    frequency: 'monthly' as const,
+    months: [0, 1, 2],
+  };
+
+  it('accepts a valid line', () => {
+    expect(addStructureLineSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a zero amount (a waived/free head)', () => {
+    expect(addStructureLineSchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(true);
+  });
+
+  it('rejects a negative amount — money as bigint paisa is never negative on a structure line', () => {
+    expect(addStructureLineSchema.safeParse({ ...base, amountRupees: -100 }).success).toBe(false);
+  });
+
+  it('rejects no months selected', () => {
+    expect(addStructureLineSchema.safeParse({ ...base, months: [] }).success).toBe(false);
+  });
+});
+
+describe('proposeFeePlanOverrideSchema', () => {
+  const base = { lineId: '11111111-1111-1111-1111-111111111111', amountRupees: 4000, reason: 'board approved staff rate' };
+
+  it('accepts a valid override proposal', () => {
+    expect(proposeFeePlanOverrideSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing reason — matches REASON_REQUIRED', () => {
+    expect(proposeFeePlanOverrideSchema.safeParse({ ...base, reason: '' }).success).toBe(false);
+  });
+});
+
+describe('createConcessionSchemeSchema', () => {
+  const base = {
+    code: 'SIBLING2',
+    nameEn: 'Sibling 2nd Child',
+    nameUr: 'دوسرا بہن بھائی',
+    calcType: 'percentage' as const,
+    value: 10,
+    applicableHeadIds: ['11111111-1111-1111-1111-111111111111'],
+    requiresDocument: false,
+  };
+
+  it('accepts a valid percentage scheme', () => {
+    expect(createConcessionSchemeSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a percentage over 100', () => {
+    expect(createConcessionSchemeSchema.safeParse({ ...base, value: 150 }).success).toBe(false);
+  });
+
+  it('accepts a fixed_amount value over 100 — it is paisa, not a percentage', () => {
+    expect(createConcessionSchemeSchema.safeParse({ ...base, calcType: 'fixed_amount', value: 150000 }).success).toBe(true);
+  });
+
+  it('rejects zero applicable heads', () => {
+    expect(createConcessionSchemeSchema.safeParse({ ...base, applicableHeadIds: [] }).success).toBe(false);
+  });
+});
+
+describe('requestConcessionAwardSchema', () => {
+  const base = {
+    schemeId: '11111111-1111-1111-1111-111111111111',
+    value: 10,
+    effectiveFrom: '2026-09-01',
+    effectiveTo: '2027-03-31',
+  };
+
+  it('accepts a valid request', () => {
+    expect(requestConcessionAwardSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects effectiveTo not after effectiveFrom', () => {
+    expect(requestConcessionAwardSchema.safeParse({ ...base, effectiveTo: '2026-09-01' }).success).toBe(false);
+  });
+});
+
+describe('decideConcessionAwardSchema', () => {
+  const base = { awardId: '11111111-1111-1111-1111-111111111111', approve: true };
+
+  it('accepts an approval with no reason', () => {
+    expect(decideConcessionAwardSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a rejection with a reason under 10 characters', () => {
+    expect(decideConcessionAwardSchema.safeParse({ ...base, approve: false, rejectionReason: 'too short' }).success).toBe(false);
+  });
+
+  it('accepts a rejection with a reason of 10+ characters', () => {
+    expect(
+      decideConcessionAwardSchema.safeParse({ ...base, approve: false, rejectionReason: 'insufficient supporting evidence' }).success
+    ).toBe(true);
+  });
+});
+
+describe('postLedgerEntrySchema', () => {
+  const base = { entryType: 'charge' as const, amountRupees: 5000, direction: 'debit' as const };
+
+  it('accepts a valid entry', () => {
+    expect(postLedgerEntrySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a zero amount — amount_paisa must be positive, direction carries the sign', () => {
+    expect(postLedgerEntrySchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(false);
+  });
+});
+
+describe('reverseLedgerEntrySchema', () => {
+  const base = { ledgerId: '11111111-1111-1111-1111-111111111111', reason: 'cheque returned unpaid by MCB 12-08' };
+
+  it('accepts a reason of 15+ characters', () => {
+    expect(reverseLedgerEntrySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a reason under 15 characters', () => {
+    expect(reverseLedgerEntrySchema.safeParse({ ...base, reason: 'too short' }).success).toBe(false);
+  });
+});
+
+describe('generateChallansSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    period: '2026-08',
+    dryRun: false,
+  };
+
+  it('accepts a valid YYYY-MM period', () => {
+    expect(generateChallansSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a period with a day component', () => {
+    expect(generateChallansSchema.safeParse({ ...base, period: '2026-08-01' }).success).toBe(false);
+  });
+
+  it('rejects a malformed period', () => {
+    expect(generateChallansSchema.safeParse({ ...base, period: 'August 2026' }).success).toBe(false);
+  });
+});
+
+describe('createLateFeeRuleSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    graceDays: 3,
+  };
+
+  it('accepts a per_day rule with an amount', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'per_day', amountRupees: 50 }).success).toBe(true);
+  });
+
+  it('rejects a per_day rule with no amount', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'per_day' }).success).toBe(false);
+  });
+
+  it('accepts a percentage rule with a percentage', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'percentage', percentage: 2 }).success).toBe(true);
+  });
+
+  it('rejects a percentage rule with no percentage', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'percentage' }).success).toBe(false);
+  });
+
+  it('rejects a percentage over 100', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'percentage', percentage: 140 }).success).toBe(false);
+  });
+});
+
+describe('previewLateFeeSchema', () => {
+  it('accepts a valid challan id and date', () => {
+    expect(
+      previewLateFeeSchema.safeParse({ challanId: '11111111-1111-1111-1111-111111111111', asOf: '2026-08-20' }).success
+    ).toBe(true);
+  });
+
+  it('rejects a missing challan id', () => {
+    expect(previewLateFeeSchema.safeParse({ challanId: '', asOf: '2026-08-20' }).success).toBe(false);
+  });
+});
+
+describe('setFeePolicySchema', () => {
+  it('accepts a cap within range', () => {
+    expect(setFeePolicySchema.safeParse({ maxStackedConcessionPct: 50, allowNegativeNet: false }).success).toBe(true);
+  });
+
+  it('accepts no cap at all (uncapped, subject only to the per-line clamp)', () => {
+    expect(setFeePolicySchema.safeParse({ allowNegativeNet: false }).success).toBe(true);
+  });
+
+  it('rejects a cap over 100', () => {
+    expect(setFeePolicySchema.safeParse({ maxStackedConcessionPct: 140, allowNegativeNet: false }).success).toBe(false);
+  });
+});
+
+describe('setSiblingDiscountSchemeSchema', () => {
+  const base = { schemeId: '11111111-1111-1111-1111-111111111111' };
+
+  it('accepts rank 2 and above', () => {
+    expect(setSiblingDiscountSchemeSchema.safeParse({ ...base, siblingRank: 2 }).success).toBe(true);
+    expect(setSiblingDiscountSchemeSchema.safeParse({ ...base, siblingRank: 3 }).success).toBe(true);
+  });
+
+  it('rejects rank 1 — the eldest never gets a sibling discount', () => {
+    expect(setSiblingDiscountSchemeSchema.safeParse({ ...base, siblingRank: 1 }).success).toBe(false);
+  });
+});
+
+describe('createNextStructureVersionSchema', () => {
+  it('accepts a valid prior structure id and effective date', () => {
+    expect(
+      createNextStructureVersionSchema.safeParse({
+        priorStructureId: '11111111-1111-1111-1111-111111111111',
+        effectiveFrom: '2027-01-01',
+      }).success
+    ).toBe(true);
+  });
+});
+
+describe('updateStructureLineAmountSchema', () => {
+  it('accepts a non-negative amount', () => {
+    expect(
+      updateStructureLineAmountSchema.safeParse({ lineId: '11111111-1111-1111-1111-111111111111', amountRupees: 5500 }).success
+    ).toBe(true);
+  });
+
+  it('rejects a negative amount', () => {
+    expect(
+      updateStructureLineAmountSchema.safeParse({ lineId: '11111111-1111-1111-1111-111111111111', amountRupees: -1 }).success
+    ).toBe(false);
+  });
+});
+
+describe('setChallanTemplateSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    bankName: 'MCB Bank',
+    bankAccountTitle: 'ABC School Trust',
+    bankAccountNo: '1234567890',
+  };
+
+  it('accepts a valid template', () => {
+    expect(setChallanTemplateSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing bank name', () => {
+    expect(setChallanTemplateSchema.safeParse({ ...base, bankName: '' }).success).toBe(false);
+  });
+});
+
+describe('recordPaymentSchema', () => {
+  const base = { amountRupees: 5000, mode: 'cash' as const };
+
+  it('accepts a valid cash payment', () => {
+    expect(recordPaymentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts an optional reference number', () => {
+    expect(recordPaymentSchema.safeParse({ ...base, mode: 'bank_challan', referenceNo: 'CHQ-1029' }).success).toBe(true);
+  });
+
+  it('rejects a zero amount', () => {
+    expect(recordPaymentSchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(false);
+  });
+
+  it('rejects an unknown mode', () => {
+    expect(recordPaymentSchema.safeParse({ ...base, mode: 'crypto' }).success).toBe(false);
+  });
+});
+
+describe('lookupChallanSchema', () => {
+  it('accepts a non-empty challan number', () => {
+    expect(lookupChallanSchema.safeParse({ challanNo: '00000000001' }).success).toBe(true);
+  });
+
+  it('rejects an empty challan number', () => {
+    expect(lookupChallanSchema.safeParse({ challanNo: '' }).success).toBe(false);
+  });
+});
+
+describe('collectCashPaymentSchema', () => {
+  const base = {
+    challanId: '11111111-1111-1111-1111-111111111111',
+    amountRupees: 5000,
+    mode: 'cash' as const,
+    clientIdempotencyKey: 'a-uuid-or-similar-key',
+  };
+
+  it('accepts a valid collection', () => {
+    expect(collectCashPaymentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing idempotency key', () => {
+    expect(collectCashPaymentSchema.safeParse({ ...base, clientIdempotencyKey: '' }).success).toBe(false);
+  });
+
+  it('rejects a zero amount', () => {
+    expect(collectCashPaymentSchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(false);
+  });
+});
+
+describe('printReceiptSchema', () => {
+  it('accepts a valid receipt id', () => {
+    expect(printReceiptSchema.safeParse({ receiptId: '11111111-1111-1111-1111-111111111111' }).success).toBe(true);
+  });
+
+  it('rejects a non-uuid receipt id', () => {
+    expect(printReceiptSchema.safeParse({ receiptId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('collectionReportSchema', () => {
+  const base = { campusId: '11111111-1111-1111-1111-111111111111', from: '2026-08-01', to: '2026-08-31' };
+
+  it('accepts a valid date range', () => {
+    expect(collectionReportSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a single-day range (from equals to)', () => {
+    expect(collectionReportSchema.safeParse({ ...base, to: base.from }).success).toBe(true);
+  });
+
+  it('rejects an end date before the start date', () => {
+    expect(collectionReportSchema.safeParse({ ...base, from: '2026-08-31', to: '2026-08-01' }).success).toBe(false);
+  });
+
+  it('FR-A12 AC2: accepts an empty campusId as the "All campuses" sentinel', () => {
+    expect(collectionReportSchema.safeParse({ ...base, campusId: '' }).success).toBe(true);
+  });
+
+  it('rejects a campusId that is neither a UUID nor the empty sentinel', () => {
+    expect(collectionReportSchema.safeParse({ ...base, campusId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('finaliseCashBookDaySchema', () => {
+  it('accepts a valid campus id and date', () => {
+    expect(
+      finaliseCashBookDaySchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111', bookDate: '2026-08-12' }).success
+    ).toBe(true);
+  });
+
+  it('rejects a missing book date', () => {
+    expect(finaliseCashBookDaySchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111', bookDate: '' }).success).toBe(
+      false
+    );
+  });
+});
+
+describe('upsertClassSubjectSchema', () => {
+  const base = { subjectId: '11111111-1111-1111-1111-111111111111', weeklyPeriods: 6, isCompulsory: true };
+
+  it('accepts a valid compulsory mapping with no elective fields', () => {
+    expect(upsertClassSubjectSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing subject', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, subjectId: '' }).success).toBe(false);
+  });
+
+  it('rejects zero weekly periods', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, weeklyPeriods: 0 }).success).toBe(false);
+  });
+
+  it('rejects weekly periods over 12', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, weeklyPeriods: 13 }).success).toBe(false);
+  });
+
+  it('accepts weekly periods at the 12-period ceiling', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, weeklyPeriods: 12 }).success).toBe(true);
+  });
+
+  it('rejects an elective subject with no bucket', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, isCompulsory: false }).success).toBe(false);
+  });
+
+  it('rejects an elective subject with an empty-string bucket (matches an untouched form field)', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, isCompulsory: false, electiveBucket: '' }).success).toBe(false);
+  });
+
+  it('accepts an elective subject with a bucket and choose-N', () => {
+    expect(
+      upsertClassSubjectSchema.safeParse({ ...base, isCompulsory: false, electiveBucket: 1, chooseN: 1 }).success
+    ).toBe(true);
+  });
+
+  it('accepts a compulsory subject even with an empty-string elective bucket (field is hidden, not filled)', () => {
+    expect(upsertClassSubjectSchema.safeParse({ ...base, electiveBucket: '', chooseN: '' }).success).toBe(true);
+  });
+});
+
+describe('createRoomSchema', () => {
+  const base = { code: 'SL-1', name: 'Science Lab 1', roomType: 'SCIENCE_LAB', capacity: 30 };
+
+  it('accepts a valid room', () => {
+    expect(createRoomSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing code', () => {
+    expect(createRoomSchema.safeParse({ ...base, code: '' }).success).toBe(false);
+  });
+
+  it('rejects zero capacity', () => {
+    expect(createRoomSchema.safeParse({ ...base, capacity: 0 }).success).toBe(false);
+  });
+
+  it('rejects a negative capacity', () => {
+    expect(createRoomSchema.safeParse({ ...base, capacity: -5 }).success).toBe(false);
+  });
+
+  it('rejects an unrecognized room type', () => {
+    expect(createRoomSchema.safeParse({ ...base, roomType: 'GYM' }).success).toBe(false);
+  });
+
+  it('accepts an optional block label', () => {
+    expect(createRoomSchema.safeParse({ ...base, blockLabel: 'Block C' }).success).toBe(true);
+  });
+});
+
+describe('declareCompetencySchema', () => {
+  const base = {
+    staffId: '11111111-1111-1111-1111-111111111111',
+    subjectId: '22222222-2222-2222-2222-222222222222',
+    minClassOrdinal: 9,
+    maxClassOrdinal: 12,
+  };
+
+  it('accepts a valid ordinal range', () => {
+    expect(declareCompetencySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts an equal min and max (a single-class competency)', () => {
+    expect(declareCompetencySchema.safeParse({ ...base, minClassOrdinal: 9, maxClassOrdinal: 9 }).success).toBe(true);
+  });
+
+  it('rejects a min ordinal greater than the max', () => {
+    expect(declareCompetencySchema.safeParse({ ...base, minClassOrdinal: 12, maxClassOrdinal: 9 }).success).toBe(false);
+  });
+
+  it('rejects a missing staff', () => {
+    expect(declareCompetencySchema.safeParse({ ...base, staffId: '' }).success).toBe(false);
+  });
+});
+
+describe('suggestSubstitutesSchema', () => {
+  it('accepts a valid subject and class', () => {
+    expect(
+      suggestSubstitutesSchema.safeParse({
+        subjectId: '11111111-1111-1111-1111-111111111111',
+        classLevelId: '22222222-2222-2222-2222-222222222222',
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects a missing class', () => {
+    expect(suggestSubstitutesSchema.safeParse({ subjectId: '11111111-1111-1111-1111-111111111111', classLevelId: '' }).success).toBe(
+      false
+    );
+  });
+});
+
+describe('cloneAcademicStructureSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    fromSessionId: '22222222-2222-2222-2222-222222222222',
+    toSessionId: '33333333-3333-3333-3333-333333333333',
+  };
+
+  it('accepts distinct source and target sessions', () => {
+    expect(cloneAcademicStructureSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects cloning a session into itself', () => {
+    expect(cloneAcademicStructureSchema.safeParse({ ...base, toSessionId: base.fromSessionId }).success).toBe(false);
+  });
+
+  it('rejects a missing campus', () => {
+    expect(cloneAcademicStructureSchema.safeParse({ ...base, campusId: '' }).success).toBe(false);
+  });
+});
+
+describe('startRolloverSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    fromSessionId: '22222222-2222-2222-2222-222222222222',
+    toSessionId: '33333333-3333-3333-3333-333333333333',
+  };
+
+  it('accepts distinct source and target sessions', () => {
+    expect(startRolloverSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects rolling a session into itself', () => {
+    expect(startRolloverSchema.safeParse({ ...base, toSessionId: base.fromSessionId }).success).toBe(false);
+  });
+
+  it('rejects a missing campus', () => {
+    expect(startRolloverSchema.safeParse({ ...base, campusId: '' }).success).toBe(false);
+  });
+});
+
+describe('setDocumentRequirementSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    minClassOrdinal: 7,
+    maxClassOrdinal: 13,
+    docType: 'transfer_certificate',
+    isMandatory: true,
+    minCount: 1,
+  };
+
+  it('accepts a valid requirement', () => {
+    expect(setDocumentRequirementSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a min ordinal greater than the max', () => {
+    expect(setDocumentRequirementSchema.safeParse({ ...base, minClassOrdinal: 13, maxClassOrdinal: 7 }).success).toBe(false);
+  });
+
+  it('rejects a zero min count', () => {
+    expect(setDocumentRequirementSchema.safeParse({ ...base, minCount: 0 }).success).toBe(false);
+  });
+
+  it('rejects an unrecognized document type', () => {
+    expect(setDocumentRequirementSchema.safeParse({ ...base, docType: 'passport' }).success).toBe(false);
+  });
+});
+
+describe('setDocumentSubmissionSchema', () => {
+  const base = {
+    applicationId: '11111111-1111-1111-1111-111111111111',
+    docType: 'passport_photo',
+    status: 'uploaded',
+    uploadedCount: 2,
+  };
+
+  it('accepts a valid uploaded submission', () => {
+    expect(setDocumentSubmissionSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a promised status with no deadline', () => {
+    expect(setDocumentSubmissionSchema.safeParse({ ...base, status: 'promised', promisedDeadline: undefined }).success).toBe(false);
+  });
+
+  it('accepts a promised status with a deadline', () => {
+    expect(
+      setDocumentSubmissionSchema.safeParse({ ...base, status: 'promised', promisedDeadline: '2026-09-01' }).success
+    ).toBe(true);
+  });
+});
+
+describe('createTestSittingSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    classLevelId: '33333333-3333-3333-3333-333333333333',
+    startsAt: '2026-08-10T09:00',
+    capacity: 30,
+  };
+
+  it('accepts a valid sitting', () => {
+    expect(createTestSittingSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a zero capacity', () => {
+    expect(createTestSittingSchema.safeParse({ ...base, capacity: 0 }).success).toBe(false);
+  });
+
+  it('rejects a missing start time', () => {
+    expect(createTestSittingSchema.safeParse({ ...base, startsAt: '' }).success).toBe(false);
+  });
+
+  it('rejects a missing class', () => {
+    expect(createTestSittingSchema.safeParse({ ...base, classLevelId: '' }).success).toBe(false);
+  });
+});
+
+describe('allocateTestSeatSchema', () => {
+  const base = {
+    sittingId: '11111111-1111-1111-1111-111111111111',
+    applicationId: '22222222-2222-2222-2222-222222222222',
+  };
+
+  it('accepts a valid allocation', () => {
+    expect(allocateTestSeatSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing application', () => {
+    expect(allocateTestSeatSchema.safeParse({ ...base, applicationId: '' }).success).toBe(false);
+  });
+});
+
+describe('setTestScoreSchema', () => {
+  const base = { candidateId: '11111111-1111-1111-1111-111111111111', subjectCode: 'math', obtained: 40, total: 50 };
+
+  it('accepts a valid score', () => {
+    expect(setTestScoreSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects obtained greater than total', () => {
+    expect(setTestScoreSchema.safeParse({ ...base, obtained: 51 }).success).toBe(false);
+  });
+
+  it('rejects a zero total', () => {
+    expect(setTestScoreSchema.safeParse({ ...base, total: 0 }).success).toBe(false);
+  });
+
+  it('rejects a negative obtained', () => {
+    expect(setTestScoreSchema.safeParse({ ...base, obtained: -1 }).success).toBe(false);
+  });
+
+  it('rejects a missing subject code', () => {
+    expect(setTestScoreSchema.safeParse({ ...base, subjectCode: '' }).success).toBe(false);
+  });
+});
+
+describe('setTestAttendanceSchema', () => {
+  const base = { candidateId: '11111111-1111-1111-1111-111111111111', attendance: 'absent' };
+
+  it('accepts a valid attendance value', () => {
+    expect(setTestAttendanceSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an unrecognized attendance value', () => {
+    expect(setTestAttendanceSchema.safeParse({ ...base, attendance: 'late' }).success).toBe(false);
+  });
+});
+
+describe('bookInterviewSchema', () => {
+  const base = {
+    applicationId: '11111111-1111-1111-1111-111111111111',
+    panelUserId: '22222222-2222-2222-2222-222222222222',
+    startsAt: '2026-08-10T11:00',
+    endsAt: '2026-08-10T11:20',
+  };
+
+  it('accepts a valid booking', () => {
+    expect(bookInterviewSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an end time at or before the start time', () => {
+    expect(bookInterviewSchema.safeParse({ ...base, endsAt: '2026-08-10T10:00' }).success).toBe(false);
+  });
+
+  it('rejects a missing panel member', () => {
+    expect(bookInterviewSchema.safeParse({ ...base, panelUserId: '' }).success).toBe(false);
+  });
+});
+
+describe('cancelInterviewSchema', () => {
+  it('accepts a valid id', () => {
+    expect(cancelInterviewSchema.safeParse({ interviewId: '11111111-1111-1111-1111-111111111111' }).success).toBe(true);
+  });
+
+  it('rejects a non-uuid id', () => {
+    expect(cancelInterviewSchema.safeParse({ interviewId: 'nope' }).success).toBe(false);
+  });
+});
+
+describe('submitScorecardSchema', () => {
+  const base = {
+    interviewId: '11111111-1111-1111-1111-111111111111',
+    scores: { communication: 4, confidence: 4, academic_readiness: 3, parental_engagement: 4, overall_impression: 3 },
+    recommendation: 'accept',
+  };
+
+  it('accepts a fully scored card', () => {
+    expect(submitScorecardSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a missing criterion', () => {
+    const { overall_impression: _drop, ...rest } = base.scores;
+    expect(submitScorecardSchema.safeParse({ ...base, scores: rest }).success).toBe(false);
+  });
+
+  it('rejects a score outside 1-5', () => {
+    expect(submitScorecardSchema.safeParse({ ...base, scores: { ...base.scores, confidence: 6 } }).success).toBe(false);
+  });
+
+  it('rejects an unrecognized recommendation', () => {
+    expect(submitScorecardSchema.safeParse({ ...base, recommendation: 'maybe' }).success).toBe(false);
+  });
+
+  it('accepts an optional justification', () => {
+    expect(submitScorecardSchema.safeParse({ ...base, justification: 'Clear override rationale here.' }).success).toBe(true);
+  });
+});
+
+describe('uploadDocumentSchema', () => {
+  const base = { applicationId: '11111111-1111-1111-1111-111111111111', docType: 'b_form' };
+
+  it('accepts a valid upload with no B-Form number', () => {
+    expect(uploadDocumentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a valid B-Form number', () => {
+    expect(uploadDocumentSchema.safeParse({ ...base, bFormNo: '42101-1234567-8' }).success).toBe(true);
+  });
+
+  it('rejects a malformed B-Form number', () => {
+    expect(uploadDocumentSchema.safeParse({ ...base, bFormNo: '12345' }).success).toBe(false);
+  });
+
+  it('rejects an unrecognized document type', () => {
+    expect(uploadDocumentSchema.safeParse({ ...base, docType: 'passport' }).success).toBe(false);
+  });
+});
+
+describe('rejectDocumentSchema', () => {
+  const base = { documentId: '11111111-1111-1111-1111-111111111111', reason: 'Blurred scan' };
+
+  it('accepts a valid rejection', () => {
+    expect(rejectDocumentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an empty reason', () => {
+    expect(rejectDocumentSchema.safeParse({ ...base, reason: '' }).success).toBe(false);
+  });
+});
+
+describe('publicEnquirySchema', () => {
+  const base = {
+    childName: 'Web Child',
+    dob: '2020-01-01',
+    classCode: '1',
+    parentName: 'Web Parent',
+    phone: '03001234567',
+  };
+
+  it('accepts a valid public enquiry', () => {
+    expect(publicEnquirySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts an optional Urdu child name', () => {
+    expect(publicEnquirySchema.safeParse({ ...base, childNameUr: 'ویب چائلڈ' }).success).toBe(true);
+  });
+
+  it('rejects a missing child name', () => {
+    expect(publicEnquirySchema.safeParse({ ...base, childName: '' }).success).toBe(false);
+  });
+
+  it('rejects a missing phone number', () => {
+    expect(publicEnquirySchema.safeParse({ ...base, phone: '' }).success).toBe(false);
+  });
+
+  it('rejects a missing class', () => {
+    expect(publicEnquirySchema.safeParse({ ...base, classCode: '' }).success).toBe(false);
+  });
+});
+
+describe('recordAdmissionFeePaymentSchema', () => {
+  const base = { offerId: '11111111-1111-1111-1111-111111111111', amountRupees: 25000, mode: 'cash' as const };
+
+  it('accepts a valid payment', () => {
+    expect(recordAdmissionFeePaymentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a zero or negative amount', () => {
+    expect(recordAdmissionFeePaymentSchema.safeParse({ ...base, amountRupees: 0 }).success).toBe(false);
+    expect(recordAdmissionFeePaymentSchema.safeParse({ ...base, amountRupees: -5 }).success).toBe(false);
+  });
+
+  it('rejects an unknown payment mode', () => {
+    expect(recordAdmissionFeePaymentSchema.safeParse({ ...base, mode: 'crypto' }).success).toBe(false);
+  });
+});
+
+describe('waiveAdmissionFeeSchema', () => {
+  const base = { offerId: '11111111-1111-1111-1111-111111111111', reason: 'Approved staff-child hardship waiver' };
+
+  it('accepts a valid waiver reason', () => {
+    expect(waiveAdmissionFeeSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a too-short reason', () => {
+    expect(waiveAdmissionFeeSchema.safeParse({ ...base, reason: 'staff' }).success).toBe(false);
+  });
+});
+
+describe('enrolFromOfferSchema', () => {
+  const base = {
+    offerId: '11111111-1111-1111-1111-111111111111',
+    sectionId: '22222222-2222-2222-2222-222222222222',
+    gender: 'male' as const,
+    paymentId: '33333333-3333-3333-3333-333333333333',
+  };
+
+  it('accepts a payment-funded enrolment', () => {
+    expect(enrolFromOfferSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a waiver-funded enrolment', () => {
+    const { paymentId: _paymentId, ...rest } = base;
+    expect(enrolFromOfferSchema.safeParse({ ...rest, waiverId: '44444444-4444-4444-4444-444444444444' }).success).toBe(true);
+  });
+
+  it('rejects neither a payment nor a waiver', () => {
+    const { paymentId: _paymentId, ...rest } = base;
+    expect(enrolFromOfferSchema.safeParse(rest).success).toBe(false);
+  });
+
+  it('rejects both a payment and a waiver at once', () => {
+    expect(enrolFromOfferSchema.safeParse({ ...base, waiverId: '44444444-4444-4444-4444-444444444444' }).success).toBe(false);
+  });
+
+  it('rejects a missing section', () => {
+    expect(enrolFromOfferSchema.safeParse({ ...base, sectionId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('uploadBrandingAssetSchema', () => {
+  const base = { assetType: 'logo' as const, widthPx: 800, heightPx: 600 };
+
+  it('accepts a tenant-wide upload with no campus', () => {
+    expect(uploadBrandingAssetSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a campus-scoped upload', () => {
+    expect(uploadBrandingAssetSchema.safeParse({ ...base, campusId: '11111111-1111-1111-1111-111111111111' }).success).toBe(true);
+  });
+
+  it('rejects an unknown asset type', () => {
+    expect(uploadBrandingAssetSchema.safeParse({ ...base, assetType: 'banner' }).success).toBe(false);
+  });
+
+  it('rejects a non-positive width', () => {
+    expect(uploadBrandingAssetSchema.safeParse({ ...base, widthPx: 0 }).success).toBe(false);
+  });
+});
+
+describe('setTenantThemeSchema', () => {
+  it('accepts valid hex colours', () => {
+    expect(setTenantThemeSchema.safeParse({ primaryHex: '#112233', secondaryHex: '#445566' }).success).toBe(true);
+  });
+
+  it('accepts empty strings (clearing the theme)', () => {
+    expect(setTenantThemeSchema.safeParse({ primaryHex: '', secondaryHex: '' }).success).toBe(true);
+  });
+
+  it('rejects an invalid hex colour', () => {
+    expect(setTenantThemeSchema.safeParse({ primaryHex: 'not-a-hex' }).success).toBe(false);
+  });
+});
+
+describe('setAttendancePolicySchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    mode: 'daily' as const,
+    startTime: '08:00',
+    lateThresholdMinutes: 15,
+    lockWindowHours: 24,
+    saturdayWorking: false,
+  };
+
+  it('accepts a valid policy', () => {
+    expect(setAttendancePolicySchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a malformed start time', () => {
+    expect(setAttendancePolicySchema.safeParse({ ...base, startTime: '8am' }).success).toBe(false);
+  });
+
+  it('rejects a negative late threshold', () => {
+    expect(setAttendancePolicySchema.safeParse({ ...base, lateThresholdMinutes: -1 }).success).toBe(false);
+  });
+
+  it('rejects a zero lock window', () => {
+    expect(setAttendancePolicySchema.safeParse({ ...base, lockWindowHours: 0 }).success).toBe(false);
+  });
+
+  it('rejects an out-of-range minimum attendance percentage', () => {
+    expect(setAttendancePolicySchema.safeParse({ ...base, minAttendancePct: 150 }).success).toBe(false);
+  });
+});
+
+describe('bulkMarkAttendanceSchema', () => {
+  const base = { sectionId: '11111111-1111-1111-1111-111111111111', attendanceDate: '2026-08-01', exceptions: [] as unknown[] };
+
+  it('accepts zero exceptions', () => {
+    expect(bulkMarkAttendanceSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts one exception', () => {
+    expect(
+      bulkMarkAttendanceSchema.safeParse({
+        ...base,
+        exceptions: [{ enrolmentId: '22222222-2222-2222-2222-222222222222', status: 'absent' }],
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects an unknown status in an exception', () => {
+    expect(
+      bulkMarkAttendanceSchema.safeParse({
+        ...base,
+        exceptions: [{ enrolmentId: '22222222-2222-2222-2222-222222222222', status: 'tardy' }],
+      }).success
+    ).toBe(false);
+  });
+});
+
+describe('requestAttendanceCorrectionSchema', () => {
+  const base = {
+    enrolmentId: '11111111-1111-1111-1111-111111111111',
+    attendanceDate: '2026-08-01',
+    newStatus: 'present' as const,
+    reason: 'Was marked absent by mistake',
+  };
+
+  it('accepts a valid correction request', () => {
+    expect(requestAttendanceCorrectionSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a too-short reason', () => {
+    expect(requestAttendanceCorrectionSchema.safeParse({ ...base, reason: 'oops' }).success).toBe(false);
+  });
+
+  it('rejects an unknown status', () => {
+    expect(requestAttendanceCorrectionSchema.safeParse({ ...base, newStatus: 'tardy' }).success).toBe(false);
+  });
+});
+
+describe('decideAttendanceCorrectionSchema', () => {
+  const base = { correctionId: '11111111-1111-1111-1111-111111111111', note: 'Confirmed with the parent note on file' };
+
+  it('accepts a valid decision', () => {
+    expect(decideAttendanceCorrectionSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a too-short note', () => {
+    expect(decideAttendanceCorrectionSchema.safeParse({ ...base, note: 'no' }).success).toBe(false);
+  });
+});
+
+describe('recomputeMonthlyAttendanceSchema', () => {
+  const base = { campusId: '11111111-1111-1111-1111-111111111111', year: 2026, month: 8 };
+
+  it('accepts a valid campus/year/month', () => {
+    expect(recomputeMonthlyAttendanceSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('coerces string form-data values', () => {
+    expect(recomputeMonthlyAttendanceSchema.safeParse({ ...base, year: '2026', month: '8' }).success).toBe(true);
+  });
+
+  it('rejects a month outside 1-12', () => {
+    expect(recomputeMonthlyAttendanceSchema.safeParse({ ...base, month: 13 }).success).toBe(false);
+  });
+});
+
+describe('dispatchAbsenteeNotificationsSchema', () => {
+  const base = { campusId: '11111111-1111-1111-1111-111111111111', date: '2026-08-01' };
+
+  it('accepts a valid campus/date', () => {
+    expect(dispatchAbsenteeNotificationsSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects an empty date', () => {
+    expect(dispatchAbsenteeNotificationsSchema.safeParse({ ...base, date: '' }).success).toBe(false);
+  });
+});
+
+describe('createHomeworkSchema', () => {
+  const base = {
+    sectionId: '11111111-1111-1111-1111-111111111111',
+    subjectId: '22222222-2222-2222-2222-222222222222',
+    title: 'Chapter 3 exercises',
+    assignedDate: '2026-08-01',
+    dueDate: '2026-08-08',
+  };
+
+  it('accepts a valid assignment with no optional fields', () => {
+    expect(createHomeworkSchema.safeParse(base).success).toBe(true);
+  });
+
+  // Regression: a blank number input reaches this schema as '', which
+  // z.coerce.number() alone turns into 0 — 0 then failed .positive(),
+  // silently blocking submission for anyone who left this genuinely
+  // optional field empty (found via e2e, not by inspection).
+  it('treats a blank estimatedMinutes as absent, not an invalid 0', () => {
+    const result = createHomeworkSchema.safeParse({ ...base, estimatedMinutes: '' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.estimatedMinutes).toBeUndefined();
+  });
+
+  it('coerces a numeric-string estimatedMinutes', () => {
+    const result = createHomeworkSchema.safeParse({ ...base, estimatedMinutes: '45' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.estimatedMinutes).toBe(45);
+  });
+
+  it('rejects a zero or negative estimatedMinutes', () => {
+    expect(createHomeworkSchema.safeParse({ ...base, estimatedMinutes: '0' }).success).toBe(false);
+    expect(createHomeworkSchema.safeParse({ ...base, estimatedMinutes: '-5' }).success).toBe(false);
+  });
+
+  it('rejects a title over 120 characters', () => {
+    expect(createHomeworkSchema.safeParse({ ...base, title: 'x'.repeat(121) }).success).toBe(false);
+  });
+
+  it('rejects a description over 4000 characters', () => {
+    expect(createHomeworkSchema.safeParse({ ...base, description: 'x'.repeat(4001) }).success).toBe(false);
+  });
+
+  it('rejects an empty due date', () => {
+    expect(createHomeworkSchema.safeParse({ ...base, dueDate: '' }).success).toBe(false);
+  });
+});
+
+describe('bellSegmentSchema', () => {
+  it('accepts a segment where end is after start', () => {
+    expect(bellSegmentSchema.safeParse({ kind: 'TEACHING', startTime: '08:00', endTime: '08:40' }).success).toBe(true);
+  });
+
+  it('rejects a segment where end is not after start', () => {
+    expect(bellSegmentSchema.safeParse({ kind: 'TEACHING', startTime: '08:40', endTime: '08:00' }).success).toBe(false);
+    expect(bellSegmentSchema.safeParse({ kind: 'TEACHING', startTime: '08:00', endTime: '08:00' }).success).toBe(false);
+  });
+});
+
+describe('createBellTemplateSchema', () => {
+  const base = {
+    shift: 'MORNING' as const,
+    code: 'REGULAR',
+    name: 'Regular Morning',
+    segments: [{ kind: 'TEACHING' as const, startTime: '08:00', endTime: '08:40' }],
+  };
+
+  it('accepts a template with at least one segment', () => {
+    expect(createBellTemplateSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a template with zero segments', () => {
+    expect(createBellTemplateSchema.safeParse({ ...base, segments: [] }).success).toBe(false);
+  });
+
+  it('rejects a template whose segment has end before start', () => {
+    const result = createBellTemplateSchema.safeParse({
+      ...base,
+      segments: [{ kind: 'TEACHING', startTime: '09:00', endTime: '08:00' }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('defaults isDefault to undefined when omitted, not required', () => {
+    const result = createBellTemplateSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.isDefault).toBeUndefined();
+  });
+});
+
+describe('createBellCalendarRuleSchema', () => {
+  const base = { shift: 'MORNING' as const, bellTemplateId: '11111111-1111-1111-1111-111111111111', weekday: 5 };
+
+  it('accepts a Friday (weekday 5) rule with default precedence', () => {
+    const result = createBellCalendarRuleSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.precedence).toBe(50);
+  });
+
+  it('rejects a weekday outside 0-6', () => {
+    expect(createBellCalendarRuleSchema.safeParse({ ...base, weekday: 7 }).success).toBe(false);
+    expect(createBellCalendarRuleSchema.safeParse({ ...base, weekday: -1 }).success).toBe(false);
+  });
+
+  it('rejects a non-uuid bellTemplateId', () => {
+    expect(createBellCalendarRuleSchema.safeParse({ ...base, bellTemplateId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('createTimetableVersionSchema', () => {
+  it('accepts a valid version', () => {
+    expect(createTimetableVersionSchema.safeParse({ shift: 'MORNING', name: 'Draft v1' }).success).toBe(true);
+  });
+
+  it('rejects an empty name', () => {
+    expect(createTimetableVersionSchema.safeParse({ shift: 'MORNING', name: '' }).success).toBe(false);
+  });
+});
+
+describe('upsertTimetableSlotSchema', () => {
+  const base = { weekday: 1, periodNo: 3, subjectId: '11111111-1111-1111-1111-111111111111' };
+
+  it('accepts a slot with no teacher/room override', () => {
+    const result = upsertTimetableSlotSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.staffId).toBeUndefined();
+      expect(result.data.roomId).toBeUndefined();
+    }
+  });
+
+  // Regression class: a blank optional <select> reaches here as '' —
+  // without preprocessing that fails z.string().uuid() instead of being
+  // treated as "no override chosen", the same bug class this batch's
+  // createHomeworkSchema fix already caught for a blank number field.
+  it('treats a blank staffId/roomId as absent, not an invalid uuid', () => {
+    const result = upsertTimetableSlotSchema.safeParse({ ...base, staffId: '', roomId: '' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.staffId).toBeUndefined();
+      expect(result.data.roomId).toBeUndefined();
+    }
+  });
+
+  it('rejects a weekday outside 0-6', () => {
+    expect(upsertTimetableSlotSchema.safeParse({ ...base, weekday: 7 }).success).toBe(false);
+  });
+
+  it('rejects a non-positive periodNo', () => {
+    expect(upsertTimetableSlotSchema.safeParse({ ...base, periodNo: 0 }).success).toBe(false);
+  });
+
+  it('rejects a missing subjectId', () => {
+    expect(upsertTimetableSlotSchema.safeParse({ ...base, subjectId: undefined }).success).toBe(false);
+  });
+});
+
+describe('createTeachableSubjectSchema', () => {
+  const base = {
+    staffId: '11111111-1111-1111-1111-111111111111',
+    subjectId: '22222222-2222-2222-2222-222222222222',
+    classLevelFromId: '33333333-3333-3333-3333-333333333333',
+    classLevelToId: '44444444-4444-4444-4444-444444444444',
+  };
+
+  it('accepts a grant with no stream restriction', () => {
+    const result = createTeachableSubjectSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.streamId).toBeUndefined();
+  });
+
+  it('treats a blank streamId as absent, not an invalid uuid', () => {
+    const result = createTeachableSubjectSchema.safeParse({ ...base, streamId: '' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.streamId).toBeUndefined();
+  });
+
+  it('rejects a missing teacher', () => {
+    expect(createTeachableSubjectSchema.safeParse({ ...base, staffId: undefined }).success).toBe(false);
+  });
+});
+
+describe('assignSubstitutionSchema', () => {
+  const base = {
+    slotId: '11111111-1111-1111-1111-111111111111',
+    subDate: '2026-08-03',
+    substituteStaffId: '22222222-2222-2222-2222-222222222222',
+    reason: 'leave',
+  };
+
+  it('accepts a valid assignment', () => {
+    expect(assignSubstitutionSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a substitute that is not a chosen uuid', () => {
+    expect(assignSubstitutionSchema.safeParse({ ...base, substituteStaffId: '' }).success).toBe(false);
+  });
+
+  it('rejects a reason outside the enum', () => {
+    expect(assignSubstitutionSchema.safeParse({ ...base, reason: 'sick' }).success).toBe(false);
+  });
+});
+
+describe('publishTimetableSchema', () => {
+  it('accepts a bare effective date with no override reason', () => {
+    const result = publishTimetableSchema.safeParse({ effectiveFrom: '2026-08-03' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.overrideReason).toBeUndefined();
+  });
+
+  it('rejects a missing effective date', () => {
+    expect(publishTimetableSchema.safeParse({ effectiveFrom: '' }).success).toBe(false);
+  });
+});
+
+describe('requestAuditExportSchema', () => {
+  const base = { from: '2026-01-01', to: '2026-06-30', tableNames: ['fee_challan', 'certificate_issue'] };
+
+  it('accepts a valid date range with no campus filter', () => {
+    const result = requestAuditExportSchema.safeParse(base);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.campusId).toBeUndefined();
+  });
+
+  it('accepts an explicit campus filter', () => {
+    const result = requestAuditExportSchema.safeParse({ ...base, campusId: '11111111-1111-1111-1111-111111111111' });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a to-date before the from-date', () => {
+    const result = requestAuditExportSchema.safeParse({ ...base, from: '2026-06-30', to: '2026-01-01' });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty entity list', () => {
+    expect(requestAuditExportSchema.safeParse({ ...base, tableNames: [] }).success).toBe(false);
+  });
+
+  it('rejects an entity outside the curated list', () => {
+    expect(requestAuditExportSchema.safeParse({ ...base, tableNames: ['not_a_real_table'] }).success).toBe(false);
+  });
+});
+
+describe('recordConsentSchema', () => {
+  const base = {
+    studentId: '11111111-1111-1111-1111-111111111111',
+    purposeCode: 'student_photo_marketing',
+    guardianId: '22222222-2222-2222-2222-222222222222',
+    decision: 'granted',
+    channel: 'counter',
+  };
+
+  it('accepts a counter capture', () => {
+    expect(recordConsentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a withdrawal from the portal', () => {
+    expect(recordConsentSchema.safeParse({ ...base, decision: 'withdrawn', channel: 'portal' }).success).toBe(true);
+  });
+
+  it('rejects a decision outside granted/denied/withdrawn', () => {
+    expect(recordConsentSchema.safeParse({ ...base, decision: 'maybe' }).success).toBe(false);
+  });
+
+  it('rejects a channel the register does not model', () => {
+    expect(recordConsentSchema.safeParse({ ...base, channel: 'telepathy' }).success).toBe(false);
+  });
+
+  it('rejects a missing guardian — a decision always belongs to someone', () => {
+    expect(recordConsentSchema.safeParse({ ...base, guardianId: '' }).success).toBe(false);
+  });
+});
+
+describe('buildGalleryExportSchema', () => {
+  it('accepts a whole campus', () => {
+    expect(buildGalleryExportSchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111' }).success).toBe(true);
+  });
+
+  it('accepts an empty section filter as "no section filter"', () => {
+    expect(
+      buildGalleryExportSchema.safeParse({ campusId: '11111111-1111-1111-1111-111111111111', sectionId: '' }).success,
+    ).toBe(true);
+  });
+
+  it('rejects a missing campus', () => {
+    expect(buildGalleryExportSchema.safeParse({ campusId: '' }).success).toBe(false);
+  });
+});
+
+// FR-I01. Weightage is basis points in the database (1 bp = 0.01%); these
+// two are the only place the app converts, so they are the only place a
+// percentage can be silently mangled on the way in or out.
+describe('exam term weightage, as basis points', () => {
+  it('converts whole percentages exactly', () => {
+    expect(pctToBasisPoints(25)).toBe(2500);
+    expect(pctToBasisPoints(100)).toBe(10000);
+    expect(pctToBasisPoints(0)).toBe(0);
+  });
+
+  it('converts two-decimal percentages exactly — 33.33% is 3333 bp, not 3332', () => {
+    expect(pctToBasisPoints(33.33)).toBe(3333);
+    expect(pctToBasisPoints(0.01)).toBe(1);
+    expect(pctToBasisPoints(85.5)).toBe(8550);
+  });
+
+  it('renders a weight with the two decimal places FR-I01 quotes', () => {
+    expect(formatWeightPct(90)).toBe('90.00');
+    expect(formatWeightPct(100)).toBe('100.00');
+    expect(formatWeightPct(0)).toBe('0.00');
+    expect(formatWeightPct(85.5)).toBe('85.50');
+  });
+
+  it('survives the float sum that the basis-point representation exists to avoid', () => {
+    const total = [25.0, 15.0, 0.0, 60.0].reduce((s, w) => s + w, 0);
+    expect(formatWeightPct(total)).toBe('100.00');
+    expect([2500, 1500, 0, 6000].reduce((s, w) => s + w, 0)).toBe(10000);
+  });
+});
+
+describe('upsertExamTermSchema', () => {
+  const base = {
+    campusId: '11111111-1111-1111-1111-111111111111',
+    sessionId: '22222222-2222-2222-2222-222222222222',
+    code: 'T1',
+    name: 'First Term',
+    sequence: 1,
+    weightPct: 25,
+    countsTowardAnnual: true,
+  };
+
+  it('accepts a term', () => {
+    expect(upsertExamTermSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a 0% non-counting term — AC1\'s Pre-Board', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: 0, countsTowardAnnual: false }).success).toBe(true);
+  });
+
+  it('accepts two decimal places, the basis-point floor', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: 33.33 }).success).toBe(true);
+  });
+
+  it('rejects a third decimal place rather than rounding it away', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: 33.333 }).success).toBe(false);
+  });
+
+  it('rejects a weight outside 0-100', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: 100.01 }).success).toBe(false);
+    expect(upsertExamTermSchema.safeParse({ ...base, weightPct: -1 }).success).toBe(false);
+  });
+
+  it('rejects a term with no code or no name', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, code: '' }).success).toBe(false);
+    expect(upsertExamTermSchema.safeParse({ ...base, name: '' }).success).toBe(false);
+  });
+
+  it('rejects a sequence outside the chk_exam_term_sequence range', () => {
+    expect(upsertExamTermSchema.safeParse({ ...base, sequence: 0 }).success).toBe(false);
+    expect(upsertExamTermSchema.safeParse({ ...base, sequence: 41 }).success).toBe(false);
+  });
+});
+
+// FR-I02. The client copy of two rules the database also enforces: pass <=
+// max (chk_pass_le_max plus upsert_exam_subject's own raise) and the total
+// max being the sum of the components.
+describe('exam subject components', () => {
+  const theory = { component: 'theory' as const, maxMarks: 65, passMarks: 23 };
+  const practical = { component: 'practical' as const, maxMarks: 20, passMarks: 7 };
+
+  it('accepts AC1\'s theory 65/23 and practical 20/7', () => {
+    expect(examComponentSchema.safeParse(theory).success).toBe(true);
+    expect(examComponentSchema.safeParse(practical).success).toBe(true);
+  });
+
+  it('totals AC1\'s configuration at 85', () => {
+    expect(examSubjectTotalMax([theory, practical])).toBe(85);
+  });
+
+  it('rejects AC2\'s practical — pass 7 out of a maximum of 5', () => {
+    const result = examComponentSchema.safeParse({ component: 'practical', maxMarks: 5, passMarks: 7 });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error.issues[0]?.message).toBe(PASS_EXCEEDS_MAX);
+  });
+
+  it('accepts pass equal to max — "cannot exceed", not "must be below"', () => {
+    expect(examComponentSchema.safeParse({ component: 'viva', maxMarks: 10, passMarks: 10 }).success).toBe(true);
+  });
+
+  it('rejects a component out of zero marks, and a negative pass mark', () => {
+    expect(examComponentSchema.safeParse({ component: 'theory', maxMarks: 0, passMarks: 0 }).success).toBe(false);
+    expect(examComponentSchema.safeParse({ component: 'theory', maxMarks: 50, passMarks: -1 }).success).toBe(false);
+  });
+
+  it('rejects a component the mark_component_code enum does not have', () => {
+    expect(examComponentSchema.safeParse({ component: 'homework', maxMarks: 10, passMarks: 4 }).success).toBe(false);
+  });
+
+  it('keeps AC4\'s wording where a disabled grid can reach it', () => {
+    expect(EXAM_SETUP_PENDING).toBe('exam setup pending — contact the exam office');
+  });
+});
+
+describe('upsertExamSubjectSchema', () => {
+  const base = {
+    examTermId: '11111111-1111-1111-1111-111111111111',
+    classSubjectId: '22222222-2222-2222-2222-222222222222',
+    components: [
+      { component: 'theory' as const, maxMarks: 65, passMarks: 23 },
+      { component: 'practical' as const, maxMarks: 20, passMarks: 7 },
+    ],
+  };
+
+  it('accepts a two-component configuration', () => {
+    expect(upsertExamSubjectSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a configuration with no components — there would be no denominator', () => {
+    expect(upsertExamSubjectSchema.safeParse({ ...base, components: [] }).success).toBe(false);
+  });
+
+  it('rejects the same component twice — the grid would have two identical columns', () => {
+    expect(
+      upsertExamSubjectSchema.safeParse({
+        ...base,
+        components: [
+          { component: 'theory' as const, maxMarks: 50, passMarks: 17 },
+          { component: 'theory' as const, maxMarks: 30, passMarks: 10 },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects a configuration with no exam term', () => {
+    expect(upsertExamSubjectSchema.safeParse({ ...base, examTermId: '' }).success).toBe(false);
+  });
+});
+
+describe('FR-I12 validateMarkCell', () => {
+  it('AC1: 70 into a paper out of 65 is refused with "max 65"', () => {
+    expect(validateMarkCell('70', 65, 0)).toBe('max 65');
+  });
+
+  it('AC1: 65 exactly is accepted — "max 65" means at most', () => {
+    expect(validateMarkCell('65', 65, 0)).toBeNull();
+  });
+
+  it('AC2: 45.5 at precision 0 is refused with "whole numbers only"', () => {
+    expect(validateMarkCell('45.5', 65, 0)).toBe('whole numbers only');
+  });
+
+  it('AC2: 45.00 IS a whole number — the rule is about the value, not the typing', () => {
+    expect(validateMarkCell('45.00', 65, 0)).toBeNull();
+  });
+
+  it('AC2: the same 45.5 passes once the campus allows one decimal', () => {
+    expect(validateMarkCell('45.5', 65, 1)).toBeNull();
+    expect(validateMarkCell('45.55', 65, 1)).toBe('at most 1 decimal place');
+    expect(validateMarkCell('45.55', 65, 2)).toBeNull();
+  });
+
+  it('refuses a negative mark', () => {
+    expect(validateMarkCell('-1', 65, 0)).toBe('marks cannot be negative');
+  });
+
+  it('refuses something that is not a number at all', () => {
+    expect(validateMarkCell('abs', 65, 0)).toBe('numbers only');
+  });
+
+  it('treats an empty cell as valid — no mark yet is a delete, not a zero', () => {
+    expect(validateMarkCell('', 65, 0)).toBeNull();
+    expect(validateMarkCell('  ', 65, 0)).toBeNull();
+  });
+
+  it('agrees with the message helpers the database raises', () => {
+    expect(markMaxMessage(65)).toBe('max 65');
+    expect(markPrecisionMessage(0)).toBe(WHOLE_NUMBERS_ONLY);
+    expect(markPrecisionMessage(1)).toBe('at most 1 decimal place');
+    expect(markPrecisionMessage(2)).toBe('at most 2 decimal places');
+  });
+});
+
+describe('FR-I12 markEntryError', () => {
+  it('passes the cell sentences through verbatim — the grid must not disagree with the database', () => {
+    expect(markEntryError('max 65')).toBe('max 65');
+    expect(markEntryError('whole numbers only')).toBe('whole numbers only');
+    expect(markEntryError('at most 1 decimal place')).toBe('at most 1 decimal place');
+    expect(markEntryError('marks cannot be negative')).toBe('marks cannot be negative');
+  });
+
+  it('passes the approval freeze through, because it already says what to do next', () => {
+    expect(markEntryError('marks are locked by approval — raise a result-recompute request')).toBe(
+      'marks are locked by approval — raise a result-recompute request',
+    );
+  });
+
+  it('translates the codes a teacher should never read raw', () => {
+    expect(markEntryError('FORBIDDEN')).toBe('You do not teach this class subject.');
+    expect(markEntryError('MARK_ENROLMENT_MISMATCH')).toBe(
+      'That candidate is not in the class this paper is set for.',
+    );
+  });
+
+  it('falls back rather than leaking an unknown database message', () => {
+    expect(markEntryError('some pg internal detail')).toBe('Could not save those marks.');
+  });
+});
+
+describe('FR-I12 upsertMarksSchema', () => {
+  const cell = { enrolmentId: '11111111-1111-4111-8111-111111111111', component: 'theory' as const, marksObtained: 45 };
+  const base = { examSubjectId: '22222222-2222-4222-8222-222222222222', cells: [cell] };
+
+  it('accepts a batch of cells', () => {
+    expect(upsertMarksSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('accepts a null mark — clearing a cell is a delete', () => {
+    expect(upsertMarksSchema.safeParse({ ...base, cells: [{ ...cell, marksObtained: null }] }).success).toBe(true);
+  });
+
+  it('rejects an empty batch — there is nothing to send', () => {
+    expect(upsertMarksSchema.safeParse({ ...base, cells: [] }).success).toBe(false);
+  });
+
+  it('rejects a negative mark before it reaches the trigger', () => {
+    expect(upsertMarksSchema.safeParse({ ...base, cells: [{ ...cell, marksObtained: -1 }] }).success).toBe(false);
+  });
+
+  it('rejects a client batch id that is not a uuid — an idempotency key has to be one', () => {
+    expect(upsertMarksSchema.safeParse({ ...base, clientBatchId: 'not-a-uuid' }).success).toBe(false);
+  });
+});
+
+describe('FR-I11 exam attendance', () => {
+  it("AC3: an absent candidate's report symbol is 'AB'", () => {
+    expect(examReportSymbol('absent')).toBe('AB');
+  });
+
+  it('an exempt one prints EX and a debarred one DEB', () => {
+    expect(examReportSymbol('exempt')).toBe('EX');
+    expect(examReportSymbol('debarred')).toBe('DEB');
+  });
+
+  it('a candidate who sat the paper carries no symbol at all', () => {
+    expect(examReportSymbol('present')).toBeNull();
+  });
+
+  it('offers only the reason codes that fit each status', () => {
+    expect(ABSENCE_REASONS_BY_STATUS.exempt).toContain('religious_exemption');
+    expect(ABSENCE_REASONS_BY_STATUS.debarred).toContain('fee_default');
+    expect(ABSENCE_REASONS_BY_STATUS.absent).not.toContain('religious_exemption');
+    // Every narrowed option is still a real enum value the database accepts.
+    for (const reasons of Object.values(ABSENCE_REASONS_BY_STATUS)) {
+      for (const reason of reasons) expect(EXAM_ABSENCE_REASONS).toContain(reason);
+    }
+  });
+
+  it('requires a reason code for every non-present status', () => {
+    const base = {
+      examSubjectId: '11111111-1111-4111-8111-111111111111',
+      enrolmentId: '22222222-2222-4222-8222-222222222222',
+    };
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'absent', reason: 'medical' }).success).toBe(true);
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'absent', reason: null }).success).toBe(false);
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'debarred', reason: null }).success).toBe(false);
+  });
+
+  it('and refuses one on a candidate who sat the paper — "present, medical" is not a thing', () => {
+    const base = {
+      examSubjectId: '11111111-1111-4111-8111-111111111111',
+      enrolmentId: '22222222-2222-4222-8222-222222222222',
+    };
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'present', reason: null }).success).toBe(true);
+    expect(setExamAttendanceSchema.safeParse({ ...base, status: 'present', reason: 'medical' }).success).toBe(false);
+  });
+});
+
+describe('FR-I11 markEntryError', () => {
+  it("AC1: passes the candidate's status through verbatim, for each status", () => {
+    for (const s of ['Absent', 'Exempt', 'Debarred']) {
+      expect(markEntryError(`candidate is marked ${s} for this paper`)).toBe(
+        `candidate is marked ${s} for this paper`,
+      );
+    }
+  });
+
+  it('AC4: passes the lock through, because it names the break-glass path', () => {
+    const locked =
+      'candidate exam status is locked by approved marks \u2014 the break-glass path is a result-recompute request';
+    expect(markEntryError(locked)).toBe(locked);
+  });
+
+  it('translates the office-only refusal', () => {
+    expect(markEntryError('EXAM_STATUS_OFFICE_ONLY')).toBe(
+      'Only the exam office can record an exemption or a debarment.',
+    );
+  });
+});
+
+describe('FR-I16 markApprovalError', () => {
+  it("AC1: passes the completeness refusal through, because the GR numbers are IN it", () => {
+    const refusal = '2 candidates have neither a mark nor an exam status: GR-0039, GR-0040';
+    expect(markApprovalError(refusal)).toBe(refusal);
+    const one = '1 candidate has neither a mark nor an exam status: GR-0039';
+    expect(markApprovalError(one)).toBe(one);
+  });
+
+  it('and the partial-component one too, with the component named', () => {
+    const refusal = '1 candidate is missing a component mark: GR-0039 (practical)';
+    expect(markApprovalError(refusal)).toBe(refusal);
+  });
+
+  it('translates the named codes', () => {
+    expect(markApprovalError('MARKS_ALREADY_APPROVED')).toBe(
+      'This set is already signed off. Reopening it is a break-glass unlock.',
+    );
+    expect(markApprovalError('FORBIDDEN')).toBe('You do not have permission to approve marks.');
+  });
+});
+
+describe('FR-I16 markEntryError: the lock', () => {
+  it("AC3's own token becomes a sentence exactly once, here", () => {
+    expect(markEntryError('marks_locked')).toBe(
+      'These marks were approved and signed off — a correction needs a break-glass unlock.',
+    );
+  });
+});
+
+describe('FR-I17 break-glass schemas', () => {
+  const ids = {
+    examSubjectId: '11111111-1111-4111-8111-111111111111',
+    sectionId: '22222222-2222-4222-8222-222222222222',
+  };
+
+  it('AC1: a reason under ten characters is not a reason', () => {
+    expect(requestMarkUnlockSchema.safeParse({ ...ids, reason: 'oops' }).success).toBe(false);
+    expect(
+      requestMarkUnlockSchema.safeParse({ ...ids, reason: 'Q5 total mis-added on 6 scripts' }).success,
+    ).toBe(true);
+  });
+
+  it('AC1: and whitespace does not pad it out to ten', () => {
+    expect(requestMarkUnlockSchema.safeParse({ ...ids, reason: '  bad      ' }).success).toBe(false);
+  });
+
+  it('AC2: the window defaults to 60 minutes and is bounded at both ends', () => {
+    const requestId = '33333333-3333-4333-8333-333333333333';
+    expect(breakGlassUnlockSchema.parse({ requestId }).windowMinutes).toBe(DEFAULT_UNLOCK_WINDOW_MINUTES);
+    expect(breakGlassUnlockSchema.safeParse({ requestId, windowMinutes: 0 }).success).toBe(false);
+    expect(breakGlassUnlockSchema.safeParse({ requestId, windowMinutes: 241 }).success).toBe(false);
+    expect(breakGlassUnlockSchema.safeParse({ requestId, windowMinutes: 240 }).success).toBe(true);
+  });
+});
+
+describe('FR-I17 unlockMinutesLeft', () => {
+  const now = Date.parse('2026-08-13T14:00:00Z');
+
+  it('AC2: counts the minutes to the deadline, rounding up so 59:01 reads as 60', () => {
+    expect(unlockMinutesLeft('2026-08-13T15:00:00Z', now)).toBe(60);
+    expect(unlockMinutesLeft('2026-08-13T14:00:01Z', now)).toBe(1);
+  });
+
+  it('AC2: never goes negative — a lapsed window has zero minutes left, not minus five', () => {
+    expect(unlockMinutesLeft('2026-08-13T13:55:00Z', now)).toBe(0);
+    expect(unlockMinutesLeft('2026-08-13T14:00:00Z', now)).toBe(0);
+  });
+
+  it('and no window at all is null rather than zero — the two mean different things', () => {
+    expect(unlockMinutesLeft(null, now)).toBeNull();
+    expect(unlockMinutesLeft(undefined, now)).toBeNull();
+  });
+});
+
+describe('FR-I17 markUnlockError', () => {
+  it('AC1: names the self-approval refusal in the words the control is about', () => {
+    expect(markUnlockError('UNLOCK_SELF_APPROVAL')).toBe(
+      'A break-glass request cannot be decided by the person who raised it.',
+    );
+    expect(markUnlockError('UNLOCK_APPROVER_ONLY')).toBe(
+      'Only a Principal, Owner or Super Admin can grant a break-glass unlock.',
+    );
+  });
+
+  it('and the append-only refusal, which is the whole evidentiary point', () => {
+    expect(markUnlockError('break-glass request is append-only')).toBe(
+      'A break-glass request records what was asked, by whom and why. None of those is editable afterwards.',
+    );
+  });
+});
+
+describe('FR-I14 OCR review', () => {
+  const jobId = '44444444-4444-4444-8444-444444444444';
+  const enrolmentId = '55555555-5555-4555-8555-555555555555';
+
+  it('AC1: the progress sentence is the one fn_promote_ocr_marks() refuses with, word for word', () => {
+    expect(ocrReviewProgressMessage(0, 40)).toBe('0 of 40 scripts reviewed');
+    expect(ocrReviewProgressMessage(10, 40)).toBe('10 of 40 scripts reviewed');
+  });
+
+  it('AC1: and it passes through the error mapper untranslated, counts and all', () => {
+    expect(ocrReviewError('0 of 40 scripts reviewed')).toBe('0 of 40 scripts reviewed');
+    expect(ocrReviewError('10 of 40 scripts reviewed')).toBe('10 of 40 scripts reviewed');
+  });
+
+  it('AC3: a bulk accept is one entry per script — there is no payload that means "a page"', () => {
+    const page = Array.from({ length: 10 }, (_, i) => ({
+      enrolmentId: `5555555${i}-5555-4555-8555-555555555555`,
+      questionNo: 1,
+    }));
+    const parsed = recordOcrReviewSchema.safeParse({ jobId, reviews: page });
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.reviews).toHaveLength(10);
+  });
+
+  it('AC3: and an empty review confirms nothing, so it is not a review', () => {
+    expect(recordOcrReviewSchema.safeParse({ jobId, reviews: [] }).success).toBe(false);
+  });
+
+  it('AC2: omitting finalValue means "accept what the machine said" — the client never echoes it back', () => {
+    const accepted = recordOcrReviewSchema.parse({ jobId, reviews: [{ enrolmentId, questionNo: 1 }] });
+    expect(accepted.reviews[0]!.finalValue).toBeUndefined();
+    const amended = recordOcrReviewSchema.parse({
+      jobId,
+      reviews: [{ enrolmentId, questionNo: 1, finalValue: 55 }],
+    });
+    expect(amended.reviews[0]!.finalValue).toBe(55);
+  });
+
+  it('AC2: the cell badge tells a machine mark from a typed one, and says which kind', () => {
+    expect(markSourceLabel('ocr_confirmed')).toBe('OCR confirmed');
+    expect(markSourceLabel('ocr_overridden')).toBe('OCR amended');
+    expect(markSourceLabel('manual')).toBeNull();
+    expect(markSourceLabel(undefined)).toBeNull();
+  });
+
+  it('abandoning a batch needs a written reason, and whitespace does not pad it out', () => {
+    expect(cancelOcrJobSchema.safeParse({ jobId, reason: 'bad scan' }).success).toBe(false);
+    expect(cancelOcrJobSchema.safeParse({ jobId, reason: '   bad     ' }).success).toBe(false);
+    expect(cancelOcrJobSchema.safeParse({ jobId, reason: 'Scanner fed two scripts together' }).success).toBe(true);
+  });
+
+  it('the provenance refusal reads as what it is rather than as a trigger name', () => {
+    expect(ocrReviewError('a machine mark needs a named teacher')).toBe(
+      'An OCR mark reaches a report card only through a teacher who confirmed it.',
+    );
+    expect(ocrReviewError('an OCR review action is append-only')).toBe(
+      'A confirmation is a signature. It is written once and it stays.',
+    );
+  });
+
+  it('FR-I16 approval: the unreviewed-batch refusal passes through with its GR numbers', () => {
+    const refusal = '2 candidates have an OCR mark no teacher has confirmed: GR-0001, GR-0040';
+    expect(markApprovalError(refusal)).toBe(refusal);
+    expect(markApprovalError('1 candidate has an OCR mark no teacher has confirmed: GR-0007')).toBe(
+      '1 candidate has an OCR mark no teacher has confirmed: GR-0007',
+    );
+  });
+});

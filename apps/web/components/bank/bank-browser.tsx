@@ -7,6 +7,7 @@ import type { Question } from '@seena/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/modal';
 
 export type BankItem = {
   id: string;
@@ -26,6 +27,7 @@ export function BankBrowser({ initial }: { initial: BankItem[] }) {
   const [subject, setSubject] = useState('');
   const [type, setType] = useState('');
   const [q, setQ] = useState('');
+  const [questionToDelete, setQuestionToDelete] = useState<BankItem | null>(null);
 
   const subjects = useMemo(
     () => [...new Set(items.map((i) => i.subject).filter((s): s is string => !!s))],
@@ -40,12 +42,16 @@ export function BankBrowser({ initial }: { initial: BankItem[] }) {
     return true;
   });
 
-  async function remove(id: string) {
+  async function confirmDeleteQuestion() {
+    if (!questionToDelete) return;
+    const id = questionToDelete.id;
     const prev = items;
     setItems((xs) => xs.filter((x) => x.id !== id));
+    setQuestionToDelete(null);
     try {
       const res = await fetch(`/api/bank/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(await res.text());
+      toast.success('Question removed from bank.');
     } catch (e) {
       setItems(prev);
       toast.error((e as Error).message);
@@ -116,7 +122,12 @@ export function BankBrowser({ initial }: { initial: BankItem[] }) {
                       ) : null}
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => void remove(i.id)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuestionToDelete(i)}
+                    className="text-red-700 hover:bg-red-50 hover:text-red-800"
+                  >
                     Delete
                   </Button>
                 </CardContent>
@@ -125,6 +136,16 @@ export function BankBrowser({ initial }: { initial: BankItem[] }) {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(questionToDelete)}
+        onClose={() => setQuestionToDelete(null)}
+        onConfirm={() => void confirmDeleteQuestion()}
+        title="Delete Banked Question"
+        description="Are you sure you want to delete this question from the question bank? This action cannot be undone."
+        confirmLabel="Delete Question"
+        destructive
+      />
     </div>
   );
 }

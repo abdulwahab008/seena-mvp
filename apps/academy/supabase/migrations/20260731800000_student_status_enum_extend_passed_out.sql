@@ -1,0 +1,14 @@
+-- FR-A06: session rollover and promotion engine needs a 'passed_out'
+-- student_status distinct from the existing 'graduated' value (that one is
+-- reserved for the manual /students/[id] status-change flow's own
+-- 'graduation' path — reusing it here would make "how many graduated via
+-- the manual flow" and "how many passed out via rollover" indistinguishable
+-- in student_status_history).
+--
+-- Split into its own migration: ALTER TYPE ... ADD VALUE cannot be used in
+-- the same transaction that later references the new value, and each
+-- migration file is its own transaction — same convention as
+-- student_status_enum_extend.sql before it. The migration that actually
+-- uses this value (20260731810000_session_rollover_and_promotion.sql)
+-- follows as a separate file.
+alter type public.student_status add value if not exists 'passed_out';

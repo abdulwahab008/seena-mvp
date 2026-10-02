@@ -21,7 +21,7 @@ jobs:
   academy:
     name: academy — typecheck, unit, db, e2e
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -29,7 +29,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
@@ -59,6 +59,13 @@ jobs:
                   -e 's/^SERVICE_ROLE_KEY=/SUPABASE_SERVICE_ROLE_KEY=/' \
             > .env.local
           echo "ADMIN_SETUP_TOKEN=ci-$(openssl rand -hex 12)" >> .env.local
+          echo "COMM_WEBHOOK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
+          echo "PAY_SECRET_JAZZCASH=ci-$(openssl rand -hex 16)" >> .env.local
+          echo "EXPORT_WORKER_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
+          echo "TRANSPORT_GPS_WEBHOOK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
+          echo "EXAM_PAPER_CALLBACK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
+          # A non-empty key makes the password-reset flow attempt a send (which fails neutrally with no network); unset it reports "not configured".
+          echo "RESEND_API_KEY=ci-dummy-not-a-credential" >> .env.local
 
       - name: Typecheck
         working-directory: apps/academy

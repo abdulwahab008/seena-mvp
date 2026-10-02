@@ -18,6 +18,47 @@ const MAX_OUTPUT_TOKENS = 16000;
 const MAX_BATCH_RETRIES = 3;
 const RETRY_BACKOFF_MS = 4000;
 
+const IMAGE_SYSTEM_PROMPT = `You are an OCR service. Extract ALL readable text from this image exactly as written, preserving line order. Include math expressions, question numbers, and handwritten answers. Do NOT add commentary, explanations, or summaries — output only the extracted text.`;
+const IMAGE_USER_PROMPT = 'Extract all text from this image.';
+const IMAGE_MAX_OUTPUT_TOKENS = 4000;
+
+export type ImageOcrResult = { text: string; inputTokens: number; outputTokens: number };
+
+/**
+ * OCR a single image (e.g. a photographed/scanned answer sheet uploaded as
+ * PNG/JPEG/WebP rather than a PDF) via the vision model directly, as an
+ * `image_url` content part rather than routing it through pdf-parse.
+ */
+export async function ocrImageWithVisionLlm(
+  imageBuffer: Buffer,
+  mimeType: string,
+): Promise<ImageOcrResult> {
+  const base64 = imageBuffer.toString('base64');
+  const completion = await llm().chat.completions.create({
+    model: env().OPENROUTER_VISION_MODEL ?? 'google/gemini-3.5-flash',
+    max_tokens: IMAGE_MAX_OUTPUT_TOKENS,
+    messages: [
+      { role: 'system', content: IMAGE_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
+          { type: 'text', text: IMAGE_USER_PROMPT },
+        ],
+      },
+    ],
+  });
+  const choice = completion.choices?.[0];
+  if (!choice) {
+    throw new Error(`image OCR returned no choices: ${JSON.stringify(completion).slice(0, 500)}`);
+  }
+  return {
+    text: (choice.message?.content ?? '').trim(),
+    inputTokens: completion.usage?.prompt_tokens ?? 0,
+    outputTokens: completion.usage?.completion_tokens ?? 0,
+  };
+}
+
 export type VisionOcrOptions = {
   /**
    * Skip batches whose final 1-based page number is ≤ this. Used by callers
@@ -39,16 +80,24 @@ export type VisionOcrOptions = {
  * Per-batch retry: transient network errors (ENOTFOUND, ECONNRESET, 5xx)
  * retry with exponential backoff before giving up on the batch.
  */
+export type VisionOcrResult = {
+  pages: PageText[];
+  inputTokens: number;
+  outputTokens: number;
+};
+
 export async function ocrPdfWithVisionLlm(
   pdfBuffer: Buffer,
   _approxPageCount: number,
   opts: VisionOcrOptions = {},
-): Promise<PageText[]> {
+): Promise<VisionOcrResult> {
   const sourceDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
   const totalPages = sourceDoc.getPageCount();
   console.log(`[vision-ocr] source PDF has ${totalPages} pages`);
 
   const out: PageText[] = [];
+  let inputTokens = 0;
+  let outputTokens = 0;
   const skipUntil = opts.skipPageNumbersBeforeOrEqual ?? 0;
 
   for (let start = 0; start < totalPages; start += PAGES_PER_BATCH) {
@@ -101,6 +150,8 @@ export async function ocrPdfWithVisionLlm(
           );
         }
         raw = choice.message?.content ?? '';
+        inputTokens += completion.usage?.prompt_tokens ?? 0;
+        outputTokens += completion.usage?.completion_tokens ?? 0;
         break;
       } catch (err) {
         lastErr = err;
@@ -141,7 +192,7 @@ export async function ocrPdfWithVisionLlm(
     }
   }
 
-  return out;
+  return { pages: out, inputTokens, outputTokens };
 }
 
 function isTransientError(err: unknown): boolean {

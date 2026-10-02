@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --surface: 0 0% 100%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215 16% 47%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+
+    --primary: 231 60% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-muted: 231 70% 96%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-muted: 0 86% 97%;
+
+    --success: 152 60% 32%;
+    --success-foreground: 0 0% 100%;
+    --success-muted: 152 60% 96%;
+
+    --warning: 32 85% 40%;
+    --warning-foreground: 0 0% 100%;
+    --warning-muted: 40 90% 96%;
+
+    --info: 205 80% 40%;
+    --info-foreground: 0 0% 100%;
+    --info-muted: 205 85% 96%;
+
+    --ring: 231 60% 45%;
+    --radius: 0.625rem;
+
+    /* Sidebar reads as its own surface, not a tinted page. */
+    --sidebar: 222 44% 13%;
+    --sidebar-foreground: 213 27% 84%;
+    --sidebar-muted: 215 20% 55%;
+    --sidebar-accent: 222 40% 20%;
+    --sidebar-active: 231 60% 58%;
+    --sidebar-border: 222 34% 20%;
+  }
+
+  .dark {
+    --background: 224 47% 7%;
+    --foreground: 213 31% 91%;
+    --surface: 222 44% 11%;
+
+    --muted: 223 30% 16%;
+    --muted-foreground: 215 20% 62%;
+
+    --card: 222 44% 11%;
+    --card-foreground: 213 31% 91%;
+
+    --popover: 222 44% 11%;
+    --popover-foreground: 213 31% 91%;
+
+    --border: 216 30% 20%;
+    --input: 216 30% 22%;
+
+    --primary: 231 70% 66%;
+    --primary-foreground: 224 47% 9%;
+    --primary-muted: 231 40% 20%;
+
+    --secondary: 222 33% 18%;
+    --secondary-foreground: 213 31% 91%;
+
+    --accent: 222 33% 18%;
+    --accent-foreground: 213 31% 91%;
+
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 224 47% 9%;
+    --destructive-muted: 0 40% 20%;
+
+    --success: 152 50% 52%;
+    --success-foreground: 224 47% 9%;
+    --success-muted: 152 30% 18%;
+
+    --warning: 38 80% 60%;
+    --warning-foreground: 224 47% 9%;
+    --warning-muted: 38 35% 20%;
+
+    --info: 205 75% 62%;
+    --info-foreground: 224 47% 9%;
+    --info-muted: 205 40% 20%;
+
+    --ring: 231 70% 66%;
+
+    --sidebar: 222 47% 9%;
+    --sidebar-foreground: 213 27% 84%;
+    --sidebar-muted: 215 20% 55%;
+    --sidebar-accent: 222 40% 16%;
+    --sidebar-active: 231 70% 66%;
+    --sidebar-border: 222 34% 16%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  /* Tabular figures everywhere numbers are compared down a column —
+     money, marks, counts. Proportional digits make a fee column unreadable. */
+  .tabular,
+  table td.numeric,
+  table th.numeric {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  /* Native <dialog> backdrop — used by Modal/Sheet so no JS overlay is needed. */
+  dialog::backdrop {
+    background: hsl(222 47% 11% / 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  dialog[open] {
+    animation: dialog-in 140ms ease-out;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog[open] {
+    animation: none;
+  }
+}
+
+/* FR-N12: Urdu is set in Nastaliq where installed, with Naskh as the fallback. */
+[lang='ur'] {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Noto Naskh Arabic', system-ui, sans-serif;
+  line-height: 2;
+}

@@ -1,6 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { db, schema } from './db';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 
 export type SessionContext = {
   userId: string;
@@ -46,11 +46,18 @@ export async function requireSession(): Promise<SessionContext> {
       })
       .returning();
   } else {
-    // Personal mode: find existing membership, or create a personal workspace.
+    // Personal mode: find this user's own personal workspace (an org with no
+    // Clerk org attached), or create one. Scoped to clerk_org_id IS NULL and
+    // ordered deterministically so a membership row in a *shared* org —
+    // including one Clerk has since removed this user from — can never be
+    // picked up here; Clerk, not this table, is the source of truth for
+    // shared-org access.
     const [existingMembership] = await db
       .select({ orgId: schema.memberships.orgId })
       .from(schema.memberships)
-      .where(eq(schema.memberships.userId, user.id))
+      .innerJoin(schema.organizations, eq(schema.organizations.id, schema.memberships.orgId))
+      .where(and(eq(schema.memberships.userId, user.id), isNull(schema.organizations.clerkOrgId)))
+      .orderBy(asc(schema.memberships.createdAt))
       .limit(1);
     if (existingMembership) {
       [org] = await db
@@ -66,21 +73,20 @@ export async function requireSession(): Promise<SessionContext> {
   }
   if (!org) throw new Error('FAILED_TO_RESOLVE_ORG');
 
-  // Upsert membership — admin by default for personal/first-org case.
-  const desiredRole: 'admin' | 'teacher' = orgRole === 'org:admin' ? 'admin' : 'teacher';
-  await db
+  // Upsert membership. Clerk is authoritative for shared orgs on every call
+  // (a demotion or removal in Clerk must take effect immediately, not just on
+  // first insert); personal workspaces have no Clerk role to defer to, so
+  // their sole member is always admin.
+  const desiredRole: 'admin' | 'teacher' = !clerkOrgId || orgRole === 'org:admin' ? 'admin' : 'teacher';
+  const [membership] = await db
     .insert(schema.memberships)
     .values({ userId: user.id, orgId: org.id, role: desiredRole })
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: [schema.memberships.userId, schema.memberships.orgId],
+      set: { role: desiredRole },
+    })
+    .returning();
+  if (!membership) throw new Error('FAILED_TO_RESOLVE_MEMBERSHIP');
 
-  // Re-read membership for authoritative role (in case Clerk role changed).
-  const [membership] = await db
-    .select()
-    .from(schema.memberships)
-    .where(and(eq(schema.memberships.userId, user.id), eq(schema.memberships.orgId, org.id)));
-
-  const role: 'admin' | 'teacher' =
-    orgRole === 'org:admin' || membership?.role === 'admin' ? 'admin' : 'teacher';
-
-  return { userId: user.id, orgId: org.id, role, email: user.email };
+  return { userId: user.id, orgId: org.id, role: membership.role, email: user.email };
 }
