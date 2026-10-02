@@ -65,6 +65,10 @@ jobs:
           echo "COMM_WEBHOOK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
           echo "PAY_SECRET_JAZZCASH=ci-$(openssl rand -hex 16)" >> .env.local
           echo "EXPORT_WORKER_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
+          echo "TRANSPORT_GPS_WEBHOOK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
+          echo "EXAM_PAPER_CALLBACK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
+          # A non-empty key makes the password-reset flow attempt a send (which fails neutrally with no network); unset it reports "not configured".
+          echo "RESEND_API_KEY=ci-dummy-not-a-credential" >> .env.local
 
       - name: Typecheck
         working-directory: apps/academy

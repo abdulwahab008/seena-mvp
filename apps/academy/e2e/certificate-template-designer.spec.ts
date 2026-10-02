@@ -177,6 +177,6 @@ test('AC4: an Urdu template previews right-to-left with an embedded Nastaliq fac
 
   const body = Buffer.from(await response.body());
   expect(body.subarray(0, 5).toString('latin1')).toBe('%PDF-');
-  expect(pdfBaseFonts(body)).toContain('NotoNastaliqUrdu');
+  expect(pdfBaseFonts(body).some((f: string) => f.startsWith('NotoNastaliqUrdu'))).toBe(true);
   expect(pdfFirstMediaBox(body).width).toBe(A4_PORTRAIT_WIDTH_PT);
 });

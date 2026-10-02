@@ -72,7 +72,10 @@ test('requisition approval chain, purchase order and a short goods receipt', asy
   await page.getByTestId('req-approve').click();
   await expect(page.getByTestId('req-status')).toHaveText('approved');
   await page.getByTestId('po-form').getByLabel('Vendor').selectOption({ label: 'Chair Traders' });
+  // the PO is created by a server action: wait for that request to finish before navigating away, or the navigation cancels it
+  const poSaved = page.waitForResponse((r) => r.request().method() === 'POST');
   await page.getByTestId('po-form-submit').click();
+  await poSaved;
   await page.goto('/purchasing/orders');
   await expect(page.getByTestId('po-card')).toHaveCount(1);
   await page.getByLabel('Received Classroom chair').fill('92');
