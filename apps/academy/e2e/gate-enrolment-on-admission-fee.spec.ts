@@ -102,8 +102,15 @@ test('an owner gates enrolment on the admission fee — a shortfall is refused, 
   await appCard.getByTestId(/^enrol-submit-/).click();
   await expect(page.getByText(/^Enrolled — GR /)).toBeVisible();
   await expect(appCard.getByTestId(/^application-status-/)).toHaveText('enrolled');
+  // an enrolled application offers no further payment / waiver / enrol controls
+  await expect(appCard.getByTestId(/^enrol-submit-/)).toHaveCount(0);
 
   await page.goto('/students');
   await page.waitForLoadState('networkidle');
   await expect(page.getByText('Gate Flow Child')).toBeVisible();
+
+  // the student is placed in the section and gets the section's first roll number
+  await page.getByText('Gate Flow Child').first().click();
+  await expect(page.getByRole('heading', { name: 'Gate Flow Child' })).toBeVisible();
+  await expect(page.getByText(/Class 1 · Section A · Roll 1$/)).toBeVisible();
 });

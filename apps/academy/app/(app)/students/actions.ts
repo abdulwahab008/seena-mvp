@@ -14,6 +14,7 @@ import {
   setStudentElectiveChoiceSchema,
 } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
+import { assignRollNumberAfterEnrolment } from '@/lib/enrolment-roll';
 
 export type CreateStudentState = { error: string | null; studentId: string | null };
 
@@ -139,7 +140,7 @@ export async function enrolStudentIntoSection(studentId: string, _prev: EnrolStu
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
 
   const supabase = await supabaseServer();
-  const { error } = await supabase.rpc('enrol_student', { p_section_id: parsed.data.sectionId, p_student_id: studentId });
+  const { data: enrolmentId, error } = await supabase.rpc('enrol_student', { p_section_id: parsed.data.sectionId, p_student_id: studentId });
 
   if (error) {
     if (error.message.includes('SECTION_FULL')) return { error: 'This section is full.' };
@@ -147,6 +148,8 @@ export async function enrolStudentIntoSection(studentId: string, _prev: EnrolStu
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to enrol students at this campus.' };
     return { error: 'Could not enrol the student.' };
   }
+
+  await assignRollNumberAfterEnrolment(supabase, { enrolmentId: (enrolmentId as string | null) ?? null, studentId });
 
   revalidatePath(`/students/${studentId}`);
   return { error: null };
