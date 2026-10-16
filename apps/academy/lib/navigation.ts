@@ -1,6 +1,7 @@
 import {
   Award,
   BadgeCheck,
+  Banknote,
   BookOpen,
   Boxes,
   Building2,
@@ -116,9 +117,23 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/staff/certificates', label: 'Certificates' },
       { href: '/staff/workload', label: 'Teacher Workload' },
       { href: '/staff/appraisals', label: 'Appraisals' },
+      { href: '/staff/remarks', label: 'Remarks Moderation' },
+      { href: '/staff/tickets', label: 'Support Tickets' },
       { href: '/leave', label: 'Leave' },
       { href: '/academic-setup/competency', label: 'Teacher Competency' },
       { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects' },
+    ],
+  },
+  {
+    id: 'payroll',
+    label: 'Payroll',
+    icon: Banknote,
+    items: [
+      { href: '/payroll/runs', label: 'Payroll Runs' },
+      { href: '/payroll/components', label: 'Salary Components' },
+      { href: '/payroll/structures', label: 'Salary Structures' },
+      { href: '/payroll/loans', label: 'Staff Loans' },
+      { href: '/payroll/tax-slabs', label: 'Tax Slabs' },
     ],
   },
   {
@@ -232,6 +247,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/expenses/vouchers', label: 'Vouchers', feature: 'module.expenses' },
       { href: '/expenses/approvals', label: 'Approvals', feature: 'module.expenses' },
       { href: '/expenses/petty-cash', label: 'Petty Cash', feature: 'module.expenses' },
+      { href: '/expenses/chart', label: 'Chart & Budgets', feature: 'module.expenses' },
     ],
   },
   {
