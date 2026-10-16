@@ -54,13 +54,15 @@ values (:'parent_uid', '923005550001', now(), 'x', 'authenticated', 'authenticat
 insert into public.app_user (user_id, tenant_id, app_role, full_name) values (:'owner_uid', :'tenant_id', 'owner', 'Boundary Owner');
 insert into public.user_campus (user_id, tenant_id, campus_id) values (:'owner_uid', :'tenant_id', :'campus_id');
 
--- rows an UPDATE or DELETE actually touched under the caller's policies
+-- rows an UPDATE or DELETE actually touched under the caller's policies and privileges
 create function pg_temp.affected(p_sql text) returns int language plpgsql as $$
 declare n int;
 begin
   execute p_sql;
   get diagnostics n = row_count;
   return n;
+exception when insufficient_privilege then
+  return 0;  -- refused outright rather than filtered: still nothing changed
 end;
 $$;
 grant execute on function pg_temp.affected(text) to public;
