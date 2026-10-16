@@ -101,9 +101,9 @@ test.describe('FR-M14: Campus Events Calendar', () => {
     await icsModal.getByRole('button', { name: 'Close' }).click();
     await expect(icsModal).toBeHidden();
 
-    // 7. Verify Parent Portal Calendar Page
+    // 7. The Parent Portal calendar is for guardians (the guardian view is covered by
+    //    portal-access-guard.spec.ts): a staff session that opens it is sent home.
     await page.goto('/portal/calendar');
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('h2')).toContainText('Campus Events & Holidays Calendar');
+    await expect(page).toHaveURL(/\/dashboard$/);
   });
 });

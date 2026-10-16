@@ -77,9 +77,9 @@ test.describe('FR-M12: Circular Publishing with Attachments', () => {
     // Verify status changes to unpublished in desk
     await expect(circularRow.getByText('unpublished')).toBeVisible({ timeout: 10000 });
 
-    // 9. Verify Parent Portal Circulars route exists and renders cleanly
+    // 9. The Parent Portal is for guardians (the guardian view is covered by
+    //    portal-access-guard.spec.ts): a staff session that opens it is sent home.
     await page.goto('/portal/circulars');
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('h2')).toContainText('Official School Circulars');
+    await expect(page).toHaveURL(/\/dashboard$/);
   });
 });
