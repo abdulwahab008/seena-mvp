@@ -61,9 +61,9 @@ select is((select count(*)::int from public.v_drilldown_outstanding where bucket
 select is((select live_value from public.fn_metric_reconcile('outstanding', null, app.fn_karachi_today())), 180000000::numeric, 'live equals the aggregate while nothing has changed');
 select is((select exceeds_tolerance from public.fn_metric_reconcile('outstanding', null, app.fn_karachi_today())), false, 'AC2: no notice while they agree');
 reset role;
--- a back-dated receipt of 2,000,000 paisa lands after the last aggregate refresh
+-- a back-dated receipt lands after the last aggregate refresh (never for DR0214, whose challan is larger than the 8,400 PKR paid)
 insert into public.fee_payment (tenant_id, campus_id, enrolment_id, amount_paisa, mode, value_date, reference_no)
-select tenant_id, campus_id, id, 840000, 'cash', current_date - 3, 'drill-1' from public.enrolment where tenant_id = :'tenant_id' order by id limit 1 returning id as pay_id \gset
+select e.tenant_id, e.campus_id, e.id, 840000, 'cash', current_date - 3, 'drill-1' from public.enrolment e join public.student s on s.id = e.student_id where e.tenant_id = :'tenant_id' and s.gr_number <> 'DR0214' order by e.id limit 1 returning id as pay_id \gset
 insert into public.fee_payment_allocation (payment_id, challan_id, fee_head_id, amount_paisa)
 select :'pay_id', c.id, :'head_id', 840000 from public.fee_challan c where c.enrolment_id = (select enrolment_id from public.fee_payment where id = :'pay_id');
 set local role authenticated;
@@ -74,7 +74,7 @@ select is((select delta_pct from public.fn_metric_reconcile('outstanding', :'cam
 select is((select exceeds_tolerance from public.fn_metric_reconcile('outstanding', :'campus_a'::uuid, app.fn_karachi_today())), false, 'a 0.47% gap is inside the 0.5% tolerance');
 reset role;
 insert into public.fee_payment (tenant_id, campus_id, enrolment_id, amount_paisa, mode, value_date, reference_no)
-select tenant_id, campus_id, id, 840000, 'cash', current_date - 2, 'drill-2' from public.enrolment where tenant_id = :'tenant_id' order by id offset 1 limit 1 returning id as pay2_id \gset
+select e.tenant_id, e.campus_id, e.id, 840000, 'cash', current_date - 2, 'drill-2' from public.enrolment e join public.student s on s.id = e.student_id where e.tenant_id = :'tenant_id' and s.gr_number <> 'DR0214' order by e.id offset 1 limit 1 returning id as pay2_id \gset
 insert into public.fee_payment_allocation (payment_id, challan_id, fee_head_id, amount_paisa)
 select :'pay2_id', c.id, :'head_id', 840000 from public.fee_challan c where c.enrolment_id = (select enrolment_id from public.fee_payment where id = :'pay2_id');
 set local role authenticated;
