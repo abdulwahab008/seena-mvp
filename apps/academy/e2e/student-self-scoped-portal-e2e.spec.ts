@@ -138,7 +138,6 @@ test.describe('FR-N09: Student self-scoped portal', () => {
       .single();
     expect(studentRow).toBeTruthy();
     const grNumber = studentRow!.gr_number;
-    const initialPassword = `Seena@${studentRow!.gr_digits || '123456'}`;
 
     // Create Guardian for Student Six (for AC 1 & AC 3 checks)
     const { data: parentUser } = await db.auth.admin.createUser({
@@ -304,6 +303,10 @@ test.describe('FR-N09: Student self-scoped portal', () => {
 
     const bilalAccount = (provisioned as any[]).find((p) => p.student_id === studentId);
     expect(bilalAccount).toBeTruthy();
+    // First passwords are random; the provisioning call is the only place they are handed out.
+    const initialPassword = bilalAccount.initial_password as string;
+    expect(initialPassword).toBeTruthy();
+    expect(initialPassword).not.toContain('Seena@');
 
     // Verify must_change_password flag is true
     const { data: spaRow } = await db
