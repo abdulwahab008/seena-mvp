@@ -1,5 +1,8 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { requireSession } from '@/lib/auth/require-session';
+import { isNoSchoolRedirect, portalRedirectFor } from '@/lib/auth/portal-access';
+import { supabaseServer } from '@/lib/supabase/server';
 import { getLang } from '@/lib/i18n/server';
 import { dirFor, t, type MessageKey } from '@/lib/i18n/messages';
 import { LanguageToggle } from '@/components/language-toggle';
@@ -31,9 +34,33 @@ const PORTAL_LINKS: { href: string; key: MessageKey }[] = [
 // (FR-C11) actually land in.
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   // Guardians reach the portal through their own activation flow, which
-  // creates no app_user row, so this intentionally checks only for a session
-  // — the /no-school membership rule belongs to the staff app, not here.
-  await requireSession();
+  // creates no app_user row, so the /no-school membership rule of the staff app
+  // does not apply here.
+  const user = await requireSession();
+
+  // Only a guardian may render any portal page. The pages below pick "this
+  // guardian's children" with an unfiltered enrolment query and trust row-level
+  // security to have narrowed it; for staff that policy is campus-wide, so a staff
+  // or student session that typed a portal URL used to see every child in the
+  // campus (and a real fee balance) here. See lib/auth/portal-access.ts.
+  const supabase = await supabaseServer();
+  const { data: verified } = await supabase.auth.getClaims();
+  const target = portalRedirectFor(verified?.claims.app_role);
+  if (target) {
+    if (isNoSchoolRedirect(target)) {
+      // A guardian whose token predates being linked to a child carries the role
+      // 'none' until it refreshes; they still own a guardian row and belong here.
+      const { data: guardian } = await supabase
+        .from('guardian')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .maybeSingle();
+      if (!guardian) redirect(target);
+    } else {
+      redirect(target);
+    }
+  }
+
   const lang = await getLang();
 
   return (
