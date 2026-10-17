@@ -3,11 +3,21 @@ import { seedFeesTenant, SEED_PASSWORD } from './support/fees-seed';
 
 // FR-Q02: a bed holds one student; a second request is refused; a transfer moves the stay in one step.
 
+// The allocations page lists only stays that are open or end today or later, so the dates are relative to today.
+const addDays = (iso: string, n: number): string => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+
 test('allocating the same bed twice is refused and a transfer moves the stay', async ({ page }) => {
   test.setTimeout(150000);
   const { db, owner$, email, tenant, campusId } = await seedFeesTenant(2, 'bed-e2e');
   const block = await owner$.rpc('create_hostel_block', { p_campus_id: campusId, p_code: 'IQ', p_name: 'Iqbal Block', p_gender: 'male', p_rooms: 20, p_beds_per_room: 4 });
   expect(block.error).toBeNull();
+  const start = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
+  const second = addDays(start, 1);
+  const moveOn = addDays(start, 5);
   const { data: students } = await db.from('student').select('gr_number').eq('tenant_id', tenant).order('gr_number');
   expect(students).toHaveLength(2);
 
@@ -22,26 +32,26 @@ test('allocating the same bed twice is refused and a transfer moves the stay', a
   const form = page.getByTestId('bed-form');
   await form.getByLabel(/GR number/).fill(students![0]!.gr_number);
   await form.getByLabel(/Bed code/).fill('IQ-105-B3');
-  await form.getByLabel(/Starts on/).fill('2026-08-01');
+  await form.getByLabel(/Starts on/).fill(start);
   await page.getByTestId('bed-form-submit').click();
   await expect(page.getByTestId('stay-row')).toHaveCount(1);
 
   await form.getByLabel(/GR number/).fill(students![1]!.gr_number);
   await form.getByLabel(/Bed code/).fill('IQ-105-B3');
-  await form.getByLabel(/Starts on/).fill('2026-09-01');
+  await form.getByLabel(/Starts on/).fill(second);
   await page.getByTestId('bed-form-submit').click();
   await expect(page.getByTestId('bed-form-error')).toContainText('BED_TAKEN');
 
   const transfer = page.getByTestId('transfer-form');
   await transfer.getByLabel(/GR number/).fill(students![0]!.gr_number);
   await transfer.getByLabel(/New bed code/).fill('IQ-210-B1');
-  await transfer.getByLabel(/Moves on/).fill('2026-10-05');
+  await transfer.getByLabel(/Moves on/).fill(moveOn);
   await page.getByTestId('transfer-form-submit').click();
   await expect(page.getByTestId('stay-row')).toHaveCount(2);
 
   const { data: stays } = await db.from('hostel_allocation').select('starts_on, ends_on').eq('tenant_id', tenant).order('starts_on');
   expect(stays).toEqual([
-    { starts_on: '2026-08-01', ends_on: '2026-10-04' },
-    { starts_on: '2026-10-05', ends_on: null },
+    { starts_on: start, ends_on: addDays(moveOn, -1) },
+    { starts_on: moveOn, ends_on: null },
   ]);
 });
