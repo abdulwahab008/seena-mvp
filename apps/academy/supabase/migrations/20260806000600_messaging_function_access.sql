@@ -1608,6 +1608,187 @@ begin
 end;
 $function$;
 
+-- public.apply_receipt (provider webhook form). The webhooks call it with the service role; staff on the
+-- Receipts and Fallback screens call it signed in, so it checks the tenant instead of being service-only.
+create or replace function public.apply_receipt(p_provider text, p_payload jsonb, p_tenant_id uuid DEFAULT NULL::uuid)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+declare
+  v_provider_ref text;
+  v_raw_status text;
+  v_mapped_status public.attempt_status;
+  v_attempt record;
+  v_current_rank int;
+  v_new_rank int;
+  v_tenant_id uuid;
+  v_receipt_id uuid;
+  v_school boolean := app.auth_tenant_id() is not null;
+begin
+  -- A school session acts on its own school only (an omitted tenant means its own); the service role,
+  -- cron and the provider webhooks (which have no school session) keep working across tenants.
+  p_tenant_id := app.fn_comm_scope_tenant(p_tenant_id);
+  v_tenant_id := p_tenant_id;
+
+  -- Extract provider reference and status from common payload shapes
+  v_provider_ref := coalesce(
+    p_payload->>'provider_ref',
+    p_payload->>'message_id',
+    p_payload->>'id',
+    p_payload->>'sms_id',
+    p_payload->>'sid'
+  );
+
+  if v_provider_ref is null or trim(v_provider_ref) = '' then
+    raise exception 'MISSING_PROVIDER_REF';
+  end if;
+
+  v_raw_status := lower(coalesce(
+    p_payload->>'status',
+    p_payload->>'event',
+    p_payload->>'delivery_status',
+    'unknown'
+  ));
+
+  -- Normalize raw provider status to attempt_status
+  case v_raw_status
+    when 'delivered', 'dlr_delivered', 'read', 'received' then
+      v_mapped_status := 'delivered'::public.attempt_status;
+    when 'failed', 'dlr_failed', 'undelivered', 'bounced', 'rejected' then
+      v_mapped_status := 'failed'::public.attempt_status;
+    when 'expired', 'dlr_expired' then
+      v_mapped_status := 'expired'::public.attempt_status;
+    when 'sent', 'transferred' then
+      v_mapped_status := 'sent'::public.attempt_status;
+    when 'submitted', 'buffered', 'queued' then
+      v_mapped_status := 'submitted'::public.attempt_status;
+    else
+      v_mapped_status := 'unknown'::public.attempt_status;
+  end case;
+
+  -- Locate matching attempt
+  select ma.id, ma.message_id, ma.status, m.tenant_id
+  into v_attempt
+  from public.message_attempt ma
+  join public.message m on m.id = ma.message_id
+  where ma.provider_ref = v_provider_ref
+    and (not v_school or m.tenant_id = p_tenant_id)
+  limit 1;
+
+  -- AC 3: If no attempt matches provider_ref, write to dead_letter_receipt
+  if v_attempt.id is null then
+    if v_tenant_id is null then
+      -- Fallback to first active tenant if tenant context was not provided by webhook
+      select id into v_tenant_id from public.tenant where status = 'active' order by created_at asc limit 1;
+    end if;
+
+    if v_tenant_id is null then
+      select id into v_tenant_id from public.tenant limit 1;
+    end if;
+
+    insert into public.dead_letter_receipt (
+      tenant_id,
+      provider,
+      provider_ref,
+      payload,
+      reason,
+      received_at,
+      expires_at
+    ) values (
+      v_tenant_id,
+      p_provider,
+      v_provider_ref,
+      p_payload,
+      'attempt_not_found',
+      clock_timestamp(),
+      clock_timestamp() + interval '30 days'
+    );
+
+    return jsonb_build_object(
+      'success', true,
+      'action', 'dead_letter',
+      'provider_ref', v_provider_ref,
+      'reason', 'attempt_not_found'
+    );
+  end if;
+
+  v_tenant_id := v_attempt.tenant_id;
+
+  -- Record receipt audit row regardless of whether state advances
+  insert into public.message_receipt (
+    tenant_id,
+    message_attempt_id,
+    provider,
+    provider_ref,
+    status,
+    raw,
+    received_at
+  ) values (
+    v_tenant_id,
+    v_attempt.id,
+    p_provider,
+    v_provider_ref,
+    v_mapped_status,
+    p_payload,
+    clock_timestamp()
+  ) returning id into v_receipt_id;
+
+  -- AC 1: Monotonic state machine check
+  -- Check ranks: queued/sending (1) -> submitted (2) -> sent (3) -> delivered/failed/expired (4)
+  v_current_rank := public.comm_status_rank(v_attempt.status);
+  v_new_rank := public.comm_status_rank(v_mapped_status);
+
+  -- Only advance forward. If current is terminal (rank 4), or new rank <= current rank, state is unchanged
+  if v_current_rank < 4 and v_new_rank > v_current_rank then
+    update public.message_attempt
+    set
+      status = v_mapped_status,
+      completed_at = case when v_new_rank = 4 then clock_timestamp() else completed_at end,
+      raw_response = coalesce(raw_response, '{}'::jsonb) || jsonb_build_object('latest_dlr', p_payload)
+    where id = v_attempt.id;
+
+    -- Update parent message status
+    if v_mapped_status = 'delivered' then
+      update public.message
+      set status = 'delivered'::public.message_status,
+          final_status = 'delivered'::public.message_status,
+          updated_at = clock_timestamp()
+      where id = v_attempt.message_id;
+    elsif v_mapped_status in ('failed', 'expired') then
+      update public.message
+      set status = v_mapped_status::text::public.message_status,
+          final_status = v_mapped_status::text::public.message_status,
+          updated_at = clock_timestamp()
+      where id = v_attempt.message_id;
+    elsif v_mapped_status = 'sent' then
+      update public.message
+      set status = 'sent'::public.message_status,
+          updated_at = clock_timestamp()
+      where id = v_attempt.message_id and status in ('queued', 'claimed', 'sending');
+    end if;
+
+    return jsonb_build_object(
+      'success', true,
+      'action', 'advanced',
+      'previous_status', v_attempt.status,
+      'new_status', v_mapped_status,
+      'receipt_id', v_receipt_id
+    );
+  else
+    -- State rejected backwards or already at terminal status; state unchanged, receipt audited
+    return jsonb_build_object(
+      'success', true,
+      'action', 'preserved',
+      'status', v_attempt.status,
+      'ignored_status', v_mapped_status,
+      'receipt_id', v_receipt_id
+    );
+  end if;
+end;
+$function$;
+
 -- ── who may call what ─────────────────────────────────────────────────────────────
 
 -- Nothing signed out. Every overload of each name.
@@ -1665,7 +1846,6 @@ begin
            'resolve_student_login', 'sla_due', 'student_matches_segment',
            'wa_window_open'
          ])
-         or p.oid = to_regprocedure('public.apply_receipt(text, jsonb, uuid)')
        )
   loop
     execute format('revoke execute on function %s from authenticated', r.sig);

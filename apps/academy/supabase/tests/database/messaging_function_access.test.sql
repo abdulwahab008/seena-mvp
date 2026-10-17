@@ -5,7 +5,7 @@
 -- touched: claim another school's queued messages, top up or drain its wallet, forge delivery
 -- receipts, publish its circulars.
 begin;
-select plan(29);
+select plan(36);
 
 select public.provision_tenant('test-msg-access-a', 'Messaging Access A', 'owner@msgaccess-a.test');
 select public.provision_tenant('test-msg-access-b', 'Messaging Access B', 'owner@msgaccess-b.test');
@@ -57,9 +57,10 @@ select is(
   'functions only the worker and other functions call are not open to signed-in users either'
 );
 select ok(
-  not has_function_privilege('authenticated', 'public.apply_receipt(text, jsonb, uuid)'::regprocedure, 'execute')
+  not has_function_privilege('anon', 'public.apply_receipt(text, jsonb, uuid)'::regprocedure, 'execute')
+  and has_function_privilege('authenticated', 'public.apply_receipt(text, jsonb, uuid)'::regprocedure, 'execute')
   and has_function_privilege('service_role', 'public.apply_receipt(text, jsonb, uuid)'::regprocedure, 'execute'),
-  'the provider webhook form of apply_receipt is service role only'
+  'the provider form of apply_receipt is closed to signed-out callers (the Receipts screen and the webhooks call it)'
 );
 select ok(
   has_function_privilege('authenticated', 'public.apply_receipt(uuid, text, text, jsonb)'::regprocedure, 'execute'),
@@ -77,6 +78,11 @@ select public.seed_default_segments(:'tenant_b'::uuid);
 select id as segment_b from public.message_segment where tenant_id = :'tenant_b' limit 1 \gset
 insert into public.wa_template (tenant_id, meta_template_name, body_text) values (:'tenant_b', 'b_template', 'Hello') returning id as template_b \gset
 select gen_random_uuid() as worker_id \gset
+select id as msg_a from public.message where tenant_id = :'tenant_a' limit 1 \gset
+select id as msg_b from public.message where tenant_id = :'tenant_b' limit 1 \gset
+insert into public.message_attempt (message_id, attempt_number, provider_ref, status, dispatched_at, channel)
+values (:'msg_a', 1, 'ACCESS-REF-A', 'sent', now() - interval '1 hour', 'sms'),
+       (:'msg_b', 1, 'ACCESS-REF-B', 'sent', now() - interval '1 hour', 'sms');
 
 -- ── a staff member of school A ───────────────────────────────────────────────
 set local role authenticated;
@@ -99,10 +105,15 @@ select throws_ok(format($$ select public.unpublish_circular(%L) $$, :'circular_b
 select throws_ok(format($$ select * from public.resolve_segment(%L) $$, :'segment_b'), 'FORBIDDEN', 'nor read another school''s audience, guardian numbers and dues');
 select throws_ok(format($$ select public.sync_wa_template_status(%L, 'APPROVED') $$, :'template_b'), 'FORBIDDEN', 'nor approve another school''s WhatsApp template');
 select throws_like(format($$ select public.publish_circular(%L) $$, gen_random_uuid()), 'CIRCULAR_NOT_FOUND%', 'a record that does not exist is still reported as not found');
+select is(public.apply_receipt('sms_aggregator', '{"provider_ref":"ACCESS-REF-A","status":"delivered"}'::jsonb, null) ->> 'action', 'advanced', 'staff can apply a delivery receipt to their own school''s attempt (tenant left out)');
+select is(public.apply_receipt('sms_aggregator', '{"provider_ref":"ACCESS-REF-B","status":"delivered"}'::jsonb, null) ->> 'action', 'dead_letter', 'another school''s provider reference is not found for them, so it is set aside');
+select throws_ok(format($$ select public.apply_receipt('sms_aggregator', '{"provider_ref":"ACCESS-REF-B","status":"delivered"}'::jsonb, %L) $$, :'tenant_b'), 'FORBIDDEN', 'and they cannot name the other school');
 reset role;
 
 select is((select count(*)::int from public.message where tenant_id = :'tenant_b' and status = 'queued'), 2, 'school B''s queue was left alone');
 select is((select status from public.circular where id = :'circular_b'), 'draft', 'and school B''s circular is still a draft');
+select is((select status::text from public.message_attempt where provider_ref = 'ACCESS-REF-B'), 'sent', 'and school B''s attempt was not advanced by school A');
+select is((select tenant_id from public.dead_letter_receipt where provider_ref = 'ACCESS-REF-B' limit 1), :'tenant_a'::uuid, 'the set-aside receipt belongs to school A');
 
 -- ── a parent of school A ─────────────────────────────────────────────────────
 set local role authenticated;
@@ -110,6 +121,7 @@ select set_config('request.jwt.claims', json_build_object('role', 'authenticated
 select throws_ok(format($$ select public.top_up_comm_wallet(%L, 1) $$, :'tenant_a'), 'FORBIDDEN', 'a parent cannot top up the wallet');
 select throws_ok(format($$ select * from public.claim_message_batch(%L, 10) $$, :'worker_id'), 'FORBIDDEN', 'cannot claim the outbound queue');
 select throws_ok(format($$ select public.publish_circular(%L) $$, :'circular_a'), 'FORBIDDEN', 'and cannot publish a circular');
+select throws_ok($$ select public.apply_receipt('sms_aggregator', '{"provider_ref":"ACCESS-REF-A","status":"failed"}'::jsonb, null) $$, 'FORBIDDEN', 'and cannot forge a delivery receipt');
 reset role;
 
 -- ── a signed-in user who belongs to no school ────────────────────────────────
@@ -125,6 +137,7 @@ select is((select count(*)::int from public.claim_message_batch(:'worker_id'::uu
 select set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
 select lives_ok(format($$ select public.top_up_comm_wallet(%L, 100) $$, :'tenant_b'), 'the service role can still top up any school');
 select lives_ok(format($$ select public.publish_circular(%L) $$, :'circular_b'), 'and publish any school''s circular');
+select is(public.apply_receipt('sms_aggregator', '{"provider_ref":"ACCESS-REF-B","status":"delivered"}'::jsonb, null) ->> 'action', 'advanced', 'and a provider webhook still reaches any school''s attempt by its reference');
 select set_config('request.jwt.claims', '', true);
 select is(
   (select balance_paisa from public.tenant_comm_wallet where tenant_id = :'tenant_a'), 5000::bigint,
