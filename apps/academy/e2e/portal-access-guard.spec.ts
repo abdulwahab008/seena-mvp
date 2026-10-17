@@ -26,8 +26,6 @@ test('only a guardian can open the parent portal; staff and students are sent ho
 
   const { data: enrolment } = await db.from('enrolment').select('student_id').eq('id', challan.enrolment_id).single();
   const studentId = enrolment!.student_id as string;
-  const { data: student } = await db.from('student').select('name_en').eq('id', studentId).single();
-  const childName = student!.name_en as string;
 
   // A guardian, built the way guardian activation builds one: an auth user and a guardian
   // row pointing at it, no app_user row.
@@ -81,7 +79,10 @@ test('only a guardian can open the parent portal; staff and students are sent ho
   await page.goto('/portal/fees');
   await expect(page).toHaveURL(/\/portal\/fees$/);
   await expect(page.getByRole('heading', { level: 2 })).toContainText('Fee Dues & Billing');
-  await expect(page.getByText(childName).first()).toBeVisible();
+  // The name only shows in the switcher for two or more children; the page has a child when it is not the empty state.
+  await expect(page.getByTestId('portal-fees-page')).toBeVisible();
+  await expect(page.getByTestId('portal-fees-empty')).toHaveCount(0);
+  await expect(page.getByTestId('fees-outstanding-balance')).toBeVisible();
 
   // The two portal pages that used to be checked from a staff session, now from the guardian's.
   await page.goto('/portal/circulars');

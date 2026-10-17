@@ -92,9 +92,9 @@ test.describe('FR-M13: Circular Read Receipts', () => {
     await statsModal.getByRole('button', { name: 'Close' }).click();
     await expect(statsModal).toBeHidden();
 
-    // 9. Navigate to Portal Circulars and verify parent view
+    // 9. The Parent Portal is for guardians (the guardian view is covered by
+    //    portal-access-guard.spec.ts): a staff session that opens it is sent home.
     await page.goto('/portal/circulars');
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('h2')).toContainText('Official School Circulars');
+    await expect(page).toHaveURL(/\/dashboard$/);
   });
 });
