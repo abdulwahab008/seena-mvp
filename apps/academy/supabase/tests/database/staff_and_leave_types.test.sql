@@ -35,7 +35,7 @@ select is(
 
 select public.create_staff(:'campus_id'::uuid, 'John Foreign Teacher', 'male', p_id_document_type => 'passport', p_passport_no => 'AB1234567') as foreign_id \gset
 select is(
-  (select cnic from public.staff where id = :'foreign_id'),
+  (select cnic from public.staff_identity(:'foreign_id')),
   null,
   'a passport-documented staff member has no CNIC recorded'
 );
