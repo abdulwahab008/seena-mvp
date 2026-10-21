@@ -194,6 +194,7 @@ export function AppHeader({
             <SidebarContent
               schoolName={schoolName}
               features={features}
+              role={role}
               onNavigate={() => setDrawer(false)}
               reserveCloseSpace
             />

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { NAV_SECTIONS, findActiveItem, type NavSection } from '@/lib/navigation';
+import { NAV_SECTIONS, findActiveItem, navSectionsForRole, type NavSection } from '@/lib/navigation';
 import { visibleNavSections, type FeatureSet } from '@/lib/features';
 
 function SectionGroup({
@@ -107,6 +107,7 @@ function SectionGroup({
 export function SidebarContent({
   schoolName,
   features,
+  role,
   onNavigate,
   /** Leaves room for the drawer's close button so it never sits on the name. */
   reserveCloseSpace = false,
@@ -118,11 +119,17 @@ export function SidebarContent({
    * as its icon, which cannot cross the server/client boundary.
    */
   features?: FeatureSet;
+  /**
+   * The signed-in user's role: sections like Fees are only for the roles that use them. Presentation
+   * only; each page and the data behind it are gated by its own guard and by row-level security.
+   */
+  role?: string;
   onNavigate?: () => void;
   reserveCloseSpace?: boolean;
 }) {
   const pathname = usePathname();
-  const sections = features ? visibleNavSections(NAV_SECTIONS, features) : NAV_SECTIONS;
+  const forRole = navSectionsForRole(NAV_SECTIONS, role);
+  const sections = features ? visibleNavSections(forRole, features) : forRole;
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
@@ -154,17 +161,19 @@ export function SidebarContent({
 export function Sidebar({
   schoolName,
   features,
+  role,
   /** FR-A16: the impersonation banner owns the top 2.75rem of the viewport. */
   impersonating = false,
 }: {
   schoolName: string;
   features?: FeatureSet;
+  role?: string;
   impersonating?: boolean;
 }) {
   return (
     <aside className="hidden w-64 shrink-0 border-r border-sidebar-border lg:block">
       <div className={cn('fixed bottom-0 left-0 w-64', impersonating ? 'top-11' : 'top-0')}>
-        <SidebarContent schoolName={schoolName} features={features} />
+        <SidebarContent schoolName={schoolName} features={features} role={role} />
       </div>
     </aside>
   );

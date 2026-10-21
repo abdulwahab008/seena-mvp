@@ -23,6 +23,7 @@ import {
   MessageSquare,
   type LucideIcon,
 } from 'lucide-react';
+import { FEE_STAFF_ROLES } from '@/lib/auth/fee-access';
 
 export type NavItem = {
   href: string;
@@ -35,6 +36,12 @@ export type NavItem = {
    * are gated in the database.
    */
   feature?: string;
+  /**
+   * Roles that see the item. Presentation only, like `feature`: the route and the data behind it
+   * are gated by the route's own guard and by row-level security. An item with no `roles` is for
+   * everyone; a session whose role is unknown sees none of the items that have them.
+   */
+  roles?: readonly string[];
 };
 
 export type NavSection = {
@@ -43,6 +50,9 @@ export type NavSection = {
   icon: LucideIcon;
   items: NavItem[];
 };
+
+/** The fee staff, plus the admissions officer for the two fees pages their admissions work uses. */
+const FEES_ADMISSIONS_ROLES = [...FEE_STAFF_ROLES, 'admissions_officer'] as const;
 
 /**
  * The app's information architecture. Sections mirror how a school is actually
@@ -221,22 +231,22 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Fees',
     icon: Wallet,
     items: [
-      { href: '/fees/heads', label: 'Fee Heads' },
-      { href: '/fees/structure', label: 'Fee Structure' },
-      { href: '/fees/challans', label: 'Challans' },
-      { href: '/fees/counter', label: 'Cash Counter' },
-      { href: '/fees/defaulters', label: 'Defaulters' },
-      { href: '/fees/reminders', label: 'Reminders' },
-      { href: '/fees/settlements', label: 'Withdrawal Settlements' },
-      { href: '/fees/no-dues', label: 'Deposits and No-Dues' },
-      { href: '/fees/gateway-settlements', label: 'Gateway Settlements' },
-      { href: '/fees/attendance-concessions', label: 'Attendance Concessions' },
-      { href: '/fees/concessions', label: 'Concessions' },
-      { href: '/fees/sibling-discounts', label: 'Sibling Discounts' },
-      { href: '/fees/late-fee-rules', label: 'Late Fee Rules' },
-      { href: '/fees/gateways', label: 'Online Payments' },
-      { href: '/fees/bank-statements', label: 'Bank Statements' },
-      { href: '/fees/reports', label: 'Collection Reports' },
+      { href: '/fees/heads', label: 'Fee Heads', roles: FEE_STAFF_ROLES },
+      { href: '/fees/structure', label: 'Fee Structure', roles: FEE_STAFF_ROLES },
+      { href: '/fees/challans', label: 'Challans', roles: FEE_STAFF_ROLES },
+      { href: '/fees/counter', label: 'Cash Counter', roles: FEE_STAFF_ROLES },
+      { href: '/fees/defaulters', label: 'Defaulters', roles: FEE_STAFF_ROLES },
+      { href: '/fees/reminders', label: 'Reminders', roles: FEE_STAFF_ROLES },
+      { href: '/fees/settlements', label: 'Withdrawal Settlements', roles: FEE_STAFF_ROLES },
+      { href: '/fees/no-dues', label: 'Deposits and No-Dues', roles: FEE_STAFF_ROLES },
+      { href: '/fees/gateway-settlements', label: 'Gateway Settlements', roles: FEE_STAFF_ROLES },
+      { href: '/fees/attendance-concessions', label: 'Attendance Concessions', roles: FEE_STAFF_ROLES },
+      { href: '/fees/concessions', label: 'Concessions', roles: FEES_ADMISSIONS_ROLES },
+      { href: '/fees/sibling-discounts', label: 'Sibling Discounts', roles: FEES_ADMISSIONS_ROLES },
+      { href: '/fees/late-fee-rules', label: 'Late Fee Rules', roles: FEE_STAFF_ROLES },
+      { href: '/fees/gateways', label: 'Online Payments', roles: FEE_STAFF_ROLES },
+      { href: '/fees/bank-statements', label: 'Bank Statements', roles: FEE_STAFF_ROLES },
+      { href: '/fees/reports', label: 'Collection Reports', roles: FEE_STAFF_ROLES },
     ],
   },
   {
@@ -412,4 +422,17 @@ export function breadcrumbsFor(pathname: string): Crumb[] {
     crumbs.push({ label: active.label, href: active.href });
   }
   return crumbs;
+}
+
+/**
+ * Drops the items the role may not see, and any section left with nothing in it. Presentation
+ * only: see NavItem.roles.
+ */
+export function navSectionsForRole(sections: NavSection[], role: string | undefined): NavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => !item.roles || (role !== undefined && item.roles.includes(role))),
+    }))
+    .filter((section) => section.items.length > 0);
 }

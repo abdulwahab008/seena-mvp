@@ -9,6 +9,7 @@ import { LedgerView, type LedgerEntryRow } from './ledger-view';
 import { PaymentView, type PaymentRow } from './payment-view';
 import { ElectiveChoiceView, type ElectiveBucket } from './elective-choice-view';
 import { DeleteStudentControl } from './delete-student-control';
+import { canSeeConcessionAwards, hasFeeAccess } from '@/lib/auth/fee-access';
 
 // supabase-js types every embedded to-one relation as a possible array —
 // the FK is unique per enrolment/section row, so it's really ever 0 or 1.
@@ -58,8 +59,15 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     supabase.from('app_user').select('app_role').eq('user_id', user!.id).single(),
   ]);
 
+  // Fee data (plan, payments, ledger) is for the fee staff; the admissions officer also sees concession
+  // awards, which they request. The database returns nothing to anyone else, which would read as "no
+  // fees", so those sections are left out for them.
+  const role = appUser?.app_role;
+  const showFees = hasFeeAccess(role);
+  const showAwards = canSeeConcessionAwards(role);
+
   let feePlanLines: FeePlanLineRow[] = [];
-  if (enrolment) {
+  if (enrolment && showFees) {
     const { data: plan } = await supabase.from('fee_plan').select('id').eq('enrolment_id', enrolment.id).maybeSingle();
     if (plan) {
       const { data: lineRows } = await supabase
@@ -82,7 +90,6 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     }
   }
 
-  const role = appUser?.app_role;
   const canAdjust = role === 'super_admin' || role === 'owner' || role === 'accountant';
   const canApprove = role === 'super_admin' || role === 'owner' || role === 'principal';
   const canRequestAward =
@@ -101,7 +108,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     .order('code');
 
   let awards: AwardRow[] = [];
-  if (enrolment) {
+  if (enrolment && showAwards) {
     const { data: awardRows } = await supabase
       .from('concession_award')
       .select(
@@ -127,7 +134,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
   let ledgerEntries: LedgerEntryRow[] = [];
   let balancePaisa = 0;
-  if (enrolment) {
+  if (enrolment && showFees) {
     const [{ data: ledgerRows }, { data: balance }] = await Promise.all([
       supabase
         .from('fee_ledger')
@@ -150,7 +157,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   }
 
   let payments: PaymentRow[] = [];
-  if (enrolment) {
+  if (enrolment && showFees) {
     const { data: paymentRows } = await supabase
       .from('fee_payment')
       .select('id, amount_paisa, mode, value_date, reference_no')
@@ -252,12 +259,14 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <GuardianForm studentId={student.id} />
       </section>
 
-      <section className="space-y-2">
-        <h2 className="text-lg font-medium">Fees</h2>
-        <FeePlanView studentId={student.id} lines={feePlanLines} canAdjust={canAdjust} canApprove={canApprove} />
-      </section>
+      {showFees && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-medium">Fees</h2>
+          <FeePlanView studentId={student.id} lines={feePlanLines} canAdjust={canAdjust} canApprove={canApprove} />
+        </section>
+      )}
 
-      {enrolment && (
+      {enrolment && showAwards && (
         <section className="space-y-2">
           <h2 className="text-lg font-medium">Concession awards</h2>
           <ConcessionAwardView
@@ -270,14 +279,14 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         </section>
       )}
 
-      {enrolment && (
+      {enrolment && showFees && (
         <section className="space-y-2">
           <h2 className="text-lg font-medium">Payments</h2>
           <PaymentView studentId={student.id} enrolmentId={enrolment.id} payments={payments} canRecord={canRecordPayment} />
         </section>
       )}
 
-      {enrolment && (
+      {enrolment && showFees && (
         <section className="space-y-2">
           <h2 className="text-lg font-medium">Ledger</h2>
           <LedgerView

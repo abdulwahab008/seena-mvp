@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader, Stat } from '@/components/ui/page-header';
+import { canCollectFees, hasFeeAccess } from '@/lib/auth/fee-access';
 import { Badge } from '@/components/ui/badge';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,7 @@ function formatPkr(paisa: number) {
 
 const QUICK_LINKS = [
   { href: '/attendance/register', label: 'Mark attendance', icon: BadgeCheck },
-  { href: '/fees/counter', label: 'Collect fees', icon: Wallet },
+  { href: '/fees/counter', label: 'Collect fees', icon: Wallet, collectorsOnly: true },
   { href: '/students', label: 'Find a student', icon: Users },
   { href: '/exams/marks', label: 'Enter marks', icon: GraduationCap },
 ];
@@ -38,6 +39,13 @@ export default async function DashboardPage() {
   const supabase = await supabaseServer();
   const today = new Date().toISOString().slice(0, 10);
 
+  // Fee figures are for the people who handle fees (the database returns nothing to anyone else, which
+  // would read as "nothing outstanding"), so the card and the cash-counter link are theirs alone.
+  const { data: verified } = await supabase.auth.getClaims();
+  const role = verified?.claims.app_role;
+  const showFees = hasFeeAccess(role);
+  const quickLinks = QUICK_LINKS.filter((l) => !l.collectorsOnly || canCollectFees(role));
+
   // RLS scopes every one of these to the caller's tenant and campuses, so the
   // dashboard needs no tenant filter of its own.
   const [students, staff, sections, attendanceToday, unpaid, recentStudents] = await Promise.all([
@@ -45,7 +53,9 @@ export default async function DashboardPage() {
     supabase.from('staff').select('id', { count: 'exact', head: true }).eq('employment_status', 'active'),
     supabase.from('class_section').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('attendance_day').select('status').eq('attendance_date', today),
-    supabase.from('fee_challan').select('net_paisa, status').neq('status', 'paid').is('deleted_at', null),
+    showFees
+      ? supabase.from('fee_challan').select('net_paisa, status').neq('status', 'paid').is('deleted_at', null)
+      : Promise.resolve({ data: [] as { net_paisa: number | null; status: string }[] }),
     supabase
       .from('student')
       .select('id, name_en, gr_number, created_at')
@@ -67,7 +77,11 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         title="Dashboard"
-        description="Today at a glance — enrolment, staffing, attendance and outstanding fees."
+        description={
+          showFees
+            ? 'Today at a glance — enrolment, staffing, attendance and outstanding fees.'
+            : 'Today at a glance — enrolment, staffing and attendance.'
+        }
       />
 
       <section aria-label="Key figures" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -84,49 +98,51 @@ export default async function DashboardPage() {
       </section>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-base">Outstanding fees</CardTitle>
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/fees/challans">
-                View challans
-                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {unpaidCount === 0 ? (
-              <EmptyState
-                icon={Wallet}
-                title="Nothing outstanding"
-                description="Every generated challan has been settled."
-                className="border-0 py-8"
-              />
-            ) : (
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="tabular text-3xl font-semibold tracking-tight text-foreground">
-                    {formatPkr(outstandingPaisa)}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    across <span className="tabular font-medium text-foreground">{unpaidCount}</span> unpaid{' '}
-                    {unpaidCount === 1 ? 'challan' : 'challans'}
-                  </p>
+        {showFees && (
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-base">Outstanding fees</CardTitle>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/fees/challans">
+                  View challans
+                  <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {unpaidCount === 0 ? (
+                <EmptyState
+                  icon={Wallet}
+                  title="Nothing outstanding"
+                  description="Every generated challan has been settled."
+                  className="border-0 py-8"
+                />
+              ) : (
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="tabular text-3xl font-semibold tracking-tight text-foreground">
+                      {formatPkr(outstandingPaisa)}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      across <span className="tabular font-medium text-foreground">{unpaidCount}</span> unpaid{' '}
+                      {unpaidCount === 1 ? 'challan' : 'challans'}
+                    </p>
+                  </div>
+                  <Button asChild size="sm">
+                    <Link href="/fees/counter">Open cash counter</Link>
+                  </Button>
                 </div>
-                <Button asChild size="sm">
-                  <Link href="/fees/counter">Open cash counter</Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Quick actions</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2">
-            {QUICK_LINKS.map(({ href, label, icon: Icon }) => (
+            {quickLinks.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
