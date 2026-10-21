@@ -42,7 +42,7 @@ test('only the fee staff see the fees area; the admissions officer keeps two pag
   await signIn(page, teacherEmail);
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   await expect(feesNav(page)).toHaveCount(0);
-  await expect(page.getByText('Outstanding fees')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Outstanding fees' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Collect fees' })).toHaveCount(0);
   for (const path of ['/fees/challans', '/fees/counter', '/fees/concessions', '/fees/reports']) {
     await page.goto(path);
@@ -62,7 +62,7 @@ test('only the fee staff see the fees area; the admissions officer keeps two pag
   // 2. An accountant keeps all of it.
   await signIn(page, accountantEmail);
   await expect(feesNav(page)).toBeVisible();
-  await expect(page.getByText('Outstanding fees')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Outstanding fees' })).toBeVisible();
   await page.goto('/fees/challans');
   await expect(page).toHaveURL(/\/fees\/challans$/);
   await page.goto(`/students/${studentId}`);
