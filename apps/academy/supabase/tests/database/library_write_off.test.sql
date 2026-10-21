@@ -66,6 +66,7 @@ update public.library_loan set due_on = :'today'::date - 24 where id = (:'loan1'
 select public.accrue_library_fines(:'today'::date);
 select sum(amount)::bigint as accrued from public.library_fine where loan_id = (:'loan1'::jsonb ->> 'loan_id')::uuid \gset
 select is(:'accrued'::bigint, 12000::bigint, 'precondition: PKR 120 of accrued fine');
+select set_config('request.jwt.claims', json_build_object('sub', :'acct_uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select public.student_balance(:'enrol_a'::uuid) as bal_before \gset
 set local role authenticated;
 
@@ -74,12 +75,15 @@ select set_config('request.jwt.claims', json_build_object('sub', :'lib_uid', 'te
 select public.write_off_copy(:'w1'::uuid, 'multiple', 1.5) as wo1 \gset
 select is((:'wo1'::jsonb ->> 'ok')::boolean, true, 'the write-off succeeds');
 select is((:'wo1'::jsonb ->> 'charge_amount')::bigint, 139500::bigint, 'AC1: charge = 850 x 1.5 + 120 = PKR 1,395');
+-- the ledger is read by finance roles; check what the write-off posted as the database owner
+reset role;
 select is((select count(*) from public.fee_ledger where source_type = 'library_write_off' and source_id = (:'wo1'::jsonb ->> 'write_off_id')::uuid), 1::bigint, 'AC1: a single ledger entry is posted');
 select is((select amount_paisa from public.fee_ledger where source_id = (:'wo1'::jsonb ->> 'write_off_id')::uuid), 139500::bigint, 'AC1: for PKR 1,395');
 select is((select h.code from public.fee_ledger l join public.fee_head h on h.id = l.fee_head_id where l.source_id = (:'wo1'::jsonb ->> 'write_off_id')::uuid), 'LIB_RECOVERY', 'AC1: under head LIB_RECOVERY');
 select is((select direction::text from public.fee_ledger where source_id = (:'wo1'::jsonb ->> 'write_off_id')::uuid), 'debit', 'AC1: as a debit on the student''s account');
 select is((select enrolment_id from public.fee_ledger where source_id = (:'wo1'::jsonb ->> 'write_off_id')::uuid), :'enrol_a'::uuid, 'AC1: on the same fee ledger (the borrower''s enrolment)');
 reset role;
+select set_config('request.jwt.claims', json_build_object('sub', :'acct_uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is(public.student_balance(:'enrol_a'::uuid) - :'bal_before'::bigint, 139500::bigint, 'the student''s balance (derived from the ledger) rises by PKR 1,395');
 select is((select status::text from public.library_copy where id = :'w1'::uuid), 'written_off', 'the copy is written off');
 select ok((select returned_at is not null and return_condition = 'lost' from public.library_loan where id = (:'loan1'::jsonb ->> 'loan_id')::uuid), 'the loan is closed as lost');
@@ -97,12 +101,16 @@ select throws_ok(format($$ select public.register_library_copy(%L, %L, 'LIB-2024
 select public.reverse_write_off((:'wo1'::jsonb ->> 'write_off_id')::uuid, 'Book found behind the shelf') as rev1 \gset
 select is((:'rev1'::jsonb ->> 'ok')::boolean, true, 'AC2: the write-off is reversed');
 select is((select status::text from public.library_copy where id = :'w1'::uuid), 'available', 'AC2: the copy returns to available');
+reset role;
 select is((select count(*) from public.fee_ledger where source_id = (:'wo1'::jsonb ->> 'write_off_id')::uuid and entry_type = 'charge'), 1::bigint, 'AC2: the original charge row remains');
 select is((select count(*) from public.fee_ledger where reversal_of_id = (select fee_ledger_id from public.library_write_off where id = (:'wo1'::jsonb ->> 'write_off_id')::uuid)), 1::bigint, 'AC2: and a credit note references it');
 select is((select direction::text || ':' || amount_paisa from public.fee_ledger where id = (:'rev1'::jsonb ->> 'credit_note_id')::uuid), 'credit:139500', 'AC2: reversing the full PKR 1,395');
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :'lib_uid', 'tenant_id', :'tenant_id', 'app_role', 'librarian', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is((select count(*) from public.library_write_off where copy_id = :'w1'::uuid), 2::bigint, 'AC2: the write-off row and its reversal are both kept');
 select is((select reversed_at is not null from public.library_write_off where id = (:'wo1'::jsonb ->> 'write_off_id')::uuid), true, 'the original is stamped reversed');
 reset role;
+select set_config('request.jwt.claims', json_build_object('sub', :'acct_uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is(public.student_balance(:'enrol_a'::uuid), :'bal_before'::bigint, 'the balance is back to where it started');
 select is((select count(*) from public.library_fine where loan_id = (:'loan1'::jsonb ->> 'loan_id')::uuid and status = 'outstanding'), 24::bigint, 'the late fines are owed again after the reversal');
 set local role authenticated;
@@ -113,7 +121,10 @@ select throws_ok(format($$ select public.register_library_copy(%L, %L, 'LIB-2024
 -- ── other bases, other borrowers ──────────────────────────────────────────
 select is((public.write_off_copy(:'w2'::uuid, 'multiple', 1.5) ->> 'charge_amount')::bigint, 0::bigint, 'a copy lost from the shelf with no open loan is written off at no charge');
 select is((public.write_off_copy(:'w3'::uuid, 'purchase_cost') ->> 'charge_amount')::bigint, 85000::bigint, 'the purchase_cost basis charges the plain cost (PKR 850)');
+reset role;
 select is((select count(*) from public.fee_ledger where source_type = 'library_write_off'), 1::bigint, 'a staff borrower''s recovery is not posted to a student fee ledger');
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :'lib_uid', 'tenant_id', :'tenant_id', 'app_role', 'librarian', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select ok((select recovery_note like 'Staff borrower%' from public.library_write_off where copy_id = :'w3'::uuid), 'it is recorded on the write-off for payroll recovery');
 select throws_ok(format($$ select public.write_off_copy(%L, 'market') $$, :'w4'), 'MARKET_VALUE_REQUIRED', 'the market basis needs a value');
 select throws_ok(format($$ select public.write_off_copy(%L, 'multiple') $$, :'w5'), 'PURCHASE_COST_MISSING', 'a copy with no purchase cost cannot be priced by multiple');

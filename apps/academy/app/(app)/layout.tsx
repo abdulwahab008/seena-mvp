@@ -127,7 +127,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className={cn('flex min-h-screen bg-background', imp && 'pt-11')}>
       {banner}
-      <Sidebar schoolName={schoolName} features={features} impersonating={!!imp} />
+      <Sidebar schoolName={schoolName} features={features} role={appUser.app_role} impersonating={!!imp} />
       <div className="flex min-w-0 flex-1 flex-col">
         <AppHeader
           email={user.email ?? 'Signed in'}

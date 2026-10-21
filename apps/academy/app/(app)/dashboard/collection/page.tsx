@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation';
 import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
+import { FEES_DENIED_HOME, hasFeeAccess } from '@/lib/auth/fee-access';
 import { formatPct } from '@/lib/format-money';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -15,6 +17,12 @@ function currentMonth(): string {
 export default async function CollectionDashboardPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
   const supabase = await supabaseServer();
+
+  // Collection figures are for the fee staff and the vice principal (the aggregate views the page reads
+  // are limited to them in the database); anyone else would only see an empty page.
+  const { data: verified } = await supabase.auth.getClaims();
+  const role = verified?.claims.app_role;
+  if (!hasFeeAccess(role) && role !== 'vice_principal') redirect(FEES_DENIED_HOME);
 
   const { data: due } = await supabase.rpc('fee_collection_refresh_due');
   if (due) await supabaseServiceRole().rpc('refresh_fee_collection_metrics');

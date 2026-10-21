@@ -51,6 +51,8 @@ select set_config('request.jwt.claims', json_build_object('sub', :'tm_uid', 'ten
 select sid as s_a, eid as e_a from stu where n = 1 \gset
 select public.allocate_transport(:'s_a'::uuid, :'stop_b'::uuid, :'stop_b'::uuid, '2026-08-11') as alloc_a \gset
 select public.post_transport_charges('2026-08-01');
+-- the ledger is read by finance roles: check what was posted as the accountant
+select set_config('request.jwt.claims', json_build_object('sub', :'acct_uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is((select amount_paisa from public.fee_ledger where source_id = :'alloc_a'::uuid and value_date = '2026-08-01'), 237100::bigint, 'AC2: pro-rata August charge is 3,500 x 21/31 = PKR 2,371');
 select is(public.prorate_transport_fee(:'alloc_a'::uuid, '2026-09-01'), 350000::bigint, 'AC2: September onward is the full PKR 3,500');
 select is((select count(*) from public.fee_ledger where source_id = :'alloc_a'::uuid and value_date = '2026-08-01'), 1::bigint, 'posting twice does not duplicate the August line');
@@ -63,7 +65,10 @@ select set_config('request.jwt.claims', json_build_object('sub', :'tm_uid', 'ten
 select sid as s_b from stu where n = 2 \gset
 select public.allocate_transport(:'s_b'::uuid, :'stop_b'::uuid, :'stop_b'::uuid, '2026-08-11') as alloc_b \gset
 select public.post_transport_charges('2026-08-01');
+-- the ledger is read by finance roles: check what was posted as the accountant
+select set_config('request.jwt.claims', json_build_object('sub', :'acct_uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is((select amount_paisa from public.fee_ledger where source_id = :'alloc_b'::uuid and value_date = '2026-08-01'), 350000::bigint, 'AC3: with full-month policy the same allocation charges the full PKR 3,500');
+select set_config('request.jwt.claims', json_build_object('sub', :'tm_uid', 'tenant_id', :'tenant_id', 'app_role', 'transport_manager', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 
 -- ── AC1: seat capacity of the assigned vehicle ──────────────────────────────
 select public.allocate_transport(sid, :'stop_b'::uuid, :'stop_b'::uuid, '2026-08-11') from stu where n between 3 and 42 order by n;
@@ -116,6 +121,8 @@ select set_config('request.jwt.claims', json_build_object('sub', :'tm_uid', 'ten
 select sid as s_e from stu where n = 45 \gset
 select public.allocate_transport(:'s_e'::uuid, :'stop_b2'::uuid, :'stop_b2'::uuid, '2026-10-01') as alloc_e \gset
 select public.move_transport_allocation(:'s_e'::uuid, :'stop_c'::uuid, :'stop_c'::uuid, '2026-10-16') as alloc_e2 \gset
+-- the ledger is read by finance roles: check what was posted as the accountant
+select set_config('request.jwt.claims', json_build_object('sub', :'acct_uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is((select sum(case direction when 'debit' then amount_paisa else -amount_paisa end)::bigint from public.fee_ledger where source_id in (:'alloc_e'::uuid, :'alloc_e2'::uuid) and value_date = '2026-10-01'), 420000::bigint, 'full-month policy: a move up a zone costs the dearest slab once, not both');
 
 -- ── Parent reads own child only, with route and stop times ─────────────────
