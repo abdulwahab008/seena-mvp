@@ -240,6 +240,15 @@ export function SubjectSetup({
                 </option>
               ))}
             </select>
+            {options.length === 0 && (
+              <p className="text-sm text-muted-foreground" data-testid="no-class-subjects">
+                No class offers a subject yet. Map subjects to classes in{' '}
+                <Link href="/academic-setup/curriculum" className="underline">
+                  Curriculum mapping
+                </Link>{' '}
+                first, then come back to set their marks.
+              </p>
+            )}
           </div>
 
           {/* Quick Assessment Presets */}
@@ -343,12 +352,11 @@ export function SubjectSetup({
       )}
 
       <p className="text-sm text-muted-foreground" data-testid="mark-entry-link">
-        Entering marks against this setup is{' '}
+        Teachers enter marks against this setup in{' '}
         <Link href="/exams/marks" className="underline">
           Mark entry
         </Link>
-        {' '}. The read-only preview that used to sit here was a stub for that grid and is gone now that the
-        grid is real — one surface, not two.
+        .
       </p>
     </div>
   );
