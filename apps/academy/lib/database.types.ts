@@ -24812,6 +24812,106 @@ export type Database = {
           },
         ]
       }
+      payslip: {
+        Row: {
+          campus_id: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          run_line_id: string
+          sha256: string
+          staff_id: string
+          storage_path: string
+          tenant_id: string
+          version: number
+        }
+        Insert: {
+          campus_id: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          run_line_id: string
+          sha256: string
+          staff_id: string
+          storage_path: string
+          tenant_id: string
+          version: number
+        }
+        Update: {
+          campus_id?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          run_line_id?: string
+          sha256?: string
+          staff_id?: string
+          storage_path?: string
+          tenant_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'payslip_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payslip_run_line_id_fkey'
+            columns: ['run_line_id']
+            isOneToOne: false
+            referencedRelation: 'payroll_run_line'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payslip_staff_id_fkey'
+            columns: ['staff_id']
+            isOneToOne: false
+            referencedRelation: 'staff'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payslip_tenant_id_fkey'
+            columns: ['tenant_id']
+            isOneToOne: false
+            referencedRelation: 'tenant'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      payslip_denied_access: {
+        Row: {
+          attempted_at: string
+          attempted_by: string | null
+          id: string
+          payslip_id: string
+          tenant_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          attempted_by?: string | null
+          id?: string
+          payslip_id: string
+          tenant_id: string
+        }
+        Update: {
+          attempted_at?: string
+          attempted_by?: string | null
+          id?: string
+          payslip_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'payslip_denied_access_tenant_id_fkey'
+            columns: ['tenant_id']
+            isOneToOne: false
+            referencedRelation: 'tenant'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       payroll_run_line_component: {
         Row: {
           amount_paisa: number
@@ -45453,6 +45553,13 @@ export type Database = {
         Returns: Json
       }
       counter_session_totals: { Args: { p_session_id: string }; Returns: Json }
+      payslip_payload: { Args: { p_run_line_id: string }; Returns: Json }
+      payslip_run_lines: { Args: { p_run_id: string }; Returns: { line_id: string; staff_id: string }[] }
+      record_payslip_denied: { Args: { p_payslip_id: string }; Returns: undefined }
+      register_payslip: {
+        Args: { p_generated_by?: string; p_run_line_id: string; p_sha256: string; p_storage_path: string; p_version: number }
+        Returns: string
+      }
       countersign_counter_session: {
         Args: { p_remark: string; p_session_id: string }
         Returns: undefined
