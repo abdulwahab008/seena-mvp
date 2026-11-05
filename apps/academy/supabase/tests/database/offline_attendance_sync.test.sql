@@ -41,7 +41,7 @@ select set_config(
 -- The AC's own scenario, literally: the register is tapped at 08:20 on
 -- the device and does not reach the server until much later.
 select gen_random_uuid() as key1 \gset
-select ((current_date + time '08:20') at time zone 'Asia/Karachi') as captured1 \gset
+select least((current_date + time '08:20') at time zone 'Asia/Karachi', now() - interval '10 minutes') as captured1 \gset
 
 -- ── AC2: the same idempotency key three times over ───────────────────
 

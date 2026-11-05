@@ -23,6 +23,7 @@ import {
   XCircle,
   Percent,
 } from 'lucide-react';
+import { todayPk } from '@/lib/dates';
 
 interface Props {
   initialComponents: SalaryComponentRow[];
@@ -423,7 +424,7 @@ export function ComponentsDesk({ initialComponents }: Props) {
               id="effective_from"
               name="effective_from"
               type="date"
-              defaultValue={selectedComp?.effective_from || new Date().toISOString().slice(0, 10)}
+              defaultValue={selectedComp?.effective_from || todayPk()}
               required
             />
           </div>

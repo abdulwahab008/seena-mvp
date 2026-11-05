@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
+import { todayPk } from '@/lib/dates';
 
 /** One row of v_grading_scheme. */
 export type GradingSchemeRow = {
@@ -63,7 +64,7 @@ const blankBand = (): GradingBandInput => ({
   remarkUr: undefined,
 });
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayPk();
 
 /**
  * FR-J01's configuration screen.

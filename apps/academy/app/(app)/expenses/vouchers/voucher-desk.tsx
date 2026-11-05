@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { todayPk } from '@/lib/dates';
 
 // Radix's Select.Item rejects an empty-string value; '' is this page's
 // "all" sentinel, mapped the same way every other filtered page here does.
@@ -28,7 +29,7 @@ type Campus = { id: string; code: string; name: string };
 
 const INITIAL: SubmitVoucherState = { error: null };
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayPk();
 
 export function VoucherDesk({
   role,

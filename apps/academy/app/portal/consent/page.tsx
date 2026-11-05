@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { PortalConsentForm, type PortalPurpose } from './portal-consent-form';
+import { todayPk } from '@/lib/dates';
 
 export default async function PortalConsentPage({ searchParams }: { searchParams: Promise<{ child?: string }> }) {
   const { child: childParam } = await searchParams;
@@ -32,7 +33,7 @@ export default async function PortalConsentPage({ searchParams }: { searchParams
       : Promise.resolve({ data: [] as never[] }),
   ]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPk();
   const currentText = new Map<string, string>();
   for (const t of textRows ?? []) {
     if (t.effective_from <= today && !currentText.has(t.purpose_code)) currentText.set(t.purpose_code, t.body_en);

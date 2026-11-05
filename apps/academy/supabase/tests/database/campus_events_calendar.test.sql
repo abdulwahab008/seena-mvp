@@ -87,8 +87,8 @@ values (
   :'campus_1_id',
   'Iqbal Day Holiday',
   'holiday',
-  '2026-10-15 00:00:00+00'::timestamptz,
-  '2026-10-15 23:59:59+00'::timestamptz,
+  '2026-10-15 00:00:00+05'::timestamptz,
+  '2026-10-15 23:59:59+05'::timestamptz,
   true,
   'Public Holiday'
 )

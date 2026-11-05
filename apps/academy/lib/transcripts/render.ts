@@ -3,6 +3,7 @@ import { checkGlyphCoverage, parseCmapRanges, resolveNastaliqFont } from '@/lib/
 import { RendererUnavailableError, renderPdf, stampPdfTimestamps } from '@/lib/pdf/render';
 import { sha256Hex } from '@/lib/certificates/seal';
 import { buildTranscriptHtml, collectTranscriptStrings, type TranscriptSnapshot } from './html';
+import { todayPk } from '@/lib/dates';
 
 /**
  * FR-J13: everything after issue_transcript() has committed — the
@@ -50,7 +51,7 @@ export async function renderAndStoreTranscript(supabase: ServerClient, issued: I
       : fail('The transcript could not be rendered, so none was produced.', 'RENDER_FAILED');
   }
   // The document's own date, not the clock: a re-render is the same bytes.
-  const bytes = stampPdfTimestamps(new Uint8Array(pdf), new Date(`${issued.snapshot.issued_on ?? new Date().toISOString().slice(0, 10)}T00:00:00Z`));
+  const bytes = stampPdfTimestamps(new Uint8Array(pdf), new Date(`${issued.snapshot.issued_on ?? todayPk()}T00:00:00Z`));
 
   const { error: uploadError } = await supabase.storage
     .from('transcripts')

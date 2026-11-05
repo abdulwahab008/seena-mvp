@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
+import { todayPk } from '@/lib/dates';
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  return todayPk();
 }
 
 export function UnmarkedView({ campusId }: { campusId: string }) {

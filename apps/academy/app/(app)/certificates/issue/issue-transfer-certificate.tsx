@@ -14,6 +14,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
+import { todayPk } from '@/lib/dates';
 
 export type CandidateRow = {
   id: string;
@@ -70,7 +71,7 @@ export function IssueTransferCertificate({
   const [pending, startTransition] = useTransition();
 
   const [enrolmentId, setEnrolmentId] = useState<string>(candidates[0]?.id ?? '');
-  const [leavingDate, setLeavingDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [leavingDate, setLeavingDate] = useState<string>(todayPk());
   const [reason, setReason] = useState('');
   const [conduct, setConduct] = useState('Good');
   const [template, setTemplate] = useState<string>(templates[0] ? templateValue(templates[0]) : '');

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
+import { todayPk } from '@/lib/dates';
 
 export type SegmentType = 'defaulters' | 'absent_today' | 'custom';
 
@@ -189,7 +190,7 @@ export async function resolveSegmentPreview(
   const { client } = await resolveTenantAndCampus();
 
   try {
-    const targetDate = asOf || new Date().toISOString().slice(0, 10);
+    const targetDate = asOf || todayPk();
     const { data, error } = await client.rpc('resolve_segment', {
       p_segment_id: segmentId,
       p_as_of: targetDate,
@@ -369,7 +370,7 @@ export async function dispatchCampaignAudienceSnapshot(
   const { client } = await resolveTenantAndCampus();
 
   try {
-    const targetDate = asOf || new Date().toISOString().slice(0, 10);
+    const targetDate = asOf || todayPk();
     const { data, error } = await client.rpc('snapshot_campaign_audience', {
       p_campaign_id: campaignId,
       p_segment_id: segmentId,

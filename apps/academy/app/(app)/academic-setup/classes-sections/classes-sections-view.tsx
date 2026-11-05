@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Modal } from '@/components/ui/modal';
 import { DatePicker } from '@/components/ui/date-picker';
 import { createSection, assignClassTeacher } from './actions';
+import { todayPk } from '@/lib/dates';
 
 export interface ClassesSectionsViewProps {
   campus: { id: string; name: string; code: string } | null;
@@ -70,7 +71,7 @@ export function ClassesSectionsView({
   const [assignModalOpen, setAssignModalOpen] = React.useState(false);
   const [targetSection, setTargetSection] = React.useState<{ id: string; name: string; className: string } | null>(null);
   const [selectedStaffId, setSelectedStaffId] = React.useState('');
-  const [effectiveDate, setEffectiveDate] = React.useState(new Date().toISOString().slice(0, 10));
+  const [effectiveDate, setEffectiveDate] = React.useState(todayPk());
   const [isAssigning, startAssignTransition] = React.useTransition();
 
   // Filter classes
@@ -133,7 +134,7 @@ export function ClassesSectionsView({
   const handleOpenAssignModal = (sec: { id: string; name: string }, className: string) => {
     setTargetSection({ id: sec.id, name: sec.name, className });
     setSelectedStaffId(teacherAssignmentMap[sec.id] ?? '');
-    setEffectiveDate(new Date().toISOString().slice(0, 10));
+    setEffectiveDate(todayPk());
     setAssignModalOpen(true);
   };
 
