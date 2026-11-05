@@ -113,3 +113,25 @@ export function emailVerificationEmail({ url, schoolName }: { url: string; schoo
     ].join('\n'),
   };
 }
+
+export function staffInvitationEmail({ url, schoolName, roleLabel }: { url: string; schoolName: string; roleLabel: string }) {
+  return {
+    subject: `You're invited to join ${schoolName} on Seena Academy`,
+    html: layout({
+      schoolName,
+      heading: `Join ${schoolName}`,
+      body: `<p style="margin:0;">You have been invited to ${escapeHtml(schoolName)} as <strong>${escapeHtml(roleLabel)}</strong>. Set a password to start using Seena Academy.</p>`,
+      cta: { label: 'Accept invitation', url },
+      footnote: 'This invitation expires in 14 days. If you were not expecting it, you can ignore this email.',
+    }),
+    text: [
+      `Join ${schoolName}`,
+      '',
+      `You have been invited to ${schoolName} as ${roleLabel}.`,
+      'Open this link to set a password:',
+      url,
+      '',
+      'This invitation expires in 14 days.',
+    ].join('\n'),
+  };
+}

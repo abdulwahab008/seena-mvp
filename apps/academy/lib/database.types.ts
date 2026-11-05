@@ -49891,7 +49891,7 @@ export type Database = {
       }
       seed_tenant_roles: { Args: { p_tenant_id: string }; Returns: undefined }
       send_guardian_invite: {
-        Args: { p_channel: string; p_guardian_id: string }
+        Args: { p_base_url?: string; p_channel: string; p_guardian_id: string }
         Returns: Json
       }
       set_academic_terms: {

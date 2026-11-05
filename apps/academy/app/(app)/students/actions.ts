@@ -13,6 +13,7 @@ import {
   recordPaymentSchema,
   setStudentElectiveChoiceSchema,
 } from '@/lib/validation';
+import { siteUrl } from '@/lib/auth/recovery';
 import { supabaseServer } from '@/lib/supabase/server';
 import { assignRollNumberAfterEnrolment } from '@/lib/enrolment-roll';
 
@@ -105,7 +106,7 @@ export async function linkGuardianToStudent(studentId: string, _prev: LinkGuardi
   return { error: null };
 }
 
-export type SendGuardianInviteState = { error: string | null; result: { token: string; expiresAt: string } | null };
+export type SendGuardianInviteState = { error: string | null; result: { link: string; expiresAt: string; queued: boolean } | null };
 
 // FR-C11: send (or re-send, superseding any outstanding one) a portal
 // activation link. The raw token only ever exists in this one response —
@@ -119,7 +120,7 @@ export async function sendGuardianPortalInvite(
   _formData: FormData,
 ): Promise<SendGuardianInviteState> {
   const supabase = await supabaseServer();
-  const { data, error } = await supabase.rpc('send_guardian_invite', { p_guardian_id: guardianId, p_channel: channel });
+  const { data, error } = await supabase.rpc('send_guardian_invite', { p_guardian_id: guardianId, p_channel: channel, p_base_url: siteUrl() });
   if (error) {
     if (error.message.includes('GUARDIAN_PHONE_MISSING')) return { error: 'This guardian has no phone number on file.', result: null };
     if (error.message.includes('GUARDIAN_ALREADY_ACTIVE')) return { error: 'This guardian already has a portal account.', result: null };
@@ -127,8 +128,11 @@ export async function sendGuardianPortalInvite(
     return { error: 'Could not send the invite.', result: null };
   }
 
-  const payload = data as { token: string; expires_at: string };
-  return { error: null, result: { token: payload.token, expiresAt: payload.expires_at } };
+  const payload = data as { token: string; expires_at: string; queued?: boolean };
+  return {
+    error: null,
+    result: { link: `${siteUrl()}/guardian/activate/${payload.token}`, expiresAt: payload.expires_at, queued: payload.queued === true },
+  };
 }
 
 export type EnrolStudentState = { error: string | null };

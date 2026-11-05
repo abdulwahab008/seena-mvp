@@ -2,39 +2,71 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { supabaseServer } from '@/lib/supabase/server';
+import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
+import { STAFF_ROLES } from '@/lib/staff-roles';
+import { deliverInvitation, type InviteDelivery } from '@/lib/staff-invite';
+import { siteUrl } from '@/lib/auth/recovery';
 
-const CORE_STAFF_ROLES = [
-  'principal',
-  'admissions_officer',
-  'accountant',
-  'exam_controller',
-  'subject_teacher',
-  'hr_manager',
-] as const;
+const CORE_STAFF_ROLES = STAFF_ROLES;
 
 const InviteSchema = z.object({
   email: z.string().email('Must be a valid email address'),
   role: z.enum(CORE_STAFF_ROLES),
 });
 
-export type InviteState = { error: string | null };
+export type InviteState = { error: string | null; delivery?: InviteDelivery | null };
 
 export async function inviteStaff(campusId: string, _prev: InviteState, formData: FormData): Promise<InviteState> {
   const parsed = InviteSchema.safeParse({ email: formData.get('email'), role: formData.get('role') });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
 
   const supabase = await supabaseServer();
-  const { error } = await supabase.rpc('invite_user', {
+  const { data: invitationId, error } = await supabase.rpc('invite_user', {
     p_email: parsed.data.email,
     p_role: parsed.data.role,
     p_campus_ids: [campusId],
   });
   if (error) {
-    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to invite staff.' };
-    return { error: 'Could not send invitation.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Your role cannot invite someone as this role.' };
+    return { error: 'Could not create the invitation.' };
   }
 
+  const delivery = await deliverInvitation(invitationId);
+  revalidatePath('/staff');
+  return { error: null, delivery };
+}
+
+// Only someone who could have created the invitation may see its link or change it.
+async function manageableInvitation(invitationId: string): Promise<string | null> {
+  const supabase = await supabaseServer();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return 'You are not signed in.';
+  const { data: me } = await supabase.from('app_user').select('tenant_id, app_role').eq('user_id', auth.user.id).maybeSingle();
+  if (!me || !['owner', 'principal', 'super_admin'].includes(me.app_role)) return 'You do not have permission to manage invitations.';
+  const { data: inv } = await supabaseServiceRole().from('tenant_invitation').select('tenant_id, accepted_at').eq('id', invitationId).maybeSingle();
+  if (!inv || inv.tenant_id !== me.tenant_id) return 'Invitation not found.';
+  if (inv.accepted_at) return 'This invitation has already been accepted.';
+  return null;
+}
+
+export async function getInvitationLink(invitationId: string): Promise<{ error: string | null; delivery?: InviteDelivery | null }> {
+  const denied = await manageableInvitation(invitationId);
+  if (denied) return { error: denied };
+  const { data } = await supabaseServiceRole().from('tenant_invitation').select('token').eq('id', invitationId).single();
+  return { error: null, delivery: { link: `${siteUrl()}/accept-invite/${data?.token}`, emailed: false, note: null } };
+}
+
+export async function resendInvitation(invitationId: string): Promise<{ error: string | null; delivery?: InviteDelivery | null }> {
+  const denied = await manageableInvitation(invitationId);
+  if (denied) return { error: denied };
+  return { error: null, delivery: await deliverInvitation(invitationId) };
+}
+
+export async function revokeInvitation(invitationId: string): Promise<{ error: string | null }> {
+  const denied = await manageableInvitation(invitationId);
+  if (denied) return { error: denied };
+  const { error } = await supabaseServiceRole().from('tenant_invitation').delete().eq('id', invitationId);
+  if (error) return { error: 'Could not revoke the invitation.' };
   revalidatePath('/staff');
   return { error: null };
 }
@@ -62,6 +94,7 @@ const RegisterStaffSchema = z.object({
 export async function registerStaffMember(formData: FormData): Promise<{
   error: string | null;
   data?: { staff_id: string; employee_code: string; full_name: string; invitation_id?: string | null };
+  delivery?: InviteDelivery | null;
 }> {
   const emailVal = formData.get('email');
   const deptVal = formData.get('departmentId');
@@ -126,5 +159,7 @@ export async function registerStaffMember(formData: FormData): Promise<{
   revalidatePath('/staff');
   revalidatePath('/staff/directory');
   revalidatePath('/staff/departments');
-  return { error: null, data: data as any };
+  const created = data as { staff_id: string; employee_code: string; full_name: string; invitation_id?: string | null };
+  const delivery = created.invitation_id ? await deliverInvitation(created.invitation_id) : null;
+  return { error: null, data: created, delivery };
 }

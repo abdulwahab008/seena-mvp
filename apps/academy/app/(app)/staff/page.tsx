@@ -1,7 +1,9 @@
 import { supabaseServer } from '@/lib/supabase/server';
-import { Card, CardContent } from '@/components/ui/card';
 import { InviteForm } from './invite-form';
 import { AddStaffModal } from './add-staff-modal';
+import { InvitationRow } from './invitation-row';
+import { roleLabel } from '@/lib/staff-roles';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +20,7 @@ export default async function StaffPage() {
   const { data: subjects } = await supabase.from('subject').select('id, name_en, code').order('name_en');
   const { data: departments } = await supabase.from('department').select('id, name_en, code, name_ur').order('code');
 
-  const firstCampus = campuses?.[0];
+  const firstCampus = (await pickActiveCampus(campuses));
 
   return (
     <div className="space-y-6">
@@ -26,7 +28,7 @@ export default async function StaffPage() {
         <div>
           <h1 className="text-2xl font-semibold">Staff Management</h1>
           <p className="text-sm text-muted-foreground">
-            FR-A07 — Register official school staff records or send fast-track email invitations.
+            Register staff for HR and payroll, or invite someone to sign in.
           </p>
         </div>
         {firstCampus && (
@@ -41,7 +43,9 @@ export default async function StaffPage() {
       {firstCampus && (
         <div className="space-y-2 rounded-lg border p-4 bg-muted/10">
           <h2 className="text-sm font-semibold text-foreground">Quick Email Invitation</h2>
-          <p className="text-xs text-muted-foreground">Invite a staff member via email to create their own password and profile.</p>
+          <p className="text-xs text-muted-foreground">
+            Creates a sign-in only. To put someone on HR records and payroll, use Register Staff Member and give their email there.
+          </p>
           <InviteForm campusId={firstCampus.id} />
         </div>
       )}
@@ -51,14 +55,13 @@ export default async function StaffPage() {
           <p className="text-sm text-muted-foreground">No pending invitations.</p>
         ) : (
           invitations.map((i) => (
-            <Card key={i.id} data-testid={`invite-row-${i.email}`}>
-              <CardContent className="flex items-center justify-between p-3 text-sm">
-                <span>
-                  {i.email} — {i.app_role.replace(/_/g, ' ')}
-                </span>
-                <span className="text-muted-foreground">expires {new Date(i.expires_at).toLocaleDateString()}</span>
-              </CardContent>
-            </Card>
+            <InvitationRow
+              key={i.id}
+              id={i.id}
+              email={i.email}
+              role={roleLabel(i.app_role)}
+              expires={new Date(i.expires_at).toLocaleDateString('en-GB', { timeZone: 'Asia/Karachi', day: 'numeric', month: 'short', year: 'numeric' })}
+            />
           ))
         )}
       </div>
