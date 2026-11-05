@@ -261,6 +261,7 @@ export function RunDetailDesk({ run, lines }: Props) {
                 <th className="py-3.5 px-4">Attendance Ded.</th>
                 <th className="py-3.5 px-4">Tax Withheld</th>
                 <th className="py-3.5 px-4">Loan Recovery</th>
+                <th className="py-3.5 px-4">Other Ded.</th>
                 <th className="py-3.5 px-4">Net Salary</th>
                 <th className="py-3.5 px-4 text-right">Payslip</th>
               </tr>
@@ -297,6 +298,9 @@ export function RunDetailDesk({ run, lines }: Props) {
                   </td>
                   <td className="py-3.5 px-4 text-rose-600 dark:text-rose-400">
                     {l.loan_recovery_paisa > 0 ? formatPkr(l.loan_recovery_paisa) : '-'}
+                  </td>
+                  <td className="py-3.5 px-4 text-rose-600 dark:text-rose-400" title="Statutory and other deductions, such as EOBI">
+                    {l.other_deductions_paisa > 0 ? formatPkr(l.other_deductions_paisa) : '-'}
                   </td>
                   <td className="py-3.5 px-4 font-bold text-emerald-600 dark:text-emerald-400">
                     {formatPkr(l.net_paisa)}
