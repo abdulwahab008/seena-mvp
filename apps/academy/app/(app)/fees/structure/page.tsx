@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { StructureView, type StructureRow, type StructureLineRow, type StructureHistoryRow } from './structure-view';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 function one<T>(v: T | T[] | null): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
@@ -42,7 +43,7 @@ export default async function FeeStructurePage() {
     supabase.from('fee_head').select('id, code, name_en').eq('is_active', true).order('code'),
   ]);
 
-  const campus = campuses?.[0];
+  const campus = (await pickActiveCampus(campuses));
   const session = sessions?.[0];
 
   let structure: StructureRow = null;

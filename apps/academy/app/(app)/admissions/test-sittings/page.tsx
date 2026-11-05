@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { SittingForm } from './sitting-form';
 import { SittingList, type SittingRow, type EligibleApplication, type CandidateRow } from './sitting-list';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 function one<T>(v: T | T[] | null): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
@@ -10,10 +11,10 @@ export default async function TestSittingsPage() {
   const supabase = await supabaseServer();
 
   const [{ data: campuses }, { data: classLevels }] = await Promise.all([
-    supabase.from('campus').select('id, name, code').eq('status', 'active').order('code').limit(1),
+    supabase.from('campus').select('id, name, code').eq('status', 'active').order('code'),
     supabase.from('class_level').select('id, name_en, code').eq('is_active', true).order('ordinal'),
   ]);
-  const activeCampus = campuses?.[0];
+  const activeCampus = (await pickActiveCampus(campuses));
   const campusId = activeCampus?.id;
 
   const { data: sessions } = campusId

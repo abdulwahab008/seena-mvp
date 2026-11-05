@@ -10,6 +10,7 @@ import { breadcrumbsFor } from '@/lib/navigation';
 import type { FeatureSet } from '@/lib/features';
 import { SidebarContent } from './sidebar';
 import { GlobalSearch } from './global-search';
+import { CampusSwitcher, type CampusOption } from './campus-switcher';
 
 function Breadcrumbs() {
   const pathname = usePathname();
@@ -124,12 +125,16 @@ export function AppHeader({
   features,
   /** FR-A16: the impersonation banner is fixed to the top, so the header sticks below it. */
   impersonating = false,
+  campuses = [],
+  activeCampusId = null,
 }: {
   email: string;
   role: string;
   schoolName: string;
   features?: FeatureSet;
   impersonating?: boolean;
+  campuses?: CampusOption[];
+  activeCampusId?: string | null;
 }) {
   const [drawer, setDrawer] = React.useState(false);
   const pathname = usePathname();
@@ -167,6 +172,7 @@ export function AppHeader({
         <Breadcrumbs />
 
         <div className="ml-auto flex items-center gap-2">
+          <CampusSwitcher campuses={campuses} activeId={activeCampusId} />
           <GlobalSearch />
           <UserMenu email={email} role={role} />
         </div>

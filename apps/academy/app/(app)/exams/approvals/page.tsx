@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { MARK_APPROVER_ROLES } from '@/lib/validation';
 import { ApprovalBoard } from './approval-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-I16. The Exam Controller's sign-off screen.
@@ -40,8 +41,8 @@ export default async function MarkApprovalsPage({ searchParams }: { searchParams
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')

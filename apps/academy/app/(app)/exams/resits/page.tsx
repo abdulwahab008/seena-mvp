@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { ResitBoard } from './resit-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J14. Re-sit and improvement attempts, kept beside the original paper.
@@ -18,8 +19,8 @@ export default async function ResitsPage({ searchParams }: { searchParams: Promi
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')

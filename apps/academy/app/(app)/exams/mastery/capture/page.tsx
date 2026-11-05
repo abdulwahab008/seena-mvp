@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { CaptureBoard } from './capture-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J07. Where a paper's per-question marks are captured: first the scheme
@@ -16,8 +17,8 @@ export default async function CapturePage() {
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')

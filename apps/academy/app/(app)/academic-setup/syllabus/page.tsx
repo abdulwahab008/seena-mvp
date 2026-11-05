@@ -2,14 +2,15 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { BOARDS } from '@/lib/validation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CloneForm, UnitForm, UnitList, type UnitRow } from './syllabus-editor';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 type SearchParams = { class?: string; subject?: string; board?: string; session?: string };
 
 export default async function SyllabusPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
   const [{ data: classes }, { data: subjects }, { data: sessions }] = await Promise.all([
     supabase.from('class_level').select('id, name_en').eq('is_active', true).order('ordinal'),
     supabase.from('subject').select('id, name_en').eq('is_active', true).order('name_en'),

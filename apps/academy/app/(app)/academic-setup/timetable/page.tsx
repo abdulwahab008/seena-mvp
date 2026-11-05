@@ -1,13 +1,14 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { CreateVersionForm } from './create-version-form';
 import { TimetableGrid, type SlotRow } from './timetable-grid';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function TimetablePage({ searchParams }: { searchParams: Promise<{ version?: string; section?: string }> }) {
   const { version: versionParam, section: sectionParam } = await searchParams;
   const supabase = await supabaseServer();
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   const { data: sessions } = campusId
     ? await supabase.from('academic_session').select('id').eq('is_current', true).limit(1)

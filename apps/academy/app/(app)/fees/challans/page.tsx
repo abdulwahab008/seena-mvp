@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { ChallanGenerator, type ChallanRow, type BatchErrorRow, type BatchRow } from './challan-generator';
 import { ChallanTemplateForm, type ChallanTemplateData } from './challan-template-form';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 type ChallanQueryRow = {
   id: string;
@@ -22,7 +23,7 @@ export default async function ChallansPage() {
     supabase.from('academic_session').select('id').eq('is_current', true).order('starts_on', { ascending: false }),
   ]);
 
-  const campus = campuses?.[0];
+  const campus = (await pickActiveCampus(campuses));
   const session = sessions?.[0];
 
   let batch: BatchRow = null;

@@ -1,10 +1,11 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { UnmarkedView } from './unmarked-view';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function UnmarkedAttendancePage() {
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   return (
     <div className="space-y-6">

@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { BookingForm } from './booking-form';
 import { InterviewList, type InterviewRow } from './interview-list';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 function one<T>(v: T | T[] | null): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
@@ -9,8 +10,8 @@ function one<T>(v: T | T[] | null): T | null {
 export default async function InterviewsPage() {
   const supabase = await supabaseServer();
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   const [{ data: appRows }, { data: panelRows }, { data: interviewRows }] = await Promise.all([
     campusId

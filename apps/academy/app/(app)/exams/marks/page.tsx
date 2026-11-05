@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { MarkGrid } from './mark-grid';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-I12. The teacher's mark entry grid — the real one. FR-I02 rendered a
@@ -21,8 +22,8 @@ export default async function MarkEntryPage({ searchParams }: { searchParams: Pr
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')

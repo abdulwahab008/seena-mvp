@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { AnnualBoard } from './annual-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J03. The weighted annual result for one section of the current session.
@@ -19,8 +20,8 @@ export default async function AnnualResultsPage() {
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')

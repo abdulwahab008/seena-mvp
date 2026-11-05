@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 
-export function CreateSessionForm({ campusId }: { campusId: string }) {
+export function CreateSessionForm({ campusId, campusName }: { campusId: string; campusName: string }) {
   const [pending, startTransition] = useTransition();
   const {
     register,
@@ -37,7 +37,11 @@ export function CreateSessionForm({ campusId }: { campusId: string }) {
   });
 
   return (
-    <form onSubmit={onSubmit} className="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-2" noValidate>
+    <div className="space-y-2">
+    <p className="text-sm text-muted-foreground" data-testid="session-campus">
+      New sessions are added to <span className="font-medium text-foreground">{campusName}</span>. Switch campus in the header to add one elsewhere.
+    </p>
+    <form onSubmit={onSubmit} className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]" noValidate>
       <div className="space-y-1">
         <Label htmlFor="session-name">Name</Label>
         <Input id="session-name" placeholder="2027-28" {...register('name')} />
@@ -85,5 +89,6 @@ export function CreateSessionForm({ campusId }: { campusId: string }) {
         {pending ? 'Adding…' : 'Add session'}
       </Button>
     </form>
+    </div>
   );
 }

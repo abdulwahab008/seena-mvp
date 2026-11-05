@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { CreateRoomForm } from './create-room-form';
 import { RoomList, type RoomRow } from './room-list';
 import { Building, MapPin } from 'lucide-react';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,8 +32,8 @@ export default async function RoomsPage({
     .eq('status', 'active')
     .order('code');
 
-  const selectedCampusId = resolvedParams.campus_id || campuses?.[0]?.id;
-  const currentCampus = campuses?.find((c) => c.id === selectedCampusId) || campuses?.[0];
+  const selectedCampusId = resolvedParams.campus_id || (await pickActiveCampus(campuses))?.id;
+  const currentCampus = campuses?.find((c) => c.id === selectedCampusId) || (await pickActiveCampus(campuses));
 
   // Fetch rooms for the campus
   const { data: rawRooms } = selectedCampusId

@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { SessionList, type SessionRow } from './session-list';
 import { CreateSessionForm } from './create-session-form';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function SessionsPage() {
   const supabase = await supabaseServer();
@@ -22,15 +23,15 @@ export default async function SessionsPage() {
     terms: s.academic_term ?? [],
   }));
 
-  const firstCampus = campuses?.[0];
+  const firstCampus = (await pickActiveCampus(campuses));
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Academic Sessions</h1>
-        <p className="text-sm text-muted-foreground">FR-A04/FR-A05 — one current session per campus, and its terms.</p>
+        <p className="text-sm text-muted-foreground">One current session per campus, and its terms.</p>
       </div>
-      {firstCampus && <CreateSessionForm campusId={firstCampus.id} />}
+      {firstCampus && <CreateSessionForm campusId={firstCampus.id} campusName={firstCampus.name} />}
       <SessionList sessions={rows} />
     </div>
   );

@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { StaffDirectorySearch } from './staff-directory-search';
 import { AddStaffModal } from '../add-staff-modal';
 import type { StaffDirectoryRow } from './actions';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,7 @@ export default async function StaffDirectoryPage() {
     supabase.from('department').select('id, name_en, code').order('code'),
   ]);
 
-  const firstCampus = campuses?.[0];
+  const firstCampus = (await pickActiveCampus(campuses));
 
   return (
     <div className="space-y-6">

@@ -1,12 +1,13 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { PolicyForm } from './policy-form';
 import { WeightForm } from './weight-form';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function AttendancePolicyPage() {
   const supabase = await supabaseServer();
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   const { data: sessions } = campusId
     ? await supabase.from('academic_session').select('id').eq('is_current', true).limit(1)

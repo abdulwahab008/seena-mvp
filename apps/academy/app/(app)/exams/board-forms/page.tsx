@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { formatPkr } from '@/lib/challan/html';
 import { BoardFormsBoard } from './board-forms-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-T12. The board examination form: who is registered for which subjects,
@@ -17,8 +18,8 @@ export default async function BoardFormsPage() {
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')

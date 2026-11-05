@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { groupTrend } from '@/lib/exams/trend';
 import { SubjectTrendChart } from '@/components/subject-trend-chart';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J06 for staff. A section's average per subject and term, and any one
@@ -24,8 +25,8 @@ export default async function SubjectAnalyticsPage({ searchParams }: { searchPar
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')

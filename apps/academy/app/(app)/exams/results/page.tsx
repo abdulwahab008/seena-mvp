@@ -5,6 +5,7 @@ import { ResultBoard } from './result-board';
 import { PositionBoard } from './position-board';
 import { WithholdBoard } from './withhold-board';
 import { ReportCardBoard } from './report-card-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J02. The computed per-subject results for one section of one term.
@@ -29,8 +30,8 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')

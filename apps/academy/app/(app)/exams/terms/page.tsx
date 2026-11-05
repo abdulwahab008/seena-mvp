@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { TermSetEditor, type ExamTermRow } from './term-set-editor';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-I01. Define the exam terms of a session and their weightage, then
@@ -24,8 +25,8 @@ export default async function ExamTermsPage() {
   // (academic-setup/curriculum, fees/challans, fees/reports). Deriving the
   // acting user's own campus assignment instead is a cross-cutting gap
   // shared by all of them, not one to solve here.
-  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code').limit(1);
-  const campus = campuses?.[0];
+  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code');
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
