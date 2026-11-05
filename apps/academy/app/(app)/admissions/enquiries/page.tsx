@@ -11,7 +11,7 @@ export default async function EnquiriesPage() {
 
   const [{ data: campuses }, { data: sessions }, { data: classLevels }, { data: enquiries }] = await Promise.all([
     supabase.from('campus').select('id, code, name').eq('status', 'active').order('code'),
-    supabase.from('academic_session').select('id, name').order('starts_on', { ascending: false }),
+    supabase.from('academic_session').select('id, name').order('is_current', { ascending: false }).order('starts_on', { ascending: false }),
     supabase.from('class_level').select('id, code, name_en').eq('is_active', true).order('ordinal'),
     supabase
       .from('admission_enquiry')

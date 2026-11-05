@@ -24,6 +24,8 @@ import { Modal } from '@/components/ui/modal';
 import { DatePicker } from '@/components/ui/date-picker';
 import { createSection, assignClassTeacher } from './actions';
 import { todayPk } from '@/lib/dates';
+import { roleLabel } from '@/lib/staff-roles';
+import { useRouter } from 'next/navigation';
 
 export interface ClassesSectionsViewProps {
   campus: { id: string; name: string; code: string } | null;
@@ -97,9 +99,11 @@ export function ClassesSectionsView({
   }, [staffList]);
 
   // Handlers
-  const handleOpenAddModal = (classId?: string) => {
+  const router = useRouter();
+
+  const handleOpenAddModal = (classId?: string, suggestedName = '') => {
     if (classId) setTargetClassId(classId);
-    setNewSectionName('');
+    setNewSectionName(suggestedName);
     setNewCapacity(40);
     setAddModalOpen(true);
   };
@@ -125,8 +129,9 @@ export function ClassesSectionsView({
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(`Section ${newSectionName.trim().toUpperCase()} created successfully!`);
+        toast.success(`Section ${newSectionName.trim().toUpperCase()} created.`);
         setAddModalOpen(false);
+        router.refresh();
       }
     });
   };
@@ -301,7 +306,7 @@ export function ClassesSectionsView({
                       <Button
                         size="sm"
                         variant="link"
-                        onClick={() => handleOpenAddModal(cl.id)}
+                        onClick={() => handleOpenAddModal(cl.id, 'A')}
                         className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold p-0 mt-1 h-auto"
                       >
                         + Create Section A now
@@ -509,7 +514,7 @@ export function ClassesSectionsView({
               <SelectContent>
                 {staffList.map((staff) => (
                   <SelectItem key={staff.user_id} value={staff.user_id}>
-                    {staff.full_name} ({staff.app_role.replace(/_/g, ' ')})
+                    {staff.full_name} ({roleLabel(staff.app_role)})
                   </SelectItem>
                 ))}
               </SelectContent>

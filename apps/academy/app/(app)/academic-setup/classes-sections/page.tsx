@@ -78,7 +78,7 @@ export default async function ClassesSectionsPage() {
   const { data: staffList } = await supabase
     .from('app_user')
     .select('user_id, full_name, app_role')
-    .in('app_role', ['subject_teacher', 'class_teacher', 'head_of_department', 'principal'])
+    .in('app_role', ['subject_teacher', 'class_teacher', 'head_of_department', 'principal', 'vice_principal'])
     .order('full_name');
 
   return (
