@@ -48,7 +48,7 @@ export default async function CashCounterPage() {
   let campuses: { id: string; name: string }[] = [];
   let recent: RecentSession[] = [];
   if (canManage) {
-    const { data: campusRows } = await supabase.from('campus').select('id, name').order('name');
+    const { data: campusRows } = await supabase.from('campus').select('id, name').eq('status', 'active').order('name');
     campuses = campusRows ?? [];
     const { data: sessionRows } = await supabase
       .from('cash_counter_session')

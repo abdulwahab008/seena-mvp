@@ -22,6 +22,7 @@ export default async function CommunicationOutboxPage({
   const { data: campuses } = await (supabase as any)
     .from('campus')
     .select('id, code, name')
+    .eq('status', 'active')
     .order('name');
 
   const [messages, stats] = await Promise.all([

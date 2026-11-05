@@ -42,7 +42,7 @@ export default async function CollectionDashboardPage({ searchParams }: { search
   const [monthRes, trendRes, campusRes, classRes] = await Promise.all([
     monthQuery,
     supabase.rpc('fn_fee_collection_trend', { p_campus_id: campusId, p_months: 12 }),
-    supabase.from('campus').select('id, name').order('name'),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
     supabase.from('class_level').select('id, name_en').order('ordinal'),
   ]);
   const rows = monthRes.data ?? [];

@@ -99,6 +99,7 @@ export default async function StaffRemarksPage() {
   const { data: campusesData } = await client
     .from('campus')
     .select('id, name')
+    .eq('status', 'active')
     .order('name');
 
   const { data: policiesData } = await client

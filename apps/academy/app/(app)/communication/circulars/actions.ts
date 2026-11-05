@@ -71,6 +71,7 @@ export async function fetchCircularsDashboardData() {
     client
       .from('campus')
       .select('id, name')
+      .eq('status', 'active')
       .order('name'),
     client
       .from('v_circular_read_stats')

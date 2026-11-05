@@ -14,7 +14,7 @@ export default async function AssetsPage() {
       .from('v_asset_register')
       .select('asset_id, tag_no, name, category, capitalised_cost, accumulated_depreciation, net_book_value, status, method, campus_id')
       .order('tag_no'),
-    supabase.from('campus').select('id, name').order('name'),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
   ]);
   const live = (assets ?? []).filter((a) => a.status === 'active' || a.status === 'in_repair');
   const monthDefault = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' }).slice(0, 7);

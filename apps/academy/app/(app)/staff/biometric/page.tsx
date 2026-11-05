@@ -17,7 +17,7 @@ export default async function BiometricPage({ searchParams }: { searchParams: Pr
   const actor = await getCurrentActor();
   const canWrite = isHrWriter(actor?.role);
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id, name').order('name');
+  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('name');
   const campus = (campuses ?? []).find((c) => c.id === sp.campus) ?? (campuses ?? [])[0];
   if (!campus) return <p className="text-sm text-muted-foreground">No campus is available to your account.</p>;
 

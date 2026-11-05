@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function TeacherWorkloadPage({ searchParams }: { searchParams: Promise<{ campus?: string; week?: string }> }) {
   const sp = await searchParams;
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id, name').order('name');
+  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('name');
   const campus = (campuses ?? []).find((c) => c.id === sp.campus) ?? (campuses ?? [])[0];
   if (!campus) return <p className="text-sm text-muted-foreground">No campus is available to your account.</p>;
 
