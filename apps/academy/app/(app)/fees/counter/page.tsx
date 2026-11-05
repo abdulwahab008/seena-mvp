@@ -47,8 +47,20 @@ export default async function CashCounterPage() {
 
   let campuses: { id: string; name: string }[] = [];
   let recent: RecentSession[] = [];
+  let counterList: { id: string; name: string; campusName: string; thresholdPaisa: number }[] = [];
   if (canManage) {
     const { data: campusRows } = await supabase.from('campus').select('id, name').eq('status', 'active').order('name');
+    const { data: allCounters } = await supabase
+      .from('cash_counter')
+      .select('id, name, variance_threshold_paisa, campus:campus_id(name)')
+      .eq('is_active', true)
+      .order('name');
+    counterList = (allCounters ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      campusName: c.campus?.name ?? '',
+      thresholdPaisa: c.variance_threshold_paisa,
+    }));
     campuses = campusRows ?? [];
     const { data: sessionRows } = await supabase
       .from('cash_counter_session')
@@ -86,7 +98,7 @@ export default async function CashCounterPage() {
         !canManage &&
         !runsShift && <p className="text-sm text-muted-foreground">Only finance and front-desk staff use the cash counter.</p>
       )}
-      {canManage && <ManagePanel campuses={campuses} recent={recent} />}
+      {canManage && <ManagePanel campuses={campuses} recent={recent} counters={counterList} />}
     </div>
   );
 }

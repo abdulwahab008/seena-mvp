@@ -178,7 +178,13 @@ function CreateCounterForm({ campuses }: { campuses: { id: string; name: string 
     resolver: zodResolver(createCashCounterSchema),
     defaultValues: { campusId: campuses[0]?.id ?? '', name: '', thresholdPkr: 500 },
   });
-  const onSubmit = form.handleSubmit((v) => run(() => createCashCounter(v), 'Counter added.'));
+  const onSubmit = form.handleSubmit((v) =>
+    run(async () => {
+      const r = await createCashCounter(v);
+      if (!r.error) form.reset({ campusId: v.campusId, name: '', thresholdPkr: v.thresholdPkr });
+      return r;
+    }, 'Counter added.'),
+  );
   return (
     <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3" noValidate data-testid="create-counter-form">
       <div className="space-y-1">
@@ -244,12 +250,34 @@ export function ShiftPanel({ counters, openSession }: { counters: CounterOption[
   );
 }
 
-export function ManagePanel({ campuses, recent }: { campuses: { id: string; name: string }[]; recent: RecentSession[] }) {
+export function ManagePanel({
+  campuses,
+  recent,
+  counters,
+}: {
+  campuses: { id: string; name: string }[];
+  recent: RecentSession[];
+  counters: { id: string; name: string; campusName: string; thresholdPaisa: number }[];
+}) {
   return (
     <Card data-testid="manage-panel">
       <CardContent className="space-y-6 pt-6">
         <div className="space-y-2">
           <h2 className="text-base font-semibold">Counters</h2>
+          {counters.length > 0 ? (
+            <ul className="divide-y rounded-md border text-sm" data-testid="counter-list">
+              {counters.map((c) => (
+                <li key={c.id} className="flex flex-wrap justify-between gap-2 px-3 py-2">
+                  <span className="font-medium">{c.name}</span>
+                  <span className="text-muted-foreground">
+                    {c.campusName} · countersign above {formatPkrCompact(c.thresholdPaisa)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">No counters yet. Add one for each place cash is taken.</p>
+          )}
           <CreateCounterForm campuses={campuses} />
         </div>
         <div className="space-y-2">
