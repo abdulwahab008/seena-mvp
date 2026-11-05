@@ -25,7 +25,7 @@ export function NewStudentForm({ campuses }: { campuses: Campus[] }) {
     formState: { errors },
   } = useForm<CreateStudentInput>({
     resolver: zodResolver(createStudentSchema),
-    defaultValues: { campusId: campuses[0]?.id ?? '', gender: 'male' },
+    defaultValues: { campusId: campuses[0]?.id ?? '' },
   });
 
   const onSubmit = handleSubmit((values) => {
@@ -106,7 +106,7 @@ export function NewStudentForm({ campuses }: { campuses: Campus[] }) {
           name="gender"
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger data-testid="student-gender-trigger">
+              <SelectTrigger id="gender" data-testid="student-gender-trigger">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
@@ -117,6 +117,7 @@ export function NewStudentForm({ campuses }: { campuses: Campus[] }) {
             </Select>
           )}
         />
+        {errors.gender && <p className="text-xs text-destructive">Choose a gender.</p>}
       </div>
       <div className="space-y-1">
         <Label htmlFor="fatherNameEn">Father's name</Label>
