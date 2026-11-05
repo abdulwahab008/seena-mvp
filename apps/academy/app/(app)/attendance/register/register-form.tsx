@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { todayPk } from '@/lib/dates';
 
 // FR-G04: present -> absent -> late -> excused -> present, one tap, no
 // dialog, no dropdown. The AC's own cycle names the 4th state "leave" —
@@ -26,7 +27,7 @@ const CYCLE = ['present', 'absent', 'late', 'excused'] as const;
 const SAVED_ON_DEVICE = 'Saved on device — will upload when online';
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  return todayPk();
 }
 
 function StatusButton({ status, onTap }: { status: string; onTap: () => void }) {
@@ -300,7 +301,9 @@ export function RegisterForm({
 
       {loaded && !holiday && locked && (
         <p className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800" data-testid="register-locked-banner">
-          Locked{lockedAt ? ` at ${new Date(lockedAt).toLocaleString()}` : ''} — this date can no longer be edited.
+          {lockedAt
+            ? `Locked at ${new Date(lockedAt).toLocaleString('en-GB', { timeZone: 'Asia/Karachi', dateStyle: 'medium', timeStyle: 'short' })}. Ask for a correction to change a mark.`
+            : 'No attendance policy is set for this campus and session, so the register cannot be edited. Ask the principal to set one under Attendance Policy.'}
         </p>
       )}
 
