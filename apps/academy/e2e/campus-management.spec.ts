@@ -82,7 +82,8 @@ test('owner logs in and manages campuses (FR-A01 seed + FR-A02 create/archive)',
   // button — it doesn't vanish from the list.
   const dhaCard = page.getByTestId('campus-card-DHA');
   await dhaCard.getByRole('button', { name: 'Archive' }).click();
-  await expect(dhaCard).toContainText('archived');
+  await dhaCard.getByRole('button', { name: 'Confirm archive' }).click();
+  await expect(dhaCard).toContainText('Archived');
   await expect(dhaCard.getByRole('button', { name: 'Archive' })).not.toBeVisible();
 });
 

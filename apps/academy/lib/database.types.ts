@@ -44772,6 +44772,8 @@ export type Database = {
         Returns: undefined
       }
       archive_campus: { Args: { p_campus_id: string }; Returns: undefined }
+      restore_campus: { Args: { p_campus_id: string }; Returns: undefined }
+      update_campus: { Args: { p_campus_id: string; p_city?: string; p_code: string; p_name: string }; Returns: undefined }
       assert_asset_available: {
         Args: { p_asset_id: string; p_on?: string }
         Returns: undefined
