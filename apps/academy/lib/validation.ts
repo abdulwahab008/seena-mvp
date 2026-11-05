@@ -434,8 +434,6 @@ export const setChallanTemplateSchema = z.object({
 });
 export type SetChallanTemplateInput = z.infer<typeof setChallanTemplateSchema>;
 
-export const buildChallanRenderPayloadSchema = z.object({ challanId: z.string().uuid() });
-export type BuildChallanRenderPayloadInput = z.infer<typeof buildChallanRenderPayloadSchema>;
 
 export const FEE_PAYMENT_MODES = ['cash', 'bank_challan', 'online', 'cheque', 'adjustment'] as const;
 

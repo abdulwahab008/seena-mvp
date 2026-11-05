@@ -13,6 +13,9 @@ type ChallanQueryRow = {
   arrears_source: { enrolment_id: string; session_id: string; amount_paisa: number }[];
   net_paisa: number;
   status: string;
+  due_date: string;
+  student: { name_en: string; gr_number: string } | null;
+  enrolment: { class_section: { name: string; class_level: { name_en: string } | null } | null } | null;
 };
 
 export default async function ChallansPage() {
@@ -57,7 +60,9 @@ export default async function ChallansPage() {
 
     const { data: challanRawRows } = await supabase
       .from('fee_challan')
-      .select('id, challan_no, billing_period, gross_paisa, concession_paisa, arrears_paisa, arrears_source, net_paisa, status')
+      .select(
+        'id, challan_no, billing_period, gross_paisa, concession_paisa, arrears_paisa, arrears_source, net_paisa, status, due_date, student:student_id(name_en, gr_number), enrolment:enrolment_id(class_section:section_id(name, class_level:class_level_id(name_en)))',
+      )
       .eq('campus_id', campus.id)
       .eq('session_id', session.id)
       .order('created_at', { ascending: false })
@@ -91,6 +96,10 @@ export default async function ChallansPage() {
         .map((s) => ({ sessionName: sessionNames.get(s.session_id) ?? s.session_id, amountPaisa: s.amount_paisa })),
       netPaisa: c.net_paisa,
       status: c.status,
+      dueDate: c.due_date,
+      studentName: c.student?.name_en ?? 'Unknown student',
+      grNumber: c.student?.gr_number ?? '—',
+      classSection: [c.enrolment?.class_section?.class_level?.name_en, c.enrolment?.class_section?.name].filter(Boolean).join(' · ') || '—',
     }));
 
     const { data: templateRow } = await supabase
@@ -119,18 +128,15 @@ export default async function ChallansPage() {
       <div>
         <h1 className="text-2xl font-semibold">Monthly challans</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K09 — generate a challan per active enrolment for a billing month. Re-running a month is a no-op for challans that already exist.
+          Generate a challan for every enrolled student for a billing month. Running a month again skips challans that already exist.
         </p>
       </div>
       {campus && session ? (
         <>
           {canConfigureTemplate && (
             <div className="space-y-2">
-              <h2 className="text-lg font-medium">Challan template (FR-K11)</h2>
-              <p className="text-sm text-muted-foreground">
-                Bank details for this campus&apos;s challan copies. No PDF renderer exists yet — see &quot;Preview PDF payload&quot; below
-                for the data a future renderer would consume.
-              </p>
+              <h2 className="text-lg font-medium">Challan bank details</h2>
+              <p className="text-sm text-muted-foreground">Printed on the bank, school and student copies of every challan for this campus.</p>
               <ChallanTemplateForm campusId={campus.id} template={template} />
             </div>
           )}

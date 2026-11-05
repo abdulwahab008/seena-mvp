@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { generateChallans, buildChallanRenderPayload, type GenerateResult } from './actions';
+import { generateChallans, type GenerateResult } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,10 @@ export type ChallanRow = {
   arrearsFrom: { sessionName: string; amountPaisa: number }[];
   netPaisa: number;
   status: string;
+  dueDate: string;
+  studentName: string;
+  grNumber: string;
+  classSection: string;
 };
 
 export type BatchErrorRow = { id: string; reason: string };
@@ -45,34 +49,6 @@ function ResultSummary({ result }: { result: GenerateResult }) {
             </li>
           ))}
         </ul>
-      )}
-    </div>
-  );
-}
-
-function PayloadPreview({ challanId }: { challanId: string }) {
-  const [pending, startTransition] = useTransition();
-  const [payload, setPayload] = useState<unknown>(null);
-
-  const onPreview = () => {
-    const fd = new FormData();
-    fd.set('challanId', challanId);
-    startTransition(async () => {
-      const result = await buildChallanRenderPayload({ error: null }, fd);
-      if (result.error) toast.error(result.error);
-      else setPayload(result.payload);
-    });
-  };
-
-  return (
-    <div className="mt-2 space-y-1">
-      <Button type="button" size="sm" variant="outline" disabled={pending} onClick={onPreview} data-testid={`preview-payload-${challanId}`}>
-        {pending ? 'Loading…' : 'Preview PDF payload'}
-      </Button>
-      {payload !== null && (
-        <pre data-testid={`payload-json-${challanId}`} className="max-h-64 overflow-auto rounded-md bg-muted p-2 text-xs">
-          {JSON.stringify(payload, null, 2)}
-        </pre>
       )}
     </div>
   );
@@ -139,6 +115,16 @@ export function ChallanGenerator({
 
       <ResultSummary result={result} />
 
+      {period && (
+        <a
+          href={`/api/challans/batch/pdf?campus=${campusId}&period=${period}-01`}
+          className="inline-block text-sm font-medium text-primary underline-offset-4 hover:underline"
+          data-testid="challan-batch-pdf"
+        >
+          Print every challan for {period} (one PDF)
+        </a>
+      )}
+
       {batch && (
         <p className="text-sm text-muted-foreground" data-testid="last-batch-summary">
           Last batch ({batch.billingPeriod}): {batch.generatedCount} generated, {batch.skippedCount} skipped, {batch.failedCount} failed
@@ -163,9 +149,12 @@ export function ChallanGenerator({
           challans.map((c) => (
             <Card key={c.id} data-testid={`challan-row-${c.challanNo}`}>
               <CardContent className="p-3 text-sm">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <span>
-                    {c.challanNo} · {c.billingPeriod}
+                    <span className="font-medium">{c.studentName}</span>{' '}
+                    <span className="text-muted-foreground">
+                      GR {c.grNumber} · {c.classSection} · Challan {c.challanNo} · Due {c.dueDate}
+                    </span>
                   </span>
                   <span className="text-muted-foreground" data-testid={`challan-net-${c.challanNo}`}>
                     Net PKR {(c.netPaisa / 100).toLocaleString()} · {c.status}
@@ -187,7 +176,13 @@ export function ChallanGenerator({
                     )}
                   </p>
                 )}
-                <PayloadPreview challanId={c.id} />
+                <a
+                  href={`/api/challans/${c.id}/pdf`}
+                  className="mt-2 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  data-testid={`challan-pdf-${c.challanNo}`}
+                >
+                  Download challan PDF (3 copies)
+                </a>
               </CardContent>
             </Card>
           ))
