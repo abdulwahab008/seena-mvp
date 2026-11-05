@@ -32,6 +32,7 @@ export function ApprovalBoard({ examTermId, termName, sections }: Props) {
   const [queue, setQueue] = useState<MarkApprovalQueue | null>(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState('');
+  const [confirming, setConfirming] = useState('');
   // FR-I17. Raised here rather than on /exams/unlocks because this is the
   // screen the controller is on when they discover the mark is wrong.
   const [reasons, setReasons] = useState<Record<string, string>>({});
@@ -163,15 +164,33 @@ export function ApprovalBoard({ examTermId, termName, sections }: Props) {
                       {c.mark_count} marks across {c.candidate_count} candidates
                     </span>
                   )}
-                  {!subject.is_locked && (
+                  {!subject.is_locked && confirming !== subject.exam_subject_id && (
                     <Button
                       className="ml-auto"
                       disabled={!queue.can_approve || !c.complete || busy === subject.exam_subject_id}
                       data-testid={`approve-${subject.subject_name}`}
-                      onClick={() => void onApprove(subject)}
+                      onClick={() => setConfirming(subject.exam_subject_id)}
                     >
                       {busy === subject.exam_subject_id ? 'Approving…' : 'Approve and lock'}
                     </Button>
+                  )}
+                  {!subject.is_locked && confirming === subject.exam_subject_id && (
+                    <div className="ml-auto flex flex-wrap items-center gap-2">
+                      <span className="text-sm">Lock {subject.subject_name} marks for everyone? Only a break-glass unlock can change them.</span>
+                      <Button
+                        data-testid={`approve-confirm-${subject.subject_name}`}
+                        disabled={busy === subject.exam_subject_id}
+                        onClick={() => {
+                          setConfirming('');
+                          void onApprove(subject);
+                        }}
+                      >
+                        Confirm and lock
+                      </Button>
+                      <Button variant="ghost" onClick={() => setConfirming('')}>
+                        Cancel
+                      </Button>
+                    </div>
                   )}
                 </div>
 

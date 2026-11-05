@@ -357,6 +357,7 @@ test('a machine cannot mark a script: every suggestion needs a named teacher bef
   await page.getByTestId('open-approval-queue').click();
   await expect(page.getByTestId('approval-ocr-unreviewed-Maths')).toHaveCount(0);
   await page.getByTestId('approve-Maths').click();
+  await page.getByTestId('approve-confirm-Maths').click();
   await expect(page.getByTestId('approval-locked-Maths')).toBeVisible();
 });
 
@@ -419,5 +420,6 @@ test('a scan that came back unusable is abandoned on the record rather than maki
   await page.getByTestId('open-approval-queue').click();
   await expect(page.getByTestId('approval-ocr-unreviewed-Maths')).toHaveCount(0);
   await page.getByTestId('approve-Maths').click();
+  await page.getByTestId('approve-confirm-Maths').click();
   await expect(page.getByTestId('approval-locked-Maths')).toBeVisible();
 });
