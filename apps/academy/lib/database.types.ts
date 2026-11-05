@@ -736,6 +736,7 @@ export type Database = {
           amount_paisa: number
           campus_id: string
           consumed_by_enrolment_id: string | null
+          counter_session_id: string | null
           id: string
           mode: Database['public']['Enums']['fee_payment_mode']
           offer_id: string
@@ -751,6 +752,7 @@ export type Database = {
           amount_paisa: number
           campus_id: string
           consumed_by_enrolment_id?: string | null
+          counter_session_id?: string | null
           id?: string
           mode: Database['public']['Enums']['fee_payment_mode']
           offer_id: string
@@ -766,6 +768,7 @@ export type Database = {
           amount_paisa?: number
           campus_id?: string
           consumed_by_enrolment_id?: string | null
+          counter_session_id?: string | null
           id?: string
           mode?: Database['public']['Enums']['fee_payment_mode']
           offer_id?: string

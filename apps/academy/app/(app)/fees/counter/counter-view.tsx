@@ -83,6 +83,18 @@ export function CounterView() {
       toast.success(result.isReplay ? 'Already collected — showing the original receipt.' : 'Payment collected.');
       setReceiptId(result.receiptId!);
       setPrintResult(null);
+      // Audit BUG-17: show the challan as it stands after this payment, so it cannot be collected
+      // twice by mistake.
+      const lfd = new FormData();
+      lfd.set('challanNo', challanNo);
+      const fresh = await lookupChallan({ error: null }, lfd);
+      if (!fresh.error) {
+        setLookup((prev) =>
+          prev ? { ...prev, netPaisa: fresh.netPaisa!, outstandingPaisa: fresh.outstandingPaisa!, status: fresh.status! } : prev,
+        );
+        setAmount((fresh.outstandingPaisa! / 100).toString());
+        setIdemKey(crypto.randomUUID());
+      }
     });
   };
 
@@ -155,7 +167,7 @@ export function CounterView() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="button" disabled={pending} onClick={onCollect} data-testid="counter-collect-button">
+              <Button type="button" disabled={pending || lookup.outstandingPaisa <= 0} onClick={onCollect} data-testid="counter-collect-button">
                 {pending ? 'Collecting…' : 'Collect payment'}
               </Button>
             </div>

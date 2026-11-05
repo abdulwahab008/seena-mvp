@@ -300,6 +300,7 @@ export async function recordAdmissionFeePayment(
   });
   if (error) {
     if (error.message.includes('OFFER_NOT_ACCEPTED')) return { error: 'The offer must be accepted before recording a payment.' };
+    if (error.message.includes('COUNTER_SESSION_REQUIRED')) return { error: 'No cash counter shift is open. Open one under Fees, then Cash Counter, before taking cash, or record a bank transfer or cheque instead.' };
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to record admission fee payments.' };
     return { error: 'Could not record the payment.' };
   }
@@ -452,6 +453,8 @@ export async function quickAdmission(
       return { error: 'Student date of birth is outside allowed range (must not be in future and under 32 years).', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
     if (error.message.includes('BFORM_INVALID_FORMAT'))
       return { error: 'Invalid B-Form format (13 digits required).', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+    if (error.message.includes('COUNTER_SESSION_REQUIRED'))
+      return { error: 'No cash counter shift is open. Open one under Fees, then Cash Counter, before taking cash, or record a bank transfer or cheque instead.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
     if (error.message.includes('BFORM_DUPLICATE'))
       return { error: 'A student with this B-Form is already enrolled.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
     return { error: error.message || 'Could not complete quick admission.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };

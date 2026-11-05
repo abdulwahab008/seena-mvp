@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openCashShift } from './support/cash-shift';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
 
@@ -56,6 +57,8 @@ test('an owner gates enrolment on the admission fee — a shortfall is refused, 
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 
+  // Admission-fee cash needs an open counter shift.
+  await openCashShift(page);
   await page.goto('/admissions/enquiries');
   await page.waitForLoadState('networkidle');
   await page.getByTestId('enquiry-class-trigger').click();
@@ -85,6 +88,8 @@ test('an owner gates enrolment on the admission fee — a shortfall is refused, 
   await appCard.getByTestId(/^record-payment-submit-/).click();
   await expect(page.getByText('Payment recorded.')).toBeVisible();
 
+  await appCard.getByTestId(/^enrol-gender-trigger-/).click();
+  await page.getByRole('option', { name: 'Male', exact: true }).click();
   await appCard.getByTestId(/^enrol-funding-trigger-/).click();
   await page.getByRole('option', { name: /Payment PKR 20,000/ }).click();
   await appCard.getByTestId(/^enrol-submit-/).click();

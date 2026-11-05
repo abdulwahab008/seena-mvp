@@ -651,7 +651,7 @@ function EnrolForm({
 }) {
   const [pending, startTransition] = useTransition();
   const [sectionId, setSectionId] = useState(sections[0]?.id ?? '');
-  const [gender, setGender] = useState<'male' | 'female' | 'other'>('male');
+  const [gender, setGender] = useState<'male' | 'female' | 'other' | ''>('');
   const [funding, setFunding] = useState(fundingOptions[0]?.value ?? '');
 
   useEffect(() => {
@@ -664,6 +664,10 @@ function EnrolForm({
     const selectedFunding = funding || fundingOptions[0]?.value;
     if (!selectedFunding) {
       toast.error('Record a payment or waive the fee before enrolling.');
+      return;
+    }
+    if (!gender) {
+      toast.error("Choose the student's gender.");
       return;
     }
     const [kind, ...idParts] = selectedFunding.split(':');
@@ -695,7 +699,7 @@ function EnrolForm({
           ))}
         </SelectContent>
       </Select>
-      <Select value={gender} onValueChange={(v) => setGender(v as 'male' | 'female' | 'other')}>
+      <Select value={gender || undefined} onValueChange={(v) => setGender(v as 'male' | 'female' | 'other')}>
         <SelectTrigger className="h-8 w-24" data-testid={`enrol-gender-trigger-${offerId}`}>
           <SelectValue />
         </SelectTrigger>
@@ -799,10 +803,13 @@ function EnrolmentPanel({
           it or enrolling again would only invite a refusal, so the controls go away. */}
       {!enrolled && (
         <>
-          <div className="flex flex-wrap items-center gap-2">
-            <RecordPaymentForm offerId={offer.id} />
-            <WaiveFeeForm offerId={offer.id} />
-          </div>
+          {/* A fully covered fee takes no further payment or waiver: a second one would be taken in error. */}
+          {!isFullyCovered && (
+            <div className="flex flex-wrap items-center gap-2">
+              <RecordPaymentForm offerId={offer.id} />
+              <WaiveFeeForm offerId={offer.id} />
+            </div>
+          )}
           <EnrolForm offerId={offer.id} sections={sections} fundingOptions={fundingOptions} isFullyCovered={isFullyCovered} />
         </>
       )}
