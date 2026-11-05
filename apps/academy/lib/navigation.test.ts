@@ -65,9 +65,10 @@ describe('the Fees section', () => {
     }
   });
 
-  it('shows an accountant every fees page and an admissions officer two', () => {
+  it('shows an accountant every fees page and an admissions officer the counter and two more', () => {
     expect(navSectionsForRole(NAV_SECTIONS, 'accountant').find((s) => s.id === 'fees')!.items).toHaveLength(feeItems.length);
     expect(navSectionsForRole(NAV_SECTIONS, 'admissions_officer').find((s) => s.id === 'fees')!.items.map((i) => i.href)).toEqual([
+      '/fees/counter',
       '/fees/concessions',
       '/fees/sibling-discounts',
     ]);
@@ -77,5 +78,31 @@ describe('the Fees section', () => {
     const none = navSectionsForRole(NAV_SECTIONS, undefined);
     expect(none.some((s) => s.id === 'fees')).toBe(false);
     expect(none.some((s) => s.id === 'overview')).toBe(true);
+  });
+});
+
+describe('sidebar by role (audit: everyone saw every module)', () => {
+  const sectionIds = (role: string) => navSectionsForRole(NAV_SECTIONS, role).map((s) => s.id);
+
+  it('shows the owner every section', () => {
+    expect(sectionIds('owner')).toEqual(NAV_SECTIONS.map((s) => s.id));
+  });
+
+  it('keeps a subject teacher to teaching, attendance, exams and students', () => {
+    const ids = sectionIds('subject_teacher');
+    for (const hidden of ['setup', 'admissions', 'payroll', 'fees', 'expenses', 'settings', 'compliance', 'reports', 'library']) {
+      expect(ids, hidden).not.toContain(hidden);
+    }
+    for (const shown of ['overview', 'students', 'academics', 'attendance', 'exams']) {
+      expect(ids, shown).toContain(shown);
+    }
+    expect(navSectionsForRole(NAV_SECTIONS, 'subject_teacher').find((s) => s.id === 'staff')!.items.map((i) => i.href)).toContain('/leave');
+  });
+
+  it('gives the librarian the library and the admissions officer the front office', () => {
+    expect(sectionIds('librarian')).toContain('library');
+    expect(sectionIds('librarian')).not.toContain('payroll');
+    expect(sectionIds('admissions_officer')).toContain('admissions');
+    expect(sectionIds('admissions_officer')).not.toContain('payroll');
   });
 });

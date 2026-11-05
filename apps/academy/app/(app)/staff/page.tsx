@@ -4,11 +4,16 @@ import { AddStaffModal } from './add-staff-modal';
 import { InvitationRow } from './invitation-row';
 import { roleLabel } from '@/lib/staff-roles';
 import { pickActiveCampus } from '@/lib/campus-context';
+import { getCurrentActor } from '@/lib/hr/current-role';
+
+// Who register_staff_member() allows.
+const STAFF_REGISTRAR_ROLES = ['super_admin', 'owner', 'principal', 'hr_manager'];
 
 export const dynamic = 'force-dynamic';
 
 export default async function StaffPage() {
   const supabase = await supabaseServer();
+  const actor = await getCurrentActor();
 
   const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code');
   const { data: invitations } = await supabase
@@ -31,7 +36,7 @@ export default async function StaffPage() {
             Register staff for HR and payroll, or invite someone to sign in.
           </p>
         </div>
-        {firstCampus && (
+        {firstCampus && actor && STAFF_REGISTRAR_ROLES.includes(actor.role) && (
           <AddStaffModal
             campusId={firstCampus.id}
             campusName={firstCampus.name}
@@ -40,7 +45,7 @@ export default async function StaffPage() {
           />
         )}
       </div>
-      {firstCampus && (
+      {firstCampus && actor && ['super_admin', 'owner', 'principal'].includes(actor.role) && (
         <div className="space-y-2 rounded-lg border p-4 bg-muted/10">
           <h2 className="text-sm font-semibold text-foreground">Quick Email Invitation</h2>
           <p className="text-xs text-muted-foreground">

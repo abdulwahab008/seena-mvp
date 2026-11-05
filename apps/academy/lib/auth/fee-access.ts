@@ -23,6 +23,10 @@ export const FEE_COLLECTOR_ROLES = ['super_admin', 'owner', 'accountant'] as con
 /** The fees pages an admissions officer may open, because their admissions work uses them. */
 export const ADMISSIONS_FEE_PATHS = ['/fees/concessions', '/fees/sibling-discounts'] as const;
 
+/** Front-desk roles take admission-fee cash, so they run a cash counter shift. */
+export const FRONT_DESK_ROLES = ['admissions_officer', 'receptionist'] as const;
+export const COUNTER_PATH = '/fees/counter';
+
 /** Where a session without access lands when it wanders into a fees URL. */
 export const FEES_DENIED_HOME = '/dashboard';
 
@@ -42,7 +46,8 @@ export function canSeeConcessionAwards(role: unknown): boolean {
 /** Whether `role` may open `pathname`, a path under /fees (a query string is ignored). */
 export function canOpenFeesPath(role: unknown, pathname: string): boolean {
   if (hasFeeAccess(role)) return true;
-  if (role !== 'admissions_officer') return false;
   const path = pathname.split('?')[0] ?? '';
+  if (typeof role === 'string' && (FRONT_DESK_ROLES as readonly string[]).includes(role) && path === COUNTER_PATH) return true;
+  if (role !== 'admissions_officer') return false;
   return ADMISSIONS_FEE_PATHS.some((allowed) => path === allowed || path.startsWith(`${allowed}/`));
 }
