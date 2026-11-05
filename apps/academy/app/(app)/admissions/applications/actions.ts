@@ -417,7 +417,7 @@ export async function quickAdmission(
   const admissionFee = parseFloat(formData.get('admissionFee')?.toString() || '0');
   const paymentMode = formData.get('paymentMode')?.toString() || 'cash';
   const rawReceipt = formData.get('paymentReference')?.toString()?.trim();
-  const receiptNo = rawReceipt || `REC-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+  const paymentReference = rawReceipt || undefined;
   const bFormNo = formData.get('bFormNo')?.toString() || undefined;
   const fatherNameEn = formData.get('fatherNameEn')?.toString() || undefined;
 
@@ -441,7 +441,7 @@ export async function quickAdmission(
     p_phone: phone.trim(),
     p_admission_fee: isNaN(admissionFee) ? 0 : admissionFee,
     p_payment_mode: paymentMode,
-    p_payment_reference: receiptNo,
+    p_payment_reference: paymentReference,
     p_b_form_no: bFormNo,
     p_father_name_en: fatherNameEn,
   });
@@ -465,13 +465,13 @@ export async function quickAdmission(
   revalidatePath('/admissions/applications');
   revalidatePath('/students');
 
-  const res = data as unknown as { gr_number: string; student_id: string; application_no: string } | null;
+  const res = data as unknown as { gr_number: string; student_id: string; application_no: string; receipt_no: string | null } | null;
   if (res?.student_id) await assignRollNumberAfterEnrolment(supabase, { studentId: res.student_id });
   return {
     error: null,
     grNumber: res?.gr_number ?? null,
     studentId: res?.student_id ?? null,
     applicationNo: res?.application_no ?? null,
-    receiptNo,
+    receiptNo: res?.receipt_no ?? null,
   };
 }
