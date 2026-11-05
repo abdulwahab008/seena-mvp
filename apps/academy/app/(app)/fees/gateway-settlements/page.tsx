@@ -28,7 +28,7 @@ export default async function GatewaySettlementsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Gateway settlements</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K23 — the student is credited the full amount paid; the gateway&apos;s commission is recorded as a school expense and never reduces what a family has paid. Commission recorded so far: {pkr(totalCommission)}.
+          The student is credited the full amount paid; the gateway&apos;s commission is recorded as a school expense and never reduces what a family has paid. Commission recorded so far: {pkr(totalCommission)}.
         </p>
       </div>
 

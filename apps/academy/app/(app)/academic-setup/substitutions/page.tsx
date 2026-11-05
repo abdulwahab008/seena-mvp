@@ -11,7 +11,7 @@ export default async function SubstitutionsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Substitutions</h1>
-        <p className="text-sm text-muted-foreground">FR-D13 — cover an absent teacher&apos;s periods with eligible free teachers, one screen.</p>
+        <p className="text-sm text-muted-foreground">Cover an absent teacher&apos;s periods with eligible free teachers, one screen.</p>
       </div>
       {!campusId ? <p className="text-sm text-muted-foreground">No active campus found.</p> : <SubstitutionBoard campusId={campusId} />}
     </div>

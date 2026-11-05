@@ -36,7 +36,7 @@ export default async function CertificateRequestsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Bonafide requests"
-        description="FR-T06 — requests from guardians in the parent portal. Approving issues the certificate, stores the PDF and queues a WhatsApp message with a 7-day link. A guardian can make at most 3 requests a day."
+        description="Requests from guardians in the parent portal. Approving issues the certificate, stores the PDF and queues a WhatsApp message with a 7-day link. A guardian can make at most 3 requests a day."
       />
       <Card>
         <CardHeader>

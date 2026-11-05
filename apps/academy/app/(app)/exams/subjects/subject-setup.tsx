@@ -347,7 +347,7 @@ export function SubjectSetup({
         <Link href="/exams/marks" className="underline">
           Mark entry
         </Link>
-        {' '}(FR-I12). The read-only preview that used to sit here was a stub for that grid and is gone now that the
+        {' '}. The read-only preview that used to sit here was a stub for that grid and is gone now that the
         grid is real — one surface, not two.
       </p>
     </div>

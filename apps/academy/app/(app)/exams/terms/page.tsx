@@ -52,7 +52,7 @@ export default async function ExamTermsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Exam terms</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I01 — the term structure every mark, aggregate and report card rolls up against. A term set can only be
+          The term structure every mark, aggregate and report card rolls up against. A term set can only be
           activated when its counting terms total exactly 100.00%, and a term&rsquo;s weightage is frozen once marks have been
           approved against it.
         </p>

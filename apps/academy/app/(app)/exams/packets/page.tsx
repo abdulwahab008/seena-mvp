@@ -65,7 +65,7 @@ export default async function PacketsPage({ searchParams }: { searchParams: Prom
       <div>
         <h1 className="text-2xl font-semibold">Report card packets</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J11 — the issued{' '}
+          The issued{' '}
           <Link href="/exams/results#report-cards" className="underline">
             report card
           </Link>{' '}

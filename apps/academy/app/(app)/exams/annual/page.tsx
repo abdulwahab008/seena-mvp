@@ -51,7 +51,7 @@ export default async function AnnualResultsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Annual results</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J03 — each subject&rsquo;s year is the weighted sum of its{' '}
+          Each subject&rsquo;s year is the weighted sum of its{' '}
           <Link href="/exams/results" className="underline">
             term results
           </Link>

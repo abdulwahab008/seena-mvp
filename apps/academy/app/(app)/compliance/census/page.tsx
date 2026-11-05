@@ -20,7 +20,7 @@ export default async function CensusPage() {
       <div>
         <h1 className="text-2xl font-semibold">Census & EMIS returns</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T13 — enrolment counted as it stood on the census date: a student who left afterwards is still counted, one admitted afterwards is not. Class-by-gender and class-by-age tables must add up to the roll or the return is refused.
+          Enrolment counted as it stood on the census date: a student who left afterwards is still counted, one admitted afterwards is not. Class-by-gender and class-by-age tables must add up to the roll or the return is refused.
         </p>
       </div>
 

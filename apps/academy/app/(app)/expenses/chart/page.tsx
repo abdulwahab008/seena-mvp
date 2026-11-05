@@ -85,7 +85,7 @@ export default async function ExpenseChartPage({
       <div>
         <h1 className="text-2xl font-semibold">Expense Chart &amp; Budgets</h1>
         <p className="text-sm text-muted-foreground">
-          FR-L10 — Hierarchical chart of expense heads with monthly budget
+          Hierarchical chart of expense heads with monthly budget
           allocation and spend tracking. Only leaf-level heads can have vouchers
           charged against them.
         </p>

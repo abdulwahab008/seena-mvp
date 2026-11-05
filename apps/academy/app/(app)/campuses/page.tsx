@@ -15,7 +15,7 @@ export default async function CampusesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Campuses</h1>
-        <p className="text-sm text-muted-foreground">FR-A02 — add, list and archive your campuses.</p>
+        <p className="text-sm text-muted-foreground">Add, list and archive your campuses.</p>
       </div>
       <CreateCampusForm />
       <CampusList campuses={campuses ?? []} />

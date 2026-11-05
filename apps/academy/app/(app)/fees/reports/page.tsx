@@ -33,7 +33,7 @@ export default async function CollectionReportsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Daily collection report</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K29 — ties exactly to the ledger by value_date. A reversal always lands in the day it was posted, never rewriting an
+          Ties exactly to the ledger by value_date. A reversal always lands in the day it was posted, never rewriting an
           earlier, already-reported day.
         </p>
       </div>

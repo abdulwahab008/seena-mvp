@@ -44,7 +44,7 @@ export default async function BellTemplatesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Bell Templates</h1>
         <p className="text-sm text-muted-foreground">
-          FR-F01 — campus bell timings every timetable, attendance window and printed sheet will use.
+          Campus bell timings every timetable, attendance window and printed sheet will use.
         </p>
       </div>
       {!campusId ? (

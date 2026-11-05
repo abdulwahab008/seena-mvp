@@ -29,7 +29,7 @@ export default async function PrincipalTodayPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold">Today</h1>
-        <p className="text-sm text-muted-foreground">FR-S03 — live, not the nightly rollup: what needs attention right now.</p>
+        <p className="text-sm text-muted-foreground">Live, not the nightly rollup: what needs attention right now.</p>
       </div>
 
       {panels.map(({ c, name, unmarked, absentees }) => (

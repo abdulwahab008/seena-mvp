@@ -29,7 +29,7 @@ export default async function OnboardingPage() {
       <div>
         <h1 className="text-2xl font-semibold">Setup checklist</h1>
         <p className="text-sm text-muted-foreground">
-          FR-A03 — a resumable 7-step checklist from an empty tenant to your first enrolled student. Nothing here blocks
+          A resumable 7-step checklist from an empty tenant to your first enrolled student. Nothing here blocks
           you from using the rest of the app.
         </p>
       </div>

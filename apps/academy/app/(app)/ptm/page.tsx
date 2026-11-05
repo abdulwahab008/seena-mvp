@@ -34,7 +34,7 @@ export default async function PtmPage() {
       <div>
         <h1 className="text-2xl font-semibold">Parent-teacher meetings</h1>
         <p className="text-sm text-muted-foreground">
-          FR-N11 — open a PTM, generate slots for the teachers taking part and let parents book from the portal. A slot can be held by one family only; booking closes at the cutoff; each child gets one slot per teacher.
+          Open a PTM, generate slots for the teachers taking part and let parents book from the portal. A slot can be held by one family only; booking closes at the cutoff; each child gets one slot per teacher.
         </p>
       </div>
 

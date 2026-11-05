@@ -713,7 +713,7 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
                     <div>
                       <h4 className="text-sm font-semibold text-foreground">Follow-up with Unread Guardians</h4>
                       <p className="text-xs text-muted-foreground">
-                        Export unread guardians into an audience segment for targeted SMS or campaign dispatch (FR-M06).
+                        Export unread guardians into an audience segment for targeted SMS or campaign dispatch.
                       </p>
                     </div>
                   </div>

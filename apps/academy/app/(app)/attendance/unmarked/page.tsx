@@ -12,7 +12,7 @@ export default async function UnmarkedAttendancePage() {
       <div>
         <h1 className="text-2xl font-semibold">Unmarked Attendance</h1>
         <p className="text-sm text-muted-foreground">
-          FR-G13 — sections with no or partial attendance for a date, so gaps are caught the same day, not at report card time.
+          Sections with no or partial attendance for a date, so gaps are caught the same day, not at report card time.
         </p>
       </div>
       {!campusId ? <p className="text-sm text-muted-foreground">No active campus found.</p> : <UnmarkedView campusId={campusId} />}

@@ -58,7 +58,7 @@ export default async function InterviewsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Admission interviews</h1>
         <p className="text-sm text-muted-foreground">
-          FR-B13 — book conflict-free interview slots against a panel member's calendar.
+          Book conflict-free interview slots against a panel member's calendar.
         </p>
       </div>
       {!campusId ? (

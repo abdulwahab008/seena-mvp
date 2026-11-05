@@ -29,7 +29,7 @@ export default async function PurchasingPage() {
     <div className="space-y-6">
       <PageHeader
         title="Purchase requisitions"
-        description="FR-R06 — raise a requisition; it routes to the approvers set by the school's spending thresholds, in order. The route is fixed when you submit. Editing after an approval cancels every approval and starts again."
+        description="Raise a requisition; it routes to the approvers set by the school's spending thresholds, in order. The route is fixed when you submit. Editing after an approval cancels every approval and starts again."
       />
 
       {(queue.data ?? []).length > 0 && (

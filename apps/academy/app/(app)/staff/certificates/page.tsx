@@ -25,7 +25,7 @@ export default async function StaffCertificatesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Staff certificates</h1>
         <p className="text-sm text-muted-foreground">
-          FR-D18 — experience, service and no-objection certificates on the school letterhead, numbered without gaps. What a certificate says is frozen when it is issued, so a reprint is identical and uses no new number.
+          Experience, service and no-objection certificates on the school letterhead, numbered without gaps. What a certificate says is frozen when it is issued, so a reprint is identical and uses no new number.
         </p>
       </div>
 

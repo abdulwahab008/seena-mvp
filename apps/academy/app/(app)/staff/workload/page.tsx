@@ -28,7 +28,7 @@ export default async function TeacherWorkloadPage({ searchParams }: { searchPara
         <div>
           <h1 className="text-2xl font-semibold">Teacher workload</h1>
           <p className="text-sm text-muted-foreground">
-            FR-D20 — periods taught against periods contracted, per teacher and week. Substitution periods are shown separately and are never added to a teacher&apos;s own load.
+            Periods taught against periods contracted, per teacher and week. Substitution periods are shown separately and are never added to a teacher&apos;s own load.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

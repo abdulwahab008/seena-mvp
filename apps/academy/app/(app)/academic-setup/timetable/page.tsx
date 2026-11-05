@@ -67,7 +67,7 @@ export default async function TimetablePage({ searchParams }: { searchParams: Pr
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Timetable Builder</h1>
-        <p className="text-sm text-muted-foreground">FR-F04 — assign subjects, teachers and rooms onto a draft timetable, one section at a time.</p>
+        <p className="text-sm text-muted-foreground">Assign subjects, teachers and rooms onto a draft timetable, one section at a time.</p>
       </div>
       {!campusId || !sessionId ? (
         <p className="text-sm text-muted-foreground">No active campus or session found.</p>

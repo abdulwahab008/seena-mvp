@@ -56,7 +56,7 @@ export default async function PapersPage() {
       <div>
         <h1 className="text-2xl font-semibold">Question papers</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I05 — generate a paper from the prescribed textbook and the board pattern. A paper is stored only when its sections, question counts and marks equal the pattern exactly.
+          Generate a paper from the prescribed textbook and the board pattern. A paper is stored only when its sections, question counts and marks equal the pattern exactly.
         </p>
       </div>
       <JobPoller active={active} />

@@ -38,7 +38,7 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
     <div className="space-y-6">
       <PageHeader
         title="Counter sales"
-        description="FR-R02 — sell uniforms and books against the student. Cash goes on the cash book; charge-to-fee goes on the student's next challan under UNIFORM_BOOKS. Receipts are numbered without gaps and are never edited; a return is a credit note."
+        description="Sell uniforms and books against the student. Cash goes on the cash book; charge-to-fee goes on the student's next challan under UNIFORM_BOOKS. Receipts are numbered without gaps and are never edited; a return is a credit note."
       />
 
       <Card>

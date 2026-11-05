@@ -47,7 +47,7 @@ export default async function CertificateTemplatesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Certificate templates</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T01 — the exact wording, layout and letterhead of each certificate type, per board, campus and language. A
+          The exact wording, layout and letterhead of each certificate type, per board, campus and language. A
           template is activated only once every merge field it uses is one this system can actually resolve.
         </p>
       </div>

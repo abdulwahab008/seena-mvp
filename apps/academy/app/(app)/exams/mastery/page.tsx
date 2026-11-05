@@ -83,7 +83,7 @@ export default async function MasteryPage({ searchParams }: { searchParams: Prom
       <div>
         <h1 className="text-2xl font-semibold">Topic mastery</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J07 — per-chapter mastery from per-question marks. Chapters below 50% for the section are re-teach
+          Per-chapter mastery from per-question marks. Chapters below 50% for the section are re-teach
           candidates. Marks are captured on the{' '}
           <Link href="/exams/mastery/capture" className="underline">
             per-question marks

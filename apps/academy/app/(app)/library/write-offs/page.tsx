@@ -28,7 +28,7 @@ export default async function LibraryWriteOffsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Lost copies and write-offs"
-        description="FR-O08. A lost copy is written off and the replacement cost plus accrued fines is posted once to the student's fee ledger under LIB_RECOVERY. A found copy is reversed with a credit note: nothing is deleted and the accession number is never reused."
+        description="A lost copy is written off and the replacement cost plus accrued fines is posted once to the student's fee ledger under LIB_RECOVERY. A found copy is reversed with a credit note: nothing is deleted and the accession number is never reused."
       />
       {canWrite && (
         <Card>

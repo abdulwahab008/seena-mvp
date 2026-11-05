@@ -22,7 +22,7 @@ export default async function LibraryPoliciesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Borrowing policy"
-        description="FR-O03. Loan limits, periods, renewals and fines per borrower role and class band. A class band beats the role-wide row, a campus row beats the school-wide row, and the latest effective date wins. Each loan keeps a snapshot of the policy it was issued under."
+        description="Loan limits, periods, renewals and fines per borrower role and class band. A class band beats the role-wide row, a campus row beats the school-wide row, and the latest effective date wins. Each loan keeps a snapshot of the policy it was issued under."
       />
       {canEdit && (
         <Card>

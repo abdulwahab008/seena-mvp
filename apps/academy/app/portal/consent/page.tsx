@@ -66,7 +66,7 @@ export default async function PortalConsentPage({ searchParams }: { searchParams
       <div>
         <h2 className="text-2xl font-semibold">Consent</h2>
         <p className="text-sm text-muted-foreground">
-          FR-T15 — what you have agreed to for your child. Changing an answer here takes effect immediately: a withdrawn
+          What you have agreed to for your child. Changing an answer here takes effect immediately: a withdrawn
           photograph consent removes your child from the next marketing gallery, and a withdrawn messaging consent stops the next
           broadcast to your number.
         </p>

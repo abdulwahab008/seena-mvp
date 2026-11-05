@@ -21,7 +21,7 @@ export default async function DataExportPage() {
       <div>
         <h1 className="text-2xl font-semibold">Export school data</h1>
         <p className="text-sm text-muted-foreground">
-          FR-A19 — students, guardians, enrolments, attendance, fee challans, payments, marks and staff, each as its own CSV, with a manifest.json of row counts. Your records are yours: no lock-in.
+          Students, guardians, enrolments, attendance, fee challans, payments, marks and staff, each as its own CSV, with a manifest.json of row counts. Your records are yours: no lock-in.
         </p>
       </div>
 

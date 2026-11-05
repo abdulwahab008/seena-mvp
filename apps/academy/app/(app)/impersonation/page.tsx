@@ -77,7 +77,7 @@ export default async function ImpersonationPage() {
       <div>
         <h1 className="text-2xl font-semibold">Support access</h1>
         <p className="text-sm text-muted-foreground">
-          FR-A16 — platform support can see the product exactly as one of your staff sees it, but only while you say so. Consent
+          Platform support can see the product exactly as one of your staff sees it, but only while you say so. Consent
           lasts at most 24 hours and you can withdraw it mid-session; a session lasts at most 60 minutes; and money and results can
           never be changed from inside one.
         </p>

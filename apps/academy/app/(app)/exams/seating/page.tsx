@@ -25,7 +25,7 @@ export default async function SeatingPage({ searchParams }: { searchParams: Prom
     <div>
       <h1 className="text-2xl font-semibold">Seating plans</h1>
       <p className="text-sm text-muted-foreground">
-        FR-I09 — generate a seating plan per paper: candidates of one section never sit side by side, adjacent seats alternate paper sets, and a regeneration keeps everyone who already has a seat.
+        Generate a seating plan per paper: candidates of one section never sit side by side, adjacent seats alternate paper sets, and a regeneration keeps everyone who already has a seat.
       </p>
     </div>
   );

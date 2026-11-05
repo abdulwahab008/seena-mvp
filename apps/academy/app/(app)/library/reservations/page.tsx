@@ -29,7 +29,7 @@ export default async function LibraryReservationsPage() {
     <div className="space-y-6">
       <PageHeader
         title={isStaff ? 'Reservations' : 'My reservations'}
-        description="FR-O06. First come, first served. When a copy is returned it is held for the next reader for 48 hours; an uncollected hold lapses and passes to the next in line."
+        description="First come, first served. When a copy is returned it is held for the next reader for 48 hours; an uncollected hold lapses and passes to the next in line."
       />
       {isStaff && (
         <Card>

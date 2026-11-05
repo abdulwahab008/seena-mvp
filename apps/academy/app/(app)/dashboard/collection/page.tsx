@@ -71,7 +71,7 @@ export default async function CollectionDashboardPage({ searchParams }: { search
         <div>
           <h1 className="text-2xl font-semibold">Billing versus collection</h1>
           <p className="text-sm text-muted-foreground" data-testid="collection-as-of">
-            FR-K30 — each month is measured against what that month billed; arrears paid later fill the older month. {asOf ? `As of ${new Date(asOf).toLocaleString()}; rebuilt at least hourly.` : 'Rebuilt at least hourly.'}
+            Each month is measured against what that month billed; arrears paid later fill the older month. {asOf ? `As of ${new Date(asOf).toLocaleString()}; rebuilt at least hourly.` : 'Rebuilt at least hourly.'}
           </p>
         </div>
         <ExportCollectionButton />

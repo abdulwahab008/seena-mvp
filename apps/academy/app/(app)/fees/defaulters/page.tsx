@@ -46,7 +46,7 @@ export default async function DefaultersPage({ searchParams }: { searchParams: P
       <div>
         <h1 className="text-2xl font-semibold">Fee defaulters</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K25 — days overdue are counted from the oldest unpaid challan. Rebuilt nightly{refreshed ? `; as of ${new Date(refreshed).toLocaleString()}` : ''}. Students on an approved hardship concession are hidden unless you ask.
+          Days overdue are counted from the oldest unpaid challan. Rebuilt nightly{refreshed ? `; as of ${new Date(refreshed).toLocaleString()}` : ''}. Students on an approved hardship concession are hidden unless you ask.
         </p>
       </div>
 

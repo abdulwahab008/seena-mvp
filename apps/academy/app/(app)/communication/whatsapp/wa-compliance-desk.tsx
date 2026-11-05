@@ -220,7 +220,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Meta 24-hour customer service session window gating, approved template whitelist, and automated SMS fallback (FR-M05).
+            Meta 24-hour customer service session window gating, approved template whitelist, and automated SMS fallback.
           </p>
         </div>
 
@@ -818,7 +818,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                 Dispatch & Fallback Telemetry
               </CardTitle>
               <CardDescription className="text-xs">
-                Real-time evaluation log showing Meta window status and FR-M02 channel fallback progression.
+                Real-time evaluation log showing Meta window status, and how the message falls back to SMS.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 pt-0">

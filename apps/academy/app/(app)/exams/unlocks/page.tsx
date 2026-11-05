@@ -66,7 +66,7 @@ export default async function MarkUnlocksPage() {
       <div>
         <h1 className="text-2xl font-semibold">Break-glass unlocks</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I17 &mdash; the only way past an approved mark lock. Two people, a written reason and a window that closes
+          The only way past an approved mark lock. Two people, a written reason and a window that closes
           on the clock rather than when the tab does. Every mark changed inside one is recorded against the request that
           allowed it.
         </p>

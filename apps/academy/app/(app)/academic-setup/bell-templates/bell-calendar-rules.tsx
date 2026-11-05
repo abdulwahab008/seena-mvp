@@ -82,7 +82,7 @@ export function BellCalendarRules({
     <div className="space-y-3">
       <h2 className="text-lg font-medium">Calendar Rules</h2>
       <p className="text-sm text-muted-foreground">
-        FR-F02 — override which bell template applies on a given weekday (e.g. a shortened Friday for Jumma).
+        Override which bell template applies on a given weekday (e.g. a shortened Friday for Jumma).
       </p>
       <form onSubmit={onSubmit} className="grid grid-cols-2 gap-3 rounded-lg border p-4 md:grid-cols-5" data-testid="create-bell-rule-form" noValidate>
         <div className="space-y-1">

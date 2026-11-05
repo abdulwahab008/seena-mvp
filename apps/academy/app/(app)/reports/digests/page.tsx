@@ -21,7 +21,7 @@ export default async function DigestsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Scheduled digests</h1>
-        <p className="text-sm text-muted-foreground">FR-S05 — get a summary at a fixed time without logging in. Times are local to the timezone you choose. If a report has nothing to say, nothing is sent.</p>
+        <p className="text-sm text-muted-foreground">Get a summary at a fixed time without logging in. Times are local to the timezone you choose. If a report has nothing to say, nothing is sent.</p>
       </div>
 
       <Card>

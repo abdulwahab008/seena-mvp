@@ -41,7 +41,7 @@ export default async function StaffCompliancePage() {
         <div>
           <h1 className="text-2xl font-semibold">Staff compliance</h1>
           <p className="text-sm text-muted-foreground">
-            FR-D06 — police verification and medical certificates must stay valid. A nightly job (01:15 PKT) sends one reminder per document at 60, 30, 14 and 7 days and on the day of expiry.
+            Police verification and medical certificates must stay valid. A nightly job (01:15 PKT) sends one reminder per document at 60, 30, 14 and 7 days and on the day of expiry.
           </p>
         </div>
         {canWrite && <RunCheckButton />}

@@ -26,7 +26,7 @@ export default async function LiveTrackingPage() {
       <div>
         <h1 className="text-2xl font-semibold">Live bus tracking</h1>
         <p className="text-sm text-muted-foreground">
-          FR-P06 — a landing place for GPS pings so tracking can be switched on without reworking transport. Parents see only the bus on their child&apos;s route.
+          A landing place for GPS pings so tracking can be switched on without reworking transport. Parents see only the bus on their child&apos;s route.
         </p>
         <p className="mt-2 text-sm" data-testid="gps-flag">
           Status: <Badge variant={enabled ? 'success' : 'outline'}>{enabled ? 'on' : 'off'}</Badge>

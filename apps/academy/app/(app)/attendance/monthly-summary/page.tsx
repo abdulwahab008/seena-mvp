@@ -34,7 +34,7 @@ export default async function MonthlyAttendanceSummaryPage() {
       <div>
         <h1 className="text-2xl font-semibold">Monthly Attendance Summary</h1>
         <p className="text-sm text-muted-foreground">
-          FR-G14 — per-student working days, present days and attendance % for a section and month.
+          Per-student working days, present days and attendance % for a section and month.
         </p>
       </div>
       {!campusId ? (

@@ -111,7 +111,7 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Homework</h1>
-        <p className="text-sm text-muted-foreground">FR-H01 — publish a homework assignment to a section you teach.</p>
+        <p className="text-sm text-muted-foreground">Publish a homework assignment to a section you teach.</p>
       </div>
       {!campusId ? (
         <p className="text-sm text-muted-foreground">No active campus found.</p>

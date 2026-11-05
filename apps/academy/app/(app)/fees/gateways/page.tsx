@@ -19,7 +19,7 @@ export default async function PaymentGatewaysPage() {
       <div>
         <h1 className="text-2xl font-semibold">Online payments</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K21/K22 — gateways parents can pay with, and payment callbacks that need a human look.
+          Gateways parents can pay with, and payment callbacks that need a human look.
         </p>
       </div>
 

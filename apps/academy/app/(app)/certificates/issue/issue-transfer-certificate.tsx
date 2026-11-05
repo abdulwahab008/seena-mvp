@@ -193,7 +193,7 @@ export function IssueTransferCertificate({
                 <div className="rounded-lg border p-3.5 space-y-2.5 bg-muted/20" data-testid="clearance-gate-container">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-medium text-foreground flex items-center gap-1.5">
-                      Clearance Gate (FR-T04)
+                      Clearance Gate
                     </span>
                     {loadingClearance ? (
                       <span className="text-muted-foreground">Checking dues…</span>

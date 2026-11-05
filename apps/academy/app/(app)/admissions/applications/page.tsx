@@ -126,7 +126,7 @@ export default async function ApplicationsPage() {
         <div>
           <h1 className="text-2xl font-semibold">Applications</h1>
           <p className="text-sm text-muted-foreground">
-            FR-B08/B15/B16/B06 — issue offers against live seat availability and record responses.
+            Issue offers against live seat availability and record responses.
           </p>
         </div>
         <QuickAdmissionModal

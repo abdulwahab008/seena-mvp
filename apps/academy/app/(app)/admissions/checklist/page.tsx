@@ -28,7 +28,7 @@ export default async function ChecklistPage() {
       <div>
         <h1 className="text-2xl font-semibold">Document checklist</h1>
         <p className="text-sm text-muted-foreground">
-          FR-B09 — which documents are mandatory for which classes, effective-dated so an already-submitted application is never
+          Which documents are mandatory for which classes, effective-dated so an already-submitted application is never
           retroactively re-flagged.
         </p>
       </div>

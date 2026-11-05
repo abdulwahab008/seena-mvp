@@ -30,7 +30,7 @@ export default async function HousesPage({ searchParams }: { searchParams: Promi
       <div>
         <h1 className="text-2xl font-semibold">Houses</h1>
         <p className="text-sm text-muted-foreground">
-          FR-C06 — students are allotted to houses with siblings kept together, then the least-populated house. Moves are date-effective: points stay with the house the student was in on the day they were earned.
+          Students are allotted to houses with siblings kept together, then the least-populated house. Moves are date-effective: points stay with the house the student was in on the day they were earned.
         </p>
       </div>
 

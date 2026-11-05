@@ -42,7 +42,7 @@ export default async function DrilldownPage({ params, searchParams }: { params: 
         Back to owner dashboard
       </Link>
       <h1 className="mt-1 text-2xl font-semibold">{def.title}</h1>
-      <p className="text-sm text-muted-foreground">FR-S04 — {def.blurb}</p>
+      <p className="text-sm text-muted-foreground">{def.blurb}</p>
     </div>
   );
 

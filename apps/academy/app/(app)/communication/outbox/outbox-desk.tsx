@@ -174,7 +174,7 @@ export function OutboxDesk({
             Unified Outbound Message Outbox
           </h1>
           <p className="text-sm text-muted-foreground">
-            FR-M01: Auditable multi-channel message queue with concurrent batch locking and aggregator timeout protection.
+            Auditable multi-channel message queue with concurrent batch locking and aggregator timeout protection.
           </p>
         </div>
         <div className="flex items-center gap-3">

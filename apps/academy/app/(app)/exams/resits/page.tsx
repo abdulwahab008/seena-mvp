@@ -59,7 +59,7 @@ export default async function ResitsPage({ searchParams }: { searchParams: Promi
       <div>
         <h1 className="text-2xl font-semibold">Re-sits and improvements</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J14 — a re-sit or improvement is recorded as a separate attempt and the original is never overwritten. The
+          A re-sit or improvement is recorded as a separate attempt and the original is never overwritten. The
           campus policy decides which attempt is published; the{' '}
           <Link href="/exams/results" className="underline">
             term result

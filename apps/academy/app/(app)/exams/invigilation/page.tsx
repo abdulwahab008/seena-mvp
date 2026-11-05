@@ -24,7 +24,7 @@ export default async function InvigilationPage({ searchParams }: { searchParams:
     <div>
       <h1 className="text-2xl font-semibold">Invigilation duties</h1>
       <p className="text-sm text-muted-foreground">
-        FR-I10 — assign invigilators fairly: nobody invigilates a subject they teach to that class, the load is spread evenly, and staff on leave are skipped.
+        Assign invigilators fairly: nobody invigilates a subject they teach to that class, the load is spread evenly, and staff on leave are skipped.
       </p>
     </div>
   );

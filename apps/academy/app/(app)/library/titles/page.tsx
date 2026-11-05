@@ -30,7 +30,7 @@ export default async function LibraryTitlesPage({ searchParams }: { searchParams
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Library catalogue" description="FR-O01. Each work is catalogued once against its ISBN; every physical copy shares this record. Locally printed books without an ISBN are fine." />
+      <PageHeader title="Library catalogue" description="Each work is catalogued once against its ISBN; every physical copy shares this record. Locally printed books without an ISBN are fine." />
 
       <form method="get" className="flex flex-wrap items-end gap-3 text-sm">
         <label className="space-y-1">

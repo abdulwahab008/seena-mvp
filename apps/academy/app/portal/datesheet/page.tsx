@@ -72,7 +72,7 @@ export default async function PortalDatesheetPage({ searchParams }: { searchPara
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold">Datesheet</h2>
-        <p className="text-sm text-muted-foreground">FR-I04 — when each of your child&apos;s papers is held.</p>
+        <p className="text-sm text-muted-foreground">When each of your child&apos;s papers is held.</p>
       </div>
 
       {children.length === 0 ? (

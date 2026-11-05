@@ -17,7 +17,7 @@ export default async function RemindersPage() {
       <div>
         <h1 className="text-2xl font-semibold">Fee reminders</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K26 — the ladder runs daily at 09:00. A guardian gets one consolidated message across all their children; a paid challan stops its ladder; quiet hours defer sending to 08:00.
+          The ladder runs daily at 09:00. A guardian gets one consolidated message across all their children; a paid challan stops its ladder; quiet hours defer sending to 08:00.
         </p>
       </div>
 

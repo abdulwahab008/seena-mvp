@@ -50,7 +50,7 @@ export default async function PromotionPage() {
       <div>
         <h1 className="text-2xl font-semibold">Promotion decisions</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J04 — each candidate is promoted, put in compartment or detained from their{' '}
+          Each candidate is promoted, put in compartment or detained from their{' '}
           <Link href="/exams/annual" className="underline">
             annual result
           </Link>{' '}

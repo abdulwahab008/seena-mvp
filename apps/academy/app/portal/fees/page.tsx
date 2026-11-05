@@ -190,7 +190,7 @@ export default async function PortalFeesPage({
     <div className="space-y-6" data-testid="portal-fees-page">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">{t(lang, 'fees.title')}</h2>
-        <p className="text-sm text-muted-foreground">FR-N04 — View fee challans, outstanding balance and payment options.</p>
+        <p className="text-sm text-muted-foreground">View fee challans, outstanding balance and payment options.</p>
       </div>
 
       {children.length === 0 ? (

@@ -73,7 +73,7 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
       <div>
         <h1 className="text-2xl font-semibold">Term results</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J02 — per-subject results are computed the moment a section&rsquo;s last paper is signed off. An exempt
+          Per-subject results are computed the moment a section&rsquo;s last paper is signed off. An exempt
           subject leaves the denominator, an absence scores zero against the full maximum, and a subject can clear its
           aggregate and still fail on a component&rsquo;s own pass mark. The grade comes from the{' '}
           <Link href="/exams/grading" className="underline">
@@ -94,7 +94,7 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
           Positions
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          FR-J05 — each candidate&rsquo;s position in their section and in their class, on total marks. Ranking waits for
+          Each candidate&rsquo;s position in their section and in their class, on total marks. Ranking waits for
           every section of the class, because a class position taken against half a cohort would move the week the rest
           were signed off. The year&rsquo;s figures are on the{' '}
           <Link href="/exams/annual" className="underline">
@@ -112,7 +112,7 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
           Withheld results
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          FR-J08 — a candidate whose outstanding balance is above the campus threshold has their result withheld from
+          A candidate whose outstanding balance is above the campus threshold has their result withheld from
           the parent and from the report card, automatically, and released the moment the money lands. Withholding
           stops disclosure and nothing else: the marks above and the positions beside them are computed and ranked for
           a withheld candidate exactly as for anyone else, which is what keeps the internal gazette honest.
@@ -127,11 +127,11 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
           Report cards
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          FR-J09 — one branded A4 page per candidate, collecting the subject results above, the position beside them,
+          One branded A4 page per candidate, collecting the subject results above, the position beside them,
           the term&rsquo;s attendance summary with the dates it actually covers, and the campus&rsquo;s own letterhead
           and signature. A card refuses to print while the term is provisional, while a mark has moved under it, or
           while the result is withheld; a correction issues the next revision rather than editing the last one.
-          FR-J12 turns the same card into a results-day run: a section, a class or the whole campus in one action,
+          The same card also becomes into a results-day run: a section, a class or the whole campus in one action,
           with a merged print-ready file and a per-candidate account of anyone it could not print.
         </p>
         <div className="mt-4">

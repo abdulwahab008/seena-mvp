@@ -60,7 +60,7 @@ export default async function CapturePage() {
       <div>
         <h1 className="text-2xl font-semibold">Per-question marks</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J07 — define the questions of a paper and the chapter each tests, then capture each student&rsquo;s mark per
+          Define the questions of a paper and the chapter each tests, then capture each student&rsquo;s mark per
           question. This is what{' '}
           <Link href="/exams/mastery" className="underline">
             topic mastery

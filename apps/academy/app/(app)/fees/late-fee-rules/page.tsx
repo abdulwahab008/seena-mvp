@@ -57,7 +57,7 @@ export default async function LateFeeRulesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Late fee rules</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K12 — the currently active rule is the most recently created one whose effective date has arrived.
+          The currently active rule is the most recently created one whose effective date has arrived.
         </p>
       </div>
       {campus && session ? (

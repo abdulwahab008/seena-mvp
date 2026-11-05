@@ -31,7 +31,7 @@ export default async function RemindersPage() {
       <div>
         <h1 className="text-2xl font-semibold">Reminders</h1>
         <p className="text-sm text-muted-foreground">
-          FR-B05 — queue WhatsApp/SMS follow-up and appointment reminders. No pg_cron locally, so the
+          Queue WhatsApp/SMS follow-up and appointment reminders. No pg_cron locally, so the
           queue is checked manually here instead of on a schedule.
         </p>
       </div>

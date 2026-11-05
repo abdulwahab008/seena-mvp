@@ -29,7 +29,7 @@ export default async function AttendancePolicyPage() {
       <div>
         <h1 className="text-2xl font-semibold">Attendance Policy</h1>
         <p className="text-sm text-muted-foreground">
-          FR-G01 — configure once per session; every edit is effective-dated, never a retroactive rewrite.
+          Configure once per session; every edit is effective-dated, never a retroactive rewrite.
         </p>
       </div>
       {!campusId || !sessionId ? (
@@ -53,7 +53,7 @@ export default async function AttendancePolicyPage() {
       )}
       {campusId && sessionId && (
         <div>
-          <h2 className="mb-2 text-sm font-medium">Status weights (FR-G06)</h2>
+          <h2 className="mb-2 text-sm font-medium">Status weights</h2>
           <WeightForm campusId={campusId} sessionId={sessionId} lateWeight={lateWeight ?? 1} halfDayWeight={halfDayWeight ?? 0.5} />
         </div>
       )}

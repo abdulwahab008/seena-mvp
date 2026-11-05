@@ -59,7 +59,7 @@ export default async function RemarksPage({ searchParams }: { searchParams: Prom
       <div>
         <h1 className="text-2xl font-semibold">Class teacher remarks</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J10 — one short remark (up to 250 characters, English or Urdu) per student per term. Pick from the library, type your own, or apply one remark to several students. It prints in the report card&apos;s remark box.
+          One short remark (up to 250 characters, English or Urdu) per student per term. Pick from the library, type your own, or apply one remark to several students. It prints in the report card&apos;s remark box.
         </p>
       </div>
 

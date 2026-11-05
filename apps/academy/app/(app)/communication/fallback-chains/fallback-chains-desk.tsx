@@ -195,9 +195,6 @@ export function FallbackChainsDesk({
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               Channel Fallback Chains
             </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
-              FR-M02
-            </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
             Automated per-recipient multi-channel fallback (WhatsApp ➔ SMS ➔ Push), delivery receipt timeouts, opt-out suppression, and honest multi-hop cost ledgering.

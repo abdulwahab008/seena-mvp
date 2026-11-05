@@ -35,7 +35,7 @@ export default async function SyllabusVariancePage({ searchParams }: { searchPar
       <div>
         <h1 className="text-2xl font-semibold">Syllabus variance</h1>
         <p className="text-sm text-muted-foreground">
-          FR-H12 — which class-subjects are behind their annual plan. Expected coverage counts every chapter whose target month has begun; behind means more than 5 points short. Rebuilt every day at 05:00.
+          Which class-subjects are behind their annual plan. Expected coverage counts every chapter whose target month has begun; behind means more than 5 points short. Rebuilt every day at 05:00.
         </p>
       </div>
 

@@ -30,7 +30,7 @@ export default async function InventoryPage() {
     <div className="space-y-6">
       <PageHeader
         title="Stores and stock"
-        description="FR-R01 — uniform, textbook and stationery stock is an immutable ledger of movements per campus store. On-hand is always the sum of movements; a stock-take variance is posted as a new adjustment row, never an edit."
+        description="Uniform, textbook and stationery stock is an immutable ledger of movements per campus store. On-hand is always the sum of movements; a stock-take variance is posted as a new adjustment row, never an edit."
       />
 
       {storeRows.length === 0 && (

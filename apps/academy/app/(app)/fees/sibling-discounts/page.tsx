@@ -40,7 +40,7 @@ export default async function SiblingDiscountsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Sibling discounts</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K07 — detects families by guardian CNIC and proposes a draft award per configured rank. Never auto-approved.
+          Detects families by guardian CNIC and proposes a draft award per configured rank. Never auto-approved.
         </p>
       </div>
       {campus && session ? (

@@ -31,7 +31,7 @@ export default async function TransportRoutesPage({ searchParams }: { searchPara
       <div>
         <h1 className="text-2xl font-semibold">Transport routes</h1>
         <p className="text-sm text-muted-foreground">
-          FR-P01 — each route is an ordered list of stops with pickup and drop times; the fare comes from the stop&apos;s fare slab, never from a per-student figure.
+          Each route is an ordered list of stops with pickup and drop times; the fare comes from the stop&apos;s fare slab, never from a per-student figure.
         </p>
       </div>
 

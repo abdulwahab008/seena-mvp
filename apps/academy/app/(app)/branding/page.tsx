@@ -21,7 +21,7 @@ export default async function BrandingPage() {
       <div>
         <h1 className="text-2xl font-semibold">Branding</h1>
         <p className="text-sm text-muted-foreground">
-          FR-A18 — logo, letterhead, signature and stamp per campus, falling back to the tenant-wide asset.
+          Logo, letterhead, signature and stamp per campus, falling back to the tenant-wide asset.
         </p>
       </div>
       <BrandingList

@@ -56,7 +56,7 @@ export default async function ExpenseApprovalsPage({
       <div>
         <h1 className="text-2xl font-semibold">Vouchers awaiting approval</h1>
         <p className="text-sm text-muted-foreground">
-          FR-L11 — nothing here has been paid, and nothing here can be until it is approved by the role its amount requires. A
+          Nothing here has been paid, and nothing here can be until it is approved by the role its amount requires. A
           rejection needs a reason of at least 10 characters and is final: the voucher is locked and a correction means a new
           one.
         </p>

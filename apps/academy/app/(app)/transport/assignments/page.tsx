@@ -32,7 +32,7 @@ export default async function AssignmentsPage({ searchParams }: { searchParams: 
       <div>
         <h1 className="text-2xl font-semibold">Vehicle and crew assignment</h1>
         <p className="text-sm text-muted-foreground">
-          FR-P02 and FR-P03 — a vehicle with an expired required document, or a driver with an expired or too-low licence, cannot be assigned. A Principal can override a blocked vehicle with a recorded reason.
+          A vehicle with an expired required document, or a driver with an expired or too-low licence, cannot be assigned. A Principal can override a blocked vehicle with a recorded reason.
         </p>
       </div>
       <Card>

@@ -47,7 +47,7 @@ export default async function AttendanceRegisterPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Attendance Register</h1>
-        <p className="text-sm text-muted-foreground">FR-G02 — one status per enrolled student per day, holiday- and lock-aware.</p>
+        <p className="text-sm text-muted-foreground">One status per enrolled student per day, holiday- and lock-aware.</p>
       </div>
       {!campusId ? (
         <p className="text-sm text-muted-foreground">No active campus found.</p>

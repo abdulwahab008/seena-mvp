@@ -66,7 +66,7 @@ export default async function TimetableExportPage() {
       <div>
         <h1 className="text-2xl font-semibold">Timetable print &amp; export</h1>
         <p className="text-sm text-muted-foreground">
-          FR-F15 — per-section and per-teacher sheets on A4 portrait, the master grid on A3 landscape, as a single PDF with a
+          Per-section and per-teacher sheets on A4 portrait, the master grid on A3 landscape, as a single PDF with a
           signed download link valid for 24 hours.
         </p>
       </div>

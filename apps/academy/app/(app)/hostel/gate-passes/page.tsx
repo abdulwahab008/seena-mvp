@@ -35,7 +35,7 @@ export default async function GatePassesPage({ searchParams }: { searchParams: P
       <div>
         <h1 className="text-2xl font-semibold">Gate passes</h1>
         <p className="text-sm text-muted-foreground">
-          FR-Q03 — every exit is recorded against an approved pass. The collecting adult&apos;s CNIC must match a guardian; otherwise only a Principal can release the student, with a reason. Passes can&apos;t be edited.
+          Every exit is recorded against an approved pass. The collecting adult&apos;s CNIC must match a guardian; otherwise only a Principal can release the student, with a reason. Passes can&apos;t be edited.
         </p>
       </div>
 

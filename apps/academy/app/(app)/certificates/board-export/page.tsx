@@ -72,7 +72,7 @@ export default async function BoardExportPage() {
       <div>
         <h1 className="text-2xl font-semibold">Board registration export</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T11 — the registration file your board demands, in its exact column order, checked candidate by candidate
+          The registration file your board demands, in its exact column order, checked candidate by candidate
           before it is produced. A board bounces the whole file for one bad row, so nothing is generated while anything is
           blocking. Check the data early and often; the deadline does not move.
         </p>

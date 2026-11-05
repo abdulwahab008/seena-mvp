@@ -34,7 +34,7 @@ export default async function VisitorsPage({ searchParams }: { searchParams: Pro
       <div>
         <h1 className="text-2xl font-semibold">Hostel visitors</h1>
         <p className="text-sm text-muted-foreground">
-          FR-Q04 — who is inside the premises right now. Visitor details and photographs are kept for {String(cfg.get('hostel.visitor_retention_days') ?? 180)} days and are never visible to parents or students.
+          Who is inside the premises right now. Visitor details and photographs are kept for {String(cfg.get('hostel.visitor_retention_days') ?? 180)} days and are never visible to parents or students.
         </p>
       </div>
       <Card>

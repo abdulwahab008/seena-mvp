@@ -24,7 +24,7 @@ export default async function ReportAuditPage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Report and export audit</h1>
-        <p className="text-sm text-muted-foreground">FR-S11 — who ran or exported what, append-only. Exporting this list is itself recorded.</p>
+        <p className="text-sm text-muted-foreground">Who ran or exported what, append-only. Exporting this list is itself recorded.</p>
       </div>
 
       {(alerts ?? []).length > 0 && (

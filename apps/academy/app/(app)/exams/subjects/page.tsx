@@ -94,7 +94,7 @@ export default async function ExamSubjectsPage({ searchParams }: { searchParams:
       <div>
         <h1 className="text-2xl font-semibold">Exam subjects</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I02 — max and pass marks per component, so mark entry and pass/fail logic have an unambiguous denominator.
+          Max and pass marks per component, so mark entry and pass/fail logic have an unambiguous denominator.
           Configured once per class; every section of that class inherits it.
         </p>
       </div>

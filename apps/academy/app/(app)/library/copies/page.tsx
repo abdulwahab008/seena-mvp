@@ -39,7 +39,7 @@ export default async function LibraryCopiesPage({ searchParams }: { searchParams
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Copies and accession register" description="FR-O02. Every physical copy has its own accession number and barcode. Accession numbers are never reused, even after a write-off." />
+      <PageHeader title="Copies and accession register" description="Every physical copy has its own accession number and barcode. Accession numbers are never reused, even after a write-off." />
 
       <form method="get" className="flex flex-wrap items-end gap-3 text-sm">
         <label className="space-y-1">

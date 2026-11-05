@@ -43,7 +43,7 @@ export default async function BoardingPage({ searchParams }: { searchParams: Pro
       <div>
         <h1 className="text-2xl font-semibold">Boarding attendance</h1>
         <p className="text-sm text-muted-foreground">
-          FR-P05 — open the trip, mark everyone boarded, tap the exceptions and submit once. Parents are told when their child boards or is dropped. A batch sent twice stores each student once.
+          Open the trip, mark everyone boarded, tap the exceptions and submit once. Parents are told when their child boards or is dropped. A batch sent twice stores each student once.
         </p>
       </div>
 

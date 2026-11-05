@@ -28,7 +28,7 @@ export default async function PettyCashPage() {
       <div>
         <h1 className="text-2xl font-semibold">Petty cash</h1>
         <p className="text-sm text-muted-foreground">
-          FR-L12 — a fixed float per campus. Payments cannot exceed the balance or the per-payment cap; the tin is topped up only after a count the Principal signs off, and it always returns to exactly the float.
+          A fixed float per campus. Payments cannot exceed the balance or the per-payment cap; the tin is topped up only after a count the Principal signs off, and it always returns to exactly the float.
         </p>
       </div>
 

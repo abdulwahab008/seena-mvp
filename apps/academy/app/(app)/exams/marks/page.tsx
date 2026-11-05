@@ -68,7 +68,7 @@ export default async function MarkEntryPage({ searchParams }: { searchParams: Pr
       <div>
         <h1 className="text-2xl font-semibold">Mark entry</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I12 — obtained marks per candidate per component, validated against the configured maximum. Every cell
+          Obtained marks per candidate per component, validated against the configured maximum. Every cell
           autosaves as a draft; nothing is submitted by typing it.
         </p>
       </div>

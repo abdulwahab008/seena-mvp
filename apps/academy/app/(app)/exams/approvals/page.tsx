@@ -84,7 +84,7 @@ export default async function MarkApprovalsPage({ searchParams }: { searchParams
       <div>
         <h1 className="text-2xl font-semibold">Mark approval</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I16 — approving a paper for a section makes its marks read-only for everyone, including the teacher who
+          Approving a paper for a section makes its marks read-only for everyone, including the teacher who
           entered them and any service-role job. A set is only approvable once every candidate has a mark or an exam
           status.
         </p>

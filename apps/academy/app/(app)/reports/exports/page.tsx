@@ -24,7 +24,7 @@ export default async function ExportsPage() {
       <AutoRefresh active={pending} />
       <div>
         <h1 className="text-2xl font-semibold">Excel exports</h1>
-        <p className="text-sm text-muted-foreground">FR-S08 — large exports are built in the background. Request one, carry on working, and download it here when it is ready (kept for 30 days).</p>
+        <p className="text-sm text-muted-foreground">Large exports are built in the background. Request one, carry on working, and download it here when it is ready (kept for 30 days).</p>
       </div>
 
       {(notesRes.data ?? []).length > 0 && (

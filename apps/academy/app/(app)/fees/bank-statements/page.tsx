@@ -20,7 +20,7 @@ export default async function BankStatementsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Bank statements</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K19 — upload the bank&apos;s collection scroll (CSV). Each file can be imported once per account; unreadable rows are kept for review.
+          Upload the bank&apos;s collection scroll (CSV). Each file can be imported once per account; unreadable rows are kept for review.
         </p>
       </div>
 

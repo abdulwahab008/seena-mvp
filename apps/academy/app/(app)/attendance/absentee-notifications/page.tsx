@@ -21,7 +21,7 @@ export default async function AbsenteeNotificationsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Absentee Notifications</h1>
         <p className="text-sm text-muted-foreground">
-          FR-G12 — one SMS per absent student per day to the primary guardian, with an exception list for the office.
+          One SMS per absent student per day to the primary guardian, with an exception list for the office.
         </p>
       </div>
       {!campusId ? (

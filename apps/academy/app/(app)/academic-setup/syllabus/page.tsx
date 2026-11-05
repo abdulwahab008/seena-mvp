@@ -52,7 +52,7 @@ export default async function SyllabusPage({ searchParams }: { searchParams: Pro
       <div>
         <h1 className="text-2xl font-semibold">Annual syllabus</h1>
         <p className="text-sm text-muted-foreground">
-          FR-H08 — chapters and topics per class, subject and board, in order. FBISE and Punjab Board versions of the same subject sit side by side; copying to a new session keeps every chapter&apos;s lineage and moves its target month a year on.
+          Chapters and topics per class, subject and board, in order. FBISE and Punjab Board versions of the same subject sit side by side; copying to a new session keeps every chapter&apos;s lineage and moves its target month a year on.
         </p>
       </div>
 

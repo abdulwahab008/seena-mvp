@@ -29,7 +29,7 @@ export default async function AttendanceCorrectionsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Attendance Corrections</h1>
         <p className="text-sm text-muted-foreground">
-          FR-G11 — approve or reject a class teacher&apos;s request to change an already-locked day. Every approval is permanently audited.
+          Approve or reject a class teacher&apos;s request to change an already-locked day. Every approval is permanently audited.
         </p>
       </div>
       <CorrectionsList corrections={corrections} />

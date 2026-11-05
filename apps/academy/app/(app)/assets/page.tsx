@@ -23,7 +23,7 @@ export default async function AssetsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Asset register"
-        description="FR-R03 — every capitalised asset has a tag and depreciates itself monthly (straight line or reducing balance). The final instalment is the remainder, so net book value ends at exactly the salvage value. Running a month twice posts nothing."
+        description="Every capitalised asset has a tag and depreciates itself monthly (straight line or reducing balance). The final instalment is the remainder, so net book value ends at exactly the salvage value. Running a month twice posts nothing."
       />
 
       <Card>

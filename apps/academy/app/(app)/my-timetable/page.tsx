@@ -60,7 +60,7 @@ export default async function MyTimetablePage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">My Timetable</h1>
-        <p className="text-sm text-muted-foreground">FR-F12 — your own published schedule for the week, across every section and campus you teach.</p>
+        <p className="text-sm text-muted-foreground">Your own published schedule for the week, across every section and campus you teach.</p>
       </div>
 
       <div className="flex items-center gap-3">

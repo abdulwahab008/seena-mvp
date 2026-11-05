@@ -20,7 +20,7 @@ export default async function OwnerDashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Owner dashboard</h1>
-        <p className="text-sm text-muted-foreground">FR-S02 — this month to date, every campus you can see, from the nightly aggregates.</p>
+        <p className="text-sm text-muted-foreground">This month to date, every campus you can see, from the nightly aggregates.</p>
       </div>
 
       {fresh?.is_stale && (

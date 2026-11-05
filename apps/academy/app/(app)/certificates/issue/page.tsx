@@ -59,7 +59,7 @@ export default async function IssueCertificatePage() {
       <div>
         <h1 className="text-2xl font-semibold">Issue a Transfer Certificate</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T03 — a TC carries the student&apos;s GR number, dates, conduct and last class passed, takes its serial from the
+          A TC carries the student&apos;s GR number, dates, conduct and last class passed, takes its serial from the
           campus register and takes the student off the roster from the leaving date. One original per enrolment.
         </p>
       </div>

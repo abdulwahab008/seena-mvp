@@ -46,7 +46,7 @@ export default async function MessPage({ searchParams }: { searchParams: Promise
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Mess menu and mess-off</h1>
-        <p className="text-sm text-muted-foreground">FR-Q05 — publish the weekly menu (all 21 meals) and manage the days boarders are away. Approved mess-off days come off the mess charge.</p>
+        <p className="text-sm text-muted-foreground">Publish the weekly menu (all 21 meals) and manage the days boarders are away. Approved mess-off days come off the mess charge.</p>
       </div>
 
       <Card>

@@ -29,7 +29,7 @@ export default async function MaintenancePage() {
     <div className="space-y-6">
       <PageHeader
         title="Maintenance and repairs"
-        description="FR-R05 — one repair log for buses, generators and everything else. Downtime makes an asset unavailable: a bus in the workshop cannot be assigned to a trip. Repairs flagged as capital improvements above the threshold raise the asset's cost and re-base its depreciation."
+        description="One repair log for buses, generators and everything else. Downtime makes an asset unavailable: a bus in the workshop cannot be assigned to a trip. Repairs flagged as capital improvements above the threshold raise the asset's cost and re-base its depreciation."
       />
 
       {(reminders.data ?? []).length > 0 && (
