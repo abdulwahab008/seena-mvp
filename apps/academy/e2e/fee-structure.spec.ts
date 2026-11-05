@@ -76,7 +76,6 @@ test('an owner drafts a fee structure line and publishing is blocked by mandator
   await page.getByTestId('structure-line-head-trigger').click();
   await page.getByRole('option', { name: /Tuition Fee/ }).click();
   await page.getByLabel('Amount (PKR)').fill('5000');
-  await page.getByText('Jan', { exact: true }).click();
   await page.getByRole('button', { name: 'Add line' }).click();
   await expect(page.getByText('Line added.')).toBeVisible();
   await expect(page.getByText('Class 1 · Tuition Fee')).toBeVisible();

@@ -157,6 +157,7 @@ export function StructureView({
   history,
   classLevels,
   feeHeads,
+  missing = [],
 }: {
   campusId: string;
   sessionId: string;
@@ -165,6 +166,7 @@ export function StructureView({
   history: StructureHistoryRow[];
   classLevels: ClassLevel[];
   feeHeads: FeeHead[];
+  missing?: { head: string; classes: string[] }[];
 }) {
   if (!structure) {
     return (
@@ -186,6 +188,20 @@ export function StructureView({
         {structure.status === 'draft' && <PublishControl structureId={structure.id} />}
         {structure.status === 'published' && <CreateNextVersionControl priorStructureId={structure.id} />}
       </div>
+
+      {structure.status === 'draft' && missing.length > 0 && (
+        <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200" data-testid="structure-missing">
+          <p className="font-medium">Before publishing, add these required fee heads:</p>
+          <ul className="mt-1 list-disc pl-5">
+            {missing.map((m) => (
+              <li key={m.head}>
+                {m.head}: {m.classes.join(', ')}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1">Choose “All classes” in the form below to add a fee head to every class at once.</p>
+        </div>
+      )}
 
       {structure.status === 'draft' && <StructureLineForm structureId={structure.id} classLevels={classLevels} feeHeads={feeHeads} />}
 

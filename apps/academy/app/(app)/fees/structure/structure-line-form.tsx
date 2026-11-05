@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+const ALL_MONTHS = Array.from({ length: 12 }, (_, i) => i);
+
 type ClassLevel = { id: string; name_en: string };
 type FeeHead = { id: string; code: string; name_en: string };
 
@@ -21,10 +23,11 @@ export function StructureLineForm({ structureId, classLevels, feeHeads }: { stru
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<AddStructureLineInput>({
     resolver: zodResolver(addStructureLineSchema),
-    defaultValues: { structureId, classId: '', groupCode: '', feeHeadId: '', frequency: 'monthly', months: [] },
+    defaultValues: { structureId, classId: '', groupCode: '', feeHeadId: '', frequency: 'monthly', months: ALL_MONTHS },
   });
 
   const onSubmit = handleSubmit((values) => {
@@ -41,8 +44,8 @@ export function StructureLineForm({ structureId, classLevels, feeHeads }: { stru
       const result = await addStructureLine({ error: null }, fd);
       if (result.error) toast.error(result.error);
       else {
-        toast.success('Line added.');
-        reset({ structureId, classId: '', groupCode: '', feeHeadId: '', frequency: 'monthly', months: [] });
+        toast.success(result.note ?? 'Line added.');
+        reset({ structureId, classId: '', groupCode: '', feeHeadId: '', frequency: 'monthly', months: ALL_MONTHS });
       }
     });
   });
@@ -60,6 +63,7 @@ export function StructureLineForm({ structureId, classLevels, feeHeads }: { stru
                 <SelectValue placeholder="Select a class" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="__all__">All classes</SelectItem>
                 {classLevels.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name_en}
@@ -124,14 +128,36 @@ export function StructureLineForm({ structureId, classLevels, feeHeads }: { stru
         />
       </div>
       <div className="col-span-2 space-y-1 md:col-span-4">
-        <Label>Billing months</Label>
+        <div className="flex flex-wrap items-center gap-3">
+          <Label>Billing months</Label>
+          <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={() => setValue('months', ALL_MONTHS)}>
+            Every month
+          </Button>
+          <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={() => setValue('months', [])}>
+            Clear
+          </Button>
+        </div>
         <div className="flex flex-wrap gap-3">
-          {MONTH_LABELS.map((label, i) => (
-            <label key={label} className="flex items-center gap-1 text-sm">
-              <input type="checkbox" value={i} {...register('months')} />
-              {label.slice(0, 3)}
-            </label>
-          ))}
+          <Controller
+            control={control}
+            name="months"
+            render={({ field }) => (
+              <>
+                {MONTH_LABELS.map((label, i) => (
+                  <label key={label} className="flex items-center gap-1 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={field.value.includes(i)}
+                      onChange={(e) =>
+                        field.onChange(e.target.checked ? [...field.value, i].sort((a, b) => a - b) : field.value.filter((m) => m !== i))
+                      }
+                    />
+                    {label.slice(0, 3)}
+                  </label>
+                ))}
+              </>
+            )}
+          />
         </div>
         {errors.months && <p className="text-xs text-destructive">{errors.months.message}</p>}
       </div>

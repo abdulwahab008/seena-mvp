@@ -10,7 +10,7 @@ import {
 } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
-export type ActionState = { error: string | null };
+export type ActionState = { error: string | null; note?: string };
 
 export async function createDraftStructure(campusId: string, sessionId: string, _prev: ActionState, _formData: FormData): Promise<ActionState> {
   const parsed = createDraftStructureSchema.safeParse({ campusId, sessionId });
@@ -50,15 +50,34 @@ export async function addStructureLine(_prev: ActionState, formData: FormData): 
   const billingMonthMask = parsed.data.months.reduce((mask, m) => mask | (1 << m), 0);
 
   const supabase = await supabaseServer();
-  const { error } = await supabase.rpc('add_structure_line', {
-    p_structure_id: parsed.data.structureId,
-    p_class_id: parsed.data.classId,
-    p_fee_head_id: parsed.data.feeHeadId,
-    p_amount_paisa: amountPaisa,
-    p_frequency: parsed.data.frequency,
-    p_group_code: parsed.data.groupCode,
-    p_billing_month_mask: billingMonthMask,
-  });
+  const addFor = (classId: string) =>
+    supabase.rpc('add_structure_line', {
+      p_structure_id: parsed.data.structureId,
+      p_class_id: classId,
+      p_fee_head_id: parsed.data.feeHeadId,
+      p_amount_paisa: amountPaisa,
+      p_frequency: parsed.data.frequency,
+      p_group_code: parsed.data.groupCode,
+      p_billing_month_mask: billingMonthMask,
+    });
+
+  if (parsed.data.classId === '__all__') {
+    const { data: classes } = await supabase.from('class_level').select('id').eq('is_active', true);
+    let added = 0;
+    let skipped = 0;
+    for (const c of classes ?? []) {
+      const { error } = await addFor(c.id);
+      if (!error) added += 1;
+      else if (error.message.includes('duplicate key')) skipped += 1;
+      else if (error.message.includes('STRUCTURE_NOT_DRAFT')) return { error: 'This structure is no longer a draft.' };
+      else if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit fee structures.' };
+      else return { error: `Added ${added} lines, then could not add the rest.` };
+    }
+    revalidatePath('/fees/structure');
+    return { error: null, note: skipped ? `Added ${added} lines; ${skipped} classes already had this fee head.` : `Added ${added} lines.` };
+  }
+
+  const { error } = await addFor(parsed.data.classId);
   if (error) {
     if (error.message.includes('duplicate key')) return { error: 'A line for this class, group and fee head already exists.' };
     if (error.message.includes('STRUCTURE_NOT_DRAFT')) return { error: 'This structure is no longer a draft.' };

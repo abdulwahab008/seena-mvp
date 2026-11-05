@@ -72,7 +72,6 @@ test('an owner revises a published fee structure into a new version without touc
   await page.getByTestId('structure-line-head-trigger').click();
   await page.getByRole('option', { name: /Tuition Fee/ }).click();
   await page.getByLabel('Amount (PKR)').fill('5000');
-  await page.getByText('Jan', { exact: true }).click();
   await page.getByRole('button', { name: 'Add line' }).click();
   await expect(page.getByText('Line added.')).toBeVisible();
 
