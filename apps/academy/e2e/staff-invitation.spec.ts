@@ -46,6 +46,8 @@ test('owner invites a teacher, who accepts and reaches the dashboard', async ({ 
   await page.getByRole('option', { name: 'subject teacher' }).click();
   await page.getByRole('button', { name: 'Send invite' }).click();
   await expect(page.getByTestId(`invite-row-${teacherEmail}`)).toBeVisible();
+  // The inviter always gets the join link to share, whether or not an email went out.
+  await expect(page.getByTestId('invite-link')).toContainText('/accept-invite/');
 
   // Fetch the token directly (stands in for "the email that would have
   // been sent" — there is no email provider wired up in local dev).
@@ -61,7 +63,8 @@ test('owner invites a teacher, who accepts and reaches the dashboard', async ({ 
   const teacherPage = await context.newPage();
   await teacherPage.goto(`/accept-invite/${invite!.token}`);
   await teacherPage.waitForLoadState('networkidle');
-  await expect(teacherPage.getByTestId('invite-preview')).toContainText('subject_teacher');
+  await expect(teacherPage.getByTestId('invite-preview')).toContainText('Subject Teacher');
+  await teacherPage.getByLabel('Your full name').fill('Sana Teacher');
   await teacherPage.getByLabel('Choose a password').fill('teacher-password-123!');
   await teacherPage.getByRole('button', { name: 'Accept invitation' }).click();
 

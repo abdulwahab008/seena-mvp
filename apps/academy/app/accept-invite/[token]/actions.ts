@@ -6,6 +6,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 const AcceptSchema = z.object({
   token: z.string().min(1),
   password: z.string().min(10, 'Must be at least 10 characters'),
+  fullName: z.string().trim().min(2, 'Enter your full name').max(120),
 });
 
 export type AcceptState = { error: string | null; ok: boolean };
@@ -28,12 +29,16 @@ export async function acceptInvite(
   _prev: AcceptState,
   formData: FormData,
 ): Promise<AcceptState> {
-  const parsed = AcceptSchema.safeParse({ token: formData.get('token'), password: formData.get('password') });
+  const parsed = AcceptSchema.safeParse({ token: formData.get('token'), password: formData.get('password'), fullName: formData.get('fullName') });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.', ok: false };
 
   const supabase = await supabaseServer();
 
-  const { error: signUpError } = await supabase.auth.signUp({ email, password: parsed.data.password });
+  const { error: signUpError } = await supabase.auth.signUp({
+    email,
+    password: parsed.data.password,
+    options: { data: { full_name: parsed.data.fullName } },
+  });
   if (signUpError) {
     if (signUpError.message.toLowerCase().includes('already registered')) {
       // Since /sign-up exists, "I made an account, then my school invited me"
@@ -53,6 +58,8 @@ export async function acceptInvite(
           ok: false,
         };
       }
+      const { data: me } = await supabase.auth.getUser();
+      if (!me.user?.user_metadata?.full_name) await supabase.auth.updateUser({ data: { full_name: parsed.data.fullName } });
     } else {
       return { error: 'Could not create your account.', ok: false };
     }
