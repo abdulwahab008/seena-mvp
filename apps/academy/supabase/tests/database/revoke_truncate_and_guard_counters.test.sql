@@ -48,13 +48,19 @@ select is(
 -- a real value that the tamper attempts have something to fail against)
 -- ═══════════════════════════════════════════════════════════════════════
 
+select gen_random_uuid() as owner_uid \gset
+insert into auth.users (id, email, aud, role, encrypted_password) values (:'owner_uid', 'owner@counter-fixture.test', 'authenticated', 'authenticated', 'x');
+insert into public.app_user (user_id, tenant_id, app_role, full_name) values (:'owner_uid', :'tenant_id', 'owner', 'Counter Fixture Owner');
+
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
-  json_build_object('tenant_id', :'tenant_id', 'app_role', 'owner',
+  json_build_object('sub', :'owner_uid', 'tenant_id', :'tenant_id', 'app_role', 'owner',
                     'campus_ids', json_build_array(:'campus_id', :'campus_b'))::text,
   true
 );
+select public.create_cash_counter(:'campus_id'::uuid, 'Main desk') as ctr1 \gset
+select public.open_counter_session(:'ctr1'::uuid, 0);
 
 select public.set_class_level_active(id, false) from public.class_level where tenant_id = :'tenant_id' and code <> '1';
 select public.create_section(:'campus_id'::uuid, :'session_id'::uuid, :'class1_id'::uuid, 'A', 20) as section_id \gset

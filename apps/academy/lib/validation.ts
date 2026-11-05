@@ -470,6 +470,34 @@ export type CollectCashPaymentInput = z.infer<typeof collectCashPaymentSchema>;
 export const printReceiptSchema = z.object({ receiptId: z.string().uuid() });
 export type PrintReceiptInput = z.infer<typeof printReceiptSchema>;
 
+// FR-K18: counter shifts. Mirrors supabase/migrations/20260806001100_cash_counter_shift_close.sql.
+export const COUNTER_DENOMINATIONS = [5000, 1000, 500, 100, 50, 20, 10, 5, 2, 1] as const;
+
+export const createCashCounterSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  name: z.string().trim().min(1, 'Name the counter').max(60),
+  thresholdPkr: z.number({ message: 'Enter the variance threshold' }).min(0).max(1_000_000),
+});
+export type CreateCashCounterInput = z.infer<typeof createCashCounterSchema>;
+
+export const openCounterSessionSchema = z.object({
+  counterId: z.string().uuid('Choose a counter'),
+  openingFloatPkr: z.number({ message: 'Enter the opening float' }).min(0).max(10_000_000),
+});
+export type OpenCounterSessionInput = z.infer<typeof openCounterSessionSchema>;
+
+export const closeCounterSessionSchema = z.object({
+  sessionId: z.string().uuid(),
+  counts: z.record(z.string(), z.number({ message: 'Enter a whole number' }).int('Enter a whole number').min(0, 'Cannot be negative').max(1_000_000)),
+});
+export type CloseCounterSessionInput = z.infer<typeof closeCounterSessionSchema>;
+
+export const countersignCounterSessionSchema = z.object({
+  sessionId: z.string().uuid(),
+  remark: z.string().trim().min(10, 'Give a remark of at least 10 characters').max(500),
+});
+export type CountersignCounterSessionInput = z.infer<typeof countersignCounterSessionSchema>;
+
 // Mirrors build_collection_report_payload()'s own signature in
 // supabase/migrations/20260731280000_daily_collection_report.sql /
 // 20260731760000_per_campus_role_scoping.sql. campusId is '' for FR-A12

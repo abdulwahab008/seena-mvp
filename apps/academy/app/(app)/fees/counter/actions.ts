@@ -87,6 +87,8 @@ export async function collectCashPayment(_prev: CollectResult, formData: FormDat
     }
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to collect payments.' };
     if (error.message.includes('CHALLAN_NOT_FOUND')) return { error: 'Challan not found.' };
+    if (error.message.includes('COUNTER_SESSION_REQUIRED')) return { error: 'Open a counter session first.' };
+    if (error.message.includes('COUNTER_SESSION_CLOSED')) return { error: 'That counter session is closed. Record this against a session that is open.' };
     return { error: 'Could not collect the payment.' };
   }
 
