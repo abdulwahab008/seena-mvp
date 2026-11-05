@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { MarkGrid } from './mark-grid';
@@ -73,9 +74,26 @@ export default async function MarkEntryPage({ searchParams }: { searchParams: Pr
         </p>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        {campus.name} &middot; {session.name} &middot; {term.name}
-      </p>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-muted-foreground">
+          {campus.name} &middot; {session.name} &middot;
+        </span>
+        {termRows.map((t) => (
+          <Link
+            key={t.id}
+            href={`/exams/marks?term=${t.id}`}
+            aria-current={t.id === term.id ? 'page' : undefined}
+            className={
+              t.id === term.id
+                ? 'rounded-full bg-primary px-3 py-1 text-primary-foreground'
+                : 'rounded-full border px-3 py-1 text-muted-foreground hover:text-foreground'
+            }
+            data-testid={`mark-entry-term-${t.code}`}
+          >
+            {t.name}
+          </Link>
+        ))}
+      </div>
 
       <MarkGrid examTermId={term.id} sections={sections} subjects={subjects} />
     </div>
