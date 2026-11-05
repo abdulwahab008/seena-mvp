@@ -50842,6 +50842,19 @@ export type Database = {
         Args: { p_amount_paisa: number; p_line_id: string }
         Returns: undefined
       }
+      update_student_details: {
+        Args: {
+          p_b_form_no?: string
+          p_dob: string
+          p_father_name_en?: string
+          p_father_name_ur?: string
+          p_gender: Database['public']['Enums']['gender']
+          p_name_en: string
+          p_name_ur?: string
+          p_student_id: string
+        }
+        Returns: undefined
+      }
       update_subject: {
         Args: {
           p_code: string

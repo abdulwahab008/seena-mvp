@@ -434,3 +434,36 @@ export async function setElectiveChoice(studentId: string, _prev: SetElectiveCho
   revalidatePath(`/students/${studentId}`);
   return { error: null };
 }
+
+export type UpdateStudentState = { error: string | null };
+
+// Correct a student's own details. The GR number is permanent and is not part of this.
+export async function updateStudentDetails(studentId: string, _prev: UpdateStudentState, formData: FormData): Promise<UpdateStudentState> {
+  const gender = String(formData.get('gender') ?? '');
+  const nameEn = String(formData.get('nameEn') ?? '').trim();
+  const dob = String(formData.get('dob') ?? '');
+  if (!nameEn) return { error: "Enter the student's name." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) return { error: 'Enter a date of birth.' };
+  if (gender !== 'male' && gender !== 'female' && gender !== 'other') return { error: 'Choose a gender.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('update_student_details', {
+    p_student_id: studentId,
+    p_name_en: nameEn,
+    p_dob: dob,
+    p_gender: gender,
+    p_name_ur: String(formData.get('nameUr') ?? '') || undefined,
+    p_father_name_en: String(formData.get('fatherNameEn') ?? '') || undefined,
+    p_b_form_no: String(formData.get('bFormNo') ?? '') || undefined,
+  });
+  if (error) {
+    if (error.message.includes('BFORM_INVALID_FORMAT')) return { error: 'A B-Form number has 13 digits.' };
+    if (error.message.includes('BFORM_DUPLICATE')) return { error: 'Another student already has this B-Form number.' };
+    if (error.message.includes('chk_dob_reasonable')) return { error: 'That date of birth is not possible for a student.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit this student.' };
+    return { error: 'Could not save the changes.' };
+  }
+  revalidatePath(`/students/${studentId}`);
+  revalidatePath('/students');
+  return { error: null };
+}
