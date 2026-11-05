@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { provisionTenant } from './actions';
+import { provisionTenant, type ProvisionState } from './actions';
+import { InviteLinkPanel } from '@/app/(app)/staff/invite-link-panel';
 import { provisionTenantSchema } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,7 @@ type FormValues = z.infer<typeof FormSchema>;
 
 export function ProvisionForm() {
   const [pending, startTransition] = useTransition();
-  const [result, setResult] = useState<{ error: string | null; tenantId: string | null } | null>(null);
+  const [result, setResult] = useState<(ProvisionState & { ownerEmail: string }) | null>(null);
   const {
     register,
     handleSubmit,
@@ -33,9 +34,9 @@ export function ProvisionForm() {
     fd.set('setupToken', values.setupToken);
     startTransition(async () => {
       const r = await provisionTenant({ error: null, tenantId: null }, fd);
-      setResult(r);
+      setResult({ ...r, ownerEmail: values.ownerEmail });
       if (r.tenantId) {
-        toast.success(`Tenant provisioned: ${r.tenantId}`);
+        toast.success('School created.');
         reset();
       }
     });
@@ -69,9 +70,12 @@ export function ProvisionForm() {
         </p>
       )}
       {result?.tenantId && (
-        <p className="text-sm text-foreground">
-          Provisioned. Tenant id: <code>{result.tenantId}</code>
-        </p>
+        <div className="space-y-2" data-testid="provision-result">
+          <p className="text-sm text-foreground">
+            School created. Tenant id: <code>{result.tenantId}</code>
+          </p>
+          {result.delivery && <InviteLinkPanel email={result.ownerEmail} delivery={result.delivery} />}
+        </div>
       )}
       <Button type="submit" disabled={pending}>
         {pending ? 'Provisioning…' : 'Provision tenant'}
