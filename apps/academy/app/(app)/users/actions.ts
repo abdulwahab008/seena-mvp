@@ -13,6 +13,7 @@ function rpcError(message: string): string {
   if (message.includes('USERNAME_TAKEN')) return 'That username is already used in this school.';
   if (message.includes('USERNAME_INVALID')) return 'Usernames are 3 to 32 letters, numbers, dots, dashes or underscores.';
   if (message.includes('CAMPUS_NOT_FOUND')) return 'One of the campuses no longer exists.';
+  if (message.includes('ACCOUNT_TERMINATED')) return 'This person has left the school, so their login stays off.';
   if (message.includes('NOT_SUPPORTED')) return 'That cannot be done for this kind of account.';
   if (message.includes('FORBIDDEN')) return 'You are not allowed to do that for this account.';
   return 'Something went wrong. Try again.';
@@ -41,7 +42,13 @@ export async function createAccount(input: NewAccountInput): Promise<Result> {
     app_metadata: { must_change_password: true },
   });
   if (createError || !created.user) {
-    if (createError?.code === 'email_exists') return { error: 'An account with that email already exists. Invite them from Staff instead.' };
+    if (createError?.code === 'email_exists') {
+      return {
+        error: username
+          ? 'That username was used before in this school. Choose another.'
+          : 'An account with that email already exists. Invite them from Staff instead.',
+      };
+    }
     return { error: 'Could not create the login. Try again.' };
   }
 

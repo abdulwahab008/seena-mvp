@@ -57,6 +57,11 @@ begin
   ) then
     raise exception 'CAMPUS_NOT_FOUND' using errcode = 'P0002';
   end if;
+  if app.auth_role() not in ('super_admin', 'owner') and exists (
+    select 1 from unnest(coalesce(p_campus_ids, '{}')) c(id) where not (c.id = any(app.auth_campus_ids()))
+  ) then
+    raise exception 'FORBIDDEN' using errcode = '42501', detail = 'campus outside your scope';
+  end if;
   return v_tenant_id;
 end;
 $$;
@@ -147,6 +152,28 @@ $$;
 revoke execute on function public.create_user_account(uuid, text, public.app_role, uuid[], text) from public, anon;
 grant execute on function public.create_user_account(uuid, text, public.app_role, uuid[], text) to authenticated;
 
+-- A principal is limited to their own campuses, like every campus-scoped RPC
+-- (20260731760000_per_campus_role_scoping.sql). Owners and super admins are not.
+create or replace function app.fn_account_in_caller_scope(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select app.auth_role() in ('super_admin', 'owner')
+      or exists (select 1 from public.user_campus uc
+                  where uc.user_id = p_user_id and uc.is_active and uc.campus_id = any(app.auth_campus_ids()))
+      or exists (select 1 from public.student_portal_account spa
+                  where spa.user_id = p_user_id and spa.campus_id = any(app.auth_campus_ids()))
+      or exists (select 1 from public.guardian g
+                   join public.student_guardian sg on sg.guardian_id = g.id and sg.to_date is null
+                   join public.enrolment e on e.student_id = sg.student_id and e.status = 'active'
+                  where g.auth_user_id = p_user_id and e.campus_id = any(app.auth_campus_ids()));
+$$;
+revoke execute on function app.fn_account_in_caller_scope(uuid) from public, anon;
+grant execute on function app.fn_account_in_caller_scope(uuid) to authenticated;
+
 -- ── which accounts may the caller manage ──────────────────────────────────
 -- Staff: only people ranked below the caller (a super_admin may manage anyone
 -- but themselves). Parents and students: any Owner/Principal of their school.
@@ -163,7 +190,8 @@ declare
   v_role      text := app.auth_role();
   v_target    text;
 begin
-  if v_tenant_id is null or v_role not in ('owner', 'principal', 'super_admin') or p_user_id = (select auth.uid()) then
+  if v_tenant_id is null or v_role not in ('owner', 'principal', 'super_admin') or p_user_id = (select auth.uid())
+     or not app.fn_account_in_caller_scope(p_user_id) then
     raise exception 'FORBIDDEN' using errcode = '42501';
   end if;
 
@@ -197,7 +225,10 @@ declare
 begin
   if v_kind = 'staff' then
     update public.app_user set status = case when p_active then 'active' else 'suspended' end::public.user_status
-     where user_id = p_user_id;
+     where user_id = p_user_id and status <> 'terminated';
+    if not found then
+      raise exception 'ACCOUNT_TERMINATED' using errcode = '22023', hint = 'This person has left the school.';
+    end if;
   elsif v_kind = 'student' then
     update public.student_portal_account
        set status = case when p_active then 'active' else 'disabled' end, updated_at = clock_timestamp()
@@ -275,11 +306,15 @@ begin
     from public.app_user au
     join auth.users u on u.id = au.user_id
    where au.tenant_id = v_tenant_id
+     and (au.user_id = (select auth.uid()) or app.fn_account_in_caller_scope(au.user_id))
   union all
-  select g.auth_user_id, 'parent', g.name_en, 'parent', true, coalesce(u.email::text, u.phone::text), '{}'::text[], u.last_sign_in_at
+  select g.auth_user_id, 'parent', min(g.name_en), 'parent', true, coalesce(min(u.email::text), min(u.phone::text)), '{}'::text[], max(u.last_sign_in_at)
     from public.guardian g
     join auth.users u on u.id = g.auth_user_id
    where g.tenant_id = v_tenant_id
+     and not exists (select 1 from public.app_user au where au.user_id = g.auth_user_id)
+     and app.fn_account_in_caller_scope(g.auth_user_id)
+   group by g.auth_user_id
   union all
   select spa.user_id, 'student', s.name_en, 'student', spa.status = 'active', s.gr_number,
          array[c.name], u.last_sign_in_at
@@ -288,6 +323,7 @@ begin
     join public.campus c on c.id = spa.campus_id
     join auth.users u on u.id = spa.user_id
    where spa.tenant_id = v_tenant_id
+     and app.fn_account_in_caller_scope(spa.user_id)
   order by 2 desc, 3;
 end;
 $$;

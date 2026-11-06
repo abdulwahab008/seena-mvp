@@ -1,5 +1,5 @@
 begin;
-select plan(15);
+select plan(18);
 
 select public.provision_tenant('test-accounts-co', 'Accounts Co', 'owner@accounts.test') as tenant_id \gset
 select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
@@ -41,6 +41,20 @@ select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-
 select lives_ok($$ select public.set_user_account_role('00000000-0000-4000-8000-0000000000b3', 'class_teacher') $$, 'an owner changes a teacher''s role');
 
 select throws_ok($$ select public.user_account_kind('00000000-0000-4000-8000-0000000000b5') $$, '42501', 'FORBIDDEN', 'another school''s login cannot be managed');
+
+reset role;
+update public.app_user set status = 'terminated' where user_id = '00000000-0000-4000-8000-0000000000b3';
+set local role authenticated;
+select throws_ok($$ select public.set_user_account_active('00000000-0000-4000-8000-0000000000b3', true) $$, '22023', 'ACCOUNT_TERMINATED', 'a staff member who left cannot be turned back on');
+
+-- a principal limited to another campus cannot manage this campus's staff
+reset role;
+insert into public.campus (tenant_id, code, name) values (:'tenant_id', 'DHA', 'DHA') returning id as dha_id \gset
+update public.app_user set status = 'active' where user_id = '00000000-0000-4000-8000-0000000000b3';
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-8000-0000000000b2', 'tenant_id', :'tenant_id', 'app_role', 'principal', 'campus_ids', json_build_array(:'dha_id'))::text, true);
+select throws_ok($$ select public.user_account_kind('00000000-0000-4000-8000-0000000000b3') $$, '42501', 'FORBIDDEN', 'a principal cannot manage logins on another campus');
+select is((select count(*)::int from public.list_user_accounts() where user_id = '00000000-0000-4000-8000-0000000000b3'), 0, 'nor see them in the list');
 
 -- a principal cannot manage the owner, or themselves
 select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-8000-0000000000b2', 'tenant_id', :'tenant_id', 'app_role', 'principal', 'campus_ids', json_build_array(:'campus_id'))::text, true);

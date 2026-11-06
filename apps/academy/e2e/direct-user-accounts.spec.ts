@@ -51,5 +51,5 @@ test('an owner creates a username login, and the teacher must change the tempora
 
   const lockedOut = await (await browser.newContext()).newPage();
   await signIn(lockedOut, loginId, 'My-own-password-9');
-  await expect(lockedOut.getByTestId('no-school')).toBeVisible();
+  await expect(lockedOut.getByTestId('account-turned-off')).toBeVisible();
 });
