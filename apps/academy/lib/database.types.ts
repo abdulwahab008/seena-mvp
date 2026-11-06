@@ -48007,6 +48007,7 @@ export type Database = {
       my_school_status: {
         Args: never
         Returns: {
+          account_active: boolean
           status: Database['public']['Enums']['tenant_status']
           tenant_name: string
         }[]
@@ -48032,6 +48033,7 @@ export type Database = {
         Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
         Returns: string
       }
+      platform_renew_owner_invite: { Args: { p_tenant_id: string }; Returns: string | null }
       platform_set_tenant_status: {
         Args: {
           p_reason: string

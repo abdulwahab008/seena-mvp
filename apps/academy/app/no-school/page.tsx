@@ -34,6 +34,21 @@ export default async function NoSchoolPage() {
   if (isPlatformAdmin) redirect('/platform');
 
   const { data: school } = await supabase.rpc('my_school_status').maybeSingle();
+  if (school && school.status === 'active' && !school.account_active) {
+    return (
+      <AuthShell title="Your login is turned off" description={user.email ?? undefined}>
+        <Alert variant="warning" title={`${school.tenant_name} has turned off this login`} data-testid="account-turned-off">
+          <p>Ask your school administrator to turn it back on.</p>
+        </Alert>
+        <form action="/api/auth/sign-out" method="post">
+          <Button type="submit" variant="outline" className="w-full" data-testid="no-school-sign-out">
+            Sign out
+          </Button>
+        </form>
+      </AuthShell>
+    );
+  }
+
   if (school && school.status !== 'active') {
     return (
       <AuthShell title={`${school.tenant_name} is ${school.status === 'closed' ? 'closed' : 'suspended'}`} description={user.email ?? undefined}>

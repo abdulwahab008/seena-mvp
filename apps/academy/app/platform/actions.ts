@@ -31,8 +31,7 @@ export async function provisionSchool(_prev: ProvisionState, formData: FormData)
     return { error: 'Could not create the school.', tenantId: null };
   }
 
-  const { data: schools } = await supabase.rpc('platform_list_tenants');
-  const inviteId = schools?.find((s) => s.id === data)?.owner_invite_id;
+  const { data: inviteId } = await supabase.rpc('platform_renew_owner_invite', { p_tenant_id: data });
   const delivery = inviteId ? await deliverInvitation(inviteId) : null;
   revalidatePath('/platform');
   return { error: null, tenantId: data, delivery };
@@ -65,9 +64,8 @@ export async function setSchoolStatus(input: z.input<typeof StatusSchema>): Prom
 
 export async function resendOwnerInvite(tenantId: string): Promise<{ error: string | null; delivery: InviteDelivery | null }> {
   const supabase = await supabaseServer();
-  const { data: schools, error } = await supabase.rpc('platform_list_tenants');
+  const { data: inviteId, error } = await supabase.rpc('platform_renew_owner_invite', { p_tenant_id: tenantId });
   if (error) return { error: 'Only platform admins can resend invitations.', delivery: null };
-  const inviteId = schools.find((s) => s.id === tenantId)?.owner_invite_id;
   if (!inviteId) return { error: 'This school’s owner has already joined.', delivery: null };
   return { error: null, delivery: await deliverInvitation(inviteId) };
 }

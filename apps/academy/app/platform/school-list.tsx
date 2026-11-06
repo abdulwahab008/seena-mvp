@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import { resendOwnerInvite, setSchoolStatus } from './actions';
 import { InviteLinkPanel } from '@/app/(app)/staff/invite-link-panel';
@@ -17,6 +20,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 type School = Database['public']['Functions']['platform_list_tenants']['Returns'][number];
 type Target = 'active' | 'suspended' | 'closed';
+
+const reasonSchema = z.object({ reason: z.string().trim().min(1, 'Give a reason.').max(500) });
 
 const STATUS_BADGE = {
   active: { label: 'Active', variant: 'success' },
@@ -35,15 +40,16 @@ export function SchoolList({ schools }: { schools: School[] }) {
   const [pending, startTransition] = useTransition();
   const [changing, setChanging] = useState<{ school: School; to: Target } | null>(null);
   const [invite, setInvite] = useState<{ email: string; delivery: InviteDelivery } | null>(null);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<z.infer<typeof reasonSchema>>({
+    resolver: zodResolver(reasonSchema),
+  });
 
   if (schools.length === 0) {
     return <EmptyState title="No schools yet" description="Create the first school with the form on this page." />;
   }
 
-  const confirm = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const confirm = handleSubmit(({ reason }) => {
     if (!changing) return;
-    const reason = String(new FormData(e.currentTarget).get('reason') ?? '');
     startTransition(async () => {
       const r = await setSchoolStatus({ tenantId: changing.school.id, status: changing.to, reason });
       if (r.error) {
@@ -52,8 +58,9 @@ export function SchoolList({ schools }: { schools: School[] }) {
       }
       toast.success(`${changing.school.name}: ${STATUS_BADGE[changing.to].label.toLowerCase()}.`);
       setChanging(null);
+      reset();
     });
-  };
+  });
 
   const resend = (school: School) =>
     startTransition(async () => {
@@ -138,9 +145,10 @@ export function SchoolList({ schools }: { schools: School[] }) {
           </>
         }
       >
-        <form id="status-form" onSubmit={confirm} className="space-y-2">
+        <form id="status-form" onSubmit={confirm} className="space-y-2" noValidate>
           <Label htmlFor="status-reason">Reason (kept in the school&apos;s audit log)</Label>
-          <Textarea id="status-reason" name="reason" required maxLength={500} />
+          <Textarea id="status-reason" maxLength={500} {...register('reason')} />
+          {errors.reason && <p className="text-sm text-destructive">{errors.reason.message}</p>}
         </form>
       </Modal>
     </div>

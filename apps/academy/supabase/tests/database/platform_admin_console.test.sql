@@ -1,5 +1,5 @@
 begin;
-select plan(13);
+select plan(15);
 
 select public.provision_tenant('test-platform-co', 'Platform Co', 'owner@platform.test') as tenant_id \gset
 
@@ -23,6 +23,13 @@ select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-
 select is(public.is_platform_admin(), true, 'is_platform_admin is true for a platform admin');
 select is((select owner_name from public.platform_list_tenants() where id = :'tenant_id'::uuid), 'Platform Owner', 'the list shows the school and its owner');
 select isnt(public.platform_provision_tenant('test-platform-two', 'Platform Two', 'two@platform.test'), null, 'a platform admin creates a school');
+reset role;
+select token as old_token from public.tenant_invitation where tenant_id = :'tenant_id' and app_role = 'owner' \gset
+set local role authenticated;
+select isnt(public.platform_renew_owner_invite(:'tenant_id'), null, 'the owner invitation can be renewed');
+reset role;
+select isnt((select token from public.tenant_invitation where tenant_id = :'tenant_id' and app_role = 'owner'), :'old_token', 'renewing gives the invitation a fresh token');
+set local role authenticated;
 select throws_ok(format($$ select public.platform_set_tenant_status(%L, 'suspended', '  ') $$, :'tenant_id'), '22023', 'REASON_REQUIRED', 'a reason is required');
 
 select public.platform_set_tenant_status(:'tenant_id', 'suspended', 'Unpaid invoice');

@@ -137,6 +137,33 @@ $$;
 revoke execute on function public.platform_provision_tenant(text, text, text) from public, anon;
 grant execute on function public.platform_provision_tenant(text, text, text) to authenticated;
 
+-- ── owner invitation: a fresh link every time it is (re)sent ──────────────
+-- Invitations expire after 14 days; resending an expired token would only
+-- produce a link that accept_invitation() refuses.
+
+create or replace function public.platform_renew_owner_invite(p_tenant_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_id uuid;
+begin
+  perform app.assert_platform_admin();
+  update public.tenant_invitation
+     set token = encode(extensions.gen_random_bytes(24), 'hex'),
+         expires_at = now() + interval '14 days'
+   where id = (select i.id from public.tenant_invitation i
+                where i.tenant_id = p_tenant_id and i.app_role = 'owner' and i.accepted_at is null
+                order by i.created_at desc limit 1)
+  returning id into v_id;
+  return v_id;
+end;
+$$;
+revoke execute on function public.platform_renew_owner_invite(uuid) from public, anon;
+grant execute on function public.platform_renew_owner_invite(uuid) to authenticated;
+
 -- ── suspend / reactivate / close ──────────────────────────────────────────
 
 create or replace function public.platform_set_tenant_status(
@@ -193,19 +220,22 @@ grant execute on function public.platform_set_tenant_status(uuid, public.tenant_
 -- in a school". Reads the caller's own memberships only.
 
 create or replace function public.my_school_status()
-returns table (tenant_name text, status public.tenant_status)
+returns table (tenant_name text, status public.tenant_status, account_active boolean)
 language sql
 stable
 security definer
 set search_path = ''
 as $$
-  select t.name, t.status
-    from public.tenant t
-   where t.id = coalesce(
-     (select au.tenant_id from public.app_user au where au.user_id = (select auth.uid())),
-     (select g.tenant_id from public.guardian g where g.auth_user_id = (select auth.uid()) limit 1),
-     (select spa.tenant_id from public.student_portal_account spa where spa.user_id = (select auth.uid()) limit 1)
-   );
+  with me as (
+    select au.tenant_id, au.status = 'active' as active from public.app_user au where au.user_id = (select auth.uid())
+    union all
+    select g.tenant_id, true from public.guardian g where g.auth_user_id = (select auth.uid())
+    union all
+    select spa.tenant_id, spa.status = 'active' from public.student_portal_account spa where spa.user_id = (select auth.uid())
+  )
+  select t.name, t.status, me.active
+    from me join public.tenant t on t.id = me.tenant_id
+   limit 1;
 $$;
 revoke execute on function public.my_school_status() from public, anon;
 grant execute on function public.my_school_status() to authenticated;
