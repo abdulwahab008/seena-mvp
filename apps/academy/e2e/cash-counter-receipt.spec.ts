@@ -136,6 +136,18 @@ test('an accountant collects a cash payment at the counter and prints a receipt,
   // AC: the amount field is pre-filled with the net payable.
   await expect(page.getByTestId('counter-amount-input')).toHaveValue('5000');
 
+  // FR-K18 AC: with no open counter session, a cash receipt is refused.
+  await expect(page.getByTestId('no-open-session')).toBeVisible();
+  await page.getByTestId('counter-collect-button').click();
+  await expect(page.getByText('Open a counter session first.')).toBeVisible();
+
+  await page.getByLabel('Counter name').fill('Front desk');
+  await page.getByTestId('create-counter').click();
+  await expect(page.getByText('Counter added.')).toBeVisible();
+  await page.getByTestId('open-counter').click();
+  await expect(page.getByText('Counter opened.')).toBeVisible();
+  await expect(page.getByTestId('open-session-label')).toContainText('Front desk is open');
+
   await page.getByTestId('counter-collect-button').click();
   await expect(page.getByText('Payment collected.')).toBeVisible();
 
@@ -149,4 +161,14 @@ test('an accountant collects a cash payment at the counter and prints a receipt,
   // AC: printing the same receipt again is watermarked DUPLICATE.
   await page.getByTestId('counter-print-button').click();
   await expect(page.getByTestId('counter-duplicate-watermark')).toContainText('DUPLICATE');
+
+  // FR-K18: the shift closes against a physical count, and the tally agrees.
+  await page.getByLabel('PKR 5000', { exact: true }).fill('1');
+  await expect(page.getByTestId('expected-total')).toHaveText('PKR 5,000');
+  await expect(page.getByTestId('declared-total')).toHaveText('PKR 5,000');
+  await expect(page.getByTestId('variance-total')).toHaveText('PKR 0');
+  await page.getByTestId('close-counter').click();
+  await expect(page.getByText('Shift closed.')).toBeVisible();
+  await expect(page.getByTestId('no-open-session')).toBeVisible();
+  await expect(page.getByTestId('shift-Front desk')).toContainText('variance PKR 0');
 });

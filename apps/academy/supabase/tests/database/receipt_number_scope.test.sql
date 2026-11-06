@@ -19,6 +19,10 @@ insert into public.app_user (user_id, tenant_id, app_role, full_name) values (:'
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', :'owner_uid', 'tenant_id', :'tenant_id', 'app_role', 'owner',
   'campus_ids', json_build_array(:'campus1_id', :'campus2_id'))::text, true);
+select public.create_cash_counter(:'campus1_id'::uuid, 'Main desk') as ctr1 \gset
+select public.create_cash_counter(:'campus2_id'::uuid, 'North desk') as ctr2 \gset
+select public.open_counter_session(:'ctr1'::uuid, 0);
+select public.open_counter_session(:'ctr2'::uuid, 0);
 select public.set_class_level_active(id, false) from public.class_level where tenant_id = :'tenant_id' and code <> '1';
 select public.seed_default_fee_heads(:'tenant_id'::uuid);
 select id as tuition_id from public.fee_head where tenant_id = :'tenant_id' and code = 'TUITION' \gset
@@ -86,8 +90,8 @@ select is(pg_temp.receipt_of(:'ed'::uuid), 'RCP-00000002', 'the North campus ser
 select is((select count(*)::int from public.fee_receipt_counter where tenant_id = :'tenant_id' and campus_id = :'campus1_id'), 1,
   'a campus keeps one running series however many sessions it issues in');
 select throws_ok(
-  format($$ insert into public.fee_receipt (tenant_id, campus_id, payment_id, receipt_no) values (%L, %L, (select id from public.fee_payment where enrolment_id = %L), 'RCP-00000001') $$,
-    :'tenant_id', :'campus1_id', :'eb'),
+  format($$ insert into public.fee_receipt (tenant_id, campus_id, payment_id, receipt_no, counter_session_id) values (%L, %L, (select id from public.fee_payment where enrolment_id = %L), 'RCP-00000001', (select id from public.cash_counter_session where campus_id = %L and status = 'open')) $$,
+    :'tenant_id', :'campus1_id', :'eb', :'campus1_id'),
   '23505', null, 'a campus cannot hand out the same receipt number twice'
 );
 

@@ -7494,6 +7494,177 @@ export type Database = {
           },
         ]
       }
+      cash_counter: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          tenant_id: string
+          variance_threshold_paisa: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          tenant_id: string
+          variance_threshold_paisa?: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          tenant_id?: string
+          variance_threshold_paisa?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'cash_counter_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'cash_counter_tenant_id_fkey'
+            columns: ['tenant_id']
+            isOneToOne: false
+            referencedRelation: 'tenant'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      cash_counter_session: {
+        Row: {
+          campus_id: string
+          closed_at: string | null
+          closed_by: string | null
+          counter_id: string
+          countersign_remark: string | null
+          countersigned_at: string | null
+          countersigned_by: string | null
+          declared_total_paisa: number | null
+          id: string
+          opened_at: string
+          opened_by: string
+          opening_float_paisa: number
+          status: Database['public']['Enums']['counter_session_status']
+          system_total_paisa: number | null
+          tenant_id: string
+          variance_paisa: number | null
+        }
+        Insert: {
+          campus_id: string
+          closed_at?: string | null
+          closed_by?: string | null
+          counter_id: string
+          countersign_remark?: string | null
+          countersigned_at?: string | null
+          countersigned_by?: string | null
+          declared_total_paisa?: number | null
+          id?: string
+          opened_at?: string
+          opened_by: string
+          opening_float_paisa?: number
+          status?: Database['public']['Enums']['counter_session_status']
+          system_total_paisa?: number | null
+          tenant_id: string
+          variance_paisa?: number | null
+        }
+        Update: {
+          campus_id?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          counter_id?: string
+          countersign_remark?: string | null
+          countersigned_at?: string | null
+          countersigned_by?: string | null
+          declared_total_paisa?: number | null
+          id?: string
+          opened_at?: string
+          opened_by?: string
+          opening_float_paisa?: number
+          status?: Database['public']['Enums']['counter_session_status']
+          system_total_paisa?: number | null
+          tenant_id?: string
+          variance_paisa?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'cash_counter_session_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'cash_counter_session_counter_id_fkey'
+            columns: ['counter_id']
+            isOneToOne: false
+            referencedRelation: 'cash_counter'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'cash_counter_session_opened_by_fkey'
+            columns: ['opened_by']
+            isOneToOne: false
+            referencedRelation: 'app_user'
+            referencedColumns: ['user_id']
+          },
+          {
+            foreignKeyName: 'cash_counter_session_closed_by_fkey'
+            columns: ['closed_by']
+            isOneToOne: false
+            referencedRelation: 'app_user'
+            referencedColumns: ['user_id']
+          },
+          {
+            foreignKeyName: 'cash_counter_session_countersigned_by_fkey'
+            columns: ['countersigned_by']
+            isOneToOne: false
+            referencedRelation: 'app_user'
+            referencedColumns: ['user_id']
+          },
+          {
+            foreignKeyName: 'cash_counter_session_tenant_id_fkey'
+            columns: ['tenant_id']
+            isOneToOne: false
+            referencedRelation: 'tenant'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      cash_denomination_count: {
+        Row: {
+          count: number
+          denomination: number
+          session_id: string
+        }
+        Insert: {
+          count: number
+          denomination: number
+          session_id: string
+        }
+        Update: {
+          count?: number
+          denomination?: number
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'cash_denomination_count_session_id_fkey'
+            columns: ['session_id']
+            isOneToOne: false
+            referencedRelation: 'cash_counter_session'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       certificate_issue: {
         Row: {
           campus_id: string
@@ -14492,6 +14663,13 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'fee_receipt_counter_session_fk'
+            columns: ['counter_session_id']
+            isOneToOne: false
+            referencedRelation: 'cash_counter_session'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'fee_receipt_campus_id_fkey'
             columns: ['campus_id']
@@ -45004,6 +45182,10 @@ export type Database = {
         Returns: undefined
       }
       close_bank_import: { Args: { p_import_id: string }; Returns: undefined }
+      close_counter_session: {
+        Args: { p_denominations: Json; p_session_id: string }
+        Returns: Json
+      }
       close_gate_pass: {
         Args: { p_pass_id: string; p_returned_at?: string }
         Returns: undefined
@@ -45270,8 +45452,21 @@ export type Database = {
         }
         Returns: Json
       }
+      counter_session_totals: { Args: { p_session_id: string }; Returns: Json }
+      countersign_counter_session: {
+        Args: { p_remark: string; p_session_id: string }
+        Returns: undefined
+      }
       create_campus: {
         Args: { p_city?: string; p_code: string; p_name: string }
+        Returns: string
+      }
+      create_cash_counter: {
+        Args: {
+          p_campus_id: string
+          p_name: string
+          p_variance_threshold_paisa?: number
+        }
         Returns: string
       }
       create_certificate_template: {
@@ -48101,6 +48296,10 @@ export type Database = {
           p_include_on_leave?: boolean
         }
         Returns: Json
+      }
+      open_counter_session: {
+        Args: { p_counter_id: string; p_opening_float_paisa?: number }
+        Returns: string
       }
       open_trip_leg: {
         Args: {
@@ -50980,6 +51179,7 @@ export type Database = {
         | 'adjustment'
         | 'write_off'
         | 'reversal'
+      counter_session_status: 'open' | 'closed' | 'closed_with_variance'
       fee_payment_mode:
         | 'cash'
         | 'bank_challan'
@@ -51581,6 +51781,7 @@ export const Constants = {
         'write_off',
         'reversal',
       ],
+      counter_session_status: ['open', 'closed', 'closed_with_variance'],
       fee_payment_mode: [
         'cash',
         'bank_challan',
