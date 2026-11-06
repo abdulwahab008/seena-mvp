@@ -153,7 +153,7 @@ export function ChallanGenerator({
                   <span>
                     <span className="font-medium">{c.studentName}</span>{' '}
                     <span className="text-muted-foreground">
-                      GR {c.grNumber} · {c.classSection} · Challan {c.challanNo} · Due {c.dueDate}
+                      GR {c.grNumber} · {c.classSection} · Challan {c.challanNo} · {c.billingPeriod} · Due {c.dueDate}
                     </span>
                   </span>
                   <span className="text-muted-foreground" data-testid={`challan-net-${c.challanNo}`}>
