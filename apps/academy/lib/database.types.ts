@@ -13288,6 +13288,51 @@ export type Database = {
           },
         ]
       }
+      student_incident: {
+        Row: {
+          action_taken: string | null
+          campus_id: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          occurred_on: string
+          parent_informed: boolean
+          recorded_by: string
+          severity: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          campus_id: string
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          occurred_on: string
+          parent_informed?: boolean
+          recorded_by?: string
+          severity: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          campus_id?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          occurred_on?: string
+          parent_informed?: boolean
+          recorded_by?: string
+          severity?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
@@ -48001,6 +48046,18 @@ export type Database = {
       is_guardian_otp_locked: {
         Args: { p_guardian_id: string }
         Returns: boolean
+      }
+      record_student_incident: {
+        Args: {
+          p_action_taken?: string
+          p_category: string
+          p_description: string
+          p_occurred_on: string
+          p_parent_informed?: boolean
+          p_severity: string
+          p_student_id: string
+        }
+        Returns: string
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }

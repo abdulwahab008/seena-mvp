@@ -115,6 +115,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Users,
     items: [
       { href: '/students', label: 'All Students' },
+      { href: '/students/alumni', label: 'Alumni' },
       { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
       { href: '/students/promotion', label: 'Promotion', roles: [...LEADERSHIP, 'exam_controller'] },
       { href: '/students/recycle-bin', label: 'Recycle Bin', roles: FRONT_OFFICE },
