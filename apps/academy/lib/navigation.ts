@@ -138,6 +138,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/staff/exits', label: 'Exits', roles: HR_ROLES },
       { href: '/staff/certificates', label: 'Certificates', roles: HR_ROLES },
       { href: '/staff/workload', label: 'Teacher Workload', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
+      { href: '/staff/recruitment', label: 'Recruitment', roles: HR_ROLES },
       { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
       { href: '/staff/remarks', label: 'Remarks Moderation', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
       { href: '/staff/tickets', label: 'Support Tickets' },
