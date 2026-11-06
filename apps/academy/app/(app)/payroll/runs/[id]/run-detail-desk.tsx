@@ -38,6 +38,20 @@ export function RunDetailDesk({ run, lines }: Props) {
   const [selectedLine, setSelectedLine] = useState<PayrollRunLineRow | null>(null);
   const [payslipModalOpen, setPayslipModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [generating, setGenerating] = useState(false);
+  const locked = run.status === 'locked' || run.status === 'paid';
+
+  async function generatePayslips() {
+    setGenerating(true);
+    try {
+      const res = await fetch(`/api/payroll/runs/${run.id}/payslips`, { method: 'POST' });
+      const body = (await res.json()) as { total?: number; created?: number; error?: string };
+      if (!res.ok) toast.error(body.error === 'run_not_locked' ? 'Lock the run before generating payslips.' : (body.error ?? 'Could not generate payslips.'));
+      else toast.success(`${body.total} payslips ready (${body.created} new).`);
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   const formatPkr = (paisa: number) => {
     return new Intl.NumberFormat('en-PK', {
@@ -156,6 +170,13 @@ export function RunDetailDesk({ run, lines }: Props) {
             <Download className="w-3.5 h-3.5" />
             Export Bank File (CSV)
           </Button>
+
+          {locked && (
+            <Button size="sm" variant="outline" onClick={generatePayslips} disabled={generating} className="gap-1.5 text-xs h-9" data-testid="generate-payslips">
+              <FileText className="w-3.5 h-3.5" />
+              {generating ? 'Generating...' : 'Generate payslips'}
+            </Button>
+          )}
 
           {run.status === 'draft' && (
             <Button
@@ -293,6 +314,11 @@ export function RunDetailDesk({ run, lines }: Props) {
                       <FileText className="w-3.5 h-3.5" />
                       Breakdown
                     </Button>
+                    {locked && (
+                      <a href={`/api/payroll/payslips/${l.id}`} target="_blank" rel="noreferrer" className="ml-1 text-xs text-blue-600 hover:underline" data-testid={`payslip-pdf-${l.employee_code}`}>
+                        PDF
+                      </a>
+                    )}
                   </td>
                 </tr>
               ))}
