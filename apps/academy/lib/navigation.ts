@@ -169,6 +169,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/academic-setup/syllabus', label: 'Syllabus' },
       { href: '/academic-setup/rooms', label: 'Rooms' },
       { href: '/homework', label: 'Homework', feature: 'module.homework' },
+      { href: '/downloads', label: 'Download Centre' },
       { href: '/lesson-plans', label: 'Lesson Plans' },
       { href: '/syllabus-coverage', label: 'Syllabus Coverage' },
       { href: '/syllabus-variance', label: 'Syllabus Variance' },

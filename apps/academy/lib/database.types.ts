@@ -13288,6 +13288,69 @@ export type Database = {
           },
         ]
       }
+      download_item: {
+        Row: {
+          campus_id: string
+          category: string
+          class_level_id: string | null
+          created_at: string
+          id: string
+          mime_type: string
+          original_filename: string
+          section_id: string | null
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          title: string
+          uploaded_by: string
+        }
+        Insert: {
+          campus_id: string
+          category: string
+          class_level_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type: string
+          original_filename: string
+          section_id?: string | null
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          title: string
+          uploaded_by?: string
+        }
+        Update: {
+          campus_id?: string
+          category?: string
+          class_level_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type?: string
+          original_filename?: string
+          section_id?: string | null
+          size_bytes?: number
+          storage_path?: string
+          tenant_id?: string
+          title?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'download_item_class_level_id_fkey'
+            columns: ['class_level_id']
+            isOneToOne: false
+            referencedRelation: 'class_level'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'download_item_section_id_fkey'
+            columns: ['section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
@@ -48001,6 +48064,28 @@ export type Database = {
       is_guardian_otp_locked: {
         Args: { p_guardian_id: string }
         Returns: boolean
+      }
+      register_download_item: {
+        Args: {
+          p_campus_id: string
+          p_category: string
+          p_class_level_id: string | null
+          p_filename: string
+          p_mime_type: string
+          p_section_id: string | null
+          p_size_bytes: number
+          p_title: string
+        }
+        Returns: Json
+      }
+      delete_download_item: { Args: { p_id: string }; Returns: undefined }
+      portal_download_items: {
+        Args: never
+        Returns: { category: string; created_at: string; id: string; original_filename: string; size_bytes: number; title: string }[]
+      }
+      download_item_path: {
+        Args: { p_id: string }
+        Returns: { mime_type: string; original_filename: string; storage_path: string }[]
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
