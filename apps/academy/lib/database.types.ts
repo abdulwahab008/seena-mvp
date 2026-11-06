@@ -13288,6 +13288,82 @@ export type Database = {
           },
         ]
       }
+      halqa: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          stream: string
+          teacher_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          stream?: string
+          teacher_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          stream?: string
+          teacher_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'halqa_teacher_id_fkey'
+            columns: ['teacher_id']
+            isOneToOne: false
+            referencedRelation: 'app_user'
+            referencedColumns: ['user_id']
+          },
+        ]
+      }
+      halqa_member: {
+        Row: {
+          campus_id: string
+          halqa_id: string
+          joined_on: string
+          left_on: string | null
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          halqa_id: string
+          joined_on?: string
+          left_on?: string | null
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          halqa_id?: string
+          joined_on?: string
+          left_on?: string | null
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'halqa_member_halqa_id_fkey'
+            columns: ['halqa_id']
+            isOneToOne: false
+            referencedRelation: 'halqa'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
@@ -48001,6 +48077,39 @@ export type Database = {
       is_guardian_otp_locked: {
         Args: { p_guardian_id: string }
         Returns: boolean
+      }
+      save_halqa: {
+        Args: { p_campus_id: string; p_halqa_id?: string; p_name: string; p_stream: string; p_teacher_id: string | null }
+        Returns: string
+      }
+      set_halqa_member: { Args: { p_halqa_id: string; p_member: boolean; p_student_id: string }; Returns: undefined }
+      record_hifz_lesson: {
+        Args: {
+          p_grade: string | null
+          p_halqa_id: string
+          p_lesson_date: string
+          p_lesson_type: string
+          p_lines: number | null
+          p_mistakes: number
+          p_para_from: number | null
+          p_para_to: number | null
+          p_portion: string | null
+          p_student_id: string
+          p_tajweed_mistakes: number
+        }
+        Returns: string
+      }
+      halqa_progress: {
+        Args: { p_halqa_id: string }
+        Returns: {
+          gr_number: string
+          highest_para: number | null
+          last_lesson: string | null
+          lessons_30d: number
+          mistakes_30d: number
+          student_id: string
+          student_name: string
+        }[]
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
