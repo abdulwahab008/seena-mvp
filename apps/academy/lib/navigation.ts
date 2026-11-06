@@ -59,6 +59,7 @@ const OWNERS = ['super_admin', 'owner'] as const;
 const SCHOOL_ADMIN = ['super_admin', 'owner', 'principal'] as const;
 const FRONT_OFFICE = [...LEADERSHIP, 'admissions_officer', 'receptionist'] as const;
 const HR_ROLES = [...LEADERSHIP, 'hr_manager'] as const;
+const SCHOOL_ADMIN_HR = [...SCHOOL_ADMIN, 'hr_manager'] as const;
 const PAYROLL_ROLES = ['super_admin', 'owner', 'principal', 'hr_manager', 'accountant'] as const;
 const FINANCE_ROLES = ['super_admin', 'owner', 'principal', 'accountant'] as const;
 const ACADEMIC_LEADS = [...LEADERSHIP, 'head_of_department', 'hr_manager'] as const;
@@ -139,6 +140,8 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/staff/certificates', label: 'Certificates', roles: HR_ROLES },
       { href: '/staff/workload', label: 'Teacher Workload', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
       { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
+      { href: '/staff/training', label: 'Training & CPD', roles: SCHOOL_ADMIN_HR },
+      { href: '/staff/grievances', label: 'Grievances' },
       { href: '/staff/remarks', label: 'Remarks Moderation', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
       { href: '/staff/tickets', label: 'Support Tickets' },
       { href: '/leave', label: 'Leave' },

@@ -13288,6 +13288,119 @@ export type Database = {
           },
         ]
       }
+      training_program: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string
+          held_on: string
+          hours: number
+          id: string
+          is_mandatory: boolean
+          provider: string | null
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string
+          held_on: string
+          hours: number
+          id?: string
+          is_mandatory?: boolean
+          provider?: string | null
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string
+          held_on?: string
+          hours?: number
+          id?: string
+          is_mandatory?: boolean
+          provider?: string | null
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      training_attendance: {
+        Row: {
+          campus_id: string
+          completed: boolean
+          program_id: string
+          staff_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          completed?: boolean
+          program_id: string
+          staff_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          completed?: boolean
+          program_id?: string
+          staff_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'training_attendance_program_id_fkey'
+            columns: ['program_id']
+            isOneToOne: false
+            referencedRelation: 'training_program'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      staff_grievance: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          handled_by: string | null
+          id: string
+          raised_by: string
+          resolution: string | null
+          resolved_at: string | null
+          status: string
+          subject: string
+          tenant_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          handled_by?: string | null
+          id?: string
+          raised_by?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string
+          subject: string
+          tenant_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          handled_by?: string | null
+          id?: string
+          raised_by?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
@@ -48002,6 +48115,16 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      save_training_program: {
+        Args: { p_campus_id: string; p_held_on: string; p_hours: number; p_is_mandatory: boolean; p_provider: string | null; p_staff_ids: string[]; p_title: string }
+        Returns: string
+      }
+      staff_cpd_hours: {
+        Args: { p_campus_id: string; p_year: number }
+        Returns: { full_name: string; hours: number; mandatory_missed: number; programs: number; staff_id: string }[]
+      }
+      raise_staff_grievance: { Args: { p_category: string; p_description: string; p_subject: string }; Returns: string }
+      handle_staff_grievance: { Args: { p_id: string; p_resolution?: string | null; p_status: string }; Returns: undefined }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
