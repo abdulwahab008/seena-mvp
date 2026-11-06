@@ -48002,6 +48002,18 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      consecutive_absentees: {
+        Args: { p_campus_id: string; p_min_days?: number }
+        Returns: {
+          absent_since: string | null
+          class_name: string
+          enrolment_id: string
+          gr_number: string
+          guardian_phone: string | null
+          streak_days: number
+          student_name: string
+        }[]
+      }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
