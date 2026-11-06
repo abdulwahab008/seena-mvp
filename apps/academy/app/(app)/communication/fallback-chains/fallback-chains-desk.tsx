@@ -31,6 +31,7 @@ import {
   triggerTimeoutScan,
   simulateReceiptWebhook,
 } from './actions';
+import { formatDatePk } from '@/lib/dates';
 
 interface Props {
   initialChains: CommChannelChainRow[];
@@ -352,7 +353,7 @@ export function FallbackChainsDesk({
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-border text-[11px] text-muted-foreground">
-                <span>Updated: {new Date(chain.updated_at).toLocaleDateString()}</span>
+                <span>Updated: {formatDatePk(chain.updated_at)}</span>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -544,7 +545,7 @@ export function FallbackChainsDesk({
                         {o.reason || 'Requested by parent'}
                       </td>
                       <td className="p-3 text-muted-foreground font-mono">
-                        {new Date(o.opted_out_at).toLocaleDateString()}
+                        {formatDatePk(o.opted_out_at)}
                       </td>
                       <td className="p-3 text-right">
                         <Button

@@ -14,7 +14,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
-import { todayPk } from '@/lib/dates';
+import { formatDatePk, todayPk } from '@/lib/dates';
 
 export type CandidateRow = {
   id: string;
@@ -372,7 +372,7 @@ export function IssueTransferCertificate({
                       {r.student?.name_en}
                       <span className="ml-2 text-xs text-muted-foreground">{r.student?.gr_number}</span>
                     </td>
-                    <td className="p-2">{new Date(r.issued_at).toLocaleDateString()}</td>
+                    <td className="p-2">{formatDatePk(r.issued_at)}</td>
                     <td className="p-2" data-testid={`cert-issue-status-${r.serial_no}`}>
                       {r.status}
                       {r.revoke_reason && <span className="ml-2 text-xs text-muted-foreground">{r.revoke_reason}</span>}

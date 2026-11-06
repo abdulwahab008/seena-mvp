@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { ConfirmDialog } from '@/components/ui/modal';
+import { formatDatePk } from '@/lib/dates';
 
 export type DocumentRow = {
   id: string;
@@ -834,7 +835,7 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {a.className} · <span data-testid={`application-status-${a.applicationNo}`}>{a.status}</span>
-                  {a.offer && a.offer.status === 'issued' && ` · offer expires ${new Date(a.offer.expires_at).toLocaleDateString()}`}
+                  {a.offer && a.offer.status === 'issued' && ` · offer expires ${formatDatePk(a.offer.expires_at)}`}
                 </p>
               </div>
               {a.offer && a.offer.status === 'issued' ? (

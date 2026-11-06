@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { ALL_CAMPUSES_VALUE, buildCampusFilterOptions, type CampusOption } from '@/lib/campus-scope';
+import { formatDateTimePk } from '@/lib/dates';
 
 export type AuditExportJobRow = {
   id: string;
@@ -172,7 +173,7 @@ export function AuditExportView({ campuses, jobs: initialJobs }: { campuses: Cam
                     {campusName(job.campus_id) ? ` · ${campusName(job.campus_id)}` : ' · All campuses'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Requested {new Date(job.requested_at).toLocaleString()} — {STATUS_LABEL[job.status]}
+                    Requested {formatDateTimePk(job.requested_at)} — {STATUS_LABEL[job.status]}
                     {job.status === 'completed' && job.row_count !== null ? ` (${job.row_count} rows)` : ''}
                     {job.status === 'failed' && job.error ? `: ${job.error}` : ''}
                   </p>

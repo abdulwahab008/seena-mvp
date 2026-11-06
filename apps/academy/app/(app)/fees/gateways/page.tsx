@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GatewayForm } from './gateway-form';
+import { formatDateTimePk } from '@/lib/dates';
 
 export default async function PaymentGatewaysPage() {
   const supabase = await supabaseServer();
@@ -60,7 +61,7 @@ export default async function PaymentGatewaysPage() {
               <span>
                 {a.kind.replace('_', ' ')} — expected {((a.expected_paisa ?? 0) / 100).toLocaleString()} PKR, received {((a.received_paisa ?? 0) / 100).toLocaleString()} PKR
               </span>
-              <span className="text-muted-foreground">{new Date(a.created_at).toLocaleString()}</span>
+              <span className="text-muted-foreground">{formatDateTimePk(a.created_at)}</span>
             </div>
           ))}
         </CardContent>

@@ -9,6 +9,7 @@ import { DEFAULT_UNLOCK_WINDOW_MINUTES, unlockMinutesLeft } from '@/lib/validati
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatDateTimePk } from '@/lib/dates';
 
 /**
  * FR-I17's board.
@@ -98,7 +99,7 @@ export function UnlockBoard({ currentUserId, canDecide, pending, open, decided, 
               <div className="flex flex-wrap items-center gap-3">
                 <span className="font-medium">{label(r)}</span>
                 <span className="text-xs text-muted-foreground">
-                  raised by {r.requested_by_name ?? 'someone'} on {new Date(r.requested_at).toLocaleString()}
+                  raised by {r.requested_by_name ?? 'someone'} on {formatDateTimePk(r.requested_at)}
                 </span>
               </div>
               <p className="text-sm" data-testid={`unlock-reason-${r.id}`}>

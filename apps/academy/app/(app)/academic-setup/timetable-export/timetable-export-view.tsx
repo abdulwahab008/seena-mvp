@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatDateTimePk } from '@/lib/dates';
 
 export type VersionOption = {
   id: string;
@@ -197,7 +198,7 @@ export function TimetableExportView({
                 <div>
                   <p className="font-medium">{LAYOUT_LABEL[job.layout]}</p>
                   <p className="text-xs text-muted-foreground">
-                    Requested {new Date(job.requested_at).toLocaleString()} — {STATUS_LABEL[job.status]}
+                    Requested {formatDateTimePk(job.requested_at)} — {STATUS_LABEL[job.status]}
                     {job.status === 'completed' && job.page_count !== null ? ` (${job.page_count} pages)` : ''}
                     {job.status === 'failed' && job.error ? `: ${job.error}` : ''}
                   </p>

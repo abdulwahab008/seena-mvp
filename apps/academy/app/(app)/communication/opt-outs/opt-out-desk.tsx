@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { manualOptOutAction, resubscribeAction, simulateInboundStopAction } from './actions';
+import { formatDateTimePk } from '@/lib/dates';
 
 interface OptOutItem {
   id: string;
@@ -282,7 +283,7 @@ export function OptOutDesk({
                       </span>
                     </td>
                     <td className="p-3 text-muted-foreground whitespace-nowrap">
-                      {new Date(item.opted_out_at).toLocaleString()}
+                      {formatDateTimePk(item.opted_out_at)}
                     </td>
                     <td className="p-3 text-right">
                       <button
@@ -361,7 +362,7 @@ export function OptOutDesk({
                 auditList.map((a) => (
                   <tr key={a.id} className="hover:bg-muted/20">
                     <td className="p-3 text-muted-foreground whitespace-nowrap">
-                      {new Date(a.created_at).toLocaleString()}
+                      {formatDateTimePk(a.created_at)}
                     </td>
                     <td className="p-3 font-mono">{a.recipient_phone}</td>
                     <td className="p-3 uppercase font-medium">{a.channel}</td>

@@ -22,6 +22,7 @@ import {
   processOutboxBatch,
   resolveUnknownOutboxAttempt,
 } from '../actions';
+import { formatDatePk } from '@/lib/dates';
 
 type Campus = { id: string; code: string; name: string };
 
@@ -322,7 +323,7 @@ export function OutboxDesk({
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
                       {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                       <div className="text-[10px] text-muted-foreground/70">
-                        {new Date(m.created_at).toLocaleDateString()}
+                        {formatDatePk(m.created_at)}
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">

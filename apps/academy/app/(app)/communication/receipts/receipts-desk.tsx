@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { runStaleSweeperAction, submitSimulatedReceiptAction } from './actions';
+import { formatDatePk } from '@/lib/dates';
 
 interface DeliveryStats {
   campaign_id: string | null;
@@ -411,7 +412,7 @@ export function ReceiptsDesk({
                     <td className="p-3 font-mono text-rose-700">{dl.provider_ref}</td>
                     <td className="p-3 font-mono text-[11px] text-amber-700">{dl.reason}</td>
                     <td className="p-3 text-muted-foreground whitespace-nowrap">
-                      {new Date(dl.expires_at).toLocaleDateString()} (30d)
+                      {formatDatePk(dl.expires_at)} (30d)
                     </td>
                     <td className="p-3 font-mono text-[10px] text-muted-foreground truncate max-w-xs">
                       {JSON.stringify(dl.payload)}

@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RuleToggle, SeedButton } from './rule-controls';
+import { formatDateTimePk } from '@/lib/dates';
 
 export default async function RemindersPage() {
   const supabase = await supabaseServer();
@@ -71,7 +72,7 @@ export default async function RemindersPage() {
                 {l.rung_code} · {l.channel}
               </span>
               <span className="text-muted-foreground">
-                {l.status.replace(/_/g, ' ')} · {new Date(l.created_at).toLocaleString()}
+                {l.status.replace(/_/g, ' ')} · {formatDateTimePk(l.created_at)}
               </span>
             </p>
           ))}

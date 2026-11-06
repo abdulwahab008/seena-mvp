@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SubmitForm } from './submit-form';
 import { SubmissionRealtimeRefresher } from '../submission-realtime-refresher';
+import { formatDateTimePk } from '@/lib/dates';
 
 export const metadata = { title: 'Submit homework | Parent Portal' };
 
@@ -106,7 +107,7 @@ export default async function SubmitHomeworkPage({ searchParams }: { searchParam
           <CardContent className="space-y-1 text-sm" data-testid="submission-history">
             {(history ?? []).map((h) => (
               <p key={h.version}>
-                Version {h.version} — archived {new Date(h.archived_at).toLocaleString()}
+                Version {h.version} — archived {formatDateTimePk(h.archived_at)}
               </p>
             ))}
           </CardContent>

@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Textarea } from '@/components/ui/textarea';
 import { resolveGuardianClaim } from './actions';
+import { formatDateTimePk } from '@/lib/dates';
 
 export type ClaimRow = {
   id: string;
@@ -55,7 +56,7 @@ function ClaimCard({ claim }: { claim: ClaimRow }) {
             {claim.guardianName} for {claim.studentName}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            GR {claim.grNumber ?? '—'} · {new Date(claim.createdAt).toLocaleString()}
+            GR {claim.grNumber ?? '—'} · {formatDateTimePk(claim.createdAt)}
             {claim.reason ? ` · ${claim.reason === 'NO_PHONE' ? 'no phone on record' : 'could not receive the code'}` : ''}
           </p>
         </div>

@@ -35,6 +35,7 @@ import {
   testWhatsAppDispatch,
   resolveComplianceAlert,
 } from './actions';
+import { formatDateTimePk } from '@/lib/dates';
 
 export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppComplianceData }) {
   const router = useRouter();
@@ -444,7 +445,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                             )}
                           </td>
                           <td className="p-3 text-xs text-muted-foreground">
-                            {new Date(win.window_opened_at).toLocaleString()}
+                            {formatDateTimePk(win.window_opened_at)}
                           </td>
                           <td className="p-3 text-xs text-muted-foreground">
                             {expiry.toLocaleString()}
@@ -663,7 +664,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                     </div>
                     <p className="text-xs text-muted-foreground max-w-2xl">{alert.message}</p>
                     <span className="text-[11px] text-muted-foreground">
-                      Dispatched: {new Date(alert.created_at).toLocaleString()}
+                      Dispatched: {formatDateTimePk(alert.created_at)}
                     </span>
                   </div>
 

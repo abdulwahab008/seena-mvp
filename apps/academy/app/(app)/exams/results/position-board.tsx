@@ -8,6 +8,7 @@ import type { PositionSheet, RankPolicy } from '@/lib/exams/position-query';
 import { RANK_POLICY_LABELS, exclusionLabel, positionDisplay } from '@/lib/exams/position-query';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { formatDateTimePk } from '@/lib/dates';
 
 /**
  * FR-J05's merit list: one term, one whole class, both positions.
@@ -170,7 +171,7 @@ export function PositionBoard({ examTermId, termName, campusId, classes }: Props
           ) : (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground" data-testid="position-computed-at">
-                Computed {sheet.computed_at ? new Date(sheet.computed_at).toLocaleString() : '—'} ·{' '}
+                Computed {sheet.computed_at ? formatDateTimePk(sheet.computed_at) : '—'} ·{' '}
                 <span data-testid="position-ranked-count">
                   {ranked.length} of {sheet.candidates.length} candidates ranked
                 </span>

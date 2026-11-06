@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { topUpWalletAction, checkCampaignCreditGuardAction } from './actions';
+import { formatDateTimePk } from '@/lib/dates';
 
 interface RateCardItem {
   id: string;
@@ -389,7 +390,7 @@ export function WalletDesk({
                 txnList.map((t) => (
                   <tr key={t.id} className="hover:bg-muted/20">
                     <td className="p-3 text-muted-foreground whitespace-nowrap">
-                      {new Date(t.created_at).toLocaleString()}
+                      {formatDateTimePk(t.created_at)}
                     </td>
                     <td className="p-3">
                       <span

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ExportDefaultersButton } from './export-button';
+import { formatDateTimePk } from '@/lib/dates';
 
 const PAGE = 50;
 const BUCKETS = ['1-30', '31-60', '61-90', '90+'] as const;
@@ -46,7 +47,7 @@ export default async function DefaultersPage({ searchParams }: { searchParams: P
       <div>
         <h1 className="text-2xl font-semibold">Fee defaulters</h1>
         <p className="text-sm text-muted-foreground">
-          Days overdue are counted from the oldest unpaid challan. Rebuilt nightly{refreshed ? `; as of ${new Date(refreshed).toLocaleString()}` : ''}. Students on an approved hardship concession are hidden unless you ask.
+          Days overdue are counted from the oldest unpaid challan. Rebuilt nightly{refreshed ? `; as of ${formatDateTimePk(refreshed)}` : ''}. Students on an approved hardship concession are hidden unless you ask.
         </p>
       </div>
 

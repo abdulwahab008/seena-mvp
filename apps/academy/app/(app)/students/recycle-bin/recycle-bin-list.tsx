@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { restoreStudent } from '../actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { formatDateTimePk } from '@/lib/dates';
 
 export type RecycleBinRow = {
   id: string;
@@ -47,7 +48,7 @@ export function RecycleBinList({ students }: { students: RecycleBinRow[] }) {
                 {s.nameEn} <span className="text-muted-foreground">({s.grNumber})</span>
               </p>
               <p className="text-sm text-muted-foreground">
-                Deleted {new Date(s.deletedAt).toLocaleString()} by {s.deletedByName}
+                Deleted {formatDateTimePk(s.deletedAt)} by {s.deletedByName}
               </p>
             </div>
             <RestoreControl studentId={s.id} studentName={s.nameEn} />

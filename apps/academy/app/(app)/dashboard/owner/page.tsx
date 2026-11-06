@@ -4,6 +4,7 @@ import { formatPct, formatPkrCompact } from '@/lib/format-money';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { formatDateTimePk } from '@/lib/dates';
 
 export default async function OwnerDashboardPage() {
   const supabase = await supabaseServer();
@@ -26,7 +27,7 @@ export default async function OwnerDashboardPage() {
       {fresh?.is_stale && (
         <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900" data-testid="stale-banner">
           This data is more than 26 hours old — the last nightly refresh did not complete.
-          {fresh.last_failure_at ? ` Last failure: ${new Date(fresh.last_failure_at).toLocaleString()}.` : ''}
+          {fresh.last_failure_at ? ` Last failure: ${formatDateTimePk(fresh.last_failure_at)}.` : ''}
         </div>
       )}
 

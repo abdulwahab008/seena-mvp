@@ -5,6 +5,7 @@ import { formatPct } from '@/lib/format-money';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ExportCollectionButton } from './export-button';
+import { formatDateTimePk } from '@/lib/dates';
 
 const pkr = (paisa: number) => `PKR ${(paisa / 100).toLocaleString('en-PK')}`;
 const efficiency = (billed: number, collected: number) => (billed > 0 ? Math.round((1000 * collected) / billed) / 10 : null);
@@ -71,7 +72,7 @@ export default async function CollectionDashboardPage({ searchParams }: { search
         <div>
           <h1 className="text-2xl font-semibold">Billing versus collection</h1>
           <p className="text-sm text-muted-foreground" data-testid="collection-as-of">
-            Each month is measured against what that month billed; arrears paid later fill the older month. {asOf ? `As of ${new Date(asOf).toLocaleString()}; rebuilt at least hourly.` : 'Rebuilt at least hourly.'}
+            Each month is measured against what that month billed; arrears paid later fill the older month. {asOf ? `As of ${formatDateTimePk(asOf)}; rebuilt at least hourly.` : 'Rebuilt at least hourly.'}
           </p>
         </div>
         <ExportCollectionButton />
