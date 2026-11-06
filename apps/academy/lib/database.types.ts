@@ -45012,6 +45012,10 @@ export type Database = {
         }
         Returns: number
       }
+      can_manage_invitation: {
+        Args: { p_invitation_id: string }
+        Returns: boolean
+      }
       can_teach: {
         Args: {
           p_class_level_id: string
@@ -49485,6 +49489,10 @@ export type Database = {
       revoke_impersonation_consent: {
         Args: { p_consent_id: string }
         Returns: number
+      }
+      revoke_invitation: {
+        Args: { p_invitation_id: string }
+        Returns: undefined
       }
       revoke_staff_teachable_subject: {
         Args: { p_id: string }
