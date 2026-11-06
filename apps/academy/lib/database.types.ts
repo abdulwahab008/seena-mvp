@@ -48002,6 +48002,7 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      admit_card_batch: { Args: { p_exam_term_id: string; p_section_id: string }; Returns: Json }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
