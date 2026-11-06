@@ -13288,6 +13288,154 @@ export type Database = {
           },
         ]
       }
+      quiz: {
+        Row: {
+          campus_id: string
+          closes_at: string
+          created_at: string
+          created_by: string
+          duration_min: number
+          id: string
+          opens_at: string
+          section_id: string
+          status: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          closes_at: string
+          created_at?: string
+          created_by?: string
+          duration_min: number
+          id?: string
+          opens_at: string
+          section_id: string
+          status?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          closes_at?: string
+          created_at?: string
+          created_by?: string
+          duration_min?: number
+          id?: string
+          opens_at?: string
+          section_id?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_section_id_fkey'
+            columns: ['section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      quiz_question: {
+        Row: {
+          campus_id: string
+          correct_index: number
+          id: string
+          marks: number
+          options: string[]
+          position: number
+          prompt: string
+          quiz_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          correct_index: number
+          id?: string
+          marks?: number
+          options: string[]
+          position: number
+          prompt: string
+          quiz_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          correct_index?: number
+          id?: string
+          marks?: number
+          options?: string[]
+          position?: number
+          prompt?: string
+          quiz_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_question_quiz_id_fkey'
+            columns: ['quiz_id']
+            isOneToOne: false
+            referencedRelation: 'quiz'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      quiz_attempt: {
+        Row: {
+          answers: number[] | null
+          campus_id: string
+          id: string
+          max_score: number | null
+          quiz_id: string
+          score: number | null
+          started_at: string
+          student_id: string
+          submitted_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          answers?: number[] | null
+          campus_id: string
+          id?: string
+          max_score?: number | null
+          quiz_id: string
+          score?: number | null
+          started_at?: string
+          student_id: string
+          submitted_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          answers?: number[] | null
+          campus_id?: string
+          id?: string
+          max_score?: number | null
+          quiz_id?: string
+          score?: number | null
+          started_at?: string
+          student_id?: string
+          submitted_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_attempt_quiz_id_fkey'
+            columns: ['quiz_id']
+            isOneToOne: false
+            referencedRelation: 'quiz'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'quiz_attempt_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
@@ -48002,6 +48150,31 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      create_quiz: {
+        Args: { p_closes_at: string; p_duration_min: number; p_opens_at: string; p_section_id: string; p_title: string }
+        Returns: string
+      }
+      add_quiz_question: {
+        Args: { p_correct_index: number; p_marks?: number; p_options: string[]; p_prompt: string; p_quiz_id: string }
+        Returns: string
+      }
+      publish_quiz: { Args: { p_quiz_id: string }; Returns: undefined }
+      my_quizzes: {
+        Args: never
+        Returns: {
+          closes_at: string
+          duration_min: number
+          id: string
+          max_score: number | null
+          opens_at: string
+          questions: number
+          score: number | null
+          submitted: boolean
+          title: string
+        }[]
+      }
+      start_quiz_attempt: { Args: { p_quiz_id: string }; Returns: Json }
+      submit_quiz_attempt: { Args: { p_answers: number[]; p_quiz_id: string }; Returns: Json }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
