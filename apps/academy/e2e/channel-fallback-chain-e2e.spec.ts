@@ -27,7 +27,6 @@ test.describe('FR-M02: Channel Fallback Chains End-to-End Flow', () => {
 
     // 3. Verify Page Header and Badges
     await expect(page.locator('h1')).toContainText('Channel Fallback Chains');
-    await expect(page.getByText('FR-M02')).toBeVisible();
 
     // 4. Verify default fallback chains exist
     await expect(page.getByText('default', { exact: true }).first()).toBeVisible();

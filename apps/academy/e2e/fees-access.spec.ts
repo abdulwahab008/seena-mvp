@@ -16,7 +16,7 @@ async function signIn(page: Page, email: string) {
   await page.waitForURL(/\/dashboard/);
 }
 
-test('only the fee staff see the fees area; the admissions officer keeps two pages', async ({ page }) => {
+test('only the fee staff see the fees area; the admissions officer keeps concessions, sibling discounts and the cash counter', async ({ page }) => {
   test.setTimeout(240000);
   const { db, tenant, campusId, challans } = await seedFeesTenant(1, 'fees-access-e2e');
   const challan = challans[0]!;
@@ -72,14 +72,15 @@ test('only the fee staff see the fees area; the admissions officer keeps two pag
   expect(accountantPdf.status()).not.toBe(404);
   await page.context().clearCookies();
 
-  // 3. An admissions officer gets concessions and sibling discounts, and nothing else under /fees.
+  // 3. An admissions officer gets concessions, sibling discounts and the cash counter (admission
+  //    fees are taken at the front desk inside a counter shift), and nothing else under /fees.
   await signIn(page, admissionsEmail);
   await expect(feesNav(page)).toBeVisible();
-  for (const path of ['/fees/concessions', '/fees/sibling-discounts']) {
+  for (const path of ['/fees/concessions', '/fees/sibling-discounts', '/fees/counter']) {
     await page.goto(path);
     await expect(page).toHaveURL(new RegExp(`${path}$`));
   }
-  for (const path of ['/fees/challans', '/fees/counter']) {
+  for (const path of ['/fees/challans']) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/dashboard$/);
   }
