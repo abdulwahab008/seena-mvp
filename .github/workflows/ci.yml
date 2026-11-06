@@ -58,7 +58,6 @@ jobs:
                   -e 's/^ANON_KEY=/NEXT_PUBLIC_SUPABASE_ANON_KEY=/' \
                   -e 's/^SERVICE_ROLE_KEY=/SUPABASE_SERVICE_ROLE_KEY=/' \
             > .env.local
-          echo "ADMIN_SETUP_TOKEN=ci-$(openssl rand -hex 12)" >> .env.local
           echo "COMM_WEBHOOK_SECRET=ci-$(openssl rand -hex 16)" >> .env.local
           echo "PAY_SECRET_JAZZCASH=ci-$(openssl rand -hex 16)" >> .env.local
           echo "EXPORT_WORKER_SECRET=ci-$(openssl rand -hex 16)" >> .env.local

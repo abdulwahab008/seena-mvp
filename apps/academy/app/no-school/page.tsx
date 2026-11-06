@@ -30,6 +30,29 @@ export default async function NoSchoolPage() {
     .maybeSingle();
   if (appUser) redirect('/dashboard');
 
+  const { data: isPlatformAdmin } = await supabase.rpc('is_platform_admin');
+  if (isPlatformAdmin) redirect('/platform');
+
+  const { data: school } = await supabase.rpc('my_school_status').maybeSingle();
+  if (school && school.status !== 'active') {
+    return (
+      <AuthShell title={`${school.tenant_name} is ${school.status === 'closed' ? 'closed' : 'suspended'}`} description={user.email ?? undefined}>
+        <Alert variant="warning" title="You can't sign in to this school right now" data-testid="school-suspended">
+          <p>
+            {school.status === 'closed'
+              ? 'This school no longer uses Seena Academy.'
+              : 'Access to this school has been paused. Your data is safe. Please contact your school administrator.'}
+          </p>
+        </Alert>
+        <form action="/api/auth/sign-out" method="post">
+          <Button type="submit" variant="outline" className="w-full" data-testid="no-school-sign-out">
+            Sign out
+          </Button>
+        </form>
+      </AuthShell>
+    );
+  }
+
   return (
     <AuthShell title="You're not in a school yet" description={user.email ?? undefined}>
       <Alert variant="info" title="Your account is ready" data-testid="no-school">

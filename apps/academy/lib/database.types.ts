@@ -48003,6 +48003,43 @@ export type Database = {
         Returns: boolean
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
+      is_platform_admin: { Args: never; Returns: boolean }
+      my_school_status: {
+        Args: never
+        Returns: {
+          status: Database['public']['Enums']['tenant_status']
+          tenant_name: string
+        }[]
+      }
+      platform_list_tenants: {
+        Args: never
+        Returns: {
+          campuses: number
+          created_at: string
+          id: string
+          last_sign_in_at: string | null
+          logins: number
+          name: string
+          owner_email: string | null
+          owner_invite_id: string | null
+          owner_name: string | null
+          slug: string
+          status: Database['public']['Enums']['tenant_status']
+          students: number
+        }[]
+      }
+      platform_provision_tenant: {
+        Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
+        Returns: string
+      }
+      platform_set_tenant_status: {
+        Args: {
+          p_reason: string
+          p_status: Database['public']['Enums']['tenant_status']
+          p_tenant_id: string
+        }
+        Returns: undefined
+      }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
         Args: { p_email: string }

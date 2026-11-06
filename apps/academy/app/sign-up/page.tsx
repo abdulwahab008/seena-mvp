@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
  *
  * Seena Academy is multi-tenant and invitation-based: membership is an
  * app_user row, created either by provision_tenant() (service-role, behind
- * ADMIN_SETUP_TOKEN) or by accept_invitation(), which requires the secret
+ * a platform admin at /platform) or by accept_invitation(), which requires the secret
  * token from an invitation email.
  *
  * 1. Self-serve sign-up must not provision a tenant. provision_tenant() is

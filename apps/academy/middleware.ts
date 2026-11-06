@@ -39,9 +39,6 @@ const PUBLIC_PATHS = new Set([
  *    fn_public_school_info / submit_public_enquiry are granted to anon.
  *  - /accept-invite, /guardian/activate — pre-account surfaces; the visitor
  *    cannot have a session yet, and the URL token is the credential.
- *  - /admin/provision — bootstrap tenant creation, gated by ADMIN_SETUP_TOKEN
- *    in its action. It cannot require a session: it is what creates the first
- *    account there is.
  *  - /api/internal/ — worker endpoints (FR-S08) with no user session; each route
  *    authenticates with EXPORT_WORKER_SECRET and rejects everything without it.
  *  - /api/branding-asset — deliberately session-less signed-URL minting
@@ -56,7 +53,6 @@ const PUBLIC_PREFIXES = [
   '/apply/',
   '/accept-invite/',
   '/guardian/activate/',
-  '/admin/provision',
   '/api/public-enquiry/',
   '/api/branding-asset/',
   '/api/calendar/feed/',
