@@ -13293,6 +13293,7 @@ export type Database = {
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
+          family_no: number
           father_cnic: string | null
           id: string
           primary_guardian_id: string | null
@@ -13302,6 +13303,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          family_no?: number
           father_cnic?: string | null
           id?: string
           primary_guardian_id?: string | null
@@ -13311,6 +13313,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          family_no?: number
           father_cnic?: string | null
           id?: string
           primary_guardian_id?: string | null
@@ -48001,6 +48004,32 @@ export type Database = {
       is_guardian_otp_locked: {
         Args: { p_guardian_id: string }
         Returns: boolean
+      }
+      family_fee_lookup: {
+        Args: { p_query: string }
+        Returns: {
+          balance_paisa: number
+          class_name: string
+          enrolment_id: string
+          family_group_id: string
+          family_no: number
+          gr_number: string
+          guardian_name: string | null
+          guardian_phone: string | null
+          oldest_due_date: string | null
+          student_id: string
+          student_name: string
+        }[]
+      }
+      collect_family_payment: {
+        Args: {
+          p_amount_paisa: number
+          p_client_idempotency_key: string
+          p_family_group_id: string
+          p_mode?: Database['public']['Enums']['fee_payment_mode']
+          p_reference_no?: string
+        }
+        Returns: Json
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
