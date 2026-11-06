@@ -740,6 +740,7 @@ export type Database = {
           id: string
           mode: Database['public']['Enums']['fee_payment_mode']
           offer_id: string
+          receipt_no: string | null
           reconciled_at: string | null
           reconciled_by: string | null
           recorded_at: string
@@ -756,6 +757,7 @@ export type Database = {
           id?: string
           mode: Database['public']['Enums']['fee_payment_mode']
           offer_id: string
+          receipt_no?: string | null
           reconciled_at?: string | null
           reconciled_by?: string | null
           recorded_at?: string
@@ -772,6 +774,7 @@ export type Database = {
           id?: string
           mode?: Database['public']['Enums']['fee_payment_mode']
           offer_id?: string
+          receipt_no?: string | null
           reconciled_at?: string | null
           reconciled_by?: string | null
           recorded_at?: string

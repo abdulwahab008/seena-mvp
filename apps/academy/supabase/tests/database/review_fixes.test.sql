@@ -2,7 +2,7 @@
 -- a zero-fee walk-in takes no receipt number, editing a student keeps the father's Urdu name,
 -- and invitations are managed under the same rules as invite_user.
 begin;
-select plan(8);
+select plan(11);
 
 select public.provision_tenant('test-review-fix', 'Review Fix School', 'owner@reviewfix.test');
 select id as tenant_id from public.tenant where slug = 'test-review-fix' \gset
@@ -63,6 +63,23 @@ select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_
 select public.revoke_invitation(:'owner_invite'::uuid);
 reset role;
 select is((select count(*)::int from public.tenant_invitation where id = :'owner_invite'::uuid), 0, 'the owner can revoke it');
+
+-- A paid walk-in with a bank reference keeps the reference and still gets a series receipt
+-- number; with no ADMISSION head in the school, enrolment adds one.
+reset role;
+delete from public.fee_head where tenant_id = :'tenant_id'::uuid and lower(code) = 'admission';
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_id', 'app_role', 'owner', 'campus_ids', json_build_array(:'campus_id'), 'sub', :'owner_id')::text, true);
+select public.fn_quick_admission(:'campus_id'::uuid, :'session_id'::uuid, 'Kid Four', '2019-01-01', 'male', :'class1_id'::uuid, :'section_id'::uuid,
+       'Dawood Khan', '+923335552004', 5000, 'bank_challan', 'TRX-778899') as a4 \gset
+reset role;
+select is((select reference_no || ' / ' || receipt_no from public.admission_fee_payment where offer_id = (:'a4'::jsonb ->> 'offer_id')::uuid),
+  'TRX-778899 / ' || (:'a4'::jsonb ->> 'receipt_no'),
+  'the payer reference is kept and the receipt number comes from the series');
+select isnt((:'a4'::jsonb ->> 'receipt_no'), 'TRX-778899', 'the receipt number is not the payer reference');
+select is((select h.code from public.fee_ledger l join public.fee_head h on h.id = l.fee_head_id
+            where l.enrolment_id = (:'a4'::jsonb ->> 'enrolment_id')::uuid and l.entry_type = 'charge'), 'ADMISSION',
+  'with no ADMISSION head, enrolment adds one and charges under it');
 
 select * from finish();
 rollback;
