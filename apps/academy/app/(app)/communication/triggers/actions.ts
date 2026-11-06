@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
+import { todayPk } from '@/lib/dates';
 
 export type TriggerEventType =
   | 'attendance_absent'
@@ -279,7 +280,7 @@ export async function runDateBasedEvaluationAction(
       return { ok: false, error: 'Tenant context required' };
     }
 
-    const targetDate = runDate || new Date().toISOString().slice(0, 10);
+    const targetDate = runDate || todayPk();
     const { data: results, error } = await client.rpc('evaluate_date_based_rules', {
       p_run_date: targetDate,
       p_tenant_id: tenantId,

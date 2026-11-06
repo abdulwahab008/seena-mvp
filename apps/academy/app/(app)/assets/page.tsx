@@ -14,7 +14,7 @@ export default async function AssetsPage() {
       .from('v_asset_register')
       .select('asset_id, tag_no, name, category, capitalised_cost, accumulated_depreciation, net_book_value, status, method, campus_id')
       .order('tag_no'),
-    supabase.from('campus').select('id, name').order('name'),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
   ]);
   const live = (assets ?? []).filter((a) => a.status === 'active' || a.status === 'in_repair');
   const monthDefault = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' }).slice(0, 7);
@@ -23,7 +23,7 @@ export default async function AssetsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Asset register"
-        description="FR-R03 — every capitalised asset has a tag and depreciates itself monthly (straight line or reducing balance). The final instalment is the remainder, so net book value ends at exactly the salvage value. Running a month twice posts nothing."
+        description="Every capitalised asset has a tag and depreciates itself monthly (straight line or reducing balance). The final instalment is the remainder, so net book value ends at exactly the salvage value. Running a month twice posts nothing."
       />
 
       <Card>

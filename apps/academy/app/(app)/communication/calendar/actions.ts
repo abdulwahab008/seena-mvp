@@ -38,6 +38,7 @@ export async function fetchCampusEventsDashboardData() {
     client
       .from('campus')
       .select('id, name, code')
+      .eq('status', 'active')
       .order('name'),
     client
       .from('campus_event_override')

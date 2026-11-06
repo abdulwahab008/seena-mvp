@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
 import { resolveGuardianClaimSchema, type ResolveGuardianClaimInput } from '@/lib/validation';
@@ -38,7 +37,8 @@ export async function resolveGuardianClaim(input: ResolveGuardianClaimInput): Pr
   const result = resolvedSchema.safeParse(data);
   if (!result.success) return { error: 'Unexpected response from the server.' };
 
-  revalidatePath('/admissions/guardian-claims');
+  // No revalidate here: the card must stay on screen until the officer has copied the one-time
+  // link (it is never shown again). The desk refreshes the list when they press Done.
   return {
     error: null,
     status: result.data.status,

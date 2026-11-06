@@ -19,7 +19,7 @@ export default async function PortalTranscriptsPage() {
       <div>
         <h2 className="text-2xl font-semibold">Transcripts</h2>
         <p className="text-sm text-muted-foreground">
-          FR-J13 — transcripts the school has issued for your child.{' '}
+          Transcripts the school has issued for your child.{' '}
           <Link href="/portal/results" className="underline">
             Back to results
           </Link>

@@ -15,15 +15,11 @@ import { Modal } from '@/components/ui/modal';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useRouter } from 'next/navigation';
 import { registerStaffMember } from './actions';
+import { STAFF_ROLE_OPTIONS } from '@/lib/staff-roles';
+import type { InviteDelivery } from '@/lib/staff-invite';
+import { InviteLinkPanel } from './invite-link-panel';
+import { todayPk } from '@/lib/dates';
 
-export const STAFF_ROLE_OPTIONS = [
-  { value: 'subject_teacher', label: 'Teacher (Subject Teacher)' },
-  { value: 'principal', label: 'Principal' },
-  { value: 'admissions_officer', label: 'Admissions Officer' },
-  { value: 'accountant', label: 'Accountant' },
-  { value: 'exam_controller', label: 'Exam Controller' },
-  { value: 'hr_manager', label: 'HR Manager' },
-] as const;
 
 export interface AddStaffModalProps {
   campusId: string;
@@ -52,7 +48,7 @@ export function AddStaffModal({
   const [cnic, setCnic] = React.useState('');
   const [passportNo, setPassportNo] = React.useState('');
   const [dob, setDob] = React.useState('');
-  const [doj, setDoj] = React.useState<string>(new Date().toISOString().split('T')[0] || '');
+  const [doj, setDoj] = React.useState<string>(todayPk());
   const [contractType, setContractType] = React.useState<'permanent' | 'contractual' | 'visiting'>('permanent');
   const [mobile, setMobile] = React.useState('');
   const [altMobile, setAltMobile] = React.useState('');
@@ -64,6 +60,7 @@ export function AddStaffModal({
   const [selectedSubjectIds, setSelectedSubjectIds] = React.useState<string[]>([]);
 
   // Registration Result
+  const [delivery, setDelivery] = React.useState<{ email: string; delivery: InviteDelivery } | null>(null);
   const [createdStaff, setCreatedStaff] = React.useState<{
     staff_id: string;
     employee_code: string;
@@ -78,7 +75,7 @@ export function AddStaffModal({
     setCnic('');
     setPassportNo('');
     setDob('');
-    setDoj(new Date().toISOString().split('T')[0] || '');
+    setDoj(todayPk());
     setContractType('permanent');
     setMobile('');
     setAltMobile('');
@@ -166,6 +163,7 @@ export function AddStaffModal({
       } else {
         toast.success(`Staff member registered! Employee Code: ${result.data?.employee_code}`);
         setCreatedStaff(result.data ?? null);
+        setDelivery(result.delivery && email ? { email, delivery: result.delivery } : null);
         router.refresh();
         if (typeof window !== 'undefined') {
           window.dispatchEvent(
@@ -244,9 +242,12 @@ export function AddStaffModal({
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                The staff profile is active in the directory and linked to their department.
+                {departmentId && departmentId !== 'none'
+                  ? 'The staff profile is active in the directory and linked to their department.'
+                  : 'The staff profile is active in the directory. Assign a department from the Departments page when ready.'}
               </p>
             </div>
+            {delivery && <InviteLinkPanel email={delivery.email} delivery={delivery.delivery} />}
 
             <div className="flex justify-end gap-3 pt-2">
               <Button
@@ -254,6 +255,7 @@ export function AddStaffModal({
                 onClick={() => {
                   resetForm();
                   setCreatedStaff(null);
+                  setDelivery(null);
                   router.refresh();
                 }}
               >
@@ -562,7 +564,7 @@ export function AddStaffModal({
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  If provided, an invitation email with a temporary password link will be sent.
+                  If provided, they get a sign-in invitation. You will see the join link to share after saving.
                 </p>
               </div>
             </div>

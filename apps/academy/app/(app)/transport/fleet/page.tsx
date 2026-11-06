@@ -45,7 +45,7 @@ export default async function FleetPage({ searchParams }: { searchParams: Promis
       <div>
         <h1 className="text-2xl font-semibold">Fleet and vehicle documents</h1>
         <p className="text-sm text-muted-foreground">
-          FR-P02 — a bus whose fitness certificate (or other enforced document) has expired cannot be assigned to a route. Only a Principal can override, with a recorded reason.
+          A bus whose fitness certificate (or other enforced document) has expired cannot be assigned to a route. Only a Principal can override, with a recorded reason.
         </p>
       </div>
 

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { summaryLine, uncapturedMessage, type MasterySheet } from '@/lib/exams/mastery';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J07. Which chapters a section, or one student, has not mastered.
@@ -22,8 +23,8 @@ export default async function MasteryPage({ searchParams }: { searchParams: Prom
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -82,7 +83,7 @@ export default async function MasteryPage({ searchParams }: { searchParams: Prom
       <div>
         <h1 className="text-2xl font-semibold">Topic mastery</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J07 — per-chapter mastery from per-question marks. Chapters below 50% for the section are re-teach
+          Per-chapter mastery from per-question marks. Chapters below 50% for the section are re-teach
           candidates. Marks are captured on the{' '}
           <Link href="/exams/mastery/capture" className="underline">
             per-question marks

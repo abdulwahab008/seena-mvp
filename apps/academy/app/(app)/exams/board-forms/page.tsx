@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { formatPkr } from '@/lib/challan/html';
 import { BoardFormsBoard } from './board-forms-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-T12. The board examination form: who is registered for which subjects,
@@ -17,8 +18,8 @@ export default async function BoardFormsPage() {
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -82,7 +83,7 @@ export default async function BoardFormsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Board examination forms</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T12 — register candidates with their subject combination, price each on the board&rsquo;s fee schedule in
+          Register candidates with their subject combination, price each on the board&rsquo;s fee schedule in
           force on their exam session date, compare the total with what parents paid, and export the form. A group
           missing a mandatory subject blocks the export and names the subject. An improvement candidate is exported
           with only the subjects being improved, at the per-paper rate.

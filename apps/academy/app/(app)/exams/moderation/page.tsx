@@ -32,7 +32,7 @@ export default async function ModerationPage({ searchParams }: { searchParams: P
     <div>
       <h1 className="text-2xl font-semibold">Moderation</h1>
       <p className="text-sm text-muted-foreground">
-        FR-I15 — adjust a section whose paper proved unfair: bounded by the campus cap, reasoned, applied once and only before approval. The original marks are always kept.
+        Adjust a section whose paper proved unfair: bounded by the campus cap, reasoned, applied once and only before approval. The original marks are always kept.
       </p>
     </div>
   );

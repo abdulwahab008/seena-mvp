@@ -2,14 +2,15 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { BOARDS } from '@/lib/validation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CloneForm, UnitForm, UnitList, type UnitRow } from './syllabus-editor';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 type SearchParams = { class?: string; subject?: string; board?: string; session?: string };
 
 export default async function SyllabusPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
   const [{ data: classes }, { data: subjects }, { data: sessions }] = await Promise.all([
     supabase.from('class_level').select('id, name_en').eq('is_active', true).order('ordinal'),
     supabase.from('subject').select('id, name_en').eq('is_active', true).order('name_en'),
@@ -51,7 +52,7 @@ export default async function SyllabusPage({ searchParams }: { searchParams: Pro
       <div>
         <h1 className="text-2xl font-semibold">Annual syllabus</h1>
         <p className="text-sm text-muted-foreground">
-          FR-H08 — chapters and topics per class, subject and board, in order. FBISE and Punjab Board versions of the same subject sit side by side; copying to a new session keeps every chapter&apos;s lineage and moves its target month a year on.
+          Chapters and topics per class, subject and board, in order. FBISE and Punjab Board versions of the same subject sit side by side; copying to a new session keeps every chapter&apos;s lineage and moves its target month a year on.
         </p>
       </div>
 

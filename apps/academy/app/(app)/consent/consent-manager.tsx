@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatDatePk } from '@/lib/dates';
 
 export type StudentOption = { id: string; name_en: string; gr_number: string | null };
 
@@ -219,7 +220,7 @@ export function ConsentManager({
                       {r.gr_number ? ` (GR ${r.gr_number})` : ''} · {r.purpose_code.replace(/_/g, ' ')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Agreed {new Date(r.last_recorded_at).toLocaleDateString()} against an earlier version — still valid
+                      Agreed {formatDatePk(r.last_recorded_at)} against an earlier version — still valid
                     </p>
                   </div>
                   <Button type="button" variant="outline" onClick={() => setStudentId(r.student_id)}>
@@ -305,7 +306,7 @@ export function ConsentManager({
                     {d.guardian_name} ({d.relationship}) — {d.purpose_code.replace(/_/g, ' ')}:{' '}
                     <span className="font-medium text-foreground">{DECISION_LABEL[d.decision as ConsentDecision] ?? d.decision}</span> via{' '}
                     {CHANNEL_LABEL[d.channel as ConsentChannel] ?? d.channel}, v{d.text_version},{' '}
-                    {new Date(d.recorded_at).toLocaleDateString()}
+                    {formatDatePk(d.recorded_at)}
                     {d.evidence_path && (
                       <>
                         {' · '}

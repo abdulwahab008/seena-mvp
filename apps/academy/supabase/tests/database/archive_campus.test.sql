@@ -2,7 +2,7 @@
 -- owner outside the tenant is forbidden, and the owning tenant's owner
 -- succeeds and it actually archives (not just returns ok).
 begin;
-select plan(4);
+select plan(8);
 
 -- All setup (as superuser, RLS does not apply) happens before any role
 -- switch below — see the note in foundation.test.sql for why order matters.
@@ -11,6 +11,8 @@ select public.provision_tenant('test-archive-other', 'Other Co', 'owner@other.te
 select id as tenant_id from public.tenant where slug = 'test-archive-co' \gset
 select id as other_tenant_id from public.tenant where slug = 'test-archive-other' \gset
 select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
+-- A school always keeps one active campus, so archiving needs a second one.
+insert into public.campus (tenant_id, code, name) values (:'tenant_id', 'SEC', 'Second Campus') returning id as second_id \gset
 
 set local role authenticated;
 
@@ -51,6 +53,15 @@ select is(
   'archived',
   'the campus row is actually marked archived, not just a no-op success'
 );
+
+select throws_ok(
+  format('select public.archive_campus(%L::uuid)', :'second_id'),
+  'LAST_ACTIVE_CAMPUS',
+  'the last active campus cannot be archived'
+);
+select lives_ok(format('select public.restore_campus(%L::uuid)', :'campus_id'), 'an owner can restore an archived campus');
+select lives_ok(format('select public.update_campus(%L::uuid, %L, %L, %L)', :'campus_id', 'mn', 'Main Campus', 'Lahore'), 'an owner can edit a campus');
+select is((select code || ' ' || name || ' ' || city || ' ' || status from public.campus where id = :'campus_id'::uuid), 'MN Main Campus Lahore active', 'the edit and the restore are saved');
 
 select * from finish();
 rollback;

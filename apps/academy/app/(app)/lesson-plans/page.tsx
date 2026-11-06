@@ -61,7 +61,7 @@ export default async function LessonPlansPage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Lesson plans</h1>
-        <p className="text-sm text-muted-foreground">FR-H10 — plan which syllabus topics you will cover each week. One plan per section, subject and week; the week always starts on Monday. Planning is optional.</p>
+        <p className="text-sm text-muted-foreground">Plan which syllabus topics you will cover each week. One plan per section, subject and week; the week always starts on Monday. Planning is optional.</p>
       </div>
 
       <form method="get" className="flex flex-wrap items-end gap-3 text-sm">

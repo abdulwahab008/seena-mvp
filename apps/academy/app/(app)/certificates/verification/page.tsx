@@ -21,7 +21,7 @@ export default async function VerificationActivityPage() {
     <div className="space-y-6">
       <PageHeader
         title="Certificate verification activity"
-        description="FR-T10 — every scan of a certificate's QR code, from the public verification page. A burst of scans on one serial range, or many unknown codes, can be the first sign of forged certificates. Tokens and addresses are stored only as hashes."
+        description="Every scan of a certificate's QR code, from the public verification page. A burst of scans on one serial range, or many unknown codes, can be the first sign of forged certificates. Tokens and addresses are stored only as hashes."
       />
       <Card>
         <CardHeader>

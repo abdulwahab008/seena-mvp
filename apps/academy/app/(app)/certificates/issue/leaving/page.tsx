@@ -59,7 +59,7 @@ export default async function IssueLeavingCertificatePage() {
       <div>
         <h1 className="text-2xl font-semibold">Issue a School Leaving Certificate</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T07 — for a student who completed Grade 10 or 12, on its own serial series (SLC). It prints the board, roll number, group and class from the exam registration; until the board result is imported it states “Result Awaited” rather than leaving a blank. Students leaving any other class need a Transfer Certificate.
+          For a student who completed Grade 10 or 12, on its own serial series (SLC). It prints the board, roll number, group and class from the exam registration; until the board result is imported it states “Result Awaited” rather than leaving a blank. Students leaving any other class need a Transfer Certificate.
         </p>
       </div>
       {!canIssue ? (

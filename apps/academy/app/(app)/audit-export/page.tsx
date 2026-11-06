@@ -34,7 +34,7 @@ export default async function AuditExportPage() {
       <div>
         <h1 className="text-2xl font-semibold">Audit trail export</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T14 — export every write event for a date range and set of entities as evidence for an auditor or a court, with a
+          Export every write event for a date range and set of entities as evidence for an auditor or a court, with a
           signed download link valid for 24 hours.
         </p>
       </div>

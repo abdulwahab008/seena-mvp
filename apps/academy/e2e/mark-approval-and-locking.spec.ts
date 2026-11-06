@@ -288,6 +288,7 @@ test('an incomplete paper cannot be approved, a complete one locks against every
   await expect(page.getByTestId('approval-not-started-Physics')).toHaveCount(0);
   await expect(page.getByTestId('approve-Physics')).toBeEnabled();
   await page.getByTestId('approve-Physics').click();
+  await page.getByTestId('approve-confirm-Physics').click();
   await expect(page.getByTestId('approval-locked-Physics')).toContainText('Locked by Rukhsana Bano');
 
   // The lock row and the status transition, checked in the database rather
@@ -331,6 +332,7 @@ test('an incomplete paper cannot be approved, a complete one locks against every
   await enterMarks(esUrdu, [{ enrolmentId: enrolments[2]!.enrolmentId, marks: [full('theory', 61)] }]);
   await openQueue(page);
   await page.getByTestId('approve-Urdu').click();
+  await page.getByTestId('approve-confirm-Urdu').click();
   await expect(page.getByTestId('approval-result-ready')).toContainText('term result computation is available');
 
   // Every (paper, section) pair in the term is locked, so FR-I01's

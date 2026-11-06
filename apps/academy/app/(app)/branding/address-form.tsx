@@ -53,7 +53,7 @@ export function AddressForm({ campuses }: { campuses: CampusAddress[] }) {
         <CardTitle className="text-base">Campus addresses on printed reports</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
-        <p className="text-muted-foreground">FR-S09 — printed under the school name on every PDF report. A campus with no letterhead prints the logo instead.</p>
+        <p className="text-muted-foreground">Printed under the school name on every PDF report. A campus with no letterhead prints the logo instead.</p>
         {campuses.map((c) => (
           <CampusAddressRow key={c.id} campus={c} />
         ))}

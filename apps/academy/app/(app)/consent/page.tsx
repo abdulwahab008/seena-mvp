@@ -42,7 +42,7 @@ export default async function ConsentPage() {
       <div>
         <h1 className="text-2xl font-semibold">Consent</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T15 — what each family has agreed to for photographs, data sharing and messaging, and where those choices are
+          What each family has agreed to for photographs, data sharing and messaging, and where those choices are
           enforced: the marketing gallery excludes anyone without a live grant, and a withdrawn messaging consent suppresses that
           guardian on the next broadcast.
         </p>

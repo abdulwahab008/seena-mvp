@@ -26,7 +26,7 @@ export default async function TeachableSubjectsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Teachable Subjects</h1>
         <p className="text-sm text-muted-foreground">
-          FR-D03 — which subjects and grades each teacher is approved to teach. The timetable builder blocks an
+          Which subjects and grades each teacher is approved to teach. The timetable builder blocks an
           out-of-scope assignment unless a Principal overrides it with a reason.
         </p>
       </div>

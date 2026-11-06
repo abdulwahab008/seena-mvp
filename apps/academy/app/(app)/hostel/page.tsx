@@ -26,7 +26,7 @@ export default async function HostelPage({ searchParams }: { searchParams: Promi
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Hostel</h1>
-        <p className="text-sm text-muted-foreground">FR-Q01 — blocks, rooms and individual beds. Gender belongs to the block; bed identities are permanent.</p>
+        <p className="text-sm text-muted-foreground">Blocks, rooms and individual beds. Gender belongs to the block; bed identities are permanent.</p>
       </div>
       <Card>
         <CardHeader>

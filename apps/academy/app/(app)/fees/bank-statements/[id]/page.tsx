@@ -34,7 +34,7 @@ export default async function BankImportPage({ params }: { params: Promise<{ id:
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Reconcile bank statement</h1>
-        <p className="text-sm text-muted-foreground">FR-K20 — exact matches post automatically; everything else waits here for a person.</p>
+        <p className="text-sm text-muted-foreground">Exact matches post automatically; everything else waits here for a person.</p>
       </div>
       <Card>
         <CardHeader>

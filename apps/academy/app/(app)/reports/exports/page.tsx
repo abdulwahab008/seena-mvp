@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AutoRefresh, ExportForm, type DatasetOption } from './export-form';
+import { formatDateTimePk } from '@/lib/dates';
 
 const KEYS = new Set(['students', 'fee_collection', 'fee_defaulters']);
 
@@ -14,7 +15,7 @@ export default async function ExportsPage() {
     supabase.from('user_notification').select('id, title, body, link, created_at, read_at').order('created_at', { ascending: false }).limit(5),
   ]);
 
-  const when = (v: string | null) => (v ? new Date(v).toLocaleString() : '');
+  const when = (v: string | null) => (v ? formatDateTimePk(v) : '');
   const datasets: DatasetOption[] = (datasetsRes.data ?? []).filter((d) => KEYS.has(d.dataset_key)).map((d) => ({ key: d.dataset_key as DatasetOption['key'], label: d.display_name }));
   const jobs = (jobsRes.data ?? []).filter((j) => j.requested_by === user.user?.id);
   const pending = jobs.some((j) => j.status === 'queued' || j.status === 'running');
@@ -24,7 +25,7 @@ export default async function ExportsPage() {
       <AutoRefresh active={pending} />
       <div>
         <h1 className="text-2xl font-semibold">Excel exports</h1>
-        <p className="text-sm text-muted-foreground">FR-S08 — large exports are built in the background. Request one, carry on working, and download it here when it is ready (kept for 30 days).</p>
+        <p className="text-sm text-muted-foreground">Large exports are built in the background. Request one, carry on working, and download it here when it is ready (kept for 30 days).</p>
       </div>
 
       {(notesRes.data ?? []).length > 0 && (
@@ -35,7 +36,7 @@ export default async function ExportsPage() {
           <CardContent className="space-y-1 text-sm" data-testid="notifications">
             {(notesRes.data ?? []).map((n) => (
               <p key={n.id}>
-                <strong>{n.title}</strong> — {n.body} <span className="text-muted-foreground">{new Date(n.created_at).toLocaleString()}</span>
+                <strong>{n.title}</strong> — {n.body} <span className="text-muted-foreground">{formatDateTimePk(n.created_at)}</span>
               </p>
             ))}
           </CardContent>

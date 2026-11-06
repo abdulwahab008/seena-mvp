@@ -736,9 +736,11 @@ export type Database = {
           amount_paisa: number
           campus_id: string
           consumed_by_enrolment_id: string | null
+          counter_session_id: string | null
           id: string
           mode: Database['public']['Enums']['fee_payment_mode']
           offer_id: string
+          receipt_no: string | null
           reconciled_at: string | null
           reconciled_by: string | null
           recorded_at: string
@@ -751,9 +753,11 @@ export type Database = {
           amount_paisa: number
           campus_id: string
           consumed_by_enrolment_id?: string | null
+          counter_session_id?: string | null
           id?: string
           mode: Database['public']['Enums']['fee_payment_mode']
           offer_id: string
+          receipt_no?: string | null
           reconciled_at?: string | null
           reconciled_by?: string | null
           recorded_at?: string
@@ -766,9 +770,11 @@ export type Database = {
           amount_paisa?: number
           campus_id?: string
           consumed_by_enrolment_id?: string | null
+          counter_session_id?: string | null
           id?: string
           mode?: Database['public']['Enums']['fee_payment_mode']
           offer_id?: string
+          receipt_no?: string | null
           reconciled_at?: string | null
           reconciled_by?: string | null
           recorded_at?: string
@@ -44769,6 +44775,8 @@ export type Database = {
         Returns: undefined
       }
       archive_campus: { Args: { p_campus_id: string }; Returns: undefined }
+      restore_campus: { Args: { p_campus_id: string }; Returns: undefined }
+      update_campus: { Args: { p_campus_id: string; p_city?: string; p_code: string; p_name: string }; Returns: undefined }
       assert_asset_available: {
         Args: { p_asset_id: string; p_on?: string }
         Returns: undefined
@@ -45006,6 +45014,10 @@ export type Database = {
           p_submission_ids: string[]
         }
         Returns: number
+      }
+      can_manage_invitation: {
+        Args: { p_invitation_id: string }
+        Returns: boolean
       }
       can_teach: {
         Args: {
@@ -49481,6 +49493,10 @@ export type Database = {
         Args: { p_consent_id: string }
         Returns: number
       }
+      revoke_invitation: {
+        Args: { p_invitation_id: string }
+        Returns: undefined
+      }
       revoke_staff_teachable_subject: {
         Args: { p_id: string }
         Returns: undefined
@@ -49891,7 +49907,7 @@ export type Database = {
       }
       seed_tenant_roles: { Args: { p_tenant_id: string }; Returns: undefined }
       send_guardian_invite: {
-        Args: { p_channel: string; p_guardian_id: string }
+        Args: { p_base_url?: string; p_channel: string; p_guardian_id: string }
         Returns: Json
       }
       set_academic_terms: {
@@ -50835,6 +50851,19 @@ export type Database = {
       }
       update_structure_line_amount: {
         Args: { p_amount_paisa: number; p_line_id: string }
+        Returns: undefined
+      }
+      update_student_details: {
+        Args: {
+          p_b_form_no?: string
+          p_dob: string
+          p_father_name_en?: string
+          p_father_name_ur?: string
+          p_gender: Database['public']['Enums']['gender']
+          p_name_en: string
+          p_name_ur?: string
+          p_student_id: string
+        }
         Returns: undefined
       }
       update_subject: {

@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { RegisterForm } from './register-form';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 const ADMIN_ROLES = ['super_admin', 'owner', 'principal'];
 
@@ -12,8 +13,8 @@ export default async function AttendanceRegisterPage() {
   const { data: appUser } = await supabase.from('app_user').select('app_role').eq('user_id', user!.id).single();
   const isAdmin = !!appUser && ADMIN_ROLES.includes(appUser.app_role);
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   let sections: { id: string; label: string }[] = [];
   if (campusId) {
@@ -46,7 +47,7 @@ export default async function AttendanceRegisterPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Attendance Register</h1>
-        <p className="text-sm text-muted-foreground">FR-G02 — one status per enrolled student per day, holiday- and lock-aware.</p>
+        <p className="text-sm text-muted-foreground">One status per enrolled student per day, holiday- and lock-aware.</p>
       </div>
       {!campusId ? (
         <p className="text-sm text-muted-foreground">No active campus found.</p>

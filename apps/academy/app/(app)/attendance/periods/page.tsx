@@ -29,7 +29,7 @@ export default async function PeriodAttendancePage({ searchParams }: { searchPar
       <div>
         <h1 className="text-2xl font-semibold">Period attendance</h1>
         <p className="text-sm text-muted-foreground">
-          FR-G03 — mark the students of your own period. The day is worked out from the periods overnight (none present = absent, under half = half day); a day mark made by hand is never overwritten.
+          Mark the students of your own period. The day is worked out from the periods overnight (none present = absent, under half = half day); a day mark made by hand is never overwritten.
         </p>
       </div>
 

@@ -47,7 +47,7 @@ export default async function GuardianClaimsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Parent portal claims</h1>
         <p className="text-sm text-muted-foreground">
-          FR-N01 — parents who could not receive the activation code on the number we hold land here. Fix the phone on the
+          Parents who could not receive the activation code on the number we hold land here. Fix the phone on the
           guardian record, then approve; nobody can self-enter a different number.
         </p>
       </div>

@@ -3,14 +3,15 @@ import { CreateBellTemplateForm } from './create-bell-template-form';
 import { BellTemplateList, type BellTemplateRow } from './bell-template-list';
 import { BellCalendarRules, type CalendarRuleRow } from './bell-calendar-rules';
 import { RamadanOverrides, type DateRangeRuleRow } from './ramadan-overrides';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 const SHIFTS = ['MORNING', 'AFTERNOON'] as const;
 
 export default async function BellTemplatesPage() {
   const supabase = await supabaseServer();
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   const { data: templates } = campusId
     ? await supabase
@@ -43,7 +44,7 @@ export default async function BellTemplatesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Bell Templates</h1>
         <p className="text-sm text-muted-foreground">
-          FR-F01 — campus bell timings every timetable, attendance window and printed sheet will use.
+          Campus bell timings every timetable, attendance window and printed sheet will use.
         </p>
       </div>
       {!campusId ? (

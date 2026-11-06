@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AckControl, ParentVisibilityToggle, RefreshButton } from './variance-controls';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 type SearchParams = { status?: string };
 const LABEL: Record<string, string> = { behind: 'Behind', on_track: 'On track', no_plan: 'No plan' };
@@ -10,8 +11,8 @@ export default async function SyllabusVariancePage({ searchParams }: { searchPar
   const sp = await searchParams;
   const status = sp.status && sp.status in LABEL ? sp.status : '';
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   // Worst first: behind pairs by largest shortfall, then the rest.
   let query = supabase
@@ -34,7 +35,7 @@ export default async function SyllabusVariancePage({ searchParams }: { searchPar
       <div>
         <h1 className="text-2xl font-semibold">Syllabus variance</h1>
         <p className="text-sm text-muted-foreground">
-          FR-H12 — which class-subjects are behind their annual plan. Expected coverage counts every chapter whose target month has begun; behind means more than 5 points short. Rebuilt every day at 05:00.
+          Which class-subjects are behind their annual plan. Expected coverage counts every chapter whose target month has begun; behind means more than 5 points short. Rebuilt every day at 05:00.
         </p>
       </div>
 

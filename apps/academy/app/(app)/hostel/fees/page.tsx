@@ -46,7 +46,7 @@ export default async function HostelFeesPage({ searchParams }: { searchParams: P
       <div>
         <h1 className="text-2xl font-semibold">Hostel and mess fees</h1>
         <p className="text-sm text-muted-foreground">
-          FR-Q06 — charges come from the room tariff and the days actually housed and fed; nothing is typed per student. The refundable deposit is a liability, not income.
+          Charges come from the room tariff and the days actually housed and fed; nothing is typed per student. The refundable deposit is a liability, not income.
         </p>
       </div>
 

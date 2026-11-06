@@ -71,7 +71,7 @@ export default async function SyllabusCoveragePage({ searchParams }: { searchPar
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Syllabus coverage</h1>
-        <p className="text-sm text-muted-foreground">FR-H11 — mark each chapter as not started, in progress or completed for your section. Coverage is weighted by planned periods, so a 14-period chapter counts for more than a 2-period one.</p>
+        <p className="text-sm text-muted-foreground">Mark each chapter as not started, in progress or completed for your section. Coverage is weighted by planned periods, so a 14-period chapter counts for more than a 2-period one.</p>
       </div>
 
       {assignments.length === 0 ? (

@@ -164,7 +164,8 @@ export const MONTH_LABELS = [
 // never carried as a float through the schema itself.
 export const addStructureLineSchema = z.object({
   structureId: z.string().uuid(),
-  classId: z.string().uuid('Choose a class'),
+  // ALL_CLASSES adds the same line to every active class in one step.
+  classId: z.union([z.string().uuid('Choose a class'), z.literal('__all__')], { message: 'Choose a class' }),
   groupCode: z.string().max(50).optional(),
   feeHeadId: z.string().uuid('Choose a fee head'),
   amountRupees: z.coerce.number().nonnegative('Enter an amount'),
@@ -434,8 +435,6 @@ export const setChallanTemplateSchema = z.object({
 });
 export type SetChallanTemplateInput = z.infer<typeof setChallanTemplateSchema>;
 
-export const buildChallanRenderPayloadSchema = z.object({ challanId: z.string().uuid() });
-export type BuildChallanRenderPayloadInput = z.infer<typeof buildChallanRenderPayloadSchema>;
 
 export const FEE_PAYMENT_MODES = ['cash', 'bank_challan', 'online', 'cheque', 'adjustment'] as const;
 

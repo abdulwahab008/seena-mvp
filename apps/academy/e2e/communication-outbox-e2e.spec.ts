@@ -18,7 +18,6 @@ test.describe('FR-M01: Unified Outbound Message Outbox End-to-End Flow', () => {
 
     // 3. Verify Page Header and Metrics
     await expect(page.locator('h1')).toContainText('Unified Outbound Message Outbox');
-    await expect(page.getByText('FR-M01:')).toBeVisible();
     await expect(page.getByText('Queued', { exact: true })).toBeVisible();
     await expect(page.getByText('Delivered', { exact: true })).toBeVisible();
 

@@ -8,6 +8,7 @@ import type { AnnualResultSheet, AnnualSubjectRow } from '@/lib/exams/annual-que
 import { annualDisplay } from '@/lib/exams/annual-query';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { formatDateTimePk } from '@/lib/dates';
 
 /**
  * FR-J03's board: one section's weighted annual results, the term weightages
@@ -147,7 +148,7 @@ export function AnnualBoard({ sessionId, sections }: Props) {
           ) : (
             <div className="space-y-4">
               <p className="text-xs text-muted-foreground" data-testid="annual-computed-at">
-                Computed {sheet.computed_at ? new Date(sheet.computed_at).toLocaleString() : '—'}
+                Computed {sheet.computed_at ? formatDateTimePk(sheet.computed_at) : '—'}
               </p>
               {sheet.candidates.map((c) => (
                 <div key={c.enrolment_id} className="space-y-2 rounded-md border p-4" data-testid={`annual-${c.gr_number}`}>

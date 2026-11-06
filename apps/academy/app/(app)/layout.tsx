@@ -8,6 +8,7 @@ import { logFeatureResolveFailure, resolveFeatureSet } from '@/lib/features';
 import { isImpersonationSessionEnded, parseImpersonationClaim } from '@/lib/impersonation';
 import { EmptyState } from '@/components/ui/empty-state';
 import { AppHeader } from './app-header';
+import { pickActiveCampus } from '@/lib/campus-context';
 import { ImpersonationBanner } from './impersonation-banner';
 import { ImpersonationEnded } from './impersonation-ended';
 import { Sidebar } from './sidebar';
@@ -114,6 +115,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const { data: tenant } = await supabase.from('tenant').select('name').limit(1).single();
+  const { data: campusRows } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code');
+  const activeCampus = await pickActiveCampus(campusRows);
   const schoolName = tenant?.name ?? 'Your school';
 
   // FR-A17: the resolved flag set travels with the session bootstrap, and a
@@ -135,6 +138,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           schoolName={schoolName}
           features={features}
           impersonating={!!imp}
+          campuses={campusRows ?? []}
+          activeCampusId={activeCampus?.id ?? null}
         />
         <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-6 sm:px-6 lg:px-8">
           {children}

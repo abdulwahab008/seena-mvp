@@ -10,12 +10,19 @@ select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
 select id as session_id from public.academic_session where tenant_id = :'tenant_id' \gset
 select id as class1_id from public.class_level where tenant_id = :'tenant_id' and code = '1' \gset
 
+select gen_random_uuid() as cashier_id \gset
+insert into auth.users (id, email, encrypted_password, email_confirmed_at, aud, role)
+values (:'cashier_id', 'cashier@seatsco.test', 'x', now(), 'authenticated', 'authenticated');
+insert into public.app_user (user_id, tenant_id, app_role, full_name) values (:'cashier_id', :'tenant_id', 'owner', 'Cashier Owner');
+
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
-  json_build_object('tenant_id', :'tenant_id', 'app_role', 'owner', 'campus_ids', json_build_array(:'campus_id'))::text,
+  json_build_object('tenant_id', :'tenant_id', 'app_role', 'owner', 'campus_ids', json_build_array(:'campus_id'), 'sub', :'cashier_id')::text,
   true
 );
+-- Admission-fee cash needs the collector's open counter shift.
+select public.open_counter_session(public.create_cash_counter(:'campus_id'::uuid, 'Front desk'), 0);
 select public.create_section(p_campus_id => :'campus_id', p_session_id => :'session_id', p_class_level_id => :'class1_id', p_name => 'A', p_capacity => 3) as section_id \gset
 
 -- Helper: an accepted offer for a fresh enquiry, admission fee PKR 25,000.

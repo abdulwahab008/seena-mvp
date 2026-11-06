@@ -54,7 +54,7 @@ export default async function ExpenseVouchersPage({ searchParams }: { searchPara
       <div>
         <h1 className="text-2xl font-semibold">Expense vouchers</h1>
         <p className="text-sm text-muted-foreground">
-          FR-L11 — a voucher above the campus self-approval limit goes to the approver its amount requires and cannot be paid
+          A voucher above the campus self-approval limit goes to the approver its amount requires and cannot be paid
           until they sign. Two vouchers for the same payee, head and date on the same day are flagged as a possible split and
           both go up for approval.
         </p>

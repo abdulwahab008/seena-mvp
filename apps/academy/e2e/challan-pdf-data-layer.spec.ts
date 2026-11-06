@@ -82,7 +82,7 @@ async function seedOwnerWithPublishedStructure() {
   return { email, password };
 }
 
-test('an owner configures the challan template and previews the render payload for a real challan', async ({ page }) => {
+test('an owner configures the challan template and downloads a real challan as a PDF, alone and as a month batch', async ({ page }) => {
   const { email, password } = await seedOwnerWithPublishedStructure();
 
   // The enrolment's fee plan lines take effect today, so bill the current month
@@ -122,11 +122,16 @@ test('an owner configures the challan template and previews the render payload f
   await page.getByTestId('generate-button').click();
   await expect(page.getByText('Challans generated.')).toBeVisible();
 
-  const previewButton = page.locator('[data-testid^="preview-payload-"]');
-  await previewButton.click();
-  const payloadJson = page.locator('[data-testid^="payload-json-"]');
-  await expect(payloadJson).toBeVisible();
-  await expect(payloadJson).toContainText('"bank_name": "MCB Bank"');
-  await expect(payloadJson).toContainText('"copies"');
-  await expect(payloadJson).toContainText('PDF Payload Child');
+  // The generated challan shows who it is for and downloads as the 3-copy PDF.
+  const row = page.locator('[data-testid^="challan-row-"]').first();
+  await expect(row).toContainText('PDF Payload Child');
+  const href = await page.locator('[data-testid^="challan-pdf-"]').first().getAttribute('href');
+  const pdf = await page.request.get(href!);
+  expect(pdf.status()).toBe(200);
+  expect(pdf.headers()['content-type']).toBe('application/pdf');
+  expect(Buffer.from(await pdf.body()).subarray(0, 5).toString('latin1')).toBe('%PDF-');
+
+  const batch = await page.request.get((await page.getByTestId('challan-batch-pdf').getAttribute('href'))!);
+  expect(batch.status()).toBe(200);
+  expect(batch.headers()['content-type']).toBe('application/pdf');
 });

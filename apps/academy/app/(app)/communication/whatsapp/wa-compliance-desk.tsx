@@ -35,6 +35,7 @@ import {
   testWhatsAppDispatch,
   resolveComplianceAlert,
 } from './actions';
+import { formatDateTimePk } from '@/lib/dates';
 
 export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppComplianceData }) {
   const router = useRouter();
@@ -220,7 +221,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Meta 24-hour customer service session window gating, approved template whitelist, and automated SMS fallback (FR-M05).
+            Meta 24-hour customer service session window gating, approved template whitelist, and automated SMS fallback.
           </p>
         </div>
 
@@ -444,7 +445,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                             )}
                           </td>
                           <td className="p-3 text-xs text-muted-foreground">
-                            {new Date(win.window_opened_at).toLocaleString()}
+                            {formatDateTimePk(win.window_opened_at)}
                           </td>
                           <td className="p-3 text-xs text-muted-foreground">
                             {expiry.toLocaleString()}
@@ -663,7 +664,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                     </div>
                     <p className="text-xs text-muted-foreground max-w-2xl">{alert.message}</p>
                     <span className="text-[11px] text-muted-foreground">
-                      Dispatched: {new Date(alert.created_at).toLocaleString()}
+                      Dispatched: {formatDateTimePk(alert.created_at)}
                     </span>
                   </div>
 
@@ -818,7 +819,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                 Dispatch & Fallback Telemetry
               </CardTitle>
               <CardDescription className="text-xs">
-                Real-time evaluation log showing Meta window status and FR-M02 channel fallback progression.
+                Real-time evaluation log showing Meta window status, and how the message falls back to SMS.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 pt-0">

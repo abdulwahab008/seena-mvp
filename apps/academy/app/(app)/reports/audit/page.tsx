@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { formatDateTimePk } from '@/lib/dates';
 
 type SearchParams = { user?: string; from?: string; to?: string };
 
@@ -24,7 +25,7 @@ export default async function ReportAuditPage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Report and export audit</h1>
-        <p className="text-sm text-muted-foreground">FR-S11 — who ran or exported what, append-only. Exporting this list is itself recorded.</p>
+        <p className="text-sm text-muted-foreground">Who ran or exported what, append-only. Exporting this list is itself recorded.</p>
       </div>
 
       {(alerts ?? []).length > 0 && (
@@ -35,7 +36,7 @@ export default async function ReportAuditPage({ searchParams }: { searchParams: 
           <CardContent className="space-y-1 text-sm" data-testid="pii-alerts">
             {(alerts ?? []).map((a) => (
               <p key={a.id}>
-                User {a.user_id} exported {a.pii_report_count} reports ({a.report_keys.join(', ')}) — {new Date(a.created_at).toLocaleString()}
+                User {a.user_id} exported {a.pii_report_count} reports ({a.report_keys.join(', ')}) — {formatDateTimePk(a.created_at)}
               </p>
             ))}
           </CardContent>
@@ -86,7 +87,7 @@ export default async function ReportAuditPage({ searchParams }: { searchParams: 
             <tbody>
               {(rows ?? []).map((r) => (
                 <tr key={r.id} className="border-t" data-testid="audit-row">
-                  <td className="p-2">{new Date(r.executed_at).toLocaleString()}</td>
+                  <td className="p-2">{formatDateTimePk(r.executed_at)}</td>
                   <td className="p-2 font-mono text-xs">{r.user_id.slice(0, 8)}</td>
                   <td className="p-2">{r.report_key}</td>
                   <td className="p-2">{r.row_count}</td>

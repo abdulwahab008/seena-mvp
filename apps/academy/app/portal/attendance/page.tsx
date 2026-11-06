@@ -158,7 +158,7 @@ export default async function PortalAttendancePage({
     <div className="space-y-6" data-testid="portal-attendance-page">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Attendance</h2>
-        <p className="text-sm text-muted-foreground">FR-N03 — Child attendance history and session percentage.</p>
+        <p className="text-sm text-muted-foreground">Child attendance history and session percentage.</p>
       </div>
 
       {children.length === 0 ? (

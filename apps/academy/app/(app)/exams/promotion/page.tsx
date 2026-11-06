@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { PromotionBoard } from './promotion-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J04. The end-of-session promotion decisions for one class.
@@ -18,8 +19,8 @@ export default async function PromotionPage() {
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -49,7 +50,7 @@ export default async function PromotionPage() {
       <div>
         <h1 className="text-2xl font-semibold">Promotion decisions</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J04 — each candidate is promoted, put in compartment or detained from their{' '}
+          Each candidate is promoted, put in compartment or detained from their{' '}
           <Link href="/exams/annual" className="underline">
             annual result
           </Link>{' '}

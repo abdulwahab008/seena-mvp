@@ -9,6 +9,7 @@ import type { SubjectResultRow, SubjectResultSheet } from '@/lib/exams/result-qu
 import { resultDisplay } from '@/lib/exams/result-query';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { formatDateTimePk } from '@/lib/dates';
 
 /**
  * FR-J02's board: one section's candidates, their computed subjects, and the
@@ -136,7 +137,7 @@ export function ResultBoard({ examTermId, termName, sections }: Props) {
           ) : (
             <div className="space-y-4">
               <p className="text-xs text-muted-foreground" data-testid="result-computed-at">
-                Computed {sheet.computed_at ? new Date(sheet.computed_at).toLocaleString() : '—'}
+                Computed {sheet.computed_at ? formatDateTimePk(sheet.computed_at) : '—'}
               </p>
               {sheet.candidates.map((c) => (
                 <div key={c.enrolment_id} className="space-y-2 rounded-md border p-4" data-testid={`result-${c.gr_number}`}>

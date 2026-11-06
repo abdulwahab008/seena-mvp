@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { MARK_APPROVER_ROLES } from '@/lib/validation';
 import { ApprovalBoard } from './approval-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-I16. The Exam Controller's sign-off screen.
@@ -40,8 +41,8 @@ export default async function MarkApprovalsPage({ searchParams }: { searchParams
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -83,7 +84,7 @@ export default async function MarkApprovalsPage({ searchParams }: { searchParams
       <div>
         <h1 className="text-2xl font-semibold">Mark approval</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I16 — approving a paper for a section makes its marks read-only for everyone, including the teacher who
+          Approving a paper for a section makes its marks read-only for everyone, including the teacher who
           entered them and any service-role job. A set is only approvable once every candidate has a mark or an exam
           status.
         </p>

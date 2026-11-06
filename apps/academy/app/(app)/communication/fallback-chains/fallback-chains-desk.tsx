@@ -31,6 +31,7 @@ import {
   triggerTimeoutScan,
   simulateReceiptWebhook,
 } from './actions';
+import { formatDatePk } from '@/lib/dates';
 
 interface Props {
   initialChains: CommChannelChainRow[];
@@ -195,9 +196,6 @@ export function FallbackChainsDesk({
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               Channel Fallback Chains
             </h1>
-            <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
-              FR-M02
-            </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
             Automated per-recipient multi-channel fallback (WhatsApp ➔ SMS ➔ Push), delivery receipt timeouts, opt-out suppression, and honest multi-hop cost ledgering.
@@ -355,7 +353,7 @@ export function FallbackChainsDesk({
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-border text-[11px] text-muted-foreground">
-                <span>Updated: {new Date(chain.updated_at).toLocaleDateString()}</span>
+                <span>Updated: {formatDatePk(chain.updated_at)}</span>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -547,7 +545,7 @@ export function FallbackChainsDesk({
                         {o.reason || 'Requested by parent'}
                       </td>
                       <td className="p-3 text-muted-foreground font-mono">
-                        {new Date(o.opted_out_at).toLocaleDateString()}
+                        {formatDatePk(o.opted_out_at)}
                       </td>
                       <td className="p-3 text-right">
                         <Button

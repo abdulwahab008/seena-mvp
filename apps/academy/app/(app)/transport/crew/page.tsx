@@ -34,7 +34,7 @@ export default async function CrewPage({ searchParams }: { searchParams: Promise
       <div>
         <h1 className="text-2xl font-semibold">Drivers and crew</h1>
         <p className="text-sm text-muted-foreground">
-          FR-P03 — licences, classes and police verification. An expired licence or a class too low for the bus blocks the assignment; a lapsed police verification is a warning. CNIC is masked unless your role may see it.
+          Licences, classes and police verification. An expired licence or a class too low for the bus blocks the assignment; a lapsed police verification is a warning. CNIC is masked unless your role may see it.
         </p>
       </div>
       <Card>

@@ -95,13 +95,13 @@ test.describe('FR-M06: Dynamic Audience Segments & Immutable Snapshot Engine', (
     await page.getByRole('button', { name: 'Dispatch & Snapshot' }).click();
 
     // Assert Zero-Recipient Guard blocked dispatch with explicit warning
-    await expect(page.getByText('Dispatch Blocked (FR-M06 Zero-Recipient Guard)')).toBeVisible();
+    await expect(page.getByText('Dispatch Blocked', { exact: true })).toBeVisible();
     await expect(page.getByText(/resolved to 0 recipients/i)).toBeVisible();
     await page.getByRole('button', { name: 'Cancel' }).click();
 
     // 9. Verify Audience Audit Trail Tab (AC 4)
     await page.getByRole('button', { name: /Audience Audit Trail/i }).click();
-    await expect(page.getByText('FR-M06 Point-in-Time Immutable Audience Snapshots')).toBeVisible();
+    await expect(page.getByText('Point-in-time audience snapshots')).toBeVisible();
     await expect(page.locator('table thead')).toContainText('Campaign ID');
     await expect(page.locator('table thead')).toContainText('Student');
     await expect(page.locator('table thead')).toContainText('Primary Guardian');

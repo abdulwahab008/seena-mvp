@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { PacketBoard } from './packet-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J11. The report card handed over with next term's fee challan.
@@ -21,8 +22,8 @@ export default async function PacketsPage({ searchParams }: { searchParams: Prom
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -64,7 +65,7 @@ export default async function PacketsPage({ searchParams }: { searchParams: Prom
       <div>
         <h1 className="text-2xl font-semibold">Report card packets</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J11 — the issued{' '}
+          The issued{' '}
           <Link href="/exams/results#report-cards" className="underline">
             report card
           </Link>{' '}

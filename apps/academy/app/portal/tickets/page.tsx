@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { NewTicketDialog } from './new-ticket-dialog';
 import { AlertCircle, CheckCircle2, Clock, MessageSquare, ChevronRight } from 'lucide-react';
+import { formatDatePk } from '@/lib/dates';
 
 export default async function PortalTicketsPage() {
   const supabase = await supabaseServer();
@@ -103,12 +104,12 @@ export default async function PortalTicketsPage() {
                           </span>
                         )}
                         <span>
-                          Raised: {new Date(t.created_at).toLocaleDateString()}
+                          Raised: {formatDatePk(t.created_at)}
                         </span>
                         {t.status !== 'resolved' && (
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            SLA Due: {new Date(t.sla_due_at).toLocaleDateString()}
+                            SLA Due: {formatDatePk(t.sla_due_at)}
                           </span>
                         )}
                       </div>

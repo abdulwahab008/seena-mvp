@@ -49,7 +49,7 @@ export default async function GradingSchemesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Grading schemes</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J01 — a grade scale is defined per board and must cover 0.00% to 100.00% with no gap and no overlap. Once a
+          A grade scale is defined per board and must cover 0.00% to 100.00% with no gap and no overlap. Once a
           scheme is activated its bands are frozen for everyone: changing one would re-grade every result already
           computed against it, so a change is a new effective-dated version instead.
         </p>

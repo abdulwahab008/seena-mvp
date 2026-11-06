@@ -35,7 +35,7 @@ export default async function HostelAllocationsPage({ searchParams }: { searchPa
       <div>
         <h1 className="text-2xl font-semibold">Bed allocation</h1>
         <p className="text-sm text-muted-foreground">
-          FR-Q02 — a bed can hold one student at a time and a student one bed at a time; the database refuses a double booking even when two clerks submit at once.
+          A bed can hold one student at a time and a student one bed at a time; the database refuses a double booking even when two clerks submit at once.
         </p>
       </div>
 

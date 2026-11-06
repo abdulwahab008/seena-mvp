@@ -28,7 +28,7 @@ export default async function PromotionPage() {
       <div>
         <h1 className="text-2xl font-semibold">Student promotion</h1>
         <p className="text-sm text-muted-foreground">
-          FR-A06 — roll the whole school into the next academic session in one run, with a per-student promote / retain / pass-out
+          Roll the whole school into the next academic session in one run, with a per-student promote / retain / pass-out
           decision. Enrolments and their new class placements are created only once you drive the run to completion below; nothing
           is written while you are still reviewing the decision list.
         </p>

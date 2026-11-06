@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AutoAssignPanel, DeleteHouseButton, HouseForm, MoveForm, PointsForm } from './house-forms';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 type SearchParams = { from?: string; to?: string };
 const isoDate = /^\d{4}-\d{2}-\d{2}$/;
@@ -11,8 +12,8 @@ export default async function HousesPage({ searchParams }: { searchParams: Promi
   const from = isoDate.test(sp.from ?? '') ? (sp.from as string) : `${today.slice(0, 4)}-01-01`;
   const to = isoDate.test(sp.to ?? '') ? (sp.to as string) : today;
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
   const { data: sessions } = await supabase.from('academic_session').select('id, is_current').order('starts_on', { ascending: false });
   const sessionId = sessions?.find((s) => s.is_current)?.id ?? sessions?.[0]?.id;
 
@@ -29,7 +30,7 @@ export default async function HousesPage({ searchParams }: { searchParams: Promi
       <div>
         <h1 className="text-2xl font-semibold">Houses</h1>
         <p className="text-sm text-muted-foreground">
-          FR-C06 — students are allotted to houses with siblings kept together, then the least-populated house. Moves are date-effective: points stay with the house the student was in on the day they were earned.
+          Students are allotted to houses with siblings kept together, then the least-populated house. Moves are date-effective: points stay with the house the student was in on the day they were earned.
         </p>
       </div>
 

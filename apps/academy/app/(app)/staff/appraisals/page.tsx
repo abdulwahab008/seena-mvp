@@ -36,7 +36,7 @@ export default async function AppraisalsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Staff appraisals</h1>
         <p className="text-sm text-muted-foreground">
-          FR-D14 — one weighted appraisal per staff member each session. Scores stay hidden from the staff member until the rater releases them; their acknowledgement or response is recorded.
+          One weighted appraisal per staff member each session. Scores stay hidden from the staff member until the rater releases them; their acknowledgement or response is recorded.
         </p>
       </div>
 

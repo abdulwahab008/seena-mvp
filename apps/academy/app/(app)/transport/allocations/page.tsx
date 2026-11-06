@@ -58,7 +58,7 @@ export default async function AllocationsPage({ searchParams }: { searchParams: 
       <div>
         <h1 className="text-2xl font-semibold">Transport allocation</h1>
         <p className="text-sm text-muted-foreground">
-          FR-P04 — the transport fee follows from the stop a student is allocated to. Seats are counted against the vehicle assigned to the route on the start date.
+          The transport fee follows from the stop a student is allocated to. Seats are counted against the vehicle assigned to the route on the start date.
         </p>
       </div>
 

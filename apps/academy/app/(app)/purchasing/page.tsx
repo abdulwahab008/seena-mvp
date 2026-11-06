@@ -15,7 +15,7 @@ export default async function PurchasingPage() {
   const [reqs, queue, campuses, departments, items, tiers, me] = await Promise.all([
     supabase.from('purchase_requisition').select('id, req_no, est_total, status, current_level, approval_chain, raised_at, justification').order('raised_at', { ascending: false }).limit(60),
     supabase.from('v_requisition_approval_queue').select('req_id, req_no, est_total, justification, awaiting_role'),
-    supabase.from('campus').select('id, name').order('name'),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
     supabase.from('department').select('id, name_en').order('name_en'),
     // a requester (a head of department, a teacher) cannot read inv_item itself, so the picker reads code + name through a definer function
     loose(supabase).rpc('list_requisition_items'),
@@ -29,7 +29,7 @@ export default async function PurchasingPage() {
     <div className="space-y-6">
       <PageHeader
         title="Purchase requisitions"
-        description="FR-R06 — raise a requisition; it routes to the approvers set by the school's spending thresholds, in order. The route is fixed when you submit. Editing after an approval cancels every approval and starts again."
+        description="Raise a requisition; it routes to the approvers set by the school's spending thresholds, in order. The route is fixed when you submit. Editing after an approval cancels every approval and starts again."
       />
 
       {(queue.data ?? []).length > 0 && (

@@ -59,7 +59,7 @@ export default async function PortalHomeworkPage({ searchParams }: { searchParam
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold">Homework</h2>
-        <p className="text-sm text-muted-foreground">FR-H04 — pending assignments for your child, due date first.</p>
+        <p className="text-sm text-muted-foreground">Pending assignments for your child, due date first.</p>
       </div>
 
       {children.length === 0 ? (

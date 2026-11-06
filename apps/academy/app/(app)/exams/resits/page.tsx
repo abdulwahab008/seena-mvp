@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { ResitBoard } from './resit-board';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J14. Re-sit and improvement attempts, kept beside the original paper.
@@ -18,8 +19,8 @@ export default async function ResitsPage({ searchParams }: { searchParams: Promi
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -58,7 +59,7 @@ export default async function ResitsPage({ searchParams }: { searchParams: Promi
       <div>
         <h1 className="text-2xl font-semibold">Re-sits and improvements</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J14 — a re-sit or improvement is recorded as a separate attempt and the original is never overwritten. The
+          A re-sit or improvement is recorded as a separate attempt and the original is never overwritten. The
           campus policy decides which attempt is published; the{' '}
           <Link href="/exams/results" className="underline">
             term result

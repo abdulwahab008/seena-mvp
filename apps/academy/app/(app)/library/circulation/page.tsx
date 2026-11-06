@@ -35,7 +35,7 @@ export default async function LibraryCirculationPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Circulation desk" description="FR-O04. Look up the borrower by card or name, then scan the book. Limits, unpaid-fine blocks and due dates (rolled past holidays) are enforced by the database." />
+      <PageHeader title="Circulation desk" description="Look up the borrower by card or name, then scan the book. Limits, unpaid-fine blocks and due dates (rolled past holidays) are enforced by the database." />
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Issue a book</CardTitle>
@@ -46,7 +46,7 @@ export default async function LibraryCirculationPage() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Return a book (FR-O05)</CardTitle>
+          <CardTitle className="text-base">Return a book</CardTitle>
         </CardHeader>
         <CardContent>
           <ReturnDesk />

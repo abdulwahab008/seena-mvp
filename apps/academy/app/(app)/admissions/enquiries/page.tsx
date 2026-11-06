@@ -11,7 +11,7 @@ export default async function EnquiriesPage() {
 
   const [{ data: campuses }, { data: sessions }, { data: classLevels }, { data: enquiries }] = await Promise.all([
     supabase.from('campus').select('id, code, name').eq('status', 'active').order('code'),
-    supabase.from('academic_session').select('id, name').order('starts_on', { ascending: false }),
+    supabase.from('academic_session').select('id, name').order('is_current', { ascending: false }).order('starts_on', { ascending: false }),
     supabase.from('class_level').select('id, code, name_en').eq('is_active', true).order('ordinal'),
     supabase
       .from('admission_enquiry')
@@ -24,7 +24,7 @@ export default async function EnquiriesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Admissions enquiries</h1>
-          <p className="text-sm text-muted-foreground">FR-B01 — capture every walk-in, phone, web and referral enquiry.</p>
+          <p className="text-sm text-muted-foreground">Capture every walk-in, phone, web and referral enquiry.</p>
         </div>
         <Button asChild size="sm" className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm" data-testid="goto-walkin-desk-button">
           <Link href="/admissions/walk-in">

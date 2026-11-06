@@ -44,7 +44,7 @@ export default async function RecycleBinPage() {
       <div>
         <h1 className="text-2xl font-semibold">Recycle Bin</h1>
         <p className="text-sm text-muted-foreground">
-          FR-A15 — soft-deleted students. Restore brings a student, its enrolment, and its challans back exactly as they were.
+          Soft-deleted students. Restore brings a student, its enrolment, and its challans back exactly as they were.
         </p>
       </div>
       {canView ? (

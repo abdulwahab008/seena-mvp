@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UploadForm, ProfileForm } from './bank-forms';
+import { formatDatePk } from '@/lib/dates';
 
 export default async function BankStatementsPage() {
   const supabase = await supabaseServer();
@@ -20,7 +21,7 @@ export default async function BankStatementsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Bank statements</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K19 — upload the bank&apos;s collection scroll (CSV). Each file can be imported once per account; unreadable rows are kept for review.
+          Upload the bank&apos;s collection scroll (CSV). Each file can be imported once per account; unreadable rows are kept for review.
         </p>
       </div>
 
@@ -54,7 +55,7 @@ export default async function BankStatementsPage() {
                 {i.file_name ?? 'statement'} — {i.parsed_count} parsed, {i.failed_count} failed of {i.row_count}
               </Link>
               <span className="text-muted-foreground">
-                {i.status} · {new Date(i.created_at).toLocaleDateString()}
+                {i.status} · {formatDatePk(i.created_at)}
               </span>
             </div>
           ))}

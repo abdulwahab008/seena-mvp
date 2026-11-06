@@ -25,7 +25,7 @@ export default async function DatesheetPage({ searchParams }: { searchParams: Pr
     <div>
       <h1 className="text-2xl font-semibold">Datesheet</h1>
       <p className="text-sm text-muted-foreground">
-        FR-I03 — schedule each paper of a term. A pupil registered for two papers that overlap blocks the save; hall capacity and the Friday Jummah cut-off are
+        Schedule each paper of a term. A pupil registered for two papers that overlap blocks the save; hall capacity and the Friday Jummah cut-off are
         warnings.
       </p>
     </div>

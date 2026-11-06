@@ -1,12 +1,13 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { RequirementForm } from './requirement-form';
 import { RequirementList } from './requirement-list';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function ChecklistPage() {
   const supabase = await supabaseServer();
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   const [{ data: classLevels }, { data: requirements }] = await Promise.all([
     supabase.from('class_level').select('id, name_en, ordinal').eq('is_active', true).order('ordinal'),
@@ -27,7 +28,7 @@ export default async function ChecklistPage() {
       <div>
         <h1 className="text-2xl font-semibold">Document checklist</h1>
         <p className="text-sm text-muted-foreground">
-          FR-B09 — which documents are mandatory for which classes, effective-dated so an already-submitted application is never
+          Which documents are mandatory for which classes, effective-dated so an already-submitted application is never
           retroactively re-flagged.
         </p>
       </div>

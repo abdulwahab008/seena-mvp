@@ -9,6 +9,7 @@ import { LedgerView, type LedgerEntryRow } from './ledger-view';
 import { PaymentView, type PaymentRow } from './payment-view';
 import { ElectiveChoiceView, type ElectiveBucket } from './elective-choice-view';
 import { DeleteStudentControl } from './delete-student-control';
+import { EditStudentControl } from './edit-student-control';
 import { canSeeConcessionAwards, hasFeeAccess } from '@/lib/auth/fee-access';
 
 // supabase-js types every embedded to-one relation as a possible array —
@@ -28,7 +29,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   // a deleted student's record now.
   const { data: student } = await supabase
     .from('student')
-    .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status')
+    .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status, father_name_en, b_form_no')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
@@ -228,7 +229,12 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             GR {student.gr_number} · {student.gender} · DOB {student.dob} · {student.status}
           </p>
         </div>
-        {canDelete && <DeleteStudentControl studentId={student.id} studentName={student.name_en} />}
+        {canDelete && (
+          <div className="flex gap-2">
+            <EditStudentControl student={student} />
+            <DeleteStudentControl studentId={student.id} studentName={student.name_en} />
+          </div>
+        )}
       </div>
 
       <section className="space-y-2">

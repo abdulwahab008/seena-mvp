@@ -24,7 +24,7 @@ export default async function NoDuesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Security deposits and no-dues clearance</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K28 — a deposit is held as a liability and never counted as income. Fees, library, transport, hostel and inventory are cleared by their owners; dues can be netted against the deposit; the Principal approves the refund; only the Owner can override an open clearance to release the Transfer Certificate.
+          A deposit is held as a liability and never counted as income. Fees, library, transport, hostel and inventory are cleared by their owners; dues can be netted against the deposit; the Principal approves the refund; only the Owner can override an open clearance to release the Transfer Certificate.
         </p>
       </div>
 

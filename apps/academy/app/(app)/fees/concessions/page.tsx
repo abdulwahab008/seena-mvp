@@ -33,13 +33,13 @@ export default async function ConcessionsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Concession schemes</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K05 — the catalogue FR-K06&apos;s award workflow will apply against. Applicability is per fee head, never global.
+          The schemes concession awards are made under. Applicability is per fee head, never global.
         </p>
       </div>
       <div className="space-y-2">
         <h2 className="text-lg font-medium">Fee policy</h2>
         <p className="text-sm text-muted-foreground">
-          FR-K08 — the ceiling combined concessions on one fee line can never exceed, applied by the monthly challan job itself.
+          The ceiling combined concessions on one fee line can never exceed, applied by the monthly challan job itself.
         </p>
         <FeePolicyForm maxStackedConcessionPct={policy?.max_stacked_concession_pct ?? null} />
       </div>

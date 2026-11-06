@@ -23,6 +23,7 @@ type Channel = 'whatsapp' | 'sms' | 'print';
 function InvitePanel({ guardianId, phone }: { guardianId: string; phone: string | null }) {
   const [channel, setChannel] = useState<Channel>('whatsapp');
   const [link, setLink] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const onSend = () => {
@@ -32,13 +33,13 @@ function InvitePanel({ guardianId, phone }: { guardianId: string; phone: string 
         toast.error(result.error);
         return;
       }
-      const url = `${window.location.origin}/guardian/activate/${result.result!.token}`;
-      if (channel === 'print') {
-        setLink(url);
-      } else {
-        setLink(null);
-        toast.success(`Invite sent via ${channel}.`);
-      }
+      const r = result.result!;
+      setLink(r.link);
+      if (channel === 'print') setNote('Print or hand this link to the parent. It works once and expires in 72 hours.');
+      else if (r.queued) {
+        setNote(`Queued for ${channel === 'sms' ? 'SMS' : 'WhatsApp'} in the message outbox. It goes out when the messaging provider sends the queue. You can also share the link yourself.`);
+        toast.success(`Invite queued for ${channel === 'sms' ? 'SMS' : 'WhatsApp'}.`);
+      } else setNote('No message could be queued for this guardian. Share this link with the parent yourself.');
     });
   };
 
@@ -68,9 +69,12 @@ function InvitePanel({ guardianId, phone }: { guardianId: string; phone: string 
         {!phone && <p className="text-xs text-destructive">No phone on file.</p>}
       </div>
       {link && (
-        <p className="break-all rounded border bg-muted p-2 text-xs" data-testid={`guardian-invite-link-${guardianId}`}>
-          {link}
-        </p>
+        <div className="space-y-1" data-testid={`guardian-invite-result-${guardianId}`}>
+          {note && <p className="text-xs text-muted-foreground">{note}</p>}
+          <p className="select-all break-all rounded border bg-muted p-2 text-xs" data-testid={`guardian-invite-link-${guardianId}`}>
+            {link}
+          </p>
+        </div>
       )}
     </div>
   );

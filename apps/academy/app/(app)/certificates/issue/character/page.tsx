@@ -57,7 +57,7 @@ export default async function IssueCharacterCertificatePage() {
       <div>
         <h1 className="text-2xl font-semibold">Issue a Character Certificate</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T05 — states the student&apos;s conduct and the period they actually attended, taken from their enrolment
+          States the student&apos;s conduct and the period they actually attended, taken from their enrolment
           history rather than from today&apos;s date. Issuable to a student who has already left, on its own serial
           series, and as often as one is asked for.
         </p>

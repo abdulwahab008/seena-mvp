@@ -542,7 +542,7 @@ export function DynamicSegmentDesk({
           <div className="rounded-lg border bg-blue-50/50 p-4 text-xs text-blue-900 dark:bg-blue-950/20 dark:text-blue-300 flex items-start gap-3">
             <ShieldCheck className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-sm">FR-M06 Point-in-Time Immutable Audience Snapshots</p>
+              <p className="font-semibold text-sm">Point-in-time audience snapshots</p>
               <p className="mt-1">
                 Whenever a campaign is dispatched to a dynamic segment, the exact recipient list, primary guardian contacts,
                 and balance/attendance attributes are frozen into an immutable audit snapshot. Even if a student withdraws,
@@ -808,7 +808,7 @@ export function DynamicSegmentDesk({
             <div className="rounded-md border border-rose-300 bg-rose-50 p-3 text-xs text-rose-900 dark:bg-rose-950/30 dark:text-rose-200 flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold">Dispatch Blocked (FR-M06 Zero-Recipient Guard)</p>
+                <p className="font-semibold">Dispatch Blocked</p>
                 <p className="mt-0.5">{dispatchResult.error}</p>
               </div>
             </div>
@@ -929,7 +929,7 @@ export function DynamicSegmentDesk({
                   className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <label htmlFor="chk-hardship" className="text-xs font-medium text-foreground">
-                  Exclude students with approved hardship waivers (FR-M06 AC 1)
+                  Exclude students with approved hardship waivers
                 </label>
               </div>
             </div>
@@ -947,7 +947,7 @@ export function DynamicSegmentDesk({
                   className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <label htmlFor="chk-cutoff" className="text-xs font-medium text-foreground">
-                  Enforce morning cutoff ({cutoffTime} PKT) before allowing alerts (FR-M06 AC 2)
+                  Enforce morning cutoff ({cutoffTime} PKT) before allowing alerts
                 </label>
               </div>
               <p className="text-[11px] text-muted-foreground">

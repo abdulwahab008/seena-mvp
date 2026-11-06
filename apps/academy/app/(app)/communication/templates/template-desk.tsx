@@ -354,9 +354,6 @@ export function TemplateDesk({
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight">Message Template Library</h1>
-            <span className="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-semibold px-2 py-0.5 rounded-full">
-              FR-M03 · FR-M04
-            </span>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             Immutable versioned templates, audience-scoped placeholder validation, and Pakistani GSM/UCS-2 SMS segment costing.
@@ -617,7 +614,7 @@ export function TemplateDesk({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-foreground">SMS Encoding (FR-M04)</label>
+              <label className="text-xs font-semibold text-foreground">SMS Encoding</label>
               <select
                 value={createEncoding}
                 onChange={(e) => setCreateEncoding(e.target.value as SmsEncoding)}

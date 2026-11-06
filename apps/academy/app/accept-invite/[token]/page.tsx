@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { supabaseServer } from '@/lib/supabase/server';
 import { AcceptForm } from './accept-form';
+import { roleLabel } from '@/lib/staff-roles';
 
 export default async function AcceptInvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -28,7 +29,7 @@ export default async function AcceptInvitePage({ params }: { params: Promise<{ t
         <CardHeader>
           <CardTitle>Join {data.tenant_name}</CardTitle>
           <CardDescription>
-            You&apos;ve been invited as <span className="font-medium text-foreground">{data.app_role}</span>. Set a
+            You&apos;ve been invited as <span className="font-medium text-foreground">{roleLabel(data.app_role)}</span>. Set a
             password to finish creating your account.
           </CardDescription>
         </CardHeader>

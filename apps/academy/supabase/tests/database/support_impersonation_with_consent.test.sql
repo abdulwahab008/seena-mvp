@@ -610,7 +610,8 @@ select is(
 );
 select is(
   (select write_count from public.impersonation_session where id = :'s1'::uuid),
-  1::bigint,
+  2::bigint,
+  -- the tenant's first student also ticks the "first student" onboarding step, itself audited
   'AC6: and counted, by the audit trigger that already fires on every audited table'
 );
 

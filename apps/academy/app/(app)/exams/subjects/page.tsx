@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { readExamSubjectSetup } from '@/lib/exams/subject-query';
 import { SubjectSetup } from './subject-setup';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-I02. Max and pass marks per component for each class-subject in a term.
@@ -31,8 +32,8 @@ export default async function ExamSubjectsPage({ searchParams }: { searchParams:
   const role = appUser?.app_role ?? 'none';
 
   // Same campus/session derivation as every other campus-scoped page here.
-  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code').limit(1);
-  const campus = campuses?.[0];
+  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code');
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -93,7 +94,7 @@ export default async function ExamSubjectsPage({ searchParams }: { searchParams:
       <div>
         <h1 className="text-2xl font-semibold">Exam subjects</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I02 — max and pass marks per component, so mark entry and pass/fail logic have an unambiguous denominator.
+          Max and pass marks per component, so mark entry and pass/fail logic have an unambiguous denominator.
           Configured once per class; every section of that class inherits it.
         </p>
       </div>

@@ -290,7 +290,7 @@ export function ReportCardBoard({ examTermId, termName, campusId, sections }: Pr
               <div>
                 <h3 className="font-semibold">Print the whole {scope === 'section' ? 'section' : scope}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  FR-J12 — one action produces every card in scope plus a single merged file ordered by section then
+                  One action produces every card in scope plus a single merged file ordered by section then
                   roll number, with each card starting on its own sheet so duplex printing cannot put two children on
                   one page. A candidate who cannot be printed does not stop the run: they are listed below with the
                   reason, and re-running renders only them while the merged file is rebuilt in full.

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { StaffTicketResponseClient } from './staff-ticket-response-client';
 import { ArrowLeft, Clock, AlertCircle, User, Lock } from 'lucide-react';
+import { formatDateTimePk } from '@/lib/dates';
 
 export default async function StaffTicketDetailPage({
   params,
@@ -97,7 +98,7 @@ export default async function StaffTicketDetailPage({
 
             <div className="text-xs text-muted-foreground flex items-center gap-1 font-mono">
               <Clock className="h-3.5 w-3.5" />
-              SLA Target: {new Date(ticket.sla_due_at).toLocaleString()}
+              SLA Target: {formatDateTimePk(ticket.sla_due_at)}
             </div>
           </div>
 
@@ -137,7 +138,7 @@ export default async function StaffTicketDetailPage({
                         </>
                       )}
                     </span>
-                    <span>{new Date(m.created_at).toLocaleString()}</span>
+                    <span>{formatDateTimePk(m.created_at)}</span>
                   </div>
                   <p className="text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
                     {m.body}

@@ -18,9 +18,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { DatePicker } from '@/components/ui/date-picker';
+import { todayPk } from '@/lib/dates';
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  return todayPk();
 }
 
 // AC's own Notes: leave -> 'leave', suspension has no attendance-status

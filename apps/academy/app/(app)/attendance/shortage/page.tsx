@@ -30,7 +30,7 @@ export default async function ShortagePage() {
         <div>
           <h1 className="text-2xl font-semibold">Attendance shortage warnings</h1>
           <p className="text-sm text-muted-foreground">
-            FR-G16 — evaluated every Saturday evening. A student below the campus minimum gets a level-1 warning, escalating to 2 and 3 at later weeks while still below; the parent is texted at each level and the Principal is told at level 3. Students with fewer than 20 recorded days are not evaluated.
+            Evaluated every Saturday evening. A student below the campus minimum gets a level-1 warning, escalating to 2 and 3 at later weeks while still below; the parent is texted at each level and the Principal is told at level 3. Students with fewer than 20 recorded days are not evaluated.
           </p>
         </div>
         <RunButton />

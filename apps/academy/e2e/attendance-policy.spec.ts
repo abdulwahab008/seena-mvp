@@ -27,7 +27,7 @@ async function seedOwner() {
   return { email, password };
 }
 
-test('an owner configures the attendance policy — the screen blocks until it is set, then classifies present vs late', async ({ page }) => {
+test('an owner adjusts the default attendance policy, then it classifies present vs late', async ({ page }) => {
   const { email, password } = await seedOwner();
 
   await page.goto('/login');
@@ -40,10 +40,8 @@ test('an owner configures the attendance policy — the screen blocks until it i
   await page.goto('/academic-setup/attendance-policy');
   await page.waitForLoadState('networkidle');
 
-  // AC1: nothing configured yet — the screen says so plainly.
-  await expect(page.getByTestId('attendance-policy-unconfigured')).toContainText(
-    'Attendance policy not configured for this session — contact your Principal.'
-  );
+  // Every session starts with a default policy, so the register is never blocked on setup.
+  await expect(page.getByTestId('attendance-policy-unconfigured')).toHaveCount(0);
 
   await page.getByTestId('attendance-start-time').fill('08:00');
   await page.getByTestId('attendance-late-threshold').fill('15');

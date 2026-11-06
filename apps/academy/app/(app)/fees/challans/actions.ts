@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { generateChallansSchema, buildChallanRenderPayloadSchema, setChallanTemplateSchema } from '@/lib/validation';
+import { generateChallansSchema, setChallanTemplateSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type GenerateResult = {
@@ -59,28 +59,6 @@ export async function generateChallans(_prev: GenerateResult, formData: FormData
     dryRun: result.dry_run,
     previewByClass: result.preview_by_class,
   };
-}
-
-// FR-K11 (data layer only — see the migration header for why there's no
-// PDF renderer yet): the exact JSON an Edge Function would consume to
-// draw the three copies. Surfaced here as a read-only preview so the
-// feature is genuinely visible and testable through the UI now, not
-// just from pgTAP.
-export type PayloadResult = { error: string | null; payload?: unknown };
-
-export async function buildChallanRenderPayload(_prev: PayloadResult, formData: FormData): Promise<PayloadResult> {
-  const parsed = buildChallanRenderPayloadSchema.safeParse({ challanId: formData.get('challanId') });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
-
-  const supabase = await supabaseServer();
-  const { data, error } = await supabase.rpc('build_challan_render_payload', { p_challan_id: parsed.data.challanId });
-  if (error) {
-    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to view this challan.' };
-    if (error.message.includes('CHALLAN_NOT_FOUND')) return { error: 'Challan not found.' };
-    return { error: 'Could not build the payload.' };
-  }
-
-  return { error: null, payload: data };
 }
 
 export type ActionState = { error: string | null };

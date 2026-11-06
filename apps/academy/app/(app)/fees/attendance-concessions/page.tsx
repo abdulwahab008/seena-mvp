@@ -43,7 +43,7 @@ export default async function AttendanceConcessionsPage() {
         <div>
           <h1 className="text-2xl font-semibold">Attendance-linked concessions</h1>
           <p className="text-sm text-muted-foreground">
-            FR-G17 — a scheme with a minimum attendance applies to a month&apos;s challan only if the student met it last month. A student with no attendance data keeps the concession. An issued challan is never changed: if attendance is corrected afterwards, an adjustment task is raised here.
+            A scheme with a minimum attendance applies to a month&apos;s challan only if the student met it last month. A student with no attendance data keeps the concession. An issued challan is never changed: if attendance is corrected afterwards, an adjustment task is raised here.
           </p>
         </div>
         <RefreshButton />

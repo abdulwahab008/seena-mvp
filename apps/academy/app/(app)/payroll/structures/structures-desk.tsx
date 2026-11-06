@@ -21,6 +21,7 @@ import {
   DollarSign,
   UserCheck,
 } from 'lucide-react';
+import { todayPk } from '@/lib/dates';
 
 interface Props {
   initialStructures: EmployeeSalaryStructureRow[];
@@ -229,7 +230,7 @@ export function StructuresDesk({ initialStructures, staffList }: Props) {
                 id="start_date"
                 name="start_date"
                 type="date"
-                defaultValue={new Date().toISOString().slice(0, 10)}
+                defaultValue={todayPk()}
                 required
               />
             </div>

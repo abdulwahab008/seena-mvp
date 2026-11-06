@@ -22,7 +22,7 @@ export default async function ReportBuilderPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Report builder</h1>
-        <p className="text-sm text-muted-foreground">FR-S07 — pick a dataset, choose columns, filter and group, preview, and save. Shared reports run for each person with their own campus access.</p>
+        <p className="text-sm text-muted-foreground">Pick a dataset, choose columns, filter and group, preview, and save. Shared reports run for each person with their own campus access.</p>
       </div>
 
       <Card>

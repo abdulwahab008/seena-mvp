@@ -42,7 +42,7 @@ export default async function LibraryFinesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Library fines"
-        description="FR-O07. Overdue fines accrue every night at 02:00 Karachi time, one row per late day, capped per loan. Borrowers whose unpaid fines reach the campus block threshold cannot borrow. Fines are settled or waived with a reason, never deleted."
+        description="Overdue fines accrue every night at 02:00 Karachi time, one row per late day, capped per loan. Borrowers whose unpaid fines reach the campus block threshold cannot borrow. Fines are settled or waived with a reason, never deleted."
       />
       <Card>
         <CardHeader>

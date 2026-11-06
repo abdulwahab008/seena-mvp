@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function TeacherWorkloadPage({ searchParams }: { searchParams: Promise<{ campus?: string; week?: string }> }) {
   const sp = await searchParams;
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id, name').order('name');
+  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('name');
   const campus = (campuses ?? []).find((c) => c.id === sp.campus) ?? (campuses ?? [])[0];
   if (!campus) return <p className="text-sm text-muted-foreground">No campus is available to your account.</p>;
 
@@ -28,7 +28,7 @@ export default async function TeacherWorkloadPage({ searchParams }: { searchPara
         <div>
           <h1 className="text-2xl font-semibold">Teacher workload</h1>
           <p className="text-sm text-muted-foreground">
-            FR-D20 — periods taught against periods contracted, per teacher and week. Substitution periods are shown separately and are never added to a teacher&apos;s own load.
+            Periods taught against periods contracted, per teacher and week. Substitution periods are shown separately and are never added to a teacher&apos;s own load.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

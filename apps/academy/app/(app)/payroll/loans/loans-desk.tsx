@@ -23,6 +23,7 @@ import {
   Wallet,
   ArrowDownCircle,
 } from 'lucide-react';
+import { todayPk } from '@/lib/dates';
 
 interface Props {
   initialLoans: StaffLoanSummaryRow[];
@@ -307,7 +308,7 @@ export function LoansDesk({ initialLoans, staffList }: Props) {
                 id="disbursed_at"
                 name="disbursed_at"
                 type="date"
-                defaultValue={new Date().toISOString().slice(0, 10)}
+                defaultValue={todayPk()}
                 required
               />
             </div>

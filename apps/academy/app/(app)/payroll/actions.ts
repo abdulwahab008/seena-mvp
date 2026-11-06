@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
+import { todayPk } from '@/lib/dates';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -158,7 +159,7 @@ export async function saveSalaryComponent(
   const isTaxable = formData.get('is_taxable') === 'true';
   const exemptionCapPct = parseFloat(formData.get('exemption_cap_pct')?.toString() || '0');
   const proratesOnAbsence = formData.get('prorates_on_absence') === 'true';
-  const effectiveFrom = formData.get('effective_from')?.toString() || new Date().toISOString().slice(0, 10);
+  const effectiveFrom = formData.get('effective_from')?.toString() || todayPk();
 
   if (!code || !nameEn) {
     return { error: 'Component code and English name are required.' };
@@ -367,7 +368,7 @@ export async function createStaffLoan(
   const loanType = formData.get('loan_type')?.toString() || 'loan';
   const principalPkr = parseFloat(formData.get('principal_pkr')?.toString() || '0');
   const installmentPkr = parseFloat(formData.get('installment_pkr')?.toString() || '0');
-  const disbursedAt = formData.get('disbursed_at')?.toString() || new Date().toISOString().slice(0, 10);
+  const disbursedAt = formData.get('disbursed_at')?.toString() || todayPk();
   const repaymentMonth = formData.get('repayment_start_month')?.toString() || disbursedAt.slice(0, 7) + '-01';
   const notes = formData.get('notes')?.toString()?.trim() || null;
 

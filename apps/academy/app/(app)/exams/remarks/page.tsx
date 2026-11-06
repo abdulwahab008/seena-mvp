@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LibraryEntryForm, RemarkSheet, RemarksRequiredToggle, type SheetRow } from './remark-sheet';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 type SearchParams = { section?: string; term?: string };
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
@@ -8,8 +9,8 @@ const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? nu
 export default async function RemarksPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   const { data: sections } = await supabase
     .from('class_section')
@@ -58,7 +59,7 @@ export default async function RemarksPage({ searchParams }: { searchParams: Prom
       <div>
         <h1 className="text-2xl font-semibold">Class teacher remarks</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J10 — one short remark (up to 250 characters, English or Urdu) per student per term. Pick from the library, type your own, or apply one remark to several students. It prints in the report card&apos;s remark box.
+          One short remark (up to 250 characters, English or Urdu) per student per term. Pick from the library, type your own, or apply one remark to several students. It prints in the report card&apos;s remark box.
         </p>
       </div>
 

@@ -1,11 +1,21 @@
 -- pgTAP tests for FR-G01: attendance policy configuration per campus.
 begin;
-select plan(17);
+select plan(18);
 
 select public.provision_tenant('test-attendance-policy-co', 'Attendance Policy Co', 'owner@attendancepolicyco.test');
 select id as tenant_id from public.tenant where slug = 'test-attendance-policy-co' \gset
 select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
 select id as session_id from public.academic_session where tenant_id = :'tenant_id' \gset
+
+-- Audit BUG-03: a new school gets a default policy (08:00 start, 24-hour window) at once, so its
+-- registers are usable from day one instead of failing closed.
+select is(
+  (select count(*)::int from public.attendance_policy where campus_id = :'campus_id'::uuid and session_id = :'session_id'::uuid and start_time = '08:00' and lock_window_hours = 24),
+  1,
+  'provisioning seeds the default attendance policy for the first campus and session'
+);
+-- The fail-closed behaviour below is about a campus with no policy at all.
+delete from public.attendance_policy where campus_id = :'campus_id'::uuid;
 
 set local role authenticated;
 select set_config(
@@ -158,7 +168,7 @@ select is(
   'AC/defense-in-depth: another tenant cannot resolve this tenant''s policy, even by guessing the campus id'
 );
 select is(
-  (select count(*)::int from public.attendance_policy),
+  (select count(*)::int from public.attendance_policy where tenant_id = :'tenant_id'::uuid),
   0,
   'AC/defense-in-depth: another tenant sees zero attendance_policy rows via RLS'
 );

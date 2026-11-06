@@ -58,7 +58,7 @@ export function WalkInForm({
   const [sectionId, setSectionId] = React.useState('');
   const [childName, setChildName] = React.useState('');
   const [dob, setDob] = React.useState('');
-  const [gender, setGender] = React.useState<'male' | 'female' | 'other'>('male');
+  const [gender, setGender] = React.useState<'male' | 'female' | 'other' | ''>('');
   const [parentName, setParentName] = React.useState('');
   const [phone, setPhone] = React.useState('');
   const [bFormNo, setBFormNo] = React.useState('');
@@ -109,6 +109,10 @@ export function WalkInForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!gender) {
+      toast.error("Choose the child's gender.");
+      return;
+    }
     const fd = new FormData();
     fd.set('campusId', campusId);
     fd.set('sessionId', sessionId);
@@ -153,7 +157,7 @@ export function WalkInForm({
     setAdmittedRecord(null);
     setChildName('');
     setDob('');
-    setGender('male');
+    setGender('');
     setParentName('');
     setPhone('');
     setBFormNo('');
@@ -333,6 +337,8 @@ export function WalkInForm({
                             size="sm"
                             variant={gender === g ? 'default' : 'outline'}
                             onClick={() => setGender(g)}
+                            aria-pressed={gender === g}
+                            data-testid={`walkin-gender-${g}`}
                             className={`flex-1 h-8 text-xs capitalize ${
                               gender === g ? 'bg-indigo-600 text-white' : ''
                             }`}

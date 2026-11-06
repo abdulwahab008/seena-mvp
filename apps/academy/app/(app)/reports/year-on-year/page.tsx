@@ -60,7 +60,7 @@ export default async function YearOnYearPage({ searchParams }: { searchParams: P
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Year-on-year comparison</h1>
-        <p className="text-sm text-muted-foreground">FR-S10 — months are aligned by position in the session (month 1 is the month the session starts), so April–March and August–July campuses compare like with like.</p>
+        <p className="text-sm text-muted-foreground">Months are aligned by position in the session (month 1 is the month the session starts), so April–March and August–July campuses compare like with like.</p>
       </div>
 
       <form method="get" className="flex flex-wrap items-end gap-3 text-sm" data-testid="yoy-filters">

@@ -28,7 +28,7 @@ export default async function DisciplineWorklistPage() {
       <div>
         <h1 className="text-2xl font-semibold">Disciplinary worklist</h1>
         <p className="text-sm text-muted-foreground">
-          FR-D15 — a show-cause notice is overdue from the day its response deadline is reached. Entries are permanent; corrections are added as new entries.
+          A show-cause notice is overdue from the day its response deadline is reached. Entries are permanent; corrections are added as new entries.
         </p>
       </div>
       <Card>

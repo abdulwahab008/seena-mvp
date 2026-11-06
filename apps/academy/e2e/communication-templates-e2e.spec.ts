@@ -25,7 +25,6 @@ test.describe('FR-M03 · FR-M04: Message Template Library & SMS Segment Engine E
 
     // 3. Verify Page Header and Badges
     await expect(page.locator('h1')).toContainText('Message Template Library');
-    await expect(page.getByText('FR-M03 · FR-M04')).toBeVisible();
 
     // 4. Verify seeded templates exist
     await expect(page.getByRole('heading', { name: 'Student Absence Alert' }).first()).toBeVisible();

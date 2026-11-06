@@ -2,6 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RuleToggle, SeedButton } from './rule-controls';
+import { formatDateTimePk } from '@/lib/dates';
 
 export default async function RemindersPage() {
   const supabase = await supabaseServer();
@@ -17,7 +18,7 @@ export default async function RemindersPage() {
       <div>
         <h1 className="text-2xl font-semibold">Fee reminders</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K26 — the ladder runs daily at 09:00. A guardian gets one consolidated message across all their children; a paid challan stops its ladder; quiet hours defer sending to 08:00.
+          The ladder runs daily at 09:00. A guardian gets one consolidated message across all their children; a paid challan stops its ladder; quiet hours defer sending to 08:00.
         </p>
       </div>
 
@@ -71,7 +72,7 @@ export default async function RemindersPage() {
                 {l.rung_code} · {l.channel}
               </span>
               <span className="text-muted-foreground">
-                {l.status.replace(/_/g, ' ')} · {new Date(l.created_at).toLocaleString()}
+                {l.status.replace(/_/g, ' ')} · {formatDateTimePk(l.created_at)}
               </span>
             </p>
           ))}

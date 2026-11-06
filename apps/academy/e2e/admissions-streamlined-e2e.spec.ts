@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openCashShift } from './support/cash-shift';
 import { seedSchoolOwner, seedSection } from './support/school-owner-seed';
 
 test.describe('Admissions Module E2E & Streamlined Fast-Track Flow', () => {
@@ -24,6 +25,8 @@ test.describe('Admissions Module E2E & Streamlined Fast-Track Flow', () => {
     await expect(page).toHaveURL(/\/dashboard$/);
 
     // 2. Check Applications page & verify Abdul Wahab is enrolled
+    // Admission-fee cash needs an open counter shift.
+    await openCashShift(page);
     await page.goto('/admissions/applications');
     await page.waitForLoadState('networkidle');
     await expect(page.locator('h1')).toContainText('Applications');
@@ -71,6 +74,7 @@ test.describe('Admissions Module E2E & Streamlined Fast-Track Flow', () => {
     // Select day 15
     await page.locator('[data-testid="walkin-dob-popover"]').getByRole('button', { name: '15', exact: true }).first().click();
 
+    await page.getByTestId('walkin-gender-male').click();
     await page.locator('#walkin-parentName').fill('Farhan Qureshi');
     await page.locator('#walkin-phone').fill('03009876543');
 

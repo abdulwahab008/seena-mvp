@@ -7,7 +7,7 @@ export default function ProvisionPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Provision a tenant</CardTitle>
-          <CardDescription>FR-A01 — creates a tenant, its first campus, current academic session and an owner invitation.</CardDescription>
+          <CardDescription>Creates a tenant, its first campus, current academic session and an owner invitation.</CardDescription>
         </CardHeader>
         <CardContent>
           <ProvisionForm />

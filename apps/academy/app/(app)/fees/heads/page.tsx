@@ -17,7 +17,7 @@ export default async function FeeHeadsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Fee heads</h1>
-        <p className="text-sm text-muted-foreground">FR-K01 — the catalogue every fee structure and ledger entry is built on.</p>
+        <p className="text-sm text-muted-foreground">The catalogue every fee structure and ledger entry is built on.</p>
       </div>
       <CreateFeeHeadForm />
       <FeeHeadList tenantId={appUser!.tenant_id} feeHeads={feeHeads ?? []} />

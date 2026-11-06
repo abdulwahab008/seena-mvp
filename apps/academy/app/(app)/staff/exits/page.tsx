@@ -29,7 +29,7 @@ export default async function StaffExitsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Staff exits</h1>
         <p className="text-sm text-muted-foreground">
-          FR-D16 — an exit completes only when every department has signed off (or HR has recorded a waiver with a reason). Completing it revokes the person&apos;s access immediately; their record is kept.
+          An exit completes only when every department has signed off (or HR has recorded a waiver with a reason). Completing it revokes the person&apos;s access immediately; their record is kept.
           Start an exit from the person&apos;s profile.
         </p>
       </div>

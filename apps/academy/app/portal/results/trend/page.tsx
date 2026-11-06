@@ -51,7 +51,7 @@ export default async function PortalTrendPage({ searchParams }: { searchParams: 
       <div>
         <h2 className="text-2xl font-semibold">Subject progress</h2>
         <p className="text-sm text-muted-foreground">
-          FR-J06 — each subject across the terms so far, beside the section average.{' '}
+          Each subject across the terms so far, beside the section average.{' '}
           <Link href="/portal/results" className="underline">
             Back to results
           </Link>

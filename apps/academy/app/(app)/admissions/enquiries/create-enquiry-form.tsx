@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { formatDatePk } from '@/lib/dates';
 
 type ClassLevel = { id: string; code: string; name_en: string };
 type Campus = { id: string; code: string; name: string };
@@ -251,7 +252,7 @@ export function CreateEnquiryForm({
               >
                 <span>
                   {d.child_name} — {d.enquiry_no}
-                  {d.last_followup_at && ` · last follow-up ${new Date(d.last_followup_at).toLocaleDateString()}`}
+                  {d.last_followup_at && ` · last follow-up ${formatDatePk(d.last_followup_at)}`}
                 </span>
                 <span className="flex gap-2">
                   <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => onDismiss(d.id)}>

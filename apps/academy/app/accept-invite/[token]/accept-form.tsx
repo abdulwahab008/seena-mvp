@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const PasswordSchema = z.object({ password: z.string().min(10, 'Must be at least 10 characters') });
+const PasswordSchema = z.object({
+  fullName: z.string().trim().min(2, 'Enter your full name').max(120),
+  password: z.string().min(10, 'Must be at least 10 characters'),
+});
 type PasswordValues = z.infer<typeof PasswordSchema>;
 
 export function AcceptForm({ token, email }: { token: string; email: string }) {
@@ -28,6 +31,7 @@ export function AcceptForm({ token, email }: { token: string; email: string }) {
     const fd = new FormData();
     fd.set('token', token);
     fd.set('password', values.password);
+    fd.set('fullName', values.fullName);
     startTransition(async () => {
       const result = await acceptInvite(email, { error: null, ok: false }, fd);
       if (result.error) {
@@ -44,6 +48,11 @@ export function AcceptForm({ token, email }: { token: string; email: string }) {
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input id="email" type="email" value={email} disabled />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="fullName">Your full name</Label>
+        <Input id="fullName" autoComplete="name" {...register('fullName')} />
+        {errors.fullName && <p className="text-sm text-destructive">{errors.fullName.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Choose a password</Label>

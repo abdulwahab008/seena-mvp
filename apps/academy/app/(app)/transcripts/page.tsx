@@ -44,7 +44,7 @@ export default async function TranscriptsPage({ searchParams }: { searchParams: 
       <div>
         <h1 className="text-2xl font-semibold">Academic transcripts</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J13 — every session a student attended, across campuses, in order. A year the student left is marked
+          Every session a student attended, across campuses, in order. A year the student left is marked
           incomplete; a withheld result is marked withheld and shows no marks. Issuing allocates a serial number and
           freezes the document.
         </p>

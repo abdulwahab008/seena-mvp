@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatDatePk } from '@/lib/dates';
 
 interface MessageSegment {
   id: string;
@@ -361,7 +362,7 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
                       )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div>{new Date(circ.publish_at).toLocaleDateString()}</div>
+                      <div>{formatDatePk(circ.publish_at)}</div>
                       <div className="text-xs text-muted-foreground">
                         {new Date(circ.publish_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         {isFuture && <span className="ml-1 text-amber-600 font-semibold">(Scheduled)</span>}
@@ -713,7 +714,7 @@ export function CircularDesk({ circulars, segments, campuses }: CircularDeskProp
                     <div>
                       <h4 className="text-sm font-semibold text-foreground">Follow-up with Unread Guardians</h4>
                       <p className="text-xs text-muted-foreground">
-                        Export unread guardians into an audience segment for targeted SMS or campaign dispatch (FR-M06).
+                        Export unread guardians into an audience segment for targeted SMS or campaign dispatch.
                       </p>
                     </div>
                   </div>

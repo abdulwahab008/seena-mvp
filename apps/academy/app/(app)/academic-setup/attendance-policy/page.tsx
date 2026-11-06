@@ -1,12 +1,13 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { PolicyForm } from './policy-form';
 import { WeightForm } from './weight-form';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function AttendancePolicyPage() {
   const supabase = await supabaseServer();
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   const { data: sessions } = campusId
     ? await supabase.from('academic_session').select('id').eq('is_current', true).limit(1)
@@ -28,7 +29,7 @@ export default async function AttendancePolicyPage() {
       <div>
         <h1 className="text-2xl font-semibold">Attendance Policy</h1>
         <p className="text-sm text-muted-foreground">
-          FR-G01 — configure once per session; every edit is effective-dated, never a retroactive rewrite.
+          Configure once per session; every edit is effective-dated, never a retroactive rewrite.
         </p>
       </div>
       {!campusId || !sessionId ? (
@@ -52,7 +53,7 @@ export default async function AttendancePolicyPage() {
       )}
       {campusId && sessionId && (
         <div>
-          <h2 className="mb-2 text-sm font-medium">Status weights (FR-G06)</h2>
+          <h2 className="mb-2 text-sm font-medium">Status weights</h2>
           <WeightForm campusId={campusId} sessionId={sessionId} lateWeight={lateWeight ?? 1} halfDayWeight={halfDayWeight ?? 0.5} />
         </div>
       )}

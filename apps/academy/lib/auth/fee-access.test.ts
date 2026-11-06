@@ -48,19 +48,21 @@ describe('canOpenFeesPath', () => {
     }
   });
 
-  it('lets an admissions officer open only the two pages their admissions work uses', () => {
+  it('lets an admissions officer open the cash counter and the two pages their admissions work uses', () => {
     expect(canOpenFeesPath('admissions_officer', '/fees/concessions')).toBe(true);
     expect(canOpenFeesPath('admissions_officer', '/fees/sibling-discounts')).toBe(true);
     expect(canOpenFeesPath('admissions_officer', '/fees/concessions?tab=pending')).toBe(true);
     expect(canOpenFeesPath('admissions_officer', '/fees/challans')).toBe(false);
-    expect(canOpenFeesPath('admissions_officer', '/fees/counter')).toBe(false);
+    expect(canOpenFeesPath('admissions_officer', '/fees/counter')).toBe(true);
     expect(canOpenFeesPath('admissions_officer', '/fees/concessions-report')).toBe(false);
   });
 
   it.each(OTHER_ROLES.filter((r) => r !== 'admissions_officer'))('sends %s home from every fees page', (role) => {
-    for (const path of ['/fees/challans', '/fees/concessions', '/fees/counter', '/fees/reports']) {
+    for (const path of ['/fees/challans', '/fees/concessions', '/fees/reports']) {
       expect(canOpenFeesPath(role, path)).toBe(false);
     }
+    // The receptionist takes admission-fee cash, so runs a counter shift.
+    expect(canOpenFeesPath(role, '/fees/counter')).toBe(role === 'receptionist');
   });
 
   it('refuses a missing role', () => {

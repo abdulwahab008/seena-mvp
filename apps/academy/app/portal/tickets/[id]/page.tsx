@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { TicketThreadClient } from './ticket-thread-client';
 import { ArrowLeft, Clock, AlertCircle, User, ShieldCheck } from 'lucide-react';
+import { formatDateTimePk } from '@/lib/dates';
 
 export default async function PortalTicketDetailPage({
   params,
@@ -96,7 +97,7 @@ export default async function PortalTicketDetailPage({
 
             <div className="text-xs text-muted-foreground flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
-              SLA Due: {new Date(ticket.sla_due_at).toLocaleString()}
+              SLA Due: {formatDateTimePk(ticket.sla_due_at)}
             </div>
           </div>
 
@@ -123,7 +124,7 @@ export default async function PortalTicketDetailPage({
                       <User className="h-3.5 w-3.5" />
                       {isInitial ? 'Original Query' : 'Reply'}
                     </span>
-                    <span>{new Date(m.created_at).toLocaleString()}</span>
+                    <span>{formatDateTimePk(m.created_at)}</span>
                   </div>
                   <p className="text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
                     {m.body}

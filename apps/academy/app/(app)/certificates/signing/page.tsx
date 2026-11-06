@@ -63,7 +63,7 @@ export default async function SigningIdentityPage() {
       <div>
         <h1 className="text-2xl font-semibold">Certificate signing identity</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T09 — the signature and school stamp composited onto every certificate this campus issues, at 300 DPI, with a
+          The signature and school stamp composited onto every certificate this campus issues, at 300 DPI, with a
           per-issue digest that a download re-checks before it hands the file over.
         </p>
       </div>

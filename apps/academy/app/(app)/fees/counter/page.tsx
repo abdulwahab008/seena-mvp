@@ -9,12 +9,14 @@ export default async function CashCounterPage() {
   } = await supabase.auth.getUser();
   const { data: appUser } = await supabase.from('app_user').select('app_role').eq('user_id', user!.id).single();
   const role = appUser?.app_role;
+  // Front-desk staff run a shift for admission-fee cash; only fee collectors take challan payments here.
   const canCollect = role === 'super_admin' || role === 'owner' || role === 'accountant';
+  const runsShift = canCollect || role === 'admissions_officer' || role === 'receptionist';
   const canManage = role === 'super_admin' || role === 'owner' || role === 'principal';
 
   let counters: CounterOption[] = [];
   let openSession: OpenSession | null = null;
-  if (canCollect) {
+  if (runsShift) {
     const { data: counterRows } = await supabase
       .from('cash_counter')
       .select('id, name, campus_id, variance_threshold_paisa')
@@ -45,8 +47,20 @@ export default async function CashCounterPage() {
 
   let campuses: { id: string; name: string }[] = [];
   let recent: RecentSession[] = [];
+  let counterList: { id: string; name: string; campusName: string; thresholdPaisa: number }[] = [];
   if (canManage) {
-    const { data: campusRows } = await supabase.from('campus').select('id, name').order('name');
+    const { data: campusRows } = await supabase.from('campus').select('id, name').eq('status', 'active').order('name');
+    const { data: allCounters } = await supabase
+      .from('cash_counter')
+      .select('id, name, variance_threshold_paisa, campus:campus_id(name)')
+      .eq('is_active', true)
+      .order('name');
+    counterList = (allCounters ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      campusName: c.campus?.name ?? '',
+      thresholdPaisa: c.variance_threshold_paisa,
+    }));
     campuses = campusRows ?? [];
     const { data: sessionRows } = await supabase
       .from('cash_counter_session')
@@ -74,16 +88,17 @@ export default async function CashCounterPage() {
       <div>
         <h1 className="text-2xl font-semibold">Cash counter</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K17 — scan a challan, collect a payment, and print a receipt with a gapless number and amount in words. FR-K18 — open a counter, then close the shift against a physical count.
+          Open a shift, take cash against challans and admission fees, then close the shift against a physical count.
         </p>
       </div>
-      {canCollect && <ShiftPanel counters={counters} openSession={openSession} />}
+      {runsShift && <ShiftPanel counters={counters} openSession={openSession} />}
       {canCollect ? (
         <CounterView />
       ) : (
-        !canManage && <p className="text-sm text-muted-foreground">Only an Accountant, Owner, or Super Admin can use the cash counter.</p>
+        !canManage &&
+        !runsShift && <p className="text-sm text-muted-foreground">Only finance and front-desk staff use the cash counter.</p>
       )}
-      {canManage && <ManagePanel campuses={campuses} recent={recent} />}
+      {canManage && <ManagePanel campuses={campuses} recent={recent} counters={counterList} />}
     </div>
   );
 }

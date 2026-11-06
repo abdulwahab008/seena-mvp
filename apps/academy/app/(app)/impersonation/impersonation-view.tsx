@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { endSession, grantConsent, startSession, withdrawConsent, type ImpersonationActionState } from './actions';
+import { formatDateTimePk } from '@/lib/dates';
 
 export type UserOption = { id: string; name: string; role: string };
 
@@ -44,7 +45,7 @@ export type SessionRow = {
 /** Radix refuses an empty item value, and 'tenant' scope is the absence of a target. */
 const WHOLE_SCHOOL = '__tenant__';
 
-const when = (iso: string) => new Date(iso).toLocaleString();
+const when = (iso: string) => formatDateTimePk(iso);
 
 export function ImpersonationView({
   role,

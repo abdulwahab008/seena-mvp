@@ -300,6 +300,7 @@ export async function recordAdmissionFeePayment(
   });
   if (error) {
     if (error.message.includes('OFFER_NOT_ACCEPTED')) return { error: 'The offer must be accepted before recording a payment.' };
+    if (error.message.includes('COUNTER_SESSION_REQUIRED')) return { error: 'No cash counter shift is open. Open one under Fees, then Cash Counter, before taking cash, or record a bank transfer or cheque instead.' };
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to record admission fee payments.' };
     return { error: 'Could not record the payment.' };
   }
@@ -416,7 +417,7 @@ export async function quickAdmission(
   const admissionFee = parseFloat(formData.get('admissionFee')?.toString() || '0');
   const paymentMode = formData.get('paymentMode')?.toString() || 'cash';
   const rawReceipt = formData.get('paymentReference')?.toString()?.trim();
-  const receiptNo = rawReceipt || `REC-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+  const paymentReference = rawReceipt || undefined;
   const bFormNo = formData.get('bFormNo')?.toString() || undefined;
   const fatherNameEn = formData.get('fatherNameEn')?.toString() || undefined;
 
@@ -440,7 +441,7 @@ export async function quickAdmission(
     p_phone: phone.trim(),
     p_admission_fee: isNaN(admissionFee) ? 0 : admissionFee,
     p_payment_mode: paymentMode,
-    p_payment_reference: receiptNo,
+    p_payment_reference: paymentReference,
     p_b_form_no: bFormNo,
     p_father_name_en: fatherNameEn,
   });
@@ -452,6 +453,8 @@ export async function quickAdmission(
       return { error: 'Student date of birth is outside allowed range (must not be in future and under 32 years).', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
     if (error.message.includes('BFORM_INVALID_FORMAT'))
       return { error: 'Invalid B-Form format (13 digits required).', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
+    if (error.message.includes('COUNTER_SESSION_REQUIRED'))
+      return { error: 'No cash counter shift is open. Open one under Fees, then Cash Counter, before taking cash, or record a bank transfer or cheque instead.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
     if (error.message.includes('BFORM_DUPLICATE'))
       return { error: 'A student with this B-Form is already enrolled.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
     return { error: error.message || 'Could not complete quick admission.', grNumber: null, studentId: null, applicationNo: null, receiptNo: null };
@@ -462,13 +465,13 @@ export async function quickAdmission(
   revalidatePath('/admissions/applications');
   revalidatePath('/students');
 
-  const res = data as unknown as { gr_number: string; student_id: string; application_no: string } | null;
+  const res = data as unknown as { gr_number: string; student_id: string; application_no: string; receipt_no: string | null } | null;
   if (res?.student_id) await assignRollNumberAfterEnrolment(supabase, { studentId: res.student_id });
   return {
     error: null,
     grNumber: res?.gr_number ?? null,
     studentId: res?.student_id ?? null,
     applicationNo: res?.application_no ?? null,
-    receiptNo,
+    receiptNo: res?.receipt_no ?? null,
   };
 }

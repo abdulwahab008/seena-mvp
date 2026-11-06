@@ -13,6 +13,7 @@ import {
   recordPaymentSchema,
   setStudentElectiveChoiceSchema,
 } from '@/lib/validation';
+import { siteUrl } from '@/lib/auth/recovery';
 import { supabaseServer } from '@/lib/supabase/server';
 import { assignRollNumberAfterEnrolment } from '@/lib/enrolment-roll';
 
@@ -105,7 +106,7 @@ export async function linkGuardianToStudent(studentId: string, _prev: LinkGuardi
   return { error: null };
 }
 
-export type SendGuardianInviteState = { error: string | null; result: { token: string; expiresAt: string } | null };
+export type SendGuardianInviteState = { error: string | null; result: { link: string; expiresAt: string; queued: boolean } | null };
 
 // FR-C11: send (or re-send, superseding any outstanding one) a portal
 // activation link. The raw token only ever exists in this one response —
@@ -119,7 +120,7 @@ export async function sendGuardianPortalInvite(
   _formData: FormData,
 ): Promise<SendGuardianInviteState> {
   const supabase = await supabaseServer();
-  const { data, error } = await supabase.rpc('send_guardian_invite', { p_guardian_id: guardianId, p_channel: channel });
+  const { data, error } = await supabase.rpc('send_guardian_invite', { p_guardian_id: guardianId, p_channel: channel, p_base_url: siteUrl() });
   if (error) {
     if (error.message.includes('GUARDIAN_PHONE_MISSING')) return { error: 'This guardian has no phone number on file.', result: null };
     if (error.message.includes('GUARDIAN_ALREADY_ACTIVE')) return { error: 'This guardian already has a portal account.', result: null };
@@ -127,8 +128,11 @@ export async function sendGuardianPortalInvite(
     return { error: 'Could not send the invite.', result: null };
   }
 
-  const payload = data as { token: string; expires_at: string };
-  return { error: null, result: { token: payload.token, expiresAt: payload.expires_at } };
+  const payload = data as { token: string; expires_at: string; queued?: boolean };
+  return {
+    error: null,
+    result: { link: `${siteUrl()}/guardian/activate/${payload.token}`, expiresAt: payload.expires_at, queued: payload.queued === true },
+  };
 }
 
 export type EnrolStudentState = { error: string | null };
@@ -428,5 +432,38 @@ export async function setElectiveChoice(studentId: string, _prev: SetElectiveCho
   }
 
   revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}
+
+export type UpdateStudentState = { error: string | null };
+
+// Correct a student's own details. The GR number is permanent and is not part of this.
+export async function updateStudentDetails(studentId: string, _prev: UpdateStudentState, formData: FormData): Promise<UpdateStudentState> {
+  const gender = String(formData.get('gender') ?? '');
+  const nameEn = String(formData.get('nameEn') ?? '').trim();
+  const dob = String(formData.get('dob') ?? '');
+  if (!nameEn) return { error: "Enter the student's name." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) return { error: 'Enter a date of birth.' };
+  if (gender !== 'male' && gender !== 'female' && gender !== 'other') return { error: 'Choose a gender.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('update_student_details', {
+    p_student_id: studentId,
+    p_name_en: nameEn,
+    p_dob: dob,
+    p_gender: gender,
+    p_name_ur: String(formData.get('nameUr') ?? '') || undefined,
+    p_father_name_en: String(formData.get('fatherNameEn') ?? '') || undefined,
+    p_b_form_no: String(formData.get('bFormNo') ?? '') || undefined,
+  });
+  if (error) {
+    if (error.message.includes('BFORM_INVALID_FORMAT')) return { error: 'A B-Form number has 13 digits.' };
+    if (error.message.includes('BFORM_DUPLICATE')) return { error: 'Another student already has this B-Form number.' };
+    if (error.message.includes('chk_dob_reasonable')) return { error: 'That date of birth is not possible for a student.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit this student.' };
+    return { error: 'Could not save the changes.' };
+  }
+  revalidatePath(`/students/${studentId}`);
+  revalidatePath('/students');
   return { error: null };
 }

@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { CurriculumMapper } from './curriculum-mapper';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function CurriculumPage() {
   const supabase = await supabaseServer();
@@ -14,8 +15,8 @@ export default async function CurriculumPage() {
   // most recently — a genuinely wrong session for a multi-campus tenant,
   // not just a UX nicety. Tied to campus_id (or the shared campus_id IS
   // NULL sessions) and is_current, matching the fees pages' own pattern.
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
   const { data: sessions } = campusId
     ? await supabase
         .from('academic_session')
@@ -51,7 +52,7 @@ export default async function CurriculumPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Curriculum mapping</h1>
-        <p className="text-sm text-muted-foreground">FR-E06 — declare which subjects each class offers and how many periods a week each needs.</p>
+        <p className="text-sm text-muted-foreground">Declare which subjects each class offers and how many periods a week each needs.</p>
       </div>
       {!campusId || !sessionId ? (
         <p className="text-sm text-muted-foreground">No active campus or session found.</p>

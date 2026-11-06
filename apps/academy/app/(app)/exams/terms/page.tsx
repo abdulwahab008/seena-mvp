@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { TermSetEditor, type ExamTermRow } from './term-set-editor';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-I01. Define the exam terms of a session and their weightage, then
@@ -24,8 +25,8 @@ export default async function ExamTermsPage() {
   // (academic-setup/curriculum, fees/challans, fees/reports). Deriving the
   // acting user's own campus assignment instead is a cross-cutting gap
   // shared by all of them, not one to solve here.
-  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code').limit(1);
-  const campus = campuses?.[0];
+  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code');
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -51,7 +52,7 @@ export default async function ExamTermsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Exam terms</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I01 — the term structure every mark, aggregate and report card rolls up against. A term set can only be
+          The term structure every mark, aggregate and report card rolls up against. A term set can only be
           activated when its counting terms total exactly 100.00%, and a term&rsquo;s weightage is frozen once marks have been
           approved against it.
         </p>

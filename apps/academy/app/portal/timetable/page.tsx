@@ -64,7 +64,7 @@ export default async function PortalTimetablePage({ searchParams }: { searchPara
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold">Timetable</h2>
-        <p className="text-sm text-muted-foreground">FR-F11 — your child&apos;s published weekly timetable.</p>
+        <p className="text-sm text-muted-foreground">Your child&apos;s published weekly timetable.</p>
       </div>
 
       {children.length === 0 ? (

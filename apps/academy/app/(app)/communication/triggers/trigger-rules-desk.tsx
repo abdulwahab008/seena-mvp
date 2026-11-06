@@ -27,6 +27,7 @@ import {
   processPendingFiresAction,
   TriggerEventType,
 } from './actions';
+import { todayPk } from '@/lib/dates';
 
 interface Props {
   initialData: TriggerRulesData;
@@ -49,7 +50,7 @@ export function TriggerRulesDesk({ initialData }: Props) {
   const [formError, setFormError] = useState<string | null>(null);
 
   // Simulation State
-  const [simRunDate, setSimRunDate] = useState(new Date().toISOString().slice(0, 10));
+  const [simRunDate, setSimRunDate] = useState(todayPk());
 
   // Toast State
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);

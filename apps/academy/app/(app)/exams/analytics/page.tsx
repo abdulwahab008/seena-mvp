@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { groupTrend } from '@/lib/exams/trend';
 import { SubjectTrendChart } from '@/components/subject-trend-chart';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-J06 for staff. A section's average per subject and term, and any one
@@ -24,8 +25,8 @@ export default async function SubjectAnalyticsPage({ searchParams }: { searchPar
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -92,7 +93,7 @@ export default async function SubjectAnalyticsPage({ searchParams }: { searchPar
       <div>
         <h1 className="text-2xl font-semibold">Subject analytics</h1>
         <p className="text-sm text-muted-foreground">
-          FR-J06 — section averages per subject and term, and one student&rsquo;s trend against them. For the chapters behind a subject&rsquo;s result, see{' '}
+          Section averages per subject and term, and one student&rsquo;s trend against them. For the chapters behind a subject&rsquo;s result, see{' '}
           <Link href="/exams/mastery" className="underline">
             topic mastery
           </Link>

@@ -5,6 +5,7 @@ import { formatPct } from '@/lib/format-money';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ExportCollectionButton } from './export-button';
+import { formatDateTimePk } from '@/lib/dates';
 
 const pkr = (paisa: number) => `PKR ${(paisa / 100).toLocaleString('en-PK')}`;
 const efficiency = (billed: number, collected: number) => (billed > 0 ? Math.round((1000 * collected) / billed) / 10 : null);
@@ -42,7 +43,7 @@ export default async function CollectionDashboardPage({ searchParams }: { search
   const [monthRes, trendRes, campusRes, classRes] = await Promise.all([
     monthQuery,
     supabase.rpc('fn_fee_collection_trend', { p_campus_id: campusId, p_months: 12 }),
-    supabase.from('campus').select('id, name').order('name'),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
     supabase.from('class_level').select('id, name_en').order('ordinal'),
   ]);
   const rows = monthRes.data ?? [];
@@ -71,7 +72,7 @@ export default async function CollectionDashboardPage({ searchParams }: { search
         <div>
           <h1 className="text-2xl font-semibold">Billing versus collection</h1>
           <p className="text-sm text-muted-foreground" data-testid="collection-as-of">
-            FR-K30 — each month is measured against what that month billed; arrears paid later fill the older month. {asOf ? `As of ${new Date(asOf).toLocaleString()}; rebuilt at least hourly.` : 'Rebuilt at least hourly.'}
+            Each month is measured against what that month billed; arrears paid later fill the older month. {asOf ? `As of ${formatDateTimePk(asOf)}; rebuilt at least hourly.` : 'Rebuilt at least hourly.'}
           </p>
         </div>
         <ExportCollectionButton />

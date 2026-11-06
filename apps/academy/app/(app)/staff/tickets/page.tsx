@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertCircle, Clock, MessageSquare, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { formatDateTimePk } from '@/lib/dates';
 
 export default async function StaffTicketsPage() {
   const supabase = await supabaseServer();
@@ -115,12 +116,12 @@ export default async function StaffTicketsPage() {
                           </span>
                         )}
                         <span>
-                          Created: {new Date(t.created_at).toLocaleString()}
+                          Created: {formatDateTimePk(t.created_at)}
                         </span>
                         {t.status !== 'resolved' && (
                           <span className="flex items-center gap-1 font-medium">
                             <Clock className="h-3 w-3" />
-                            SLA Target: {new Date(t.sla_due_at).toLocaleString()}
+                            SLA Target: {formatDateTimePk(t.sla_due_at)}
                           </span>
                         )}
                       </div>

@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { SiblingDiscountView, type RankRow } from './sibling-discount-view';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function SiblingDiscountsPage() {
   const supabase = await supabaseServer();
@@ -10,7 +11,7 @@ export default async function SiblingDiscountsPage() {
     supabase.from('concession_scheme').select('id, code, name_en').eq('is_active', true).order('code'),
   ]);
 
-  const campus = campuses?.[0];
+  const campus = (await pickActiveCampus(campuses));
   const session = sessions?.[0];
 
   let ranks: RankRow[] = [];
@@ -39,7 +40,7 @@ export default async function SiblingDiscountsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Sibling discounts</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K07 — detects families by guardian CNIC and proposes a draft award per configured rank. Never auto-approved.
+          Detects families by guardian CNIC and proposes a draft award per configured rank. Never auto-approved.
         </p>
       </div>
       {campus && session ? (

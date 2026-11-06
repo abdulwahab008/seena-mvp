@@ -4,10 +4,11 @@ import { z } from 'zod';
 import { provisionTenantSchema } from '@/lib/validation';
 import { env } from '@/lib/env';
 import { supabaseServiceRole } from '@/lib/supabase/server';
+import { deliverInvitation, type InviteDelivery } from '@/lib/staff-invite';
 
 const FormSchema = provisionTenantSchema.extend({ setupToken: z.string() });
 
-export type ProvisionState = { error: string | null; tenantId: string | null };
+export type ProvisionState = { error: string | null; tenantId: string | null; delivery?: InviteDelivery | null };
 
 // FR-A01: Tenant provisioning. Callable only by whoever holds
 // ADMIN_SETUP_TOKEN (see lib/env.ts for why this is a bootstrap stand-in for
@@ -46,5 +47,15 @@ export async function provisionTenant(
     return { error: 'Could not provision tenant.', tenantId: null };
   }
 
-  return { error: null, tenantId: data as string };
+  // Audit: provisioning created the owner's invitation but never sent it. Send it now and hand
+  // the operator the link either way.
+  const { data: invite } = await supabaseServiceRole()
+    .from('tenant_invitation')
+    .select('id')
+    .eq('tenant_id', data as string)
+    .eq('app_role', 'owner')
+    .is('accepted_at', null)
+    .maybeSingle();
+  const delivery = invite ? await deliverInvitation(invite.id) : null;
+  return { error: null, tenantId: data as string, delivery };
 }

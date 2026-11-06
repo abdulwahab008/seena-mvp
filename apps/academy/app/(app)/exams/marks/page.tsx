@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { readMarkEntryOptions } from '@/lib/exams/mark-query';
 import { MarkGrid } from './mark-grid';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 /**
  * FR-I12. The teacher's mark entry grid — the real one. FR-I02 rendered a
@@ -21,8 +23,8 @@ export default async function MarkEntryPage({ searchParams }: { searchParams: Pr
     .select('id, name')
     .eq('status', 'active')
     .order('code')
-    .limit(1);
-  const campus = campuses?.[0];
+    ;
+  const campus = (await pickActiveCampus(campuses));
   const { data: sessions } = campus
     ? await supabase
         .from('academic_session')
@@ -67,14 +69,31 @@ export default async function MarkEntryPage({ searchParams }: { searchParams: Pr
       <div>
         <h1 className="text-2xl font-semibold">Mark entry</h1>
         <p className="text-sm text-muted-foreground">
-          FR-I12 — obtained marks per candidate per component, validated against the configured maximum. Every cell
+          Obtained marks per candidate per component, validated against the configured maximum. Every cell
           autosaves as a draft; nothing is submitted by typing it.
         </p>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        {campus.name} &middot; {session.name} &middot; {term.name}
-      </p>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-muted-foreground">
+          {campus.name} &middot; {session.name} &middot;
+        </span>
+        {termRows.map((t) => (
+          <Link
+            key={t.id}
+            href={`/exams/marks?term=${t.id}`}
+            aria-current={t.id === term.id ? 'page' : undefined}
+            className={
+              t.id === term.id
+                ? 'rounded-full bg-primary px-3 py-1 text-primary-foreground'
+                : 'rounded-full border px-3 py-1 text-muted-foreground hover:text-foreground'
+            }
+            data-testid={`mark-entry-term-${t.code}`}
+          >
+            {t.name}
+          </Link>
+        ))}
+      </div>
 
       <MarkGrid examTermId={term.id} sections={sections} subjects={subjects} />
     </div>

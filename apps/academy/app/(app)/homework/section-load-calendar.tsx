@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
+import { toPkDate } from '@/lib/dates';
 
 type SectionOption = { sectionId: string; sectionLabel: string };
 type LoadRow = { due_date: string; assignment_count: number; total_minutes: number };
@@ -12,7 +13,7 @@ function next14Days(): string[] {
   for (let i = 0; i < 14; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
-    days.push(d.toISOString().slice(0, 10));
+    days.push(toPkDate(d));
   }
   return days;
 }

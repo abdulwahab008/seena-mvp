@@ -26,7 +26,7 @@ export default async function PortalMasteryPage({ searchParams }: { searchParams
       <div>
         <h2 className="text-2xl font-semibold">Chapter mastery</h2>
         <p className="text-sm text-muted-foreground">
-          FR-J07 — how your child is doing chapter by chapter, from the per-question marks of their papers.{' '}
+          How your child is doing chapter by chapter, from the per-question marks of their papers.{' '}
           <Link href="/portal/results" className="underline">
             Back to results
           </Link>

@@ -121,8 +121,7 @@ test('an accountant collects a cash payment at the counter and prints a receipt,
   await expect(page.getByText('Challans generated.')).toBeVisible();
 
   const challanRow = page.locator('[data-testid^="challan-row-"]');
-  const challanRowText = await challanRow.first().innerText();
-  const challanNo = challanRowText.split('·')[0]!.trim();
+  const challanNo = (await challanRow.first().getAttribute('data-testid'))!.replace('challan-row-', '');
 
   await page.goto('/fees/counter');
   await page.waitForLoadState('networkidle');

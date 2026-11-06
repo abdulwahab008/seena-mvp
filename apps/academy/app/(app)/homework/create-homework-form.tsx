@@ -11,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { todayPk } from '@/lib/dates';
 
 type Assignment = { sectionId: string; sectionLabel: string; subjectId: string; subjectLabel: string };
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
+const todayIso = () => todayPk();
 
 export function CreateHomeworkForm({ assignments }: { assignments: Assignment[] }) {
   const [pending, startTransition] = useTransition();

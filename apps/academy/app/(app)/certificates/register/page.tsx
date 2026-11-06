@@ -66,7 +66,7 @@ export default async function CertificateRegisterPage({ searchParams }: { search
       <div>
         <h1 className="text-2xl font-semibold">Statutory certificate register</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T08 — every certificate this campus ever issued, in serial order and written once. A cancelled entry keeps its
+          Every certificate this campus ever issued, in serial order and written once. A cancelled entry keeps its
           number and stays in sequence with its reason and the serial that replaced it; nothing here can be edited or deleted,
           by anyone.
         </p>

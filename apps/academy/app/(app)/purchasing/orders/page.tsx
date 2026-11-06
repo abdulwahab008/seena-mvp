@@ -19,7 +19,7 @@ export default async function OrdersPage() {
     <div className="space-y-6">
       <PageHeader
         title="Purchase orders and goods receipts"
-        description="FR-R06 — receive what actually arrived. A short delivery keeps the order open and shows the shortfall; stock is posted for the quantity received, not the quantity ordered."
+        description="Receive what actually arrived. A short delivery keeps the order open and shows the shortfall; stock is posted for the quantity received, not the quantity ordered."
       />
       {(orders.data ?? []).length === 0 && <p className="text-sm text-muted-foreground">No purchase orders yet. Approved requisitions are converted on their own page.</p>}
       {(orders.data ?? []).map((o) => {

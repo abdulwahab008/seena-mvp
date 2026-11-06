@@ -3,6 +3,7 @@ import { LeaveDashboard, type LeaveRosterRow, type LeavePolicy } from './leave-d
 import { type LeaveType, type StaffOption } from './apply-leave-form';
 import { type ApplicationRow } from './application-list';
 import { type PendingRow } from './approval-queue';
+import { todayPk } from '@/lib/dates';
 
 const APPROVER_ROLES = ['super_admin', 'owner', 'principal', 'hr_manager'];
 
@@ -129,7 +130,7 @@ export default async function LeavePage() {
   }));
 
   // KPI Calculations
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = todayPk();
   const onLeaveToday = allApplications.filter(
     (app) => app.status === 'approved' && app.from_date <= todayStr && app.to_date >= todayStr
   ).length;

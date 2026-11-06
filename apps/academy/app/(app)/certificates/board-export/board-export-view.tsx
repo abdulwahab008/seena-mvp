@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatDateTimePk } from '@/lib/dates';
 
 export type CampusOption = { id: string; code: string; name: string };
 export type SessionOption = { id: string; name: string };
@@ -262,7 +263,7 @@ export function BoardExportView({
                   {r.row_count !== null ? ` · ${r.row_count} candidates` : ''}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {r.generated_at ? `Generated ${new Date(r.generated_at).toLocaleString()}` : `Started ${new Date(r.requested_at).toLocaleString()}`}
+                  {r.generated_at ? `Generated ${formatDateTimePk(r.generated_at)}` : `Started ${formatDateTimePk(r.requested_at)}`}
                   {r.checksum ? ` · sha256 ${r.checksum.slice(0, 12)}…` : ''}
                 </p>
               </CardContent>

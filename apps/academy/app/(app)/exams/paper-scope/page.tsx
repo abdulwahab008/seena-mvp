@@ -55,7 +55,7 @@ export default async function PapersPage({ searchParams }: { searchParams: Promi
       <div>
         <h1 className="text-2xl font-semibold">Exam paper scope</h1>
         <p className="text-sm text-muted-foreground">
-          FR-H09 — choose the syllabus chapters a generated paper may draw questions from. Chapters whose coverage is still not started are refused unless an Exam Controller explicitly includes them.
+          Choose the syllabus chapters a generated paper may draw questions from. Chapters whose coverage is still not started are refused unless an Exam Controller explicitly includes them.
         </p>
       </div>
 

@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import type { Json } from '@/lib/database.types';
 import { CommitImportButton, UndoImportButton } from './commit-actions';
 import { ImportForm } from './import-form';
+import { formatDateTimePk } from '@/lib/dates';
 
 // Same roles create_import_batch() itself admits, and the same set
 // import_batch_campus_scope reads back.
@@ -143,12 +144,12 @@ export default async function StudentImportPage({ searchParams }: { searchParams
               <>
                 <p className="text-sm" data-testid="import-committed-summary">
                   Imported <span data-testid="import-committed-rows">{batch.committed_rows}</span> student
-                  {batch.committed_rows === 1 ? '' : 's'} on {new Date(batch.committed_at!).toLocaleString()}.
+                  {batch.committed_rows === 1 ? '' : 's'} on {formatDateTimePk(batch.committed_at!)}.
                 </p>
                 {batch.can_undo ? (
                   <>
                     <p className="text-xs text-muted-foreground" data-testid="import-undo-deadline">
-                      This import can be undone until {new Date(batch.undo_deadline!).toLocaleString()}, as long as no fee or
+                      This import can be undone until {formatDateTimePk(batch.undo_deadline!)}, as long as no fee or
                       attendance record references an imported student.
                     </p>
                     {UNDO_ROLES.includes(appUser.app_role) && <UndoImportButton batchId={batch.id!} />}
@@ -163,7 +164,7 @@ export default async function StudentImportPage({ searchParams }: { searchParams
 
             {batch.commit_state === 'undone' && (
               <p className="text-sm text-muted-foreground" data-testid="import-undone">
-                This import was undone on {new Date(batch.undone_at!).toLocaleString()}. Upload the file again to retry.
+                This import was undone on {formatDateTimePk(batch.undone_at!)}. Upload the file again to retry.
               </p>
             )}
 
@@ -221,7 +222,7 @@ export default async function StudentImportPage({ searchParams }: { searchParams
                   {b.original_filename}
                 </Link>{' '}
                 <span className="text-muted-foreground">
-                  — {b.ok_rows} ready, {b.error_rows} blocked, {b.commit_state} ({new Date(b.created_at!).toLocaleString()})
+                  — {b.ok_rows} ready, {b.error_rows} blocked, {b.commit_state} ({formatDateTimePk(b.created_at!)})
                 </span>
               </li>
             ))}

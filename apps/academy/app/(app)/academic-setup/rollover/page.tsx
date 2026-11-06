@@ -14,7 +14,7 @@ export default async function RolloverPage() {
       <div>
         <h1 className="text-2xl font-semibold">Session rollover</h1>
         <p className="text-sm text-muted-foreground">
-          FR-E11 — clone last session&apos;s sections, curriculum maps and teacher allocations into a new one. Enrolments and
+          Clone last session&apos;s sections, curriculum maps and teacher allocations into a new one. Enrolments and
           timetables are never cloned.
         </p>
       </div>

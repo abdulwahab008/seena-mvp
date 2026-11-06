@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { ClassesSectionsView } from './classes-sections-view';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ export default async function ClassesSectionsPage() {
     .eq('status', 'active')
     .order('code');
 
-  const campus = campuses?.[0];
+  const campus = (await pickActiveCampus(campuses));
 
   const { data: sessions } = campus
     ? await supabase
@@ -77,7 +78,7 @@ export default async function ClassesSectionsPage() {
   const { data: staffList } = await supabase
     .from('app_user')
     .select('user_id, full_name, app_role')
-    .in('app_role', ['subject_teacher', 'class_teacher', 'head_of_department', 'principal'])
+    .in('app_role', ['subject_teacher', 'class_teacher', 'head_of_department', 'principal', 'vice_principal'])
     .order('full_name');
 
   return (

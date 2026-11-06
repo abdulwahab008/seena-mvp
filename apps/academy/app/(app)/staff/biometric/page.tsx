@@ -17,7 +17,7 @@ export default async function BiometricPage({ searchParams }: { searchParams: Pr
   const actor = await getCurrentActor();
   const canWrite = isHrWriter(actor?.role);
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id, name').order('name');
+  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('name');
   const campus = (campuses ?? []).find((c) => c.id === sp.campus) ?? (campuses ?? [])[0];
   if (!campus) return <p className="text-sm text-muted-foreground">No campus is available to your account.</p>;
 
@@ -39,7 +39,7 @@ export default async function BiometricPage({ searchParams }: { searchParams: Pr
       <div>
         <h1 className="text-2xl font-semibold">Biometric attendance</h1>
         <p className="text-sm text-muted-foreground">
-          FR-D08 — punches pushed by the campus fingerprint device become staff attendance automatically. Retried or late batches never create duplicates; unknown codes wait below until you map them.
+          Punches pushed by the campus fingerprint device become staff attendance automatically. Retried or late batches never create duplicates; unknown codes wait below until you map them.
         </p>
       </div>
 

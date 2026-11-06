@@ -19,7 +19,7 @@ export default async function SettlementsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Withdrawal settlements</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K27 — unearned fees are credited back pro-rata, what the family owes is netted, and only the remainder is refunded. The Principal approves; above the owner threshold the Owner approves too; only then can the refund be disbursed.
+          Unearned fees are credited back pro-rata, what the family owes is netted, and only the remainder is refunded. The Principal approves; above the owner threshold the Owner approves too; only then can the refund be disbursed.
         </p>
       </div>
 

@@ -27,7 +27,7 @@ export default async function RetentionPage() {
       <div>
         <h1 className="text-2xl font-semibold">Data retention</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T16 — personal data of long-departed students is purged on a schedule; statutory records stay. A nightly job runs at 03:30, as a dry run on the 1st of each month. Anyone named on an issued certificate keeps their name and GR number.
+          Personal data of long-departed students is purged on a schedule; statutory records stay. A nightly job runs at 03:30, as a dry run on the 1st of each month. Anyone named on an issued certificate keeps their name and GR number.
         </p>
       </div>
 

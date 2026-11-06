@@ -53,7 +53,7 @@ export default async function CertificateSerialsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Certificate serial register</h1>
         <p className="text-sm text-muted-foreground">
-          FR-T02 — one unbroken run of numbers per campus, certificate type and academic year. Counters are advanced only
+          One unbroken run of numbers per campus, certificate type and academic year. Counters are advanced only
           by issuing a certificate; nobody, including a Super Admin, can edit one by hand.
         </p>
       </div>

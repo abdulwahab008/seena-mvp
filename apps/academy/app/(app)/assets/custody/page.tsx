@@ -37,7 +37,7 @@ export default async function CustodyPage({ searchParams }: { searchParams: Prom
     <div className="space-y-6">
       <PageHeader
         title="Asset custody"
-        description="FR-R04 — who holds each asset, and who held it on any past date. An asset can be in one custody at a time; an acknowledged issue cannot be edited; a staff exit is blocked while assets are outstanding."
+        description="Who holds each asset, and who held it on any past date. An asset can be in one custody at a time; an acknowledged issue cannot be edited; a staff exit is blocked while assets are outstanding."
       />
 
       <Card>

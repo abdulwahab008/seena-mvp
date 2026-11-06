@@ -2,14 +2,15 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EventForm, SlotsForm } from './ptm-forms';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { timeZone: 'Asia/Karachi', dateStyle: 'medium', timeStyle: 'short' });
 
 export default async function PtmPage() {
   const supabase = await supabaseServer();
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   const [{ data: events }, { data: staff }] = await Promise.all([
     supabase.from('ptm_event').select('id, title, event_date, starts_at, booking_opens_at, booking_cutoff_at, slot_minutes').order('event_date', { ascending: false }).limit(10),
@@ -33,7 +34,7 @@ export default async function PtmPage() {
       <div>
         <h1 className="text-2xl font-semibold">Parent-teacher meetings</h1>
         <p className="text-sm text-muted-foreground">
-          FR-N11 — open a PTM, generate slots for the teachers taking part and let parents book from the portal. A slot can be held by one family only; booking closes at the cutoff; each child gets one slot per teacher.
+          Open a PTM, generate slots for the teachers taking part and let parents book from the portal. A slot can be held by one family only; booking closes at the cutoff; each child gets one slot per teacher.
         </p>
       </div>
 

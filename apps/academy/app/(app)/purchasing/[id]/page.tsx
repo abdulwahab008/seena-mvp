@@ -25,7 +25,7 @@ export default async function RequisitionPage({ params }: { params: Promise<{ id
     supabase.from('purchase_approval').select('id, level, approver_role, decision, remarks, decided_at, voided_at, void_reason, approver:approved_by(full_name)').eq('req_id', id).order('decided_at'),
     supabase.from('v_requisition_approval_queue').select('req_id').eq('req_id', id),
     supabase.auth.getUser(),
-    supabase.from('campus').select('id, name').order('name'),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
     supabase.from('department').select('id, name_en').order('name_en'),
     supabase.from('inv_item').select('id, item_code, name').eq('active', true).order('item_code'),
     supabase.from('procurement_vendor').select('id, name').eq('active', true).order('name'),

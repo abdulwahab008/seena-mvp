@@ -107,8 +107,10 @@ test('an owner sends a print invite and the guardian activates their portal acco
   await expect(linkEl).toBeVisible();
   const activationUrl = (await linkEl.textContent())!.trim();
   expect(activationUrl).toContain('/guardian/activate/');
+  // The printed link carries the configured site URL; the test server may run on another port.
+  const activationPath = new URL(activationUrl).pathname;
 
-  await page.goto(activationUrl);
+  await page.goto(activationPath);
   await page.waitForLoadState('networkidle');
   await expect(page.getByText('Activate your parent portal account, E2E Guardian.')).toBeVisible();
   await expect(page.getByText(`We'll send a verification code to ${TEST_PHONE_E164}.`)).toBeVisible();
@@ -126,7 +128,7 @@ test('an owner sends a print invite and the guardian activates their portal acco
   await expect(page).toHaveURL(/\/portal\/homework$/);
 
   // Re-visiting the same (now-consumed) link must not activate a second time.
-  await page.goto(activationUrl);
+  await page.goto(activationPath);
   await page.waitForLoadState('networkidle');
   await expect(page.getByText('Invite not valid')).toBeVisible();
 });

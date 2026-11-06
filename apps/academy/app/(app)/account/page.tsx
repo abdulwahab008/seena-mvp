@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
+import { roleLabel } from '@/lib/staff-roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +60,7 @@ export default async function AccountPage() {
               <Shield className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               <div className="min-w-0">
                 <p className="text-muted-foreground">Role</p>
-                <p className="font-medium capitalize">{(appUser?.app_role ?? 'member').replace(/_/g, ' ')}</p>
+                <p className="font-medium">{roleLabel(appUser?.app_role ?? 'member')}</p>
               </div>
             </div>
           </CardContent>

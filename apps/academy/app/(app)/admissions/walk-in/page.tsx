@@ -16,7 +16,7 @@ export default async function WalkInAdmissionPage() {
     { data: recentStudents },
   ] = await Promise.all([
     supabase.from('campus').select('id, code, name').eq('status', 'active').order('code'),
-    supabase.from('academic_session').select('id, name').order('starts_on', { ascending: false }),
+    supabase.from('academic_session').select('id, name').order('is_current', { ascending: false }).order('starts_on', { ascending: false }),
     supabase.from('class_level').select('id, code, name_en').eq('is_active', true).order('ordinal'),
     supabase.from('class_section').select('id, campus_id, session_id, class_level_id, name').eq('is_active', true),
     supabase

@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { recordPortalConsent } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { formatDatePk } from '@/lib/dates';
 
 export type PortalPurpose = {
   code: string;
@@ -86,7 +87,7 @@ export function PortalConsentForm({
               Your answer:{' '}
               <span className="font-medium">
                 {p.myDecision ? p.myDecision : 'not answered yet'}
-                {p.myDecisionAt ? ` (${new Date(p.myDecisionAt).toLocaleDateString()})` : ''}
+                {p.myDecisionAt ? ` (${formatDatePk(p.myDecisionAt)})` : ''}
               </span>
               {' · '}
               In force for your child: <span className="font-medium">{p.effective ? 'yes' : 'no'}</span>

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Textarea } from '@/components/ui/textarea';
 import { resolveGuardianClaim } from './actions';
+import { formatDateTimePk } from '@/lib/dates';
 
 export type ClaimRow = {
   id: string;
@@ -31,6 +34,7 @@ function ClaimCard({ claim }: { claim: ClaimRow }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [invitePath, setInvitePath] = useState<string | null>(null);
+  const router = useRouter();
   const form = useForm<NoteInput>({ resolver: zodResolver(noteSchema) });
 
   const resolve = (approve: boolean) =>
@@ -39,7 +43,8 @@ function ClaimCard({ claim }: { claim: ClaimRow }) {
       startTransition(async () => {
         const result = await resolveGuardianClaim({ claimId: claim.id, approve, note: values.note });
         if (result.error !== null) setError(result.error);
-        else setInvitePath(result.inviteUrlPath);
+        else if (result.inviteUrlPath) setInvitePath(result.inviteUrlPath);
+        else router.refresh();
       });
     })();
 
@@ -51,7 +56,7 @@ function ClaimCard({ claim }: { claim: ClaimRow }) {
             {claim.guardianName} for {claim.studentName}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            GR {claim.grNumber ?? '—'} · {new Date(claim.createdAt).toLocaleString()}
+            GR {claim.grNumber ?? '—'} · {formatDateTimePk(claim.createdAt)}
             {claim.reason ? ` · ${claim.reason === 'NO_PHONE' ? 'no phone on record' : 'could not receive the code'}` : ''}
           </p>
         </div>
@@ -78,10 +83,28 @@ function ClaimCard({ claim }: { claim: ClaimRow }) {
       )}
       {invitePath && (
         <CardContent className="p-4 pt-0">
-          <p className="text-sm">Send this link to the parent (valid 72 hours):</p>
-          <code className="block break-all rounded bg-muted p-2 text-xs" data-testid="claim-invite-link">
+          <p className="text-sm">Approved. Send this link to the parent (it works once, for 72 hours). It is not shown again:</p>
+          <code className="block select-all break-all rounded bg-muted p-2 text-xs" data-testid="claim-invite-link">
             {`${typeof window === 'undefined' ? '' : window.location.origin}${invitePath}`}
           </code>
+          <div className="mt-2 flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                navigator.clipboard
+                  .writeText(`${window.location.origin}${invitePath}`)
+                  .then(() => toast.success('Link copied.'))
+                  .catch(() => toast.error('Could not copy. Select the link and copy it yourself.'))
+              }
+            >
+              Copy link
+            </Button>
+            <Button type="button" size="sm" onClick={() => router.refresh()}>
+              Done
+            </Button>
+          </div>
         </CardContent>
       )}
     </Card>

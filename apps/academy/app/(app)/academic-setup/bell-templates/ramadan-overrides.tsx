@@ -184,7 +184,7 @@ export function RamadanOverrides({
     <div className="space-y-3">
       <h2 className="text-lg font-medium">Ramadan &amp; Date-range Overrides</h2>
       <p className="text-sm text-muted-foreground">
-        FR-F03 — switch the campus onto a different bell template for a date range. It outranks the weekday rules above, and
+        Switch the campus onto a different bell template for a date range. It outranks the weekday rules above, and
         reverts on its own the day after the range ends. Leave the weekday blank for every day in the range; set one for a
         shorter-still Ramadan Jumma (give it a higher precedence than the general Ramadan rule).
       </p>

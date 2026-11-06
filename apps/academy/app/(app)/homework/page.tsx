@@ -2,6 +2,8 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { CreateHomeworkForm } from './create-homework-form';
 import { HomeworkList } from './homework-list';
 import { SectionLoadCalendar } from './section-load-calendar';
+import { todayPk } from '@/lib/dates';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 const ADMIN_ROLES = ['super_admin', 'owner', 'principal'];
 
@@ -15,8 +17,8 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
   const { data: appUser } = await supabase.from('app_user').select('app_role').eq('user_id', user!.id).single();
   const isAdmin = !!appUser && ADMIN_ROLES.includes(appUser.app_role);
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code').limit(1);
-  const campusId = campuses?.[0]?.id;
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campusId = (await pickActiveCampus(campuses))?.id;
 
   type Assignment = { sectionId: string; sectionLabel: string; subjectId: string; subjectLabel: string };
   let assignments: Assignment[] = [];
@@ -95,7 +97,7 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
     sectionLabel,
   }));
   const selectedLoadSectionId = loadSection ?? loadSections[0]?.sectionId ?? null;
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = todayPk();
   const { data: loadRows } = selectedLoadSectionId
     ? await supabase
         .from('v_section_homework_load')
@@ -109,7 +111,7 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Homework</h1>
-        <p className="text-sm text-muted-foreground">FR-H01 — publish a homework assignment to a section you teach.</p>
+        <p className="text-sm text-muted-foreground">Publish a homework assignment to a section you teach.</p>
       </div>
       {!campusId ? (
         <p className="text-sm text-muted-foreground">No active campus found.</p>

@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { LateFeeRuleView, type RuleRow, type ChallanOption } from './late-fee-rule-view';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 export default async function LateFeeRulesPage() {
   const supabase = await supabaseServer();
@@ -9,7 +10,7 @@ export default async function LateFeeRulesPage() {
     supabase.from('academic_session').select('id').eq('is_current', true).order('starts_on', { ascending: false }),
   ]);
 
-  const campus = campuses?.[0];
+  const campus = (await pickActiveCampus(campuses));
   const session = sessions?.[0];
 
   let rules: RuleRow[] = [];
@@ -56,7 +57,7 @@ export default async function LateFeeRulesPage() {
       <div>
         <h1 className="text-2xl font-semibold">Late fee rules</h1>
         <p className="text-sm text-muted-foreground">
-          FR-K12 — the currently active rule is the most recently created one whose effective date has arrived.
+          The currently active rule is the most recently created one whose effective date has arrived.
         </p>
       </div>
       {campus && session ? (

@@ -17,6 +17,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader, Stat } from '@/components/ui/page-header';
 import { canCollectFees, hasFeeAccess } from '@/lib/auth/fee-access';
 import { Badge } from '@/components/ui/badge';
+import { todayPk } from '@/lib/dates';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ const QUICK_LINKS = [
 
 export default async function DashboardPage() {
   const supabase = await supabaseServer();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPk();
 
   // Fee figures are for the people who handle fees (the database returns nothing to anyone else, which
   // would read as "nothing outstanding"), so the card and the cash-counter link are theirs alone.

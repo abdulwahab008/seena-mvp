@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { WEEKDAY_LABELS } from '@/lib/validation';
+import { todayPk } from '@/lib/dates';
 
 const SCHOOL_WEEKDAYS = [1, 2, 3, 4, 5, 6]; // Monday–Saturday; Sunday is the weekly off day.
 
@@ -41,7 +42,7 @@ export default async function MyTimetablePage({ searchParams }: { searchParams: 
     data: { user },
   } = await supabase.auth.getUser();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPk();
   const monday = mondayOf(weekParam ?? today);
   const prevWeek = addDays(monday, -7);
   const nextWeek = addDays(monday, 7);
@@ -59,7 +60,7 @@ export default async function MyTimetablePage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">My Timetable</h1>
-        <p className="text-sm text-muted-foreground">FR-F12 — your own published schedule for the week, across every section and campus you teach.</p>
+        <p className="text-sm text-muted-foreground">Your own published schedule for the week, across every section and campus you teach.</p>
       </div>
 
       <div className="flex items-center gap-3">

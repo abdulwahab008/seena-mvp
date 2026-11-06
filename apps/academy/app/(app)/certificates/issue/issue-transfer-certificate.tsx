@@ -14,6 +14,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
+import { formatDatePk, todayPk } from '@/lib/dates';
 
 export type CandidateRow = {
   id: string;
@@ -70,7 +71,7 @@ export function IssueTransferCertificate({
   const [pending, startTransition] = useTransition();
 
   const [enrolmentId, setEnrolmentId] = useState<string>(candidates[0]?.id ?? '');
-  const [leavingDate, setLeavingDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [leavingDate, setLeavingDate] = useState<string>(todayPk());
   const [reason, setReason] = useState('');
   const [conduct, setConduct] = useState('Good');
   const [template, setTemplate] = useState<string>(templates[0] ? templateValue(templates[0]) : '');
@@ -192,7 +193,7 @@ export function IssueTransferCertificate({
                 <div className="rounded-lg border p-3.5 space-y-2.5 bg-muted/20" data-testid="clearance-gate-container">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-medium text-foreground flex items-center gap-1.5">
-                      Clearance Gate (FR-T04)
+                      Clearance Gate
                     </span>
                     {loadingClearance ? (
                       <span className="text-muted-foreground">Checking dues…</span>
@@ -371,7 +372,7 @@ export function IssueTransferCertificate({
                       {r.student?.name_en}
                       <span className="ml-2 text-xs text-muted-foreground">{r.student?.gr_number}</span>
                     </td>
-                    <td className="p-2">{new Date(r.issued_at).toLocaleDateString()}</td>
+                    <td className="p-2">{formatDatePk(r.issued_at)}</td>
                     <td className="p-2" data-testid={`cert-issue-status-${r.serial_no}`}>
                       {r.status}
                       {r.revoke_reason && <span className="ml-2 text-xs text-muted-foreground">{r.revoke_reason}</span>}

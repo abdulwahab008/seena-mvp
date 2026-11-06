@@ -16,7 +16,7 @@ export default async function CompetencyPage() {
       <div>
         <h1 className="text-2xl font-semibold">Teacher competency</h1>
         <p className="text-sm text-muted-foreground">
-          FR-E07 — which subjects and class levels each teacher can teach, so allocation and substitution suggestions propose people
+          Which subjects and class levels each teacher can teach, so allocation and substitution suggestions propose people
           who can actually take the class.
         </p>
       </div>

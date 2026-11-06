@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatDateTimePk } from '@/lib/dates';
 
 export type InterviewRow = {
   id: string;
@@ -189,7 +190,7 @@ export function InterviewList({ interviews }: { interviews: InterviewRow[] }) {
                   {i.childName} ({i.applicationNo}) with {i.panelName}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(i.startsAt).toLocaleString()} – {new Date(i.endsAt).toLocaleTimeString()} · {i.venue ?? 'No venue set'} ·{' '}
+                  {formatDateTimePk(i.startsAt)} – {new Date(i.endsAt).toLocaleTimeString()} · {i.venue ?? 'No venue set'} ·{' '}
                   <span data-testid={`interview-status-${i.id}`}>{i.status}</span>
                 </p>
                 <NotificationViewer interviewId={i.id} />

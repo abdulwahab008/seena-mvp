@@ -16,7 +16,7 @@ export default async function InventoryPage() {
     supabase.from('v_stock_on_hand').select('store_id, item_id, on_hand, movement_count'),
     supabase.from('class_level').select('id, name_en').eq('is_active', true).order('ordinal'),
     supabase.from('subject').select('id, name_en').order('name_en'),
-    supabase.from('campus').select('id, name').order('name'),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
     supabase.from('inv_reorder_alert').select('store_id, item_id, on_hand, reorder_level').is('resolved_at', null),
   ]);
   const storeRows = stores.data ?? [];
@@ -30,7 +30,7 @@ export default async function InventoryPage() {
     <div className="space-y-6">
       <PageHeader
         title="Stores and stock"
-        description="FR-R01 — uniform, textbook and stationery stock is an immutable ledger of movements per campus store. On-hand is always the sum of movements; a stock-take variance is posted as a new adjustment row, never an edit."
+        description="Uniform, textbook and stationery stock is an immutable ledger of movements per campus store. On-hand is always the sum of movements; a stock-take variance is posted as a new adjustment row, never an edit."
       />
 
       {storeRows.length === 0 && (
