@@ -48131,6 +48131,18 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      consecutive_absentees: {
+        Args: { p_campus_id: string; p_min_days?: number }
+        Returns: {
+          absent_since: string | null
+          class_name: string
+          enrolment_id: string
+          gr_number: string
+          guardian_phone: string | null
+          streak_days: number
+          student_name: string
+        }[]
+      }
       register_download_item: {
         Args: {
           p_campus_id: string
