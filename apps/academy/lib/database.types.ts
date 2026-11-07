@@ -13324,6 +13324,237 @@ export type Database = {
         }
         Relationships: []
       }
+      result_recheck: {
+        Row: {
+          campus_id: string
+          decided_at: string | null
+          decided_by: string | null
+          enrolment_id: string
+          exam_term_id: string
+          fee_paisa: number
+          id: string
+          marks_after: number | null
+          marks_before: number | null
+          outcome_note: string | null
+          reason: string
+          requested_at: string
+          requested_by: string | null
+          status: string
+          subject_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          decided_at?: string | null
+          decided_by?: string | null
+          enrolment_id: string
+          exam_term_id: string
+          fee_paisa?: number
+          id?: string
+          marks_after?: number | null
+          marks_before?: number | null
+          outcome_note?: string | null
+          reason: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          subject_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          enrolment_id?: string
+          exam_term_id?: string
+          fee_paisa?: number
+          id?: string
+          marks_after?: number | null
+          marks_before?: number | null
+          outcome_note?: string | null
+          reason?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          subject_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'result_recheck_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'result_recheck_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'result_recheck_exam_term_id_fkey'
+            columns: ['exam_term_id']
+            isOneToOne: false
+            referencedRelation: 'exam_term'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'result_recheck_subject_id_fkey'
+            columns: ['subject_id']
+            isOneToOne: false
+            referencedRelation: 'subject'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      external_result: {
+        Row: {
+          board: string
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          exam: string
+          exam_year: number
+          grade: string | null
+          id: string
+          obtained: number
+          roll_no: string
+          student_id: string
+          tenant_id: string
+          total: number
+        }
+        Insert: {
+          board: string
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          exam: string
+          exam_year: number
+          grade?: string | null
+          id?: string
+          obtained: number
+          roll_no: string
+          student_id: string
+          tenant_id: string
+          total: number
+        }
+        Update: {
+          board?: string
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          exam?: string
+          exam_year?: number
+          grade?: string | null
+          id?: string
+          obtained?: number
+          roll_no?: string
+          student_id?: string
+          tenant_id?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'external_result_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'external_result_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      behaviour_trait: {
+        Row: {
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          tenant_id: string
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          tenant_id: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      behaviour_rating: {
+        Row: {
+          campus_id: string
+          enrolment_id: string
+          exam_term_id: string
+          id: string
+          rated_at: string
+          rated_by: string | null
+          rating: string
+          tenant_id: string
+          trait_id: string
+        }
+        Insert: {
+          campus_id: string
+          enrolment_id: string
+          exam_term_id: string
+          id?: string
+          rated_at?: string
+          rated_by?: string | null
+          rating: string
+          tenant_id: string
+          trait_id: string
+        }
+        Update: {
+          campus_id?: string
+          enrolment_id?: string
+          exam_term_id?: string
+          id?: string
+          rated_at?: string
+          rated_by?: string | null
+          rating?: string
+          tenant_id?: string
+          trait_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'behaviour_rating_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'behaviour_rating_exam_term_id_fkey'
+            columns: ['exam_term_id']
+            isOneToOne: false
+            referencedRelation: 'exam_term'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'behaviour_rating_trait_id_fkey'
+            columns: ['trait_id']
+            isOneToOne: false
+            referencedRelation: 'behaviour_trait'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -48807,6 +49038,12 @@ export type Database = {
         Args: { p_as_of: string }
         Returns: { account_id: string | null; amount: number; code: string | null; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
       }
+      queue_result_messages: { Args: { p_exam_term_id: string; p_section_id: string }; Returns: Json }
+      request_result_recheck: { Args: { p_enrolment_id: string; p_exam_term_id: string; p_fee_paisa: number; p_reason: string; p_subject_id: string }; Returns: string }
+      decide_result_recheck: { Args: { p_changed: boolean; p_id: string; p_marks_after?: number; p_note: string }; Returns: undefined }
+      save_external_result: { Args: { p_board: string; p_exam: string; p_exam_year: number; p_grade: string; p_obtained: number; p_roll_no: string; p_student_id: string; p_total: number }; Returns: string }
+      ensure_behaviour_traits: { Args: never; Returns: undefined }
+      save_behaviour_ratings: { Args: { p_exam_term_id: string; p_ratings: Json }; Returns: number }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
