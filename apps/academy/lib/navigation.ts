@@ -183,6 +183,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/academic-setup/rooms', label: 'Rooms' },
       { href: '/homework', label: 'Homework', feature: 'module.homework' },
       { href: '/quizzes', label: 'Online Quizzes' },
+      { href: '/live-classes', label: 'Live Classes' },
       { href: '/hifz', label: 'Hifz & Quran' },
       { href: '/downloads', label: 'Download Centre' },
       { href: '/lesson-plans', label: 'Lesson Plans' },
