@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import { todayPk } from './support/today';
 
 // FR-T03: a Transfer Certificate issued through the real UI by a real
 // Admissions Officer. Every assertion is made against what actually
@@ -151,7 +152,7 @@ async function signIn(page: import('@playwright/test').Page, email: string) {
 
 test('an Admissions Officer issues a Transfer Certificate, and a second one is refused by serial', async ({ page }) => {
   const { admin, clerkEmail, tenantId, campusId, sessionId, aliId, aliGr } = await seed();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPk();
 
   await signIn(page, clerkEmail);
   await page.goto('/certificates/issue');
