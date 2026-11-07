@@ -10,6 +10,7 @@ import { PaymentView, type PaymentRow } from './payment-view';
 import { ElectiveChoiceView, type ElectiveBucket } from './elective-choice-view';
 import { DeleteStudentControl } from './delete-student-control';
 import { EditStudentControl } from './edit-student-control';
+import { IncidentView } from './incident-view';
 import { canSeeConcessionAwards, hasFeeAccess } from '@/lib/auth/fee-access';
 
 // supabase-js types every embedded to-one relation as a possible array —
@@ -38,6 +39,12 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { data: incidents } = await supabase
+    .from('student_incident')
+    .select('id, occurred_on, category, severity, description, action_taken, parent_informed')
+    .eq('student_id', id)
+    .order('occurred_on', { ascending: false })
+    .limit(50);
 
   const [{ data: enrolment }, { data: sections }, { data: guardianLinks }, { data: appUser }] = await Promise.all([
     // FR-A15: explicit filter — an enrolment can be soft-deleted on its
@@ -258,6 +265,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           <ElectiveChoiceView studentId={student.id} sessionId={enrolment.session_id} classLevelId={enrolledClassLevelId} buckets={electiveBuckets} />
         </section>
       )}
+
+      <section className="space-y-2">
+        <h2 className="text-lg font-medium">Discipline</h2>
+        <IncidentView studentId={student.id} incidents={incidents ?? []} />
+      </section>
 
       <section className="space-y-2">
         <h2 className="text-lg font-medium">Guardians</h2>

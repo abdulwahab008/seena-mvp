@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { createHash, randomUUID } from 'node:crypto';
 import { makeSolidPng } from './fixtures/png';
+import { todayPk } from './support/today';
 
 // FR-T09: the signature, the stamp and the digest, end to end and against
 // real bytes. Every assertion is made on what actually happened rather than
@@ -160,7 +161,7 @@ test.setTimeout(180_000);
 
 test('a signed certificate carries the composited signature, a stored digest, and 409s once its bytes are altered', async ({ page }) => {
   const { admin, ownerEmail, clerkEmail, principalEmail, tenantId, campusId, studentGr } = await seed();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPk();
 
   // ── The Owner sets who signs ──────────────────────────────────────────
   await signIn(page, ownerEmail);
