@@ -49052,6 +49052,11 @@ export type Database = {
       save_external_result: { Args: { p_board: string; p_exam: string; p_exam_year: number; p_grade: string; p_obtained: number; p_roll_no: string; p_student_id: string; p_total: number }; Returns: string }
       ensure_behaviour_traits: { Args: never; Returns: undefined }
       save_behaviour_ratings: { Args: { p_exam_term_id: string; p_ratings: Json }; Returns: number }
+      transfer_stock: { Args: { p_from_store_id: string; p_item_id: string; p_qty: number; p_to_store_id: string }; Returns: string }
+      inventory_profit: {
+        Args: { p_from: string; p_to: string }
+        Returns: { cost_paisa: number; item_code: string; item_id: string; name: string; profit_paisa: number; qty_sold: number; revenue_paisa: number }[]
+      }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]

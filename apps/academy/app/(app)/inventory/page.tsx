@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { ActionForm } from '@/components/action-form';
 import { pkr } from '@/lib/rpc-action';
-import { createItem, createStore, postStockTake, receiveStock } from './actions';
+import { createItem, createStore, postStockTake, receiveStock, transferStock } from './actions';
 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 
@@ -130,6 +130,26 @@ export default async function InventoryPage() {
               />
             </CardContent>
           </Card>
+          {storeRows.length > 1 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Move stock between stores</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ActionForm
+                  testId="transfer-form"
+                  submitLabel="Move stock"
+                  action={transferStock}
+                  fields={[
+                    { name: 'fromStoreId', label: 'From store', type: 'select', required: true, options: storeOptions },
+                    { name: 'toStoreId', label: 'To store', type: 'select', required: true, options: storeOptions },
+                    { name: 'itemId', label: 'Item', type: 'select', required: true, options: itemOptions },
+                    { name: 'qty', label: 'Quantity', type: 'number' },
+                  ]}
+                />
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Physical stock take</CardTitle>
