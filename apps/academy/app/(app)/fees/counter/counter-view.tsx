@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ThermalReceipt } from './thermal-receipt';
 
 type LookupState = {
   challanId: string;
@@ -197,6 +198,9 @@ export function CounterView() {
                   Outstanding after this payment: PKR {(printResult.postPaymentOutstandingPaisa! / 100).toLocaleString()}
                 </p>
               </div>
+            )}
+            {printResult && (
+              <ThermalReceipt receipt={printResult} />
             )}
           </CardContent>
         </Card>
