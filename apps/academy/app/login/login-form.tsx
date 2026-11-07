@@ -45,8 +45,8 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <div className="space-y-2">
-        <Label htmlFor="email">Email or GR Number</Label>
-        <Input id="email" type="text" placeholder="name@school.com or GR-1234" autoComplete="username" {...register('email')} />
+        <Label htmlFor="email">Email, username@school or GR number</Label>
+        <Input id="email" type="text" placeholder="name@school.com, ahmed@your-school or GR-1234" autoComplete="username" {...register('email')} />
         {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
       </div>
       <div className="space-y-2">

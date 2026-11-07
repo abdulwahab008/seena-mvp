@@ -99,6 +99,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Admissions',
     icon: ClipboardCheck,
     items: [
+      { href: '/front-desk', label: 'Front Desk', roles: FRONT_OFFICE },
       { href: '/admissions/walk-in', label: 'Walk-in Desk', roles: FRONT_OFFICE },
       { href: '/admissions/enquiries', label: 'Enquiries', roles: FRONT_OFFICE },
       { href: '/admissions/applications', label: 'Applications', roles: FRONT_OFFICE },
@@ -137,6 +138,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/staff/discipline', label: 'Disciplinary', roles: HR_ROLES },
       { href: '/staff/exits', label: 'Exits', roles: HR_ROLES },
       { href: '/staff/certificates', label: 'Certificates', roles: HR_ROLES },
+      { href: '/id-cards', label: 'ID Cards', roles: [...FRONT_OFFICE, 'hr_manager'] },
       { href: '/staff/workload', label: 'Teacher Workload', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
       { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
       { href: '/staff/remarks', label: 'Remarks Moderation', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
@@ -382,6 +384,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/campuses', label: 'Campuses', roles: SCHOOL_ADMIN },
       { href: '/sessions', label: 'Academic Sessions', roles: SCHOOL_ADMIN },
       { href: '/branding', label: 'Branding', roles: SCHOOL_ADMIN },
+      { href: '/users', label: 'User Accounts', roles: SCHOOL_ADMIN },
       { href: '/roles', label: 'Roles', roles: SCHOOL_ADMIN },
       { href: '/feature-flags', label: 'Modules', roles: SCHOOL_ADMIN },
       { href: '/settings/data-export', label: 'Export School Data', roles: SCHOOL_ADMIN },

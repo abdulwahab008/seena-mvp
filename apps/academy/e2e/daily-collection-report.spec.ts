@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import { todayPk } from './support/today';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -119,7 +120,7 @@ test('an owner runs the daily collection report and finalises the cash book for 
   await page.getByTestId('record-payment-button').click();
   await expect(page.getByText('Payment recorded and allocated.')).toBeVisible();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPk();
 
   await page.goto('/fees/reports');
   await page.waitForLoadState('networkidle');
