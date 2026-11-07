@@ -374,6 +374,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/library/circulation', label: 'Circulation Desk', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/reservations', label: 'Reservations', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/fines', label: 'Fines', roles: [...LEADERSHIP, 'librarian'] },
+      { href: '/library/stock-audit', label: 'Stock Audit', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/write-offs', label: 'Write-offs', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/policies', label: 'Borrowing Policy', roles: [...LEADERSHIP, 'librarian'] },
     ],
