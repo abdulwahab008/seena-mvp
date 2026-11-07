@@ -13375,6 +13375,387 @@ export type Database = {
           },
         ]
       }
+      campus_transfer: {
+        Row: {
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          enrolment_id: string
+          from_campus_id: string
+          id: string
+          reason: string
+          requested_at: string
+          requested_by: string | null
+          status: string
+          student_id: string
+          tenant_id: string
+          to_campus_id: string
+          to_section_id: string
+        }
+        Insert: {
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          enrolment_id: string
+          from_campus_id: string
+          id?: string
+          reason: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          student_id: string
+          tenant_id: string
+          to_campus_id: string
+          to_section_id: string
+        }
+        Update: {
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          enrolment_id?: string
+          from_campus_id?: string
+          id?: string
+          reason?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          student_id?: string
+          tenant_id?: string
+          to_campus_id?: string
+          to_section_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'campus_transfer_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campus_transfer_from_campus_id_fkey'
+            columns: ['from_campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campus_transfer_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campus_transfer_to_campus_id_fkey'
+            columns: ['to_campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campus_transfer_to_section_id_fkey'
+            columns: ['to_section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      student_vaccination: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          dose_no: number
+          due_on: string | null
+          given_on: string | null
+          id: string
+          notes: string | null
+          student_id: string
+          tenant_id: string
+          vaccine: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          dose_no?: number
+          due_on?: string | null
+          given_on?: string | null
+          id?: string
+          notes?: string | null
+          student_id: string
+          tenant_id: string
+          vaccine: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          dose_no?: number
+          due_on?: string | null
+          given_on?: string | null
+          id?: string
+          notes?: string | null
+          student_id?: string
+          tenant_id?: string
+          vaccine?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'student_vaccination_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'student_vaccination_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      result_recheck: {
+        Row: {
+          campus_id: string
+          decided_at: string | null
+          decided_by: string | null
+          enrolment_id: string
+          exam_term_id: string
+          fee_paisa: number
+          id: string
+          marks_after: number | null
+          marks_before: number | null
+          outcome_note: string | null
+          reason: string
+          requested_at: string
+          requested_by: string | null
+          status: string
+          subject_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          decided_at?: string | null
+          decided_by?: string | null
+          enrolment_id: string
+          exam_term_id: string
+          fee_paisa?: number
+          id?: string
+          marks_after?: number | null
+          marks_before?: number | null
+          outcome_note?: string | null
+          reason: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          subject_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          enrolment_id?: string
+          exam_term_id?: string
+          fee_paisa?: number
+          id?: string
+          marks_after?: number | null
+          marks_before?: number | null
+          outcome_note?: string | null
+          reason?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          subject_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'result_recheck_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'result_recheck_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'result_recheck_exam_term_id_fkey'
+            columns: ['exam_term_id']
+            isOneToOne: false
+            referencedRelation: 'exam_term'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'result_recheck_subject_id_fkey'
+            columns: ['subject_id']
+            isOneToOne: false
+            referencedRelation: 'subject'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      external_result: {
+        Row: {
+          board: string
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          exam: string
+          exam_year: number
+          grade: string | null
+          id: string
+          obtained: number
+          roll_no: string
+          student_id: string
+          tenant_id: string
+          total: number
+        }
+        Insert: {
+          board: string
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          exam: string
+          exam_year: number
+          grade?: string | null
+          id?: string
+          obtained: number
+          roll_no: string
+          student_id: string
+          tenant_id: string
+          total: number
+        }
+        Update: {
+          board?: string
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          exam?: string
+          exam_year?: number
+          grade?: string | null
+          id?: string
+          obtained?: number
+          roll_no?: string
+          student_id?: string
+          tenant_id?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'external_result_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'external_result_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      behaviour_trait: {
+        Row: {
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          tenant_id: string
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          tenant_id: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      behaviour_rating: {
+        Row: {
+          campus_id: string
+          enrolment_id: string
+          exam_term_id: string
+          id: string
+          rated_at: string
+          rated_by: string | null
+          rating: string
+          tenant_id: string
+          trait_id: string
+        }
+        Insert: {
+          campus_id: string
+          enrolment_id: string
+          exam_term_id: string
+          id?: string
+          rated_at?: string
+          rated_by?: string | null
+          rating: string
+          tenant_id: string
+          trait_id: string
+        }
+        Update: {
+          campus_id?: string
+          enrolment_id?: string
+          exam_term_id?: string
+          id?: string
+          rated_at?: string
+          rated_by?: string | null
+          rating?: string
+          tenant_id?: string
+          trait_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'behaviour_rating_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'behaviour_rating_exam_term_id_fkey'
+            columns: ['exam_term_id']
+            isOneToOne: false
+            referencedRelation: 'exam_term'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'behaviour_rating_trait_id_fkey'
+            columns: ['trait_id']
+            isOneToOne: false
+            referencedRelation: 'behaviour_trait'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      gl_setting: {
+        Row: { locked_through: string | null; tenant_id: string; updated_at: string }
+        Insert: { locked_through?: string | null; tenant_id: string; updated_at?: string }
+        Update: { locked_through?: string | null; tenant_id?: string; updated_at?: string }
+        Relationships: []
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -48849,6 +49230,8 @@ export type Database = {
       post_journal_entry: { Args: { p_entry_date: string; p_lines: Json; p_narration: string }; Returns: string }
       reverse_journal_entry: { Args: { p_entry_id: string; p_reason: string }; Returns: string }
       post_ledger_backfill: { Args: never; Returns: number }
+      post_opening_balances: { Args: { p_date: string; p_lines: Json }; Returns: string }
+      close_financial_year: { Args: { p_year_end: string }; Returns: string }
       set_head_gl_code: { Args: { p_code: string; p_head_id: string; p_kind: string }; Returns: undefined }
       income_statement: {
         Args: { p_from: string; p_to: string }
@@ -48863,6 +49246,17 @@ export type Database = {
       queue_fee_slip_messages: { Args: { p_billing_period: string; p_campus_id: string }; Returns: Json }
       fee_collection_by_month: { Args: { p_from: string; p_to: string }; Returns: { billed_paisa: number; collected_paisa: number; month: string }[] }
       fee_outstanding_ageing: { Args: { p_as_of?: string }; Returns: { bucket: string; challans: number; outstanding_paisa: number }[] }
+      request_campus_transfer: { Args: { p_enrolment_id: string; p_reason: string; p_to_section_id: string }; Returns: string }
+      decide_campus_transfer: { Args: { p_approve: boolean; p_id: string; p_note: string }; Returns: undefined }
+      save_student_vaccination: { Args: { p_dose_no: number; p_due_on?: string; p_given_on?: string; p_notes: string; p_student_id: string; p_vaccine: string }; Returns: string }
+      preview_student_merge: { Args: { p_keep_id: string; p_remove_id: string }; Returns: { row_count: number; table_name: string }[] }
+      merge_students: { Args: { p_keep_id: string; p_remove_id: string }; Returns: number }
+      queue_result_messages: { Args: { p_exam_term_id: string; p_section_id: string }; Returns: Json }
+      request_result_recheck: { Args: { p_enrolment_id: string; p_exam_term_id: string; p_fee_paisa: number; p_reason: string; p_subject_id: string }; Returns: string }
+      decide_result_recheck: { Args: { p_changed: boolean; p_id: string; p_marks_after?: number; p_note?: string }; Returns: undefined }
+      save_external_result: { Args: { p_board: string; p_exam: string; p_exam_year: number; p_grade: string; p_obtained: number; p_roll_no: string; p_student_id: string; p_total: number }; Returns: string }
+      ensure_behaviour_traits: { Args: never; Returns: undefined }
+      save_behaviour_ratings: { Args: { p_exam_term_id: string; p_ratings: Json }; Returns: number }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]

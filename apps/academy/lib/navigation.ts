@@ -119,6 +119,10 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/students', label: 'All Students' },
       { href: '/students/alumni', label: 'Alumni' },
+      { href: '/students/transfers', label: 'Campus Transfers', roles: FRONT_OFFICE },
+      { href: '/students/withdrawals', label: 'Withdrawal Register', roles: FRONT_OFFICE },
+      { href: '/students/vaccinations', label: 'Vaccinations', roles: [...LEADERSHIP, 'nurse'] },
+      { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
       { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
       { href: '/students/promotion', label: 'Promotion', roles: [...LEADERSHIP, 'exam_controller'] },
       { href: '/students/recycle-bin', label: 'Recycle Bin', roles: FRONT_OFFICE },
@@ -241,6 +245,10 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/exams/grading', label: 'Grading Schemes' },
       { href: '/exams/results', label: 'Term Results & Positions' },
+      { href: '/exams/tabulation', label: 'Tabulation, Merit & Failure Lists' },
+      { href: '/exams/behaviour', label: 'Behaviour Ratings' },
+      { href: '/exams/rechecks', label: 'Re-checks' },
+      { href: '/exams/external-results', label: 'Board Results' },
       { href: '/exams/annual', label: 'Annual Results' },
       { href: '/exams/promotion', label: 'Promotion Decisions' },
       { href: '/exams/analytics', label: 'Subject Analytics' },

@@ -98,10 +98,12 @@ insert into public.inv_sale (tenant_id, campus_id, store_id, doc_type, serial, f
 values (:'tenant_id', :'campus_id', :'store_id', 'credit_note', 'CN-1', 2026, :'later_student', 'GR1', 'Later Payer', 'cash', 20000, :'sale_id') returning id as cn_id \gset
 insert into public.inv_sale (tenant_id, campus_id, store_id, serial, financial_year, student_id, student_gr, student_name, settlement, total)
 values (:'tenant_id', :'campus_id', :'store_id', 'S-2', 2026, :'later_student', 'GR1', 'Later Payer', 'fee_ledger', 99000) returning id as ledger_sale \gset
-select is((select balance from public.trial_balance(current_date) where code = '4300'), 60000::bigint, 'cash sales less refunds are shop income');
+select is((select balance from public.trial_balance(current_date) where code = '4300' and account_id in (select id from public.gl_account where tenant_id = :'tenant_id')), 60000::bigint, 'cash sales less refunds are shop income');
 select is((select count(*)::int from public.journal_entry where source_id = :'ledger_sale'), 0, 'a sale charged to fees waits for the fee payment');
 
--- Statements.
+-- Statements, as the school's accountant: RLS is what scopes them to one school.
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', :'uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is((select sum(debit) - sum(credit) from public.trial_balance(current_date))::bigint, 0::bigint, 'the trial balance still balances');
 select is((select sum(case when type = 'income' then amount else -amount end) from public.income_statement(current_date - 1, current_date))::bigint,
   (500000 + 500000 + 60000 - 120000 - 5800000)::bigint, 'the income statement nets income against expenses');
