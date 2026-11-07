@@ -153,7 +153,7 @@ $$;
 revoke execute on function public.request_result_recheck(uuid, uuid, uuid, bigint, text) from public, anon;
 grant execute on function public.request_result_recheck(uuid, uuid, uuid, bigint, text) to authenticated;
 
-create or replace function public.decide_result_recheck(p_id uuid, p_changed boolean, p_marks_after numeric, p_note text)
+create or replace function public.decide_result_recheck(p_id uuid, p_changed boolean, p_marks_after numeric default null, p_note text default null)
 returns void
 language plpgsql
 security definer

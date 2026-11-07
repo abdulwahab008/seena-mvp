@@ -4,10 +4,10 @@ import { seedHrTenant, signInAs } from './support/hr-seed';
 async function seedTermResults(label: string) {
   const seed = await seedHrTenant(label);
   const { db, tenantId: tenant_id, campusId: campus_id, runId } = seed;
-  const one = async <T,>(q: PromiseLike<{ data: T | null; error: { message: string } | null }>, what: string): Promise<T> => {
+  const one = async (q: PromiseLike<{ data: unknown; error: { message: string } | null }>, what: string): Promise<{ id: string }> => {
     const { data, error } = await q;
     if (error || !data) throw new Error(`${what}: ${error?.message}`);
-    return data;
+    return data as { id: string };
   };
   const session = await one(db.from('academic_session').select('id').eq('tenant_id', tenant_id).single(), 'session');
   const level = await one(db.from('class_level').select('id').eq('tenant_id', tenant_id).eq('code', '5').single(), 'level');

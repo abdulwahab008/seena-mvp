@@ -49040,7 +49040,7 @@ export type Database = {
       }
       queue_result_messages: { Args: { p_exam_term_id: string; p_section_id: string }; Returns: Json }
       request_result_recheck: { Args: { p_enrolment_id: string; p_exam_term_id: string; p_fee_paisa: number; p_reason: string; p_subject_id: string }; Returns: string }
-      decide_result_recheck: { Args: { p_changed: boolean; p_id: string; p_marks_after?: number; p_note: string }; Returns: undefined }
+      decide_result_recheck: { Args: { p_changed: boolean; p_id: string; p_marks_after?: number; p_note?: string }; Returns: undefined }
       save_external_result: { Args: { p_board: string; p_exam: string; p_exam_year: number; p_grade: string; p_obtained: number; p_roll_no: string; p_student_id: string; p_total: number }; Returns: string }
       ensure_behaviour_traits: { Args: never; Returns: undefined }
       save_behaviour_ratings: { Args: { p_exam_term_id: string; p_ratings: Json }; Returns: number }
