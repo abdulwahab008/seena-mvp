@@ -245,6 +245,10 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/exams/grading', label: 'Grading Schemes' },
       { href: '/exams/results', label: 'Term Results & Positions' },
+      { href: '/exams/tabulation', label: 'Tabulation, Merit & Failure Lists' },
+      { href: '/exams/behaviour', label: 'Behaviour Ratings' },
+      { href: '/exams/rechecks', label: 'Re-checks' },
+      { href: '/exams/external-results', label: 'Board Results' },
       { href: '/exams/annual', label: 'Annual Results' },
       { href: '/exams/promotion', label: 'Promotion Decisions' },
       { href: '/exams/analytics', label: 'Subject Analytics' },

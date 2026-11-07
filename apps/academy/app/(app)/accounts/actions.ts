@@ -8,10 +8,12 @@ function message(m: string) {
   if (m.includes('FORBIDDEN')) return 'Only the accountant and owner can post to the ledger.';
   if (m.includes('NOT_BALANCED')) return 'Debits and credits must be equal.';
   if (m.includes('LINES_REQUIRED')) return 'A voucher needs at least two lines.';
-  if (m.includes('DATE_INVALID')) return 'A voucher cannot be dated in the future.';
+  if (m.includes('DATE_INVALID')) return 'Choose a date that has already passed.';
   if (m.includes('ACCOUNT_TYPE_LOCKED')) return 'This account has postings, so its type cannot change.';
   if (m.includes('CANNOT_REVERSE')) return 'This voucher is already a reversal or has been reversed.';
   if (m.includes('ACCOUNT_NOT_FOUND')) return 'Fee heads post to an income account and expense heads to an expense account.';
+  if (m.includes('PERIOD_LOCKED')) return 'That date is in a closed year.';
+  if (m.includes('OPENING_ALREADY_POSTED')) return 'Opening balances are already posted. Correct them with a journal voucher.';
   if (m.includes('uq_gl_account_code')) return 'That account code is already used.';
   if (m.includes('gl_account_code_check')) return 'Account codes are 3 to 8 digits.';
   return 'Something went wrong. Try again.';
@@ -95,6 +97,32 @@ export async function setHeadAccount(input: unknown): Promise<{ error: string | 
   if (!p.success) return { error: 'Choose an account.' };
   const supabase = await supabaseServer();
   const { error } = await supabase.rpc('set_head_gl_code', { p_kind: p.data.kind, p_head_id: p.data.headId, p_code: p.data.code });
+  if (error) return { error: message(error.message) };
+  revalidatePath('/accounts');
+  return { error: null };
+}
+
+const openingSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+  lines: z.array(z.object({ accountId: z.string().uuid(), amount: z.coerce.number().min(0, 'Amounts cannot be negative') })),
+});
+
+export async function postOpeningBalances(input: unknown): Promise<{ error: string | null }> {
+  const p = openingSchema.safeParse(input);
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Check the amounts.' };
+  const lines = p.data.lines.filter((l) => l.amount > 0).map((l) => ({ account_id: l.accountId, amount: Math.round(l.amount * 100) }));
+  if (lines.length === 0) return { error: 'Enter at least one balance.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('post_opening_balances', { p_date: p.data.date, p_lines: lines });
+  if (error) return { error: message(error.message) };
+  revalidatePath('/accounts');
+  return { error: null };
+}
+
+export async function closeYear(yearEnd: string): Promise<{ error: string | null }> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(yearEnd)) return { error: 'Choose the last day of the year.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('close_financial_year', { p_year_end: yearEnd });
   if (error) return { error: message(error.message) };
   revalidatePath('/accounts');
   return { error: null };

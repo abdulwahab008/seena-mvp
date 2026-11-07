@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AccountForm, BackfillButton, HeadAccountSelect, ReverseButton, SetupChartButton, VoucherForm } from './ledger-forms';
+import { AccountForm, BackfillButton, CloseYearForm, HeadAccountSelect, OpeningBalancesForm, ReverseButton, SetupChartButton, VoucherForm } from './ledger-forms';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +21,7 @@ const TABS = [
   { id: 'balance', label: 'Balance sheet' },
   { id: 'chart', label: 'Chart of accounts' },
   { id: 'mapping', label: 'Posting accounts' },
+  { id: 'year', label: 'Year end' },
 ] as const;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -68,6 +69,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
       {tab === 'trial' && <TrialTab asOf={asOf} />}
       {tab === 'income' && <IncomeTab from={from} to={to} />}
       {tab === 'balance' && <BalanceTab asOf={asOf} />}
+      {tab === 'year' && <YearTab canWrite={canWrite} accounts={(accounts ?? []).filter((a) => a.is_active)} />}
       {tab === 'mapping' && <MappingTab canWrite={canWrite} accounts={(accounts ?? []).filter((a) => a.is_active)} />}
       {tab === 'chart' && (
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
@@ -340,6 +342,28 @@ async function MappingTab({ canWrite, accounts }: { canWrite: boolean; accounts:
           ))}
         </div>
       ))}
+    </div>
+  );
+}
+
+async function YearTab({ canWrite, accounts }: { canWrite: boolean; accounts: { id: string; code: string; name: string; type: string }[] }) {
+  const supabase = await supabaseServer();
+  const [{ data: setting }, { count: openingCount }] = await Promise.all([
+    supabase.from('gl_setting').select('locked_through').maybeSingle(),
+    supabase.from('journal_entry').select('id', { count: 'exact', head: true }).eq('source_kind', 'opening'),
+  ]);
+  const lastYearEnd = `${Number(fyStart(todayPk()).slice(0, 4))}-06-30`;
+  return (
+    <div className="space-y-6">
+      <p className="text-sm" data-testid="locked-through">
+        {setting?.locked_through ? `Books are closed through ${formatDatePk(setting.locked_through)}.` : 'No year has been closed yet.'}
+      </p>
+      {canWrite && (openingCount ?? 0) === 0 && (
+        <OpeningBalancesForm
+          accounts={accounts.filter((a) => ['asset', 'liability', 'equity'].includes(a.type) && a.code !== '3000').map((a) => ({ id: a.id, label: `${a.code} · ${a.name}` }))}
+        />
+      )}
+      {canWrite && <CloseYearForm defaultYearEnd={lastYearEnd} />}
     </div>
   );
 }
