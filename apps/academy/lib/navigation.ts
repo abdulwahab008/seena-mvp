@@ -382,6 +382,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/campuses', label: 'Campuses', roles: SCHOOL_ADMIN },
       { href: '/sessions', label: 'Academic Sessions', roles: SCHOOL_ADMIN },
       { href: '/branding', label: 'Branding', roles: SCHOOL_ADMIN },
+      { href: '/users', label: 'User Accounts', roles: SCHOOL_ADMIN },
       { href: '/roles', label: 'Roles', roles: SCHOOL_ADMIN },
       { href: '/feature-flags', label: 'Modules', roles: SCHOOL_ADMIN },
       { href: '/settings/data-export', label: 'Export School Data', roles: SCHOOL_ADMIN },
