@@ -13291,6 +13291,117 @@ export type Database = {
           },
         ]
       }
+      gl_account: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          tenant_id: string
+          type: Database['public']['Enums']['gl_account_type']
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          tenant_id: string
+          type: Database['public']['Enums']['gl_account_type']
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          tenant_id?: string
+          type?: Database['public']['Enums']['gl_account_type']
+        }
+        Relationships: []
+      }
+      journal_entry: {
+        Row: {
+          created_at: string
+          created_by: string
+          entry_date: string
+          entry_no: string
+          id: string
+          narration: string
+          reversal_of: string | null
+          reversed_by: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          entry_date: string
+          entry_no: string
+          id?: string
+          narration: string
+          reversal_of?: string | null
+          reversed_by?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          entry_date?: string
+          entry_no?: string
+          id?: string
+          narration?: string
+          reversal_of?: string | null
+          reversed_by?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      journal_line: {
+        Row: {
+          account_id: string
+          credit: number
+          debit: number
+          entry_id: string
+          id: string
+          memo: string | null
+          tenant_id: string
+        }
+        Insert: {
+          account_id: string
+          credit?: number
+          debit?: number
+          entry_id: string
+          id?: string
+          memo?: string | null
+          tenant_id: string
+        }
+        Update: {
+          account_id?: string
+          credit?: number
+          debit?: number
+          entry_id?: string
+          id?: string
+          memo?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'journal_line_account_id_fkey'
+            columns: ['account_id']
+            isOneToOne: false
+            referencedRelation: 'gl_account'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'journal_line_entry_id_fkey'
+            columns: ['entry_id']
+            isOneToOne: false
+            referencedRelation: 'journal_entry'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       quiz: {
         Row: {
           campus_id: string
@@ -48667,6 +48778,14 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      ensure_chart_of_accounts: { Args: never; Returns: number }
+      save_gl_account: { Args: { p_code: string; p_id?: string; p_is_active?: boolean; p_name: string; p_type: Database['public']['Enums']['gl_account_type'] }; Returns: string }
+      post_journal_entry: { Args: { p_entry_date: string; p_lines: Json; p_narration: string }; Returns: string }
+      reverse_journal_entry: { Args: { p_entry_id: string; p_reason: string }; Returns: string }
+      trial_balance: {
+        Args: { p_as_of: string }
+        Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
+      }
       create_quiz: {
         Args: { p_closes_at: string; p_duration_min: number; p_opens_at: string; p_section_id: string; p_title: string }
         Returns: string
@@ -52238,6 +52357,7 @@ export type Database = {
         | 'paid'
       fee_challan_line_type: 'charge' | 'concession' | 'arrears' | 'late_fee'
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
+      gl_account_type: 'asset' | 'liability' | 'equity' | 'income' | 'expense'
       front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
       fee_ledger_direction: 'debit' | 'credit'
@@ -52840,6 +52960,7 @@ export const Constants = {
       ],
       fee_challan_line_type: ['charge', 'concession', 'arrears', 'late_fee'],
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
+      gl_account_type: ['asset', 'liability', 'equity', 'income', 'expense'],
       front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
       fee_ledger_direction: ['debit', 'credit'],

@@ -3,6 +3,7 @@ import {
   BadgeCheck,
   Banknote,
   BookOpen,
+  Landmark,
   Boxes,
   Building2,
   Bus,
@@ -271,6 +272,14 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/gateways', label: 'Online Payments', roles: FEE_STAFF_ROLES },
       { href: '/fees/bank-statements', label: 'Bank Statements', roles: FEE_STAFF_ROLES },
       { href: '/fees/reports', label: 'Collection Reports', roles: FEE_STAFF_ROLES },
+    ],
+  },
+  {
+    id: 'accounts',
+    label: 'Accounts',
+    icon: Landmark,
+    items: [
+      { href: '/accounts', label: 'General Ledger', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
     ],
   },
   {
