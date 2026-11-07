@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { seedFeesTenant } from './support/fees-seed';
 import { signInAs } from './support/hr-seed';
 
-test('HR posts an opening and moves an applicant from application to hire', async ({ page }) => {
+test('HR posts an opening, scores the interview, makes an offer, hires, and sees them on the HR dashboard', async ({ page }) => {
   const seed = await seedFeesTenant(0, 'recruit');
   await signInAs(page, seed.email);
 
@@ -26,11 +26,32 @@ test('HR posts an opening and moves an applicant from application to hire', asyn
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(row.getByTestId('applicant-stage')).toHaveText('Interview');
 
-  await row.getByRole('button', { name: 'Make offer' }).click();
+  await row.getByRole('button', { name: 'Score interview' }).click();
+  await page.getByLabel('Subject knowledge').selectOption('5');
+  await page.getByLabel('Teaching demo').selectOption('4');
   await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Scorecard saved.')).toBeVisible();
+  await expect(row.getByTestId('applicant-score')).toContainText('1 recommend hiring');
+
+  await row.getByRole('button', { name: 'Make offer' }).click();
+  await page.getByLabel('Monthly salary (PKR)').fill('85000');
+  await page.getByLabel('Joining date').fill('2027-01-01');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(row.getByTestId('applicant-stage')).toHaveText('Offered');
+  await expect(row.getByTestId('applicant-offer')).toContainText('PKR 85,000.00 a month');
+
   await row.getByRole('button', { name: 'Mark hired' }).click();
-  await page.getByLabel('Note (optional)').fill('Joins on 1 Jan');
+  await page.getByLabel('Employee code').fill('T-101');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Enter the CNIC.')).toBeVisible();
+  await page.getByLabel('CNIC (if not on the application)').fill('35202-7654321-2');
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(row.getByTestId('applicant-stage')).toHaveText('Hired');
-  await expect(row).toContainText('Joins on 1 Jan');
+
+  await page.goto('/staff/hr-dashboard');
+  await expect(page.getByTestId('hr-kpi-headcount')).toHaveText('1');
+  await page.getByLabel('Employee code').fill('T-101');
+  await page.getByLabel('CNIC expires on').fill(new Date(Date.now() + 20 * 86400000).toISOString().slice(0, 10));
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByTestId('hr-cnic-expiring')).toContainText('Ayesha Khan');
 });
