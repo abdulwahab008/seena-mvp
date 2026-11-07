@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
+import { expandUsernameLogin } from '@/lib/auth/login-id';
 
 const SignInSchema = z.object({
   email: z.string().min(1, 'Enter email or GR number'),
@@ -25,7 +26,7 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
 
   const supabase = await supabaseServer();
 
-  let targetEmail = parsed.data.email.trim();
+  let targetEmail = expandUsernameLogin(parsed.data.email);
   // Support student login by GR number
   if (!targetEmail.includes('@')) {
     const { data: resolved } = await supabaseServiceRole().rpc('resolve_student_login', {

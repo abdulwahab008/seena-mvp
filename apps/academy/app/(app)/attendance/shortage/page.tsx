@@ -2,11 +2,17 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CloseForm, RunButton } from './controls';
+import { pickActiveCampus } from '@/lib/campus-context';
+import { formatDatePk } from '@/lib/dates';
 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 
-export default async function ShortagePage() {
+export default async function ShortagePage({ searchParams }: { searchParams: Promise<{ days?: string }> }) {
   const supabase = await supabaseServer();
+  const minDays = Math.min(Math.max(Number((await searchParams).days) || 3, 2), 30);
+  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const campus = await pickActiveCampus(campuses);
+  const { data: absentees } = campus ? await supabase.rpc('consecutive_absentees', { p_campus_id: campus.id, p_min_days: minDays }) : { data: [] };
   const { data: warnings } = await supabase
     .from('attendance_shortage_warning')
     .select('id, level, pct_at_warning, raised_at, last_escalated_at, status, closed_reason, enrolment:enrolment_id(student:student_id(name_en, gr_number), class_section:section_id(name, class_level(name_en)))')
@@ -59,6 +65,40 @@ export default async function ShortagePage() {
               </div>
             );
           })}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Absent {minDays} or more school days in a row ({(absentees ?? []).length})</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm" data-testid="absentee-streaks">
+          <form className="flex items-center gap-2 text-sm">
+            <label htmlFor="days">Show runs of at least</label>
+            <select id="days" name="days" defaultValue={String(minDays)} className="h-9 rounded-md border border-input bg-background px-2">
+              {[2, 3, 5, 7, 10].map((d) => (
+                <option key={d} value={d}>
+                  {d} days
+                </option>
+              ))}
+            </select>
+            <button type="submit" className="rounded-md border px-3 py-1.5 hover:bg-muted">
+              Apply
+            </button>
+          </form>
+          {(absentees ?? []).length === 0 && <p className="text-muted-foreground">No student is on a run of absences that long.</p>}
+          {(absentees ?? []).map((a) => (
+            <div key={a.enrolment_id} className="flex flex-wrap items-center justify-between gap-2 border-b pb-2" data-testid="absentee-row">
+              <span className="font-medium">
+                {a.student_name} · GR {a.gr_number} · {a.class_name}
+              </span>
+              <span className="flex items-center gap-2 text-muted-foreground">
+                since {a.absent_since ? formatDatePk(a.absent_since) : '—'}
+                {a.guardian_phone ? ` · ${a.guardian_phone}` : ''}
+                <Badge variant={a.streak_days >= 5 ? 'destructive' : 'warning'}>{a.streak_days} days</Badge>
+              </span>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
