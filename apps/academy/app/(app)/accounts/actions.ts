@@ -11,6 +11,7 @@ function message(m: string) {
   if (m.includes('DATE_INVALID')) return 'A voucher cannot be dated in the future.';
   if (m.includes('ACCOUNT_TYPE_LOCKED')) return 'This account has postings, so its type cannot change.';
   if (m.includes('CANNOT_REVERSE')) return 'This voucher is already a reversal or has been reversed.';
+  if (m.includes('ACCOUNT_NOT_FOUND')) return 'Fee heads post to an income account and expense heads to an expense account.';
   if (m.includes('uq_gl_account_code')) return 'That account code is already used.';
   if (m.includes('gl_account_code_check')) return 'Account codes are 3 to 8 digits.';
   return 'Something went wrong. Try again.';
@@ -74,6 +75,26 @@ export async function reverseVoucher(entryId: string, reason: string): Promise<{
   if (!p.success) return { error: p.error.issues[0]?.message ?? 'Give a reason.' };
   const supabase = await supabaseServer();
   const { error } = await supabase.rpc('reverse_journal_entry', { p_entry_id: p.data.entryId, p_reason: p.data.reason });
+  if (error) return { error: message(error.message) };
+  revalidatePath('/accounts');
+  return { error: null };
+}
+
+export async function backfillLedger(): Promise<{ error: string | null; posted: number }> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('post_ledger_backfill');
+  if (error) return { error: message(error.message), posted: 0 };
+  revalidatePath('/accounts');
+  return { error: null, posted: data ?? 0 };
+}
+
+const headSchema = z.object({ kind: z.enum(['fee', 'expense']), headId: z.string().uuid(), code: z.string().regex(/^(\d{3,8})?$/) });
+
+export async function setHeadAccount(input: unknown): Promise<{ error: string | null }> {
+  const p = headSchema.safeParse(input);
+  if (!p.success) return { error: 'Choose an account.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_head_gl_code', { p_kind: p.data.kind, p_head_id: p.data.headId, p_code: p.data.code });
   if (error) return { error: message(error.message) };
   revalidatePath('/accounts');
   return { error: null };

@@ -283,6 +283,10 @@ reset role;
 -- ═══════════════════════════════════════════════════════════════════════
 
 set local role service_role;
+-- Fee payments made above still have their deferred ledger posting queued;
+-- Postgres refuses any truncate behind pending trigger events, which would
+-- mask the guard this block is testing.
+set constraints all immediate;
 
 select throws_ok(
   $$ truncate public.mark_entry $$,

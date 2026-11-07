@@ -5,7 +5,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { addAccount, ensureChart, postVoucher, reverseVoucher } from './actions';
+import { addAccount, backfillLedger, ensureChart, postVoucher, reverseVoucher, setHeadAccount } from './actions';
 import { todayPk } from '@/lib/dates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -205,5 +205,65 @@ export function ReverseButton({ entryId, entryNo }: { entryId: string; entryNo: 
         </form>
       </Modal>
     </>
+  );
+}
+
+export function BackfillButton() {
+  const [pending, startTransition] = useTransition();
+  return (
+    <Button
+      variant="outline"
+      disabled={pending}
+      onClick={() =>
+        startTransition(async () => {
+          const r = await backfillLedger();
+          if (r.error) return void toast.error(r.error);
+          toast.success(r.posted === 0 ? 'Everything is already posted.' : `Posted ${r.posted} past ${r.posted === 1 ? 'record' : 'records'}.`);
+        })
+      }
+    >
+      Post past records
+    </Button>
+  );
+}
+
+export function HeadAccountSelect({
+  kind,
+  headId,
+  headName,
+  value,
+  accounts,
+  fallback,
+}: {
+  kind: 'fee' | 'expense';
+  headId: string;
+  headName: string;
+  value: string;
+  accounts: { code: string; label: string }[];
+  fallback: string;
+}) {
+  const [pending, startTransition] = useTransition();
+  return (
+    <select
+      aria-label={`Account for ${headName}`}
+      className={SELECT}
+      defaultValue={accounts.some((a) => a.code === value) ? value : ''}
+      disabled={pending}
+      onChange={(e) => {
+        const code = e.target.value;
+        startTransition(async () => {
+          const r = await setHeadAccount({ kind, headId, code });
+          if (r.error) return void toast.error(r.error);
+          toast.success(`${headName} saved.`);
+        });
+      }}
+    >
+      <option value="">Default ({fallback})</option>
+      {accounts.map((a) => (
+        <option key={a.code} value={a.code}>
+          {a.label}
+        </option>
+      ))}
+    </select>
   );
 }
