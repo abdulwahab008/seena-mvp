@@ -4,6 +4,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { getCurrentActor } from '@/lib/hr/current-role';
 import { pickActiveCampus } from '@/lib/campus-context';
 import { formatDatePk } from '@/lib/dates';
+import { formatPkr } from '@/lib/challan/html';
 import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -32,7 +33,7 @@ export default async function RecruitmentPage({ searchParams }: { searchParams: 
   const { data: applicants } = selected
     ? await supabase
         .from('job_application')
-        .select('id, candidate_name, phone, email, qualification, experience_yrs, source, stage, interview_at, job_application_event(to_stage, note, created_at)')
+        .select('id, candidate_name, phone, email, qualification, experience_yrs, source, stage, interview_at, offer_salary_paisa, offer_joining_on, job_application_event(to_stage, note, created_at), interview_score(subject_knowledge, communication, teaching_demo, attitude, recommendation)')
         .eq('job_opening_id', selected.id)
         .order('created_at')
     : { data: [] };
@@ -73,6 +74,8 @@ export default async function RecruitmentPage({ searchParams }: { searchParams: 
                 profile: [a.qualification, a.experience_yrs != null ? `${a.experience_yrs} yrs` : null, a.source].filter(Boolean).join(' · '),
                 stage: a.stage,
                 interviewAt: a.interview_at,
+                score: scoreSummary(a.interview_score ?? []),
+                offer: a.offer_salary_paisa ? `Offer: ${formatPkr(a.offer_salary_paisa)} a month from ${a.offer_joining_on ? formatDatePk(a.offer_joining_on) : 'a date to agree'}` : null,
                 lastNote: [...(a.job_application_event ?? [])].sort((x, y) => y.created_at.localeCompare(x.created_at)).find((e) => e.note)?.note ?? null,
               }))}
             />
@@ -84,4 +87,11 @@ export default async function RecruitmentPage({ searchParams }: { searchParams: 
       </div>
     </>
   );
+}
+
+function scoreSummary(scores: { subject_knowledge: number; communication: number; teaching_demo: number; attitude: number; recommendation: string }[]): string | null {
+  if (scores.length === 0) return null;
+  const avg = scores.reduce((n, x) => n + (x.subject_knowledge + x.communication + x.teaching_demo + x.attitude) / 4, 0) / scores.length;
+  const hires = scores.filter((x) => x.recommendation === 'hire').length;
+  return `${avg.toFixed(1)} / 5 from ${scores.length} ${scores.length === 1 ? 'interviewer' : 'interviewers'}, ${hires} recommend hiring`;
 }

@@ -148,6 +148,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/id-cards', label: 'ID Cards', roles: [...FRONT_OFFICE, 'hr_manager'] },
       { href: '/staff/workload', label: 'Teacher Workload', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
       { href: '/staff/recruitment', label: 'Recruitment', roles: HR_ROLES },
+      { href: '/staff/hr-dashboard', label: 'HR Dashboard', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'hr_manager'] },
       { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
       { href: '/staff/training', label: 'Training & CPD', roles: SCHOOL_ADMIN_HR },
       { href: '/staff/grievances', label: 'Grievances' },
