@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import { todayPk } from './support/today';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -225,7 +226,7 @@ test('a register captured offline for a date locked before the sync becomes corr
     tenant_id: section!.tenant_id,
     campus_id: section!.campus_id,
     section_id: sectionId,
-    attendance_date: new Date().toISOString().slice(0, 10),
+    attendance_date: todayPk(),
     locked_by: 'manual',
   });
   if (lockError) throw lockError;

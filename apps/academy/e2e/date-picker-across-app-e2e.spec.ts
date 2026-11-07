@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { seedSchoolOwner, seedSection } from './support/school-owner-seed';
+import { todayPk } from './support/today';
 
 test.describe('Universal DatePicker Functionality & UI Consistency Across Modules', () => {
   test('Owner can interact with calendar popovers, year/month selectors, and Today shortcuts across modules', async ({ page }) => {
@@ -36,8 +37,11 @@ test.describe('Universal DatePicker Functionality & UI Consistency Across Module
     // Click "Today" button and verify date filled
     await fromPopover.getByRole('button', { name: 'Today' }).click();
     await expect(fromPopover).not.toBeVisible();
-    const todayStr = new Date().toISOString().slice(0, 10);
-    await expect(reportFrom).toHaveValue(todayStr);
+    // The Today button uses the browser's own date; the register below defaults to the school's (Karachi) date.
+    const now = new Date();
+    const browserToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    await expect(reportFrom).toHaveValue(browserToday);
+    const todayStr = todayPk();
 
     // 3. Test DatePicker in Audit Export (/audit-export)
     await page.goto('/audit-export');

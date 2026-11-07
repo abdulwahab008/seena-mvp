@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import { todayPk } from './support/today';
 
 // FR-T08: the bound-register equivalent, driven end to end through the real
 // UI by a real Principal — three certificates issued, the MIDDLE one
@@ -157,7 +158,7 @@ async function issueTransferCertificate(page: import('@playwright/test').Page, g
   await page.getByTestId(`cert-issue-student-${gr}`).click();
   await page.getByTestId('cert-issue-template-trigger').click();
   await page.getByTestId('cert-issue-template-FBISE-en').click();
-  await page.getByTestId('cert-issue-leaving-date').fill(new Date().toISOString().slice(0, 10));
+  await page.getByTestId('cert-issue-leaving-date').fill(todayPk());
   await page.getByTestId('cert-issue-conduct').fill('Good');
   await page.getByTestId('cert-issue-reason').fill(reason);
   await page.getByTestId('cert-issue-submit').click();

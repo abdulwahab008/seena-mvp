@@ -2076,6 +2076,7 @@ export type Database = {
           status: Database['public']['Enums']['user_status']
           tenant_id: string
           user_id: string
+          username: string | null
         }
         Insert: {
           app_role: Database['public']['Enums']['app_role']
@@ -2087,6 +2088,7 @@ export type Database = {
           status?: Database['public']['Enums']['user_status']
           tenant_id: string
           user_id: string
+          username?: string | null
         }
         Update: {
           app_role?: Database['public']['Enums']['app_role']
@@ -2098,6 +2100,7 @@ export type Database = {
           status?: Database['public']['Enums']['user_status']
           tenant_id?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: [
           {
@@ -13288,11 +13291,135 @@ export type Database = {
           },
         ]
       }
+      download_item: {
+        Row: {
+          campus_id: string
+          category: string
+          class_level_id: string | null
+          created_at: string
+          id: string
+          mime_type: string
+          original_filename: string
+          section_id: string | null
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          title: string
+          uploaded_by: string
+        }
+        Insert: {
+          campus_id: string
+          category: string
+          class_level_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type: string
+          original_filename: string
+          section_id?: string | null
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          title: string
+          uploaded_by?: string
+        }
+        Update: {
+          campus_id?: string
+          category?: string
+          class_level_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type?: string
+          original_filename?: string
+          section_id?: string | null
+          size_bytes?: number
+          storage_path?: string
+          tenant_id?: string
+          title?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'download_item_class_level_id_fkey'
+            columns: ['class_level_id']
+            isOneToOne: false
+            referencedRelation: 'class_level'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'download_item_section_id_fkey'
+            columns: ['section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      front_desk_entry: {
+        Row: {
+          campus_id: string
+          close_note: string | null
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string
+          details: string | null
+          follow_up_on: string | null
+          host_name: string | null
+          id: string
+          kind: Database['public']['Enums']['front_desk_kind']
+          opened_at: string
+          person_name: string
+          phone: string | null
+          purpose: string | null
+          reference: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          close_note?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          details?: string | null
+          follow_up_on?: string | null
+          host_name?: string | null
+          id?: string
+          kind: Database['public']['Enums']['front_desk_kind']
+          opened_at?: string
+          person_name: string
+          phone?: string | null
+          purpose?: string | null
+          reference?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          close_note?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          details?: string | null
+          follow_up_on?: string | null
+          host_name?: string | null
+          id?: string
+          kind?: Database['public']['Enums']['front_desk_kind']
+          opened_at?: string
+          person_name?: string
+          phone?: string | null
+          purpose?: string | null
+          reference?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
+          family_no: number
           father_cnic: string | null
           id: string
           primary_guardian_id: string | null
@@ -13302,6 +13429,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          family_no?: number
           father_cnic?: string | null
           id?: string
           primary_guardian_id?: string | null
@@ -13311,6 +13439,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          family_no?: number
           father_cnic?: string | null
           id?: string
           primary_guardian_id?: string | null
@@ -48003,7 +48132,164 @@ export type Database = {
         Returns: boolean
       }
       admit_card_batch: { Args: { p_exam_term_id: string; p_section_id: string }; Returns: Json }
+      consecutive_absentees: {
+        Args: { p_campus_id: string; p_min_days?: number }
+        Returns: {
+          absent_since: string | null
+          class_name: string
+          enrolment_id: string
+          gr_number: string
+          guardian_phone: string | null
+          streak_days: number
+          student_name: string
+        }[]
+      }
+      register_download_item: {
+        Args: {
+          p_campus_id: string
+          p_category: string
+          p_class_level_id: string | null
+          p_filename: string
+          p_mime_type: string
+          p_section_id: string | null
+          p_size_bytes: number
+          p_title: string
+        }
+        Returns: Json
+      }
+      delete_download_item: { Args: { p_id: string }; Returns: undefined }
+      portal_download_items: {
+        Args: never
+        Returns: { category: string; created_at: string; id: string; original_filename: string; size_bytes: number; title: string }[]
+      }
+      download_item_path: {
+        Args: { p_id: string }
+        Returns: { mime_type: string; original_filename: string; storage_path: string }[]
+      }
+      log_front_desk_entry: {
+        Args: {
+          p_campus_id: string
+          p_details?: string
+          p_follow_up_on?: string
+          p_host_name?: string
+          p_kind: Database['public']['Enums']['front_desk_kind']
+          p_person_name: string
+          p_phone?: string
+          p_purpose?: string
+          p_reference?: string
+        }
+        Returns: string
+      }
+      close_front_desk_entry: {
+        Args: { p_entry_id: string; p_note?: string }
+        Returns: undefined
+      }
+      family_fee_lookup: {
+        Args: { p_query: string }
+        Returns: {
+          balance_paisa: number
+          class_name: string
+          enrolment_id: string
+          family_group_id: string
+          family_no: number
+          gr_number: string
+          guardian_name: string | null
+          guardian_phone: string | null
+          oldest_due_date: string | null
+          student_id: string
+          student_name: string
+        }[]
+      }
+      collect_family_payment: {
+        Args: {
+          p_amount_paisa: number
+          p_client_idempotency_key: string
+          p_family_group_id: string
+          p_mode?: Database['public']['Enums']['fee_payment_mode']
+          p_reference_no?: string
+        }
+        Returns: Json
+      }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
+      is_platform_admin: { Args: never; Returns: boolean }
+      list_user_accounts: {
+        Args: never
+        Returns: {
+          active: boolean
+          app_role: string
+          campuses: string[]
+          full_name: string
+          kind: string
+          last_sign_in_at: string | null
+          login_id: string
+          user_id: string
+        }[]
+      }
+      my_school_status: {
+        Args: never
+        Returns: {
+          account_active: boolean
+          status: Database['public']['Enums']['tenant_status']
+          tenant_name: string
+        }[]
+      }
+      create_user_account: {
+        Args: {
+          p_campus_ids: string[]
+          p_full_name: string
+          p_role: Database['public']['Enums']['app_role']
+          p_user_id: string
+          p_username: string | null
+        }
+        Returns: undefined
+      }
+      set_user_account_active: {
+        Args: { p_active: boolean; p_user_id: string }
+        Returns: undefined
+      }
+      set_user_account_role: {
+        Args: { p_role: Database['public']['Enums']['app_role']; p_user_id: string }
+        Returns: undefined
+      }
+      user_account_kind: { Args: { p_user_id: string }; Returns: string }
+      user_account_login_email: {
+        Args: {
+          p_campus_ids: string[]
+          p_role: Database['public']['Enums']['app_role']
+          p_username: string | null
+        }
+        Returns: string | null
+      }
+      platform_list_tenants: {
+        Args: never
+        Returns: {
+          campuses: number
+          created_at: string
+          id: string
+          last_sign_in_at: string | null
+          logins: number
+          name: string
+          owner_email: string | null
+          owner_invite_id: string | null
+          owner_name: string | null
+          slug: string
+          status: Database['public']['Enums']['tenant_status']
+          students: number
+        }[]
+      }
+      platform_provision_tenant: {
+        Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
+        Returns: string
+      }
+      platform_renew_owner_invite: { Args: { p_tenant_id: string }; Returns: string | null }
+      platform_set_tenant_status: {
+        Args: {
+          p_reason: string
+          p_status: Database['public']['Enums']['tenant_status']
+          p_tenant_id: string
+        }
+        Returns: undefined
+      }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
         Args: { p_email: string }
@@ -51305,6 +51591,7 @@ export type Database = {
         | 'paid'
       fee_challan_line_type: 'charge' | 'concession' | 'arrears' | 'late_fee'
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
+      front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
       fee_ledger_direction: 'debit' | 'credit'
       fee_ledger_entry_type:
@@ -51906,6 +52193,7 @@ export const Constants = {
       ],
       fee_challan_line_type: ['charge', 'concession', 'arrears', 'late_fee'],
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
+      front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
       fee_ledger_direction: ['debit', 'credit'],
       fee_ledger_entry_type: [
