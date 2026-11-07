@@ -13756,6 +13756,78 @@ export type Database = {
         Update: { locked_through?: string | null; tenant_id?: string; updated_at?: string }
         Relationships: []
       }
+      office_contact: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          organisation: string | null
+          phone: string | null
+          tenant_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          organisation?: string | null
+          phone?: string | null
+          tenant_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          organisation?: string | null
+          phone?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      team_task: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          done_at: string | null
+          due_on: string | null
+          id: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          done_at?: string | null
+          due_on?: string | null
+          id?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          done_at?: string | null
+          due_on?: string | null
+          id?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       interview_score: {
         Row: {
           application_id: string
@@ -49609,6 +49681,9 @@ export type Database = {
       save_external_result: { Args: { p_board: string; p_exam: string; p_exam_year: number; p_grade: string; p_obtained: number; p_roll_no: string; p_student_id: string; p_total: number }; Returns: string }
       ensure_behaviour_traits: { Args: never; Returns: undefined }
       save_behaviour_ratings: { Args: { p_exam_term_id: string; p_ratings: Json }; Returns: number }
+      save_office_contact: { Args: { p_category: string; p_email: string; p_name: string; p_notes?: string; p_organisation: string; p_phone: string }; Returns: string }
+      add_team_task: { Args: { p_assigned_to?: string; p_due_on?: string; p_title: string }; Returns: string }
+      complete_team_task: { Args: { p_id: string }; Returns: undefined }
       autofill_section_timetable: { Args: { p_section_id: string; p_version_id: string }; Returns: Json }
       copy_section_timetable: { Args: { p_from_section_id: string; p_to_section_id: string; p_version_id: string }; Returns: Json }
       transfer_stock: { Args: { p_from_store_id: string; p_item_id: string; p_qty: number; p_to_store_id: string }; Returns: string }
