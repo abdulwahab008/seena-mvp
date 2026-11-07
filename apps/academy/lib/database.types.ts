@@ -2076,6 +2076,7 @@ export type Database = {
           status: Database['public']['Enums']['user_status']
           tenant_id: string
           user_id: string
+          username: string | null
         }
         Insert: {
           app_role: Database['public']['Enums']['app_role']
@@ -2087,6 +2088,7 @@ export type Database = {
           status?: Database['public']['Enums']['user_status']
           tenant_id: string
           user_id: string
+          username?: string | null
         }
         Update: {
           app_role?: Database['public']['Enums']['app_role']
@@ -2098,6 +2100,7 @@ export type Database = {
           status?: Database['public']['Enums']['user_status']
           tenant_id?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: [
           {
@@ -13399,11 +13402,671 @@ export type Database = {
           },
         ]
       }
+      quiz: {
+        Row: {
+          campus_id: string
+          closes_at: string
+          created_at: string
+          created_by: string
+          duration_min: number
+          id: string
+          opens_at: string
+          section_id: string
+          status: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          closes_at: string
+          created_at?: string
+          created_by?: string
+          duration_min: number
+          id?: string
+          opens_at: string
+          section_id: string
+          status?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          closes_at?: string
+          created_at?: string
+          created_by?: string
+          duration_min?: number
+          id?: string
+          opens_at?: string
+          section_id?: string
+          status?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_section_id_fkey'
+            columns: ['section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      quiz_question: {
+        Row: {
+          campus_id: string
+          correct_index: number
+          id: string
+          marks: number
+          options: string[]
+          position: number
+          prompt: string
+          quiz_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          correct_index: number
+          id?: string
+          marks?: number
+          options: string[]
+          position: number
+          prompt: string
+          quiz_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          correct_index?: number
+          id?: string
+          marks?: number
+          options?: string[]
+          position?: number
+          prompt?: string
+          quiz_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_question_quiz_id_fkey'
+            columns: ['quiz_id']
+            isOneToOne: false
+            referencedRelation: 'quiz'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      quiz_attempt: {
+        Row: {
+          answers: number[] | null
+          campus_id: string
+          id: string
+          max_score: number | null
+          quiz_id: string
+          score: number | null
+          started_at: string
+          student_id: string
+          submitted_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          answers?: number[] | null
+          campus_id: string
+          id?: string
+          max_score?: number | null
+          quiz_id: string
+          score?: number | null
+          started_at?: string
+          student_id: string
+          submitted_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          answers?: number[] | null
+          campus_id?: string
+          id?: string
+          max_score?: number | null
+          quiz_id?: string
+          score?: number | null
+          started_at?: string
+          student_id?: string
+          submitted_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_attempt_quiz_id_fkey'
+            columns: ['quiz_id']
+            isOneToOne: false
+            referencedRelation: 'quiz'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'quiz_attempt_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      training_program: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string
+          held_on: string
+          hours: number
+          id: string
+          is_mandatory: boolean
+          provider: string | null
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string
+          held_on: string
+          hours: number
+          id?: string
+          is_mandatory?: boolean
+          provider?: string | null
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string
+          held_on?: string
+          hours?: number
+          id?: string
+          is_mandatory?: boolean
+          provider?: string | null
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      training_attendance: {
+        Row: {
+          campus_id: string
+          completed: boolean
+          program_id: string
+          staff_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          completed?: boolean
+          program_id: string
+          staff_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          completed?: boolean
+          program_id?: string
+          staff_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'training_attendance_program_id_fkey'
+            columns: ['program_id']
+            isOneToOne: false
+            referencedRelation: 'training_program'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      staff_grievance: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          handled_by: string | null
+          id: string
+          raised_by: string
+          resolution: string | null
+          resolved_at: string | null
+          status: string
+          subject: string
+          tenant_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          handled_by?: string | null
+          id?: string
+          raised_by?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string
+          subject: string
+          tenant_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          handled_by?: string | null
+          id?: string
+          raised_by?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string
+          subject?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      job_opening: {
+        Row: {
+          campus_id: string
+          closes_on: string | null
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          id: string
+          positions: number
+          salary_range: string | null
+          status: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          closes_on?: string | null
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          positions?: number
+          salary_range?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          closes_on?: string | null
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          positions?: number
+          salary_range?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      job_application: {
+        Row: {
+          campus_id: string
+          candidate_name: string
+          cnic: string | null
+          created_at: string
+          email: string | null
+          experience_yrs: number | null
+          id: string
+          interview_at: string | null
+          job_opening_id: string
+          phone: string | null
+          qualification: string | null
+          rating: number | null
+          source: string | null
+          stage: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          campus_id: string
+          candidate_name: string
+          cnic?: string | null
+          created_at?: string
+          email?: string | null
+          experience_yrs?: number | null
+          id?: string
+          interview_at?: string | null
+          job_opening_id: string
+          phone?: string | null
+          qualification?: string | null
+          rating?: number | null
+          source?: string | null
+          stage?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string
+          candidate_name?: string
+          cnic?: string | null
+          created_at?: string
+          email?: string | null
+          experience_yrs?: number | null
+          id?: string
+          interview_at?: string | null
+          job_opening_id?: string
+          phone?: string | null
+          qualification?: string | null
+          rating?: number | null
+          source?: string | null
+          stage?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'job_application_job_opening_id_fkey'
+            columns: ['job_opening_id']
+            isOneToOne: false
+            referencedRelation: 'job_opening'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      job_application_event: {
+        Row: {
+          actor_id: string
+          application_id: string
+          campus_id: string
+          created_at: string
+          from_stage: string | null
+          id: string
+          note: string | null
+          tenant_id: string
+          to_stage: string
+        }
+        Insert: {
+          actor_id?: string
+          application_id: string
+          campus_id: string
+          created_at?: string
+          from_stage?: string | null
+          id?: string
+          note?: string | null
+          tenant_id: string
+          to_stage: string
+        }
+        Update: {
+          actor_id?: string
+          application_id?: string
+          campus_id?: string
+          created_at?: string
+          from_stage?: string | null
+          id?: string
+          note?: string | null
+          tenant_id?: string
+          to_stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'job_application_event_application_id_fkey'
+            columns: ['application_id']
+            isOneToOne: false
+            referencedRelation: 'job_application'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      halqa: {
+        Row: {
+          campus_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          stream: string
+          teacher_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          stream?: string
+          teacher_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          stream?: string
+          teacher_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'halqa_teacher_id_fkey'
+            columns: ['teacher_id']
+            isOneToOne: false
+            referencedRelation: 'app_user'
+            referencedColumns: ['user_id']
+          },
+        ]
+      }
+      halqa_member: {
+        Row: {
+          campus_id: string
+          halqa_id: string
+          joined_on: string
+          left_on: string | null
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          halqa_id: string
+          joined_on?: string
+          left_on?: string | null
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          halqa_id?: string
+          joined_on?: string
+          left_on?: string | null
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'halqa_member_halqa_id_fkey'
+            columns: ['halqa_id']
+            isOneToOne: false
+            referencedRelation: 'halqa'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      student_incident: {
+        Row: {
+          action_taken: string | null
+          campus_id: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          occurred_on: string
+          parent_informed: boolean
+          recorded_by: string
+          severity: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          campus_id: string
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          occurred_on: string
+          parent_informed?: boolean
+          recorded_by?: string
+          severity: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          campus_id?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          occurred_on?: string
+          parent_informed?: boolean
+          recorded_by?: string
+          severity?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      download_item: {
+        Row: {
+          campus_id: string
+          category: string
+          class_level_id: string | null
+          created_at: string
+          id: string
+          mime_type: string
+          original_filename: string
+          section_id: string | null
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          title: string
+          uploaded_by: string
+        }
+        Insert: {
+          campus_id: string
+          category: string
+          class_level_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type: string
+          original_filename: string
+          section_id?: string | null
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          title: string
+          uploaded_by?: string
+        }
+        Update: {
+          campus_id?: string
+          category?: string
+          class_level_id?: string | null
+          created_at?: string
+          id?: string
+          mime_type?: string
+          original_filename?: string
+          section_id?: string | null
+          size_bytes?: number
+          storage_path?: string
+          tenant_id?: string
+          title?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'download_item_class_level_id_fkey'
+            columns: ['class_level_id']
+            isOneToOne: false
+            referencedRelation: 'class_level'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'download_item_section_id_fkey'
+            columns: ['section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      front_desk_entry: {
+        Row: {
+          campus_id: string
+          close_note: string | null
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string
+          details: string | null
+          follow_up_on: string | null
+          host_name: string | null
+          id: string
+          kind: Database['public']['Enums']['front_desk_kind']
+          opened_at: string
+          person_name: string
+          phone: string | null
+          purpose: string | null
+          reference: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          close_note?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          details?: string | null
+          follow_up_on?: string | null
+          host_name?: string | null
+          id?: string
+          kind: Database['public']['Enums']['front_desk_kind']
+          opened_at?: string
+          person_name: string
+          phone?: string | null
+          purpose?: string | null
+          reference?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          close_note?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          details?: string | null
+          follow_up_on?: string | null
+          host_name?: string | null
+          id?: string
+          kind?: Database['public']['Enums']['front_desk_kind']
+          opened_at?: string
+          person_name?: string
+          phone?: string | null
+          purpose?: string | null
+          reference?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
+          family_no: number
           father_cnic: string | null
           id: string
           primary_guardian_id: string | null
@@ -13413,6 +14076,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          family_no?: number
           father_cnic?: string | null
           id?: string
           primary_guardian_id?: string | null
@@ -13422,6 +14086,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          family_no?: number
           father_cnic?: string | null
           id?: string
           primary_guardian_id?: string | null
@@ -48121,7 +48786,276 @@ export type Database = {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
       }
+      create_quiz: {
+        Args: { p_closes_at: string; p_duration_min: number; p_opens_at: string; p_section_id: string; p_title: string }
+        Returns: string
+      }
+      add_quiz_question: {
+        Args: { p_correct_index: number; p_marks?: number; p_options: string[]; p_prompt: string; p_quiz_id: string }
+        Returns: string
+      }
+      publish_quiz: { Args: { p_quiz_id: string }; Returns: undefined }
+      my_quizzes: {
+        Args: never
+        Returns: {
+          closes_at: string
+          duration_min: number
+          id: string
+          max_score: number | null
+          opens_at: string
+          questions: number
+          score: number | null
+          submitted: boolean
+          title: string
+        }[]
+      }
+      start_quiz_attempt: { Args: { p_quiz_id: string }; Returns: Json }
+      submit_quiz_attempt: { Args: { p_answers: number[]; p_quiz_id: string }; Returns: Json }
+      save_training_program: {
+        Args: { p_campus_id: string; p_held_on: string; p_hours: number; p_is_mandatory: boolean; p_provider: string | null; p_staff_ids: string[]; p_title: string }
+        Returns: string
+      }
+      staff_cpd_hours: {
+        Args: { p_campus_id: string; p_year: number }
+        Returns: { full_name: string; hours: number; mandatory_missed: number; programs: number; staff_id: string }[]
+      }
+      raise_staff_grievance: { Args: { p_category: string; p_description: string; p_subject: string }; Returns: string }
+      handle_staff_grievance: { Args: { p_id: string; p_resolution?: string | null; p_status: string }; Returns: undefined }
+      save_job_opening: {
+        Args: {
+          p_campus_id: string
+          p_closes_on: string | null
+          p_department_id: string | null
+          p_description: string | null
+          p_opening_id?: string
+          p_positions: number
+          p_salary_range: string | null
+          p_status?: string
+          p_title: string
+        }
+        Returns: string
+      }
+      add_job_application: {
+        Args: {
+          p_candidate_name: string
+          p_cnic: string | null
+          p_email: string | null
+          p_experience_yrs: number | null
+          p_job_opening_id: string
+          p_phone: string | null
+          p_qualification: string | null
+          p_source: string | null
+        }
+        Returns: string
+      }
+      move_job_application: {
+        Args: { p_application_id: string; p_interview_at?: string | null; p_note?: string | null; p_rating?: number | null; p_stage: string }
+        Returns: undefined
+      }
+      save_halqa: {
+        Args: { p_campus_id: string; p_halqa_id?: string; p_name: string; p_stream: string; p_teacher_id: string | null }
+        Returns: string
+      }
+      set_halqa_member: { Args: { p_halqa_id: string; p_member: boolean; p_student_id: string }; Returns: undefined }
+      record_hifz_lesson: {
+        Args: {
+          p_grade: string | null
+          p_halqa_id: string
+          p_lesson_date: string
+          p_lesson_type: string
+          p_lines: number | null
+          p_mistakes: number
+          p_para_from: number | null
+          p_para_to: number | null
+          p_portion: string | null
+          p_student_id: string
+          p_tajweed_mistakes: number
+        }
+        Returns: string
+      }
+      halqa_progress: {
+        Args: { p_halqa_id: string }
+        Returns: {
+          gr_number: string
+          highest_para: number | null
+          last_lesson: string | null
+          lessons_30d: number
+          mistakes_30d: number
+          student_id: string
+          student_name: string
+        }[]
+      }
+      record_student_incident: {
+        Args: {
+          p_action_taken?: string
+          p_category: string
+          p_description: string
+          p_occurred_on: string
+          p_parent_informed?: boolean
+          p_severity: string
+          p_student_id: string
+        }
+        Returns: string
+      }
+      admit_card_batch: { Args: { p_exam_term_id: string; p_section_id: string }; Returns: Json }
+      consecutive_absentees: {
+        Args: { p_campus_id: string; p_min_days?: number }
+        Returns: {
+          absent_since: string | null
+          class_name: string
+          enrolment_id: string
+          gr_number: string
+          guardian_phone: string | null
+          streak_days: number
+          student_name: string
+        }[]
+      }
+      register_download_item: {
+        Args: {
+          p_campus_id: string
+          p_category: string
+          p_class_level_id: string | null
+          p_filename: string
+          p_mime_type: string
+          p_section_id: string | null
+          p_size_bytes: number
+          p_title: string
+        }
+        Returns: Json
+      }
+      delete_download_item: { Args: { p_id: string }; Returns: undefined }
+      portal_download_items: {
+        Args: never
+        Returns: { category: string; created_at: string; id: string; original_filename: string; size_bytes: number; title: string }[]
+      }
+      download_item_path: {
+        Args: { p_id: string }
+        Returns: { mime_type: string; original_filename: string; storage_path: string }[]
+      }
+      log_front_desk_entry: {
+        Args: {
+          p_campus_id: string
+          p_details?: string
+          p_follow_up_on?: string
+          p_host_name?: string
+          p_kind: Database['public']['Enums']['front_desk_kind']
+          p_person_name: string
+          p_phone?: string
+          p_purpose?: string
+          p_reference?: string
+        }
+        Returns: string
+      }
+      close_front_desk_entry: {
+        Args: { p_entry_id: string; p_note?: string }
+        Returns: undefined
+      }
+      family_fee_lookup: {
+        Args: { p_query: string }
+        Returns: {
+          balance_paisa: number
+          class_name: string
+          enrolment_id: string
+          family_group_id: string
+          family_no: number
+          gr_number: string
+          guardian_name: string | null
+          guardian_phone: string | null
+          oldest_due_date: string | null
+          student_id: string
+          student_name: string
+        }[]
+      }
+      collect_family_payment: {
+        Args: {
+          p_amount_paisa: number
+          p_client_idempotency_key: string
+          p_family_group_id: string
+          p_mode?: Database['public']['Enums']['fee_payment_mode']
+          p_reference_no?: string
+        }
+        Returns: Json
+      }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
+      is_platform_admin: { Args: never; Returns: boolean }
+      list_user_accounts: {
+        Args: never
+        Returns: {
+          active: boolean
+          app_role: string
+          campuses: string[]
+          full_name: string
+          kind: string
+          last_sign_in_at: string | null
+          login_id: string
+          user_id: string
+        }[]
+      }
+      my_school_status: {
+        Args: never
+        Returns: {
+          account_active: boolean
+          status: Database['public']['Enums']['tenant_status']
+          tenant_name: string
+        }[]
+      }
+      create_user_account: {
+        Args: {
+          p_campus_ids: string[]
+          p_full_name: string
+          p_role: Database['public']['Enums']['app_role']
+          p_user_id: string
+          p_username: string | null
+        }
+        Returns: undefined
+      }
+      set_user_account_active: {
+        Args: { p_active: boolean; p_user_id: string }
+        Returns: undefined
+      }
+      set_user_account_role: {
+        Args: { p_role: Database['public']['Enums']['app_role']; p_user_id: string }
+        Returns: undefined
+      }
+      user_account_kind: { Args: { p_user_id: string }; Returns: string }
+      user_account_login_email: {
+        Args: {
+          p_campus_ids: string[]
+          p_role: Database['public']['Enums']['app_role']
+          p_username: string | null
+        }
+        Returns: string | null
+      }
+      platform_list_tenants: {
+        Args: never
+        Returns: {
+          campuses: number
+          created_at: string
+          id: string
+          last_sign_in_at: string | null
+          logins: number
+          name: string
+          owner_email: string | null
+          owner_invite_id: string | null
+          owner_name: string | null
+          slug: string
+          status: Database['public']['Enums']['tenant_status']
+          students: number
+        }[]
+      }
+      platform_provision_tenant: {
+        Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
+        Returns: string
+      }
+      platform_renew_owner_invite: { Args: { p_tenant_id: string }; Returns: string | null }
+      platform_set_tenant_status: {
+        Args: {
+          p_reason: string
+          p_status: Database['public']['Enums']['tenant_status']
+          p_tenant_id: string
+        }
+        Returns: undefined
+      }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
         Args: { p_email: string }
@@ -51424,6 +52358,7 @@ export type Database = {
       fee_challan_line_type: 'charge' | 'concession' | 'arrears' | 'late_fee'
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
       gl_account_type: 'asset' | 'liability' | 'equity' | 'income' | 'expense'
+      front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
       fee_ledger_direction: 'debit' | 'credit'
       fee_ledger_entry_type:
@@ -52026,6 +52961,7 @@ export const Constants = {
       fee_challan_line_type: ['charge', 'concession', 'arrears', 'late_fee'],
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
       gl_account_type: ['asset', 'liability', 'equity', 'income', 'expense'],
+      front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
       fee_ledger_direction: ['debit', 'credit'],
       fee_ledger_entry_type: [
