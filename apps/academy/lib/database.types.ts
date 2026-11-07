@@ -13014,6 +13014,7 @@ export type Database = {
           code: string
           created_at: string
           created_by: string | null
+          gl_code: string | null
           id: string
           is_active: boolean
           is_leaf: boolean
@@ -13028,6 +13029,7 @@ export type Database = {
           code: string
           created_at?: string
           created_by?: string | null
+          gl_code?: string | null
           id?: string
           is_active?: boolean
           is_leaf?: boolean
@@ -13042,6 +13044,7 @@ export type Database = {
           code?: string
           created_at?: string
           created_by?: string | null
+          gl_code?: string | null
           id?: string
           is_active?: boolean
           is_leaf?: boolean
@@ -13324,35 +13327,41 @@ export type Database = {
       journal_entry: {
         Row: {
           created_at: string
-          created_by: string
+          created_by: string | null
           entry_date: string
           entry_no: string
           id: string
           narration: string
           reversal_of: string | null
           reversed_by: string | null
+          source_id: string | null
+          source_kind: string | null
           tenant_id: string
         }
         Insert: {
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           entry_date: string
           entry_no: string
           id?: string
           narration: string
           reversal_of?: string | null
           reversed_by?: string | null
+          source_id?: string | null
+          source_kind?: string | null
           tenant_id: string
         }
         Update: {
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           entry_date?: string
           entry_no?: string
           id?: string
           narration?: string
           reversal_of?: string | null
           reversed_by?: string | null
+          source_id?: string | null
+          source_kind?: string | null
           tenant_id?: string
         }
         Relationships: []
@@ -48788,6 +48797,16 @@ export type Database = {
       save_gl_account: { Args: { p_code: string; p_id?: string; p_is_active?: boolean; p_name: string; p_type: Database['public']['Enums']['gl_account_type'] }; Returns: string }
       post_journal_entry: { Args: { p_entry_date: string; p_lines: Json; p_narration: string }; Returns: string }
       reverse_journal_entry: { Args: { p_entry_id: string; p_reason: string }; Returns: string }
+      post_ledger_backfill: { Args: never; Returns: number }
+      set_head_gl_code: { Args: { p_code: string; p_head_id: string; p_kind: string }; Returns: undefined }
+      income_statement: {
+        Args: { p_from: string; p_to: string }
+        Returns: { account_id: string; amount: number; code: string; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
+      }
+      balance_sheet: {
+        Args: { p_as_of: string }
+        Returns: { account_id: string | null; amount: number; code: string | null; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
+      }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
