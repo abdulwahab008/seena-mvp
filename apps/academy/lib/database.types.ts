@@ -48085,6 +48085,7 @@ export type Database = {
       close_front_desk_entry: {
         Args: { p_entry_id: string; p_note?: string }
         Returns: undefined
+      }
       family_fee_lookup: {
         Args: { p_query: string }
         Returns: {
