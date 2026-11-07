@@ -3,6 +3,7 @@ import {
   BadgeCheck,
   Banknote,
   BookOpen,
+  Landmark,
   Boxes,
   Building2,
   Bus,
@@ -59,6 +60,7 @@ const OWNERS = ['super_admin', 'owner'] as const;
 const SCHOOL_ADMIN = ['super_admin', 'owner', 'principal'] as const;
 const FRONT_OFFICE = [...LEADERSHIP, 'admissions_officer', 'receptionist'] as const;
 const HR_ROLES = [...LEADERSHIP, 'hr_manager'] as const;
+const SCHOOL_ADMIN_HR = [...SCHOOL_ADMIN, 'hr_manager'] as const;
 const PAYROLL_ROLES = ['super_admin', 'owner', 'principal', 'hr_manager', 'accountant'] as const;
 const FINANCE_ROLES = ['super_admin', 'owner', 'principal', 'accountant'] as const;
 const ACADEMIC_LEADS = [...LEADERSHIP, 'head_of_department', 'hr_manager'] as const;
@@ -99,6 +101,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Admissions',
     icon: ClipboardCheck,
     items: [
+      { href: '/front-desk', label: 'Front Desk', roles: FRONT_OFFICE },
       { href: '/admissions/walk-in', label: 'Walk-in Desk', roles: FRONT_OFFICE },
       { href: '/admissions/enquiries', label: 'Enquiries', roles: FRONT_OFFICE },
       { href: '/admissions/applications', label: 'Applications', roles: FRONT_OFFICE },
@@ -115,6 +118,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Users,
     items: [
       { href: '/students', label: 'All Students' },
+      { href: '/students/alumni', label: 'Alumni' },
       { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
       { href: '/students/promotion', label: 'Promotion', roles: [...LEADERSHIP, 'exam_controller'] },
       { href: '/students/recycle-bin', label: 'Recycle Bin', roles: FRONT_OFFICE },
@@ -137,8 +141,12 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/staff/discipline', label: 'Disciplinary', roles: HR_ROLES },
       { href: '/staff/exits', label: 'Exits', roles: HR_ROLES },
       { href: '/staff/certificates', label: 'Certificates', roles: HR_ROLES },
+      { href: '/id-cards', label: 'ID Cards', roles: [...FRONT_OFFICE, 'hr_manager'] },
       { href: '/staff/workload', label: 'Teacher Workload', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
+      { href: '/staff/recruitment', label: 'Recruitment', roles: HR_ROLES },
       { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
+      { href: '/staff/training', label: 'Training & CPD', roles: SCHOOL_ADMIN_HR },
+      { href: '/staff/grievances', label: 'Grievances' },
       { href: '/staff/remarks', label: 'Remarks Moderation', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
       { href: '/staff/tickets', label: 'Support Tickets' },
       { href: '/leave', label: 'Leave' },
@@ -156,6 +164,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/payroll/structures', label: 'Salary Structures', roles: PAYROLL_ROLES },
       { href: '/payroll/loans', label: 'Staff Loans', roles: PAYROLL_ROLES },
       { href: '/payroll/tax-slabs', label: 'Tax Slabs', roles: PAYROLL_ROLES },
+      { href: '/payroll/statutory', label: 'Statutory Report', roles: PAYROLL_ROLES },
     ],
   },
   {
@@ -169,6 +178,9 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/academic-setup/syllabus', label: 'Syllabus' },
       { href: '/academic-setup/rooms', label: 'Rooms' },
       { href: '/homework', label: 'Homework', feature: 'module.homework' },
+      { href: '/quizzes', label: 'Online Quizzes' },
+      { href: '/hifz', label: 'Hifz & Quran' },
+      { href: '/downloads', label: 'Download Centre' },
       { href: '/lesson-plans', label: 'Lesson Plans' },
       { href: '/syllabus-coverage', label: 'Syllabus Coverage' },
       { href: '/syllabus-variance', label: 'Syllabus Variance' },
@@ -183,6 +195,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/academic-setup/timetable', label: 'Timetable' },
       { href: '/academic-setup/bell-templates', label: 'Bell Templates' },
       { href: '/academic-setup/substitutions', label: 'Substitutions' },
+      { href: '/academic-setup/free-periods', label: 'Free Teachers & Rooms' },
       { href: '/academic-setup/timetable-export', label: 'Print & Export' },
       { href: '/my-timetable', label: 'My Timetable' },
     ],
@@ -262,6 +275,14 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: 'accounts',
+    label: 'Accounts',
+    icon: Landmark,
+    items: [
+      { href: '/accounts', label: 'General Ledger', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
+    ],
+  },
+  {
     id: 'expenses',
     label: 'Expenses',
     icon: Receipt,
@@ -306,6 +327,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/inventory', label: 'Stores and Stock', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory/sales', label: 'Counter Sales', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/inventory/sales-report', label: 'Sales Report', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets', label: 'Asset Register', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets/custody', label: 'Asset Custody', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets/maintenance', label: 'Maintenance', roles: [...LEADERSHIP, 'accountant'] },
@@ -370,6 +392,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/library/circulation', label: 'Circulation Desk', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/reservations', label: 'Reservations', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/fines', label: 'Fines', roles: [...LEADERSHIP, 'librarian'] },
+      { href: '/library/stock-audit', label: 'Stock Audit', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/write-offs', label: 'Write-offs', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/policies', label: 'Borrowing Policy', roles: [...LEADERSHIP, 'librarian'] },
     ],
@@ -382,6 +405,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/campuses', label: 'Campuses', roles: SCHOOL_ADMIN },
       { href: '/sessions', label: 'Academic Sessions', roles: SCHOOL_ADMIN },
       { href: '/branding', label: 'Branding', roles: SCHOOL_ADMIN },
+      { href: '/users', label: 'User Accounts', roles: SCHOOL_ADMIN },
       { href: '/roles', label: 'Roles', roles: SCHOOL_ADMIN },
       { href: '/feature-flags', label: 'Modules', roles: SCHOOL_ADMIN },
       { href: '/settings/data-export', label: 'Export School Data', roles: SCHOOL_ADMIN },
