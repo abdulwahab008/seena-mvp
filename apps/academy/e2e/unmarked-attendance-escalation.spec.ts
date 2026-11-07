@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'node:crypto';
+import { todayPk } from './support/today';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -96,7 +97,7 @@ test('an owner runs the unmarked-attendance check and sees fully-marked excluded
     }
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPk();
 
   // Section A: the genuine UI zero-touch path — load, save, everyone
   // defaults to present. This is what "fully marked" looks like for real.
