@@ -13291,6 +13291,66 @@ export type Database = {
           },
         ]
       }
+      front_desk_entry: {
+        Row: {
+          campus_id: string
+          close_note: string | null
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string
+          details: string | null
+          follow_up_on: string | null
+          host_name: string | null
+          id: string
+          kind: Database['public']['Enums']['front_desk_kind']
+          opened_at: string
+          person_name: string
+          phone: string | null
+          purpose: string | null
+          reference: string | null
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          close_note?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          details?: string | null
+          follow_up_on?: string | null
+          host_name?: string | null
+          id?: string
+          kind: Database['public']['Enums']['front_desk_kind']
+          opened_at?: string
+          person_name: string
+          phone?: string | null
+          purpose?: string | null
+          reference?: string | null
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          close_note?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          details?: string | null
+          follow_up_on?: string | null
+          host_name?: string | null
+          id?: string
+          kind?: Database['public']['Enums']['front_desk_kind']
+          opened_at?: string
+          person_name?: string
+          phone?: string | null
+          purpose?: string | null
+          reference?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
@@ -48008,6 +48068,24 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      log_front_desk_entry: {
+        Args: {
+          p_campus_id: string
+          p_details?: string
+          p_follow_up_on?: string
+          p_host_name?: string
+          p_kind: Database['public']['Enums']['front_desk_kind']
+          p_person_name: string
+          p_phone?: string
+          p_purpose?: string
+          p_reference?: string
+        }
+        Returns: string
+      }
+      close_front_desk_entry: {
+        Args: { p_entry_id: string; p_note?: string }
+        Returns: undefined
+      }
       family_fee_lookup: {
         Args: { p_query: string }
         Returns: {
@@ -51415,6 +51493,7 @@ export type Database = {
         | 'paid'
       fee_challan_line_type: 'charge' | 'concession' | 'arrears' | 'late_fee'
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
+      front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
       fee_ledger_direction: 'debit' | 'credit'
       fee_ledger_entry_type:
@@ -52016,6 +52095,7 @@ export const Constants = {
       ],
       fee_challan_line_type: ['charge', 'concession', 'arrears', 'late_fee'],
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
+      front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
       fee_ledger_direction: ['debit', 'credit'],
       fee_ledger_entry_type: [

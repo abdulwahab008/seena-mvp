@@ -99,6 +99,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Admissions',
     icon: ClipboardCheck,
     items: [
+      { href: '/front-desk', label: 'Front Desk', roles: FRONT_OFFICE },
       { href: '/admissions/walk-in', label: 'Walk-in Desk', roles: FRONT_OFFICE },
       { href: '/admissions/enquiries', label: 'Enquiries', roles: FRONT_OFFICE },
       { href: '/admissions/applications', label: 'Applications', roles: FRONT_OFFICE },
