@@ -13756,6 +13756,173 @@ export type Database = {
         Update: { locked_through?: string | null; tenant_id?: string; updated_at?: string }
         Relationships: []
       }
+      donor: {
+        Row: {
+          cnic: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          tenant_id: string
+        }
+        Insert: {
+          cnic?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          tenant_id: string
+        }
+        Update: {
+          cnic?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      donation: {
+        Row: {
+          amount_paisa: number
+          created_at: string
+          created_by: string | null
+          donor_id: string
+          id: string
+          mode: string
+          purpose: string
+          received_on: string
+          reference: string | null
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          created_at?: string
+          created_by?: string | null
+          donor_id: string
+          id?: string
+          mode: string
+          purpose?: string
+          received_on?: string
+          reference?: string | null
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          created_at?: string
+          created_by?: string | null
+          donor_id?: string
+          id?: string
+          mode?: string
+          purpose?: string
+          received_on?: string
+          reference?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'donation_donor_id_fkey'
+            columns: ['donor_id']
+            isOneToOne: false
+            referencedRelation: 'donor'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      sponsorship: {
+        Row: {
+          created_at: string
+          donor_id: string
+          id: string
+          is_active: boolean
+          monthly_paisa: number
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          donor_id: string
+          id?: string
+          is_active?: boolean
+          monthly_paisa: number
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          donor_id?: string
+          id?: string
+          is_active?: boolean
+          monthly_paisa?: number
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'sponsorship_donor_id_fkey'
+            columns: ['donor_id']
+            isOneToOne: false
+            referencedRelation: 'donor'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sponsorship_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      sponsorship_payment: {
+        Row: {
+          amount_paisa: number
+          created_at: string
+          fee_payment_id: string | null
+          month: string
+          sponsorship_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          created_at?: string
+          fee_payment_id?: string | null
+          month: string
+          sponsorship_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          created_at?: string
+          fee_payment_id?: string | null
+          month?: string
+          sponsorship_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'sponsorship_payment_fee_payment_id_fkey'
+            columns: ['fee_payment_id']
+            isOneToOne: false
+            referencedRelation: 'fee_payment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sponsorship_payment_sponsorship_id_fkey'
+            columns: ['sponsorship_id']
+            isOneToOne: false
+            referencedRelation: 'sponsorship'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       live_class: {
         Row: {
           campus_id: string
@@ -49347,6 +49514,11 @@ export type Database = {
         Args: { p_as_of: string }
         Returns: { account_id: string | null; amount: number; code: string | null; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
       }
+      save_donor: { Args: { p_cnic?: string; p_email?: string; p_name: string; p_notes?: string; p_phone?: string }; Returns: string }
+      record_donation: { Args: { p_amount_paisa: number; p_donor_id: string; p_mode: string; p_purpose: string; p_received_on: string; p_reference?: string }; Returns: string }
+      save_sponsorship: { Args: { p_donor_id: string; p_monthly_paisa: number; p_student_id: string }; Returns: string }
+      end_sponsorship: { Args: { p_id: string }; Returns: undefined }
+      apply_sponsorships: { Args: { p_month: string }; Returns: Json }
       schedule_live_class: { Args: { p_duration_min: number; p_meeting_url: string; p_section_id: string; p_starts_at: string; p_subject_id?: string; p_title: string }; Returns: string }
       cancel_live_class: { Args: { p_id: string }; Returns: undefined }
       my_live_classes: { Args: never; Returns: { cancelled: boolean; duration_min: number; id: string; joined: boolean; starts_at: string; subject: string | null; title: string }[] }
