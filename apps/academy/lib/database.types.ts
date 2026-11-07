@@ -49201,6 +49201,8 @@ export type Database = {
       save_external_result: { Args: { p_board: string; p_exam: string; p_exam_year: number; p_grade: string; p_obtained: number; p_roll_no: string; p_student_id: string; p_total: number }; Returns: string }
       ensure_behaviour_traits: { Args: never; Returns: undefined }
       save_behaviour_ratings: { Args: { p_exam_term_id: string; p_ratings: Json }; Returns: number }
+      autofill_section_timetable: { Args: { p_section_id: string; p_version_id: string }; Returns: Json }
+      copy_section_timetable: { Args: { p_from_section_id: string; p_to_section_id: string; p_version_id: string }; Returns: Json }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
