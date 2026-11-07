@@ -48002,6 +48002,12 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      save_sms_gateway: { Args: { p_api_key?: string; p_config: Json; p_sender_id: string }; Returns: undefined }
+      sms_gateway_settings: { Args: never; Returns: { config: Json; has_key: boolean; is_active: boolean; sender_id: string | null }[] }
+      sms_gateway_for_dispatch: {
+        Args: { p_tenant_id: string }
+        Returns: { api_key: string; config: Json; provider_id: string; sender_id: string | null }[]
+      }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {

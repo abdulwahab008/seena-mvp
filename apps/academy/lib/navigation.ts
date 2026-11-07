@@ -346,6 +346,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: MessageSquare,
     items: [
       { href: '/communication/outbox', label: 'Message Outbox', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+      { href: '/communication/sms-gateway', label: 'SMS Gateway', roles: OWNERS },
       { href: '/communication/scheduled', label: 'Scheduled Sends', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/triggers', label: 'Trigger Rules', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/receipts', label: 'Delivery Receipts', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
