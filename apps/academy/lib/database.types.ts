@@ -49052,6 +49052,11 @@ export type Database = {
       save_external_result: { Args: { p_board: string; p_exam: string; p_exam_year: number; p_grade: string; p_obtained: number; p_roll_no: string; p_student_id: string; p_total: number }; Returns: string }
       ensure_behaviour_traits: { Args: never; Returns: undefined }
       save_behaviour_ratings: { Args: { p_exam_term_id: string; p_ratings: Json }; Returns: number }
+      add_provident_fund_components: { Args: { p_employee_pct: number; p_employer_pct: number }; Returns: number }
+      gratuity_liability: {
+        Args: { p_as_of?: string }
+        Returns: { basic_paisa: number; doj: string; employee_code: string; full_name: string; gratuity_paisa: number; staff_id: string; years_completed: number }[]
+      }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]

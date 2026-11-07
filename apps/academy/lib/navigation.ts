@@ -165,6 +165,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/payroll/loans', label: 'Staff Loans', roles: PAYROLL_ROLES },
       { href: '/payroll/tax-slabs', label: 'Tax Slabs', roles: PAYROLL_ROLES },
       { href: '/payroll/statutory', label: 'Statutory Report', roles: PAYROLL_ROLES },
+      { href: '/payroll/gratuity', label: 'Gratuity & Provident Fund', roles: ['super_admin', 'owner', 'hr_manager', 'accountant'] },
     ],
   },
   {
