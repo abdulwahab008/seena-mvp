@@ -3092,6 +3092,12 @@ export const stockReceiptSchema = z.object({
   unitCostPkr: nonNegNumber('Enter the unit cost').optional(),
 });
 export type StockReceiptInput = z.input<typeof stockReceiptSchema>;
+export const stockTransferSchema = z.object({
+  fromStoreId: z.string().uuid('Choose the store it leaves'),
+  toStoreId: z.string().uuid('Choose the store it goes to'),
+  itemId: z.string().uuid('Choose an item'),
+  qty: z.coerce.number({ message: 'Enter a quantity' }).positive('Quantity must be more than zero'),
+});
 export const stockTakeSchema = z.object({
   storeId: z.string().uuid('Choose a store'),
   itemId: z.string().uuid('Choose an item'),
