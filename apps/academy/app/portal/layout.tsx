@@ -22,6 +22,7 @@ const PORTAL_LINKS: { href: string; key: MessageKey }[] = [
   { href: '/portal/hostel', key: 'nav.hostel' },
   { href: '/portal/remarks', key: 'nav.remarks' },
   { href: '/portal/syllabus', key: 'nav.syllabus' },
+  { href: '/portal/downloads', key: 'nav.downloads' },
   { href: '/portal/ptm', key: 'nav.ptm' },
   { href: '/portal/tickets', key: 'nav.tickets' },
   { href: '/portal/certificates', key: 'nav.certificates' },
