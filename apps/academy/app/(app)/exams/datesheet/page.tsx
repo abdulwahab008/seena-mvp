@@ -76,6 +76,14 @@ export default async function DatesheetPage({ searchParams }: { searchParams: Pr
 
   const { data: versions } = datesheet ? await supabase.from('datesheet_version').select('id, version_no, status, note, published_at, slot_count').eq('datesheet_id', datesheet.id).order('version_no', { ascending: false }) : { data: [] };
 
+  const { data: sectionRows } =
+    datesheet?.status === 'published'
+      ? await supabase.from('class_section').select('id, name, class_level:class_level_id(name_en, ordinal)').eq('campus_id', campus.id).eq('session_id', scope.session.id).eq('is_active', true)
+      : { data: [] };
+  const sections = (sectionRows ?? [])
+    .map((s) => ({ id: s.id, label: `${one(s.class_level)?.name_en ?? ''} ${s.name}`.trim(), ordinal: one(s.class_level)?.ordinal ?? 0 }))
+    .sort((a, b) => a.ordinal - b.ordinal || a.label.localeCompare(b.label));
+
   const paperLabel = new Map(papers.map((p) => [p.id, p.label]));
   const hallLabel = new Map((halls ?? []).map((h) => [h.id, `${h.name} (${h.capacity})`]));
   const editable = scope.canWrite && datesheet?.status === 'draft';
@@ -121,6 +129,33 @@ export default async function DatesheetPage({ searchParams }: { searchParams: Pr
             </Badge>
             {datesheet.current_version > 0 && <span className="text-sm text-muted-foreground">version {datesheet.current_version}</span>}
           </div>
+
+          {datesheet.status === 'published' && term && sections.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Admit cards</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form method="get" action="/api/exams/admit-cards" target="_blank" className="flex flex-wrap items-end gap-3 text-sm">
+                  <input type="hidden" name="termId" value={term.id} />
+                  <label className="space-y-1">
+                    <span className="block text-muted-foreground">Class and section</span>
+                    <select name="sectionId" className="h-9 rounded-md border bg-background px-2" data-testid="admit-section">
+                      {sections.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button type="submit" className="h-9 rounded-md border px-3">
+                    Print admit cards
+                  </button>
+                  <span className="text-muted-foreground">Students with unpaid fees get a slip marked held.</span>
+                </form>
+              </CardContent>
+            </Card>
+          )}
 
           {(clashRows ?? []).length > 0 && (
             <div role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive" data-testid="clash-banner">
