@@ -12,6 +12,9 @@ select id as tenant_id from public.tenant where slug = 'test-comm-triggers' \gse
 select id as campus_id from public.campus where tenant_id = :'tenant_id' limit 1 \gset
 select id as session_id from public.academic_session where tenant_id = :'tenant_id' limit 1 \gset
 select id as class1_id from public.class_level where tenant_id = :'tenant_id' and code = '1' \gset
+-- Absence messages fire on working days only, and Sunday is not one: mark
+-- attendance on the latest weekday so this file passes on a Sunday too.
+select (current_date - (extract(dow from current_date) = 0)::int)::date as att_date \gset
 
 select gen_random_uuid() as principal_id \gset
 
@@ -94,7 +97,7 @@ insert into public.attendance_day (
   tenant_id, campus_id, session_id, section_id, enrolment_id, attendance_date, status, marked_by
 ) values (
   :'tenant_id'::uuid, :'campus_id'::uuid, :'session_id'::uuid, :'section_id'::uuid,
-  :'enrolment_id'::uuid, current_date, 'absent', :'principal_id'::uuid
+  :'enrolment_id'::uuid, :'att_date'::date, 'absent', :'principal_id'::uuid
 ) returning id as att_id \gset
 
 -- Second edit: corrected to present
@@ -119,7 +122,7 @@ select is(
     from public.comm_trigger_fire
     where tenant_id = :'tenant_id'::uuid
       and entity_id = :'enrolment_id'::uuid
-      and fire_key = current_date::text
+      and fire_key = :'att_date'::text
   ),
   1::bigint,
   'AC 1: Editing attendance 3 times on same date generates exactly one trigger fire'
@@ -134,7 +137,7 @@ select is(
     from public.message m
     join public.comm_trigger_fire f on f.enqueued_message_id = m.id
     where f.entity_id = :'enrolment_id'::uuid
-      and f.fire_key = current_date::text
+      and f.fire_key = :'att_date'::text
   ),
   1::bigint,
   'AC 1: Exactly one message enqueued in outbox for that student on that date'
@@ -209,7 +212,7 @@ where s.tenant_id = :'tenant_id'::uuid and s.gr_number like 'GR-BATCH-%';
 insert into public.attendance_day (
   tenant_id, campus_id, session_id, section_id, enrolment_id, attendance_date, status, marked_by
 )
-select :'tenant_id'::uuid, :'campus_id'::uuid, :'session_id'::uuid, :'section_id'::uuid, e.id, current_date, 'absent', :'principal_id'::uuid
+select :'tenant_id'::uuid, :'campus_id'::uuid, :'session_id'::uuid, :'section_id'::uuid, e.id, :'att_date'::date, 'absent', :'principal_id'::uuid
 from public.enrolment e
 where e.tenant_id = :'tenant_id'::uuid and e.section_id = :'section_id'::uuid and e.student_id in (
   select id from public.student where tenant_id = :'tenant_id'::uuid and gr_number like 'GR-BATCH-%'
@@ -220,7 +223,7 @@ select cmp_ok(
     select count(*)
     from public.comm_trigger_fire
     where tenant_id = :'tenant_id'::uuid
-      and fire_key = current_date::text
+      and fire_key = :'att_date'::text
   ),
   '>=',
   40::bigint,

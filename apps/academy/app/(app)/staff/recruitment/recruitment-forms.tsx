@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { addApplicant, moveApplicant, saveOpening } from './actions';
+import { HireModal, OfferModal, ScoreModal } from './hiring-modals';
 import { formatDateTimePk } from '@/lib/dates';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -120,7 +121,7 @@ export function ApplicantForm({ jobOpeningId }: { jobOpeningId: string }) {
   );
 }
 
-type Applicant = { id: string; name: string; contact: string; profile: string; stage: string; interviewAt: string | null; lastNote: string | null };
+type Applicant = { id: string; name: string; contact: string; profile: string; stage: string; interviewAt: string | null; lastNote: string | null; score: string | null; offer: string | null };
 type Stage = 'shortlisted' | 'interview' | 'offered' | 'hired' | 'rejected' | 'withdrawn';
 
 const NEXT: Record<string, Stage[]> = {
@@ -182,6 +183,7 @@ function MoveModal({ applicant, stage, onClose }: { applicant: Applicant; stage:
 
 export function ApplicantBoard({ applicants }: { applicants: Applicant[] }) {
   const [moving, setMoving] = useState<{ applicant: Applicant; stage: Stage } | null>(null);
+  const [scoring, setScoring] = useState<Applicant | null>(null);
   if (applicants.length === 0) return <p className="text-sm text-muted-foreground">No applicants yet.</p>;
   const sorted = [...applicants].sort((a, b) => ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage));
   return (
@@ -198,9 +200,16 @@ export function ApplicantBoard({ applicants }: { applicants: Applicant[] }) {
             {a.contact && <p className="text-muted-foreground">{a.contact}</p>}
             {a.profile && <p className="text-muted-foreground">{a.profile}</p>}
             {a.stage === 'interview' && a.interviewAt && <p>Interview: {formatDateTimePk(a.interviewAt)}</p>}
+            {a.score && <p data-testid="applicant-score">Interview score: {a.score}</p>}
+            {a.offer && <p data-testid="applicant-offer">{a.offer}</p>}
             {a.lastNote && <p className="italic text-muted-foreground">“{a.lastNote}”</p>}
           </div>
           <div className="flex flex-wrap gap-1">
+            {a.stage === 'interview' && (
+              <Button size="sm" variant="outline" onClick={() => setScoring(a)}>
+                Score interview
+              </Button>
+            )}
             {(NEXT[a.stage] ?? []).map((s) => (
               <Button key={s} size="sm" variant={s === 'rejected' || s === 'withdrawn' ? 'ghost' : 'outline'} onClick={() => setMoving({ applicant: a, stage: s })}>
                 {ACTION[s]}
@@ -209,7 +218,10 @@ export function ApplicantBoard({ applicants }: { applicants: Applicant[] }) {
           </div>
         </div>
       ))}
-      {moving && <MoveModal applicant={moving.applicant} stage={moving.stage} onClose={() => setMoving(null)} />}
+      {moving?.stage === 'offered' && <OfferModal applicationId={moving.applicant.id} name={moving.applicant.name} onClose={() => setMoving(null)} />}
+      {moving?.stage === 'hired' && <HireModal applicationId={moving.applicant.id} name={moving.applicant.name} onClose={() => setMoving(null)} />}
+      {moving && moving.stage !== 'offered' && moving.stage !== 'hired' && <MoveModal applicant={moving.applicant} stage={moving.stage} onClose={() => setMoving(null)} />}
+      {scoring && <ScoreModal applicationId={scoring.id} name={scoring.name} onClose={() => setScoring(null)} />}
     </div>
   );
 }

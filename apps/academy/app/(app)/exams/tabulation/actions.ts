@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
+import { kickMessageWorker } from '@/lib/comm/kick';
 
 export async function sendResultMessages(termId: string, sectionId: string): Promise<{ error: string | null; queued?: number; noPhone?: number }> {
   const p = z.object({ termId: z.string().uuid(), sectionId: z.string().uuid() }).safeParse({ termId, sectionId });
@@ -10,5 +11,6 @@ export async function sendResultMessages(termId: string, sectionId: string): Pro
   const { data, error } = await supabase.rpc('queue_result_messages', { p_exam_term_id: p.data.termId, p_section_id: p.data.sectionId });
   if (error) return { error: error.message.includes('FORBIDDEN') ? 'Only the exam controller or Principal can send results.' : 'Something went wrong. Try again.' };
   const r = data as { queued: number; no_phone: number };
+  if (r.queued > 0) await kickMessageWorker();
   return { error: null, queued: r.queued, noPhone: r.no_phone };
 }
