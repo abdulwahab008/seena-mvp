@@ -266,6 +266,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Expenses',
     icon: Receipt,
     items: [
+      { href: '/accounts', label: 'General Ledger', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
       { href: '/expenses/vouchers', label: 'Vouchers', feature: 'module.expenses', roles: FINANCE_ROLES },
       { href: '/expenses/approvals', label: 'Approvals', feature: 'module.expenses', roles: FINANCE_ROLES },
       { href: '/expenses/petty-cash', label: 'Petty Cash', feature: 'module.expenses', roles: FINANCE_ROLES },

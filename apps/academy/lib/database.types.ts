@@ -13288,6 +13288,117 @@ export type Database = {
           },
         ]
       }
+      gl_account: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          tenant_id: string
+          type: Database['public']['Enums']['gl_account_type']
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          tenant_id: string
+          type: Database['public']['Enums']['gl_account_type']
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          tenant_id?: string
+          type?: Database['public']['Enums']['gl_account_type']
+        }
+        Relationships: []
+      }
+      journal_entry: {
+        Row: {
+          created_at: string
+          created_by: string
+          entry_date: string
+          entry_no: string
+          id: string
+          narration: string
+          reversal_of: string | null
+          reversed_by: string | null
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          entry_date: string
+          entry_no: string
+          id?: string
+          narration: string
+          reversal_of?: string | null
+          reversed_by?: string | null
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          entry_date?: string
+          entry_no?: string
+          id?: string
+          narration?: string
+          reversal_of?: string | null
+          reversed_by?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      journal_line: {
+        Row: {
+          account_id: string
+          credit: number
+          debit: number
+          entry_id: string
+          id: string
+          memo: string | null
+          tenant_id: string
+        }
+        Insert: {
+          account_id: string
+          credit?: number
+          debit?: number
+          entry_id: string
+          id?: string
+          memo?: string | null
+          tenant_id: string
+        }
+        Update: {
+          account_id?: string
+          credit?: number
+          debit?: number
+          entry_id?: string
+          id?: string
+          memo?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'journal_line_account_id_fkey'
+            columns: ['account_id']
+            isOneToOne: false
+            referencedRelation: 'gl_account'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'journal_line_entry_id_fkey'
+            columns: ['entry_id']
+            isOneToOne: false
+            referencedRelation: 'journal_entry'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       family_group: {
         Row: {
           confirmed_at: string | null
@@ -48002,6 +48113,14 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      ensure_chart_of_accounts: { Args: never; Returns: number }
+      save_gl_account: { Args: { p_code: string; p_id?: string; p_is_active?: boolean; p_name: string; p_type: Database['public']['Enums']['gl_account_type'] }; Returns: string }
+      post_journal_entry: { Args: { p_entry_date: string; p_lines: Json; p_narration: string }; Returns: string }
+      reverse_journal_entry: { Args: { p_entry_id: string; p_reason: string }; Returns: string }
+      trial_balance: {
+        Args: { p_as_of: string }
+        Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
+      }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
@@ -51304,6 +51423,7 @@ export type Database = {
         | 'paid'
       fee_challan_line_type: 'charge' | 'concession' | 'arrears' | 'late_fee'
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
+      gl_account_type: 'asset' | 'liability' | 'equity' | 'income' | 'expense'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
       fee_ledger_direction: 'debit' | 'credit'
       fee_ledger_entry_type:
@@ -51905,6 +52025,7 @@ export const Constants = {
       ],
       fee_challan_line_type: ['charge', 'concession', 'arrears', 'late_fee'],
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
+      gl_account_type: ['asset', 'liability', 'equity', 'income', 'expense'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
       fee_ledger_direction: ['debit', 'credit'],
       fee_ledger_entry_type: [
