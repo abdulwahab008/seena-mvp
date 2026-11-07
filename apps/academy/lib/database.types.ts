@@ -48131,6 +48131,7 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      admit_card_batch: { Args: { p_exam_term_id: string; p_section_id: string }; Returns: Json }
       consecutive_absentees: {
         Args: { p_campus_id: string; p_min_days?: number }
         Returns: {
