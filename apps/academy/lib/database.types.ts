@@ -48778,6 +48778,12 @@ export type Database = {
         Args: { p_guardian_id: string }
         Returns: boolean
       }
+      save_sms_gateway: { Args: { p_api_key?: string; p_config: Json; p_sender_id: string }; Returns: undefined }
+      sms_gateway_settings: { Args: never; Returns: { config: Json; has_key: boolean; is_active: boolean; sender_id: string | null }[] }
+      sms_gateway_for_dispatch: {
+        Args: { p_tenant_id: string }
+        Returns: { api_key: string; config: Json; provider_id: string; sender_id: string | null }[]
+      }
       ensure_chart_of_accounts: { Args: never; Returns: number }
       save_gl_account: { Args: { p_code: string; p_id?: string; p_is_active?: boolean; p_name: string; p_type: Database['public']['Enums']['gl_account_type'] }; Returns: string }
       post_journal_entry: { Args: { p_entry_date: string; p_lines: Json; p_narration: string }; Returns: string }
