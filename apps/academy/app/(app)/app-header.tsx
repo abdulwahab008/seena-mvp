@@ -153,7 +153,7 @@ export function AppHeader({
     <>
       <header
         className={cn(
-          'sticky z-30 flex h-14 items-center gap-3 border-b bg-surface/90 px-4 backdrop-blur supports-[backdrop-filter]:bg-surface/75 sm:px-6',
+          'sticky z-30 flex h-14 items-center gap-3 border-b bg-surface/90 px-4 backdrop-blur supports-[backdrop-filter]:bg-surface/75 sm:px-6 print:hidden',
           impersonating ? 'top-11' : 'top-0',
         )}
       >

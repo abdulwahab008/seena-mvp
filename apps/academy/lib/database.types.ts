@@ -13324,6 +13324,57 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_installment: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          challan_id: string
+          created_at: string
+          created_by: string | null
+          due_date: string
+          id: string
+          seq: number
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          challan_id: string
+          created_at?: string
+          created_by?: string | null
+          due_date: string
+          id?: string
+          seq: number
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          challan_id?: string
+          created_at?: string
+          created_by?: string | null
+          due_date?: string
+          id?: string
+          seq?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'fee_installment_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_installment_challan_id_fkey'
+            columns: ['challan_id']
+            isOneToOne: false
+            referencedRelation: 'fee_challan'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       campus_transfer: {
         Row: {
           decided_at: string | null
@@ -13704,6 +13755,332 @@ export type Database = {
         Insert: { locked_through?: string | null; tenant_id: string; updated_at?: string }
         Update: { locked_through?: string | null; tenant_id?: string; updated_at?: string }
         Relationships: []
+      }
+      interview_score: {
+        Row: {
+          application_id: string
+          attitude: number
+          campus_id: string
+          comment: string | null
+          communication: number
+          id: string
+          interviewer_id: string
+          recommendation: string
+          scored_at: string
+          subject_knowledge: number
+          teaching_demo: number
+          tenant_id: string
+        }
+        Insert: {
+          application_id: string
+          attitude: number
+          campus_id: string
+          comment?: string | null
+          communication: number
+          id?: string
+          interviewer_id?: string
+          recommendation: string
+          scored_at?: string
+          subject_knowledge: number
+          teaching_demo: number
+          tenant_id: string
+        }
+        Update: {
+          application_id?: string
+          attitude?: number
+          campus_id?: string
+          comment?: string | null
+          communication?: number
+          id?: string
+          interviewer_id?: string
+          recommendation?: string
+          scored_at?: string
+          subject_knowledge?: number
+          teaching_demo?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'interview_score_application_id_fkey'
+            columns: ['application_id']
+            isOneToOne: false
+            referencedRelation: 'job_application'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      donor: {
+        Row: {
+          cnic: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          tenant_id: string
+        }
+        Insert: {
+          cnic?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          tenant_id: string
+        }
+        Update: {
+          cnic?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      donation: {
+        Row: {
+          amount_paisa: number
+          created_at: string
+          created_by: string | null
+          donor_id: string
+          id: string
+          mode: string
+          purpose: string
+          received_on: string
+          reference: string | null
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          created_at?: string
+          created_by?: string | null
+          donor_id: string
+          id?: string
+          mode: string
+          purpose?: string
+          received_on?: string
+          reference?: string | null
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          created_at?: string
+          created_by?: string | null
+          donor_id?: string
+          id?: string
+          mode?: string
+          purpose?: string
+          received_on?: string
+          reference?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'donation_donor_id_fkey'
+            columns: ['donor_id']
+            isOneToOne: false
+            referencedRelation: 'donor'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      sponsorship: {
+        Row: {
+          created_at: string
+          donor_id: string
+          id: string
+          is_active: boolean
+          monthly_paisa: number
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          donor_id: string
+          id?: string
+          is_active?: boolean
+          monthly_paisa: number
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          donor_id?: string
+          id?: string
+          is_active?: boolean
+          monthly_paisa?: number
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'sponsorship_donor_id_fkey'
+            columns: ['donor_id']
+            isOneToOne: false
+            referencedRelation: 'donor'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sponsorship_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      sponsorship_payment: {
+        Row: {
+          amount_paisa: number
+          created_at: string
+          fee_payment_id: string | null
+          month: string
+          sponsorship_id: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          created_at?: string
+          fee_payment_id?: string | null
+          month: string
+          sponsorship_id: string
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          created_at?: string
+          fee_payment_id?: string | null
+          month?: string
+          sponsorship_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'sponsorship_payment_fee_payment_id_fkey'
+            columns: ['fee_payment_id']
+            isOneToOne: false
+            referencedRelation: 'fee_payment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sponsorship_payment_sponsorship_id_fkey'
+            columns: ['sponsorship_id']
+            isOneToOne: false
+            referencedRelation: 'sponsorship'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      live_class: {
+        Row: {
+          campus_id: string
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          duration_min: number
+          id: string
+          meeting_url: string
+          section_id: string
+          starts_at: string
+          subject_id: string | null
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_min: number
+          id?: string
+          meeting_url: string
+          section_id: string
+          starts_at: string
+          subject_id?: string | null
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_min?: number
+          id?: string
+          meeting_url?: string
+          section_id?: string
+          starts_at?: string
+          subject_id?: string | null
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'live_class_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'live_class_section_id_fkey'
+            columns: ['section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'live_class_subject_id_fkey'
+            columns: ['subject_id']
+            isOneToOne: false
+            referencedRelation: 'subject'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      live_class_attendance: {
+        Row: {
+          campus_id: string
+          joined_at: string
+          live_class_id: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          joined_at?: string
+          live_class_id: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          joined_at?: string
+          live_class_id?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'live_class_attendance_live_class_id_fkey'
+            columns: ['live_class_id']
+            isOneToOne: false
+            referencedRelation: 'live_class'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'live_class_attendance_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
       }
       journal_entry: {
         Row: {
@@ -14100,6 +14477,9 @@ export type Database = {
       }
       job_application: {
         Row: {
+          staff_id: string | null
+          offer_salary_paisa: number | null
+          offer_joining_on: string | null
           campus_id: string
           candidate_name: string
           cnic: string | null
@@ -14118,6 +14498,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          staff_id?: string | null
+          offer_salary_paisa?: number | null
+          offer_joining_on?: string | null
           campus_id: string
           candidate_name: string
           cnic?: string | null
@@ -14136,6 +14519,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          staff_id?: string | null
+          offer_salary_paisa?: number | null
+          offer_joining_on?: string | null
           campus_id?: string
           candidate_name?: string
           cnic?: string | null
@@ -31221,6 +31607,7 @@ export type Database = {
       }
       staff: {
         Row: {
+          cnic_expires_on: string | null
           campus_id: string
           cnic: string | null
           contract_type: string
@@ -31243,6 +31630,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          cnic_expires_on?: string | null
           campus_id: string
           cnic?: string | null
           contract_type?: string
@@ -31265,6 +31653,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          cnic_expires_on?: string | null
           campus_id?: string
           cnic?: string | null
           contract_type?: string
@@ -49190,6 +49579,25 @@ export type Database = {
         Args: { p_as_of: string }
         Returns: { account_id: string | null; amount: number; code: string | null; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
       }
+      save_interview_score: { Args: { p_application_id: string; p_attitude: number; p_comment?: string; p_communication: number; p_recommendation: string; p_subject_knowledge: number; p_teaching_demo: number }; Returns: string }
+      make_job_offer: { Args: { p_application_id: string; p_joining_on: string; p_note?: string; p_salary_paisa: number }; Returns: undefined }
+      hire_applicant: { Args: { p_application_id: string; p_cnic?: string; p_employee_code: string; p_gender: Database['public']['Enums']['gender'] }; Returns: string }
+      set_staff_cnic_expiry: { Args: { p_expires_on: string; p_staff_id: string }; Returns: undefined }
+      hr_dashboard: { Args: { p_campus_id?: string }; Returns: Json }
+      save_donor: { Args: { p_cnic?: string; p_email?: string; p_name: string; p_notes?: string; p_phone?: string }; Returns: string }
+      record_donation: { Args: { p_amount_paisa: number; p_donor_id: string; p_mode: string; p_purpose: string; p_received_on: string; p_reference?: string }; Returns: string }
+      save_sponsorship: { Args: { p_donor_id: string; p_monthly_paisa: number; p_student_id: string }; Returns: string }
+      end_sponsorship: { Args: { p_id: string }; Returns: undefined }
+      apply_sponsorships: { Args: { p_month: string }; Returns: Json }
+      schedule_live_class: { Args: { p_duration_min: number; p_meeting_url: string; p_section_id: string; p_starts_at: string; p_subject_id?: string; p_title: string }; Returns: string }
+      cancel_live_class: { Args: { p_id: string }; Returns: undefined }
+      my_live_classes: { Args: never; Returns: { cancelled: boolean; duration_min: number; id: string; joined: boolean; starts_at: string; subject: string | null; title: string }[] }
+      join_live_class: { Args: { p_id: string }; Returns: string }
+      set_challan_installments: { Args: { p_challan_id: string; p_plan: Json }; Returns: number }
+      installment_status: { Args: { p_as_of?: string }; Returns: { amount_paisa: number; challan_id: string; challan_no: string; due_date: string; enrolment_id: string; installment_id: string; is_overdue: boolean; seq: number; unpaid_paisa: number }[] }
+      queue_fee_slip_messages: { Args: { p_billing_period: string; p_campus_id: string }; Returns: Json }
+      fee_collection_by_month: { Args: { p_from: string; p_to: string }; Returns: { billed_paisa: number; collected_paisa: number; month: string }[] }
+      fee_outstanding_ageing: { Args: { p_as_of?: string }; Returns: { bucket: string; challans: number; outstanding_paisa: number }[] }
       request_campus_transfer: { Args: { p_enrolment_id: string; p_reason: string; p_to_section_id: string }; Returns: string }
       decide_campus_transfer: { Args: { p_approve: boolean; p_id: string; p_note: string }; Returns: undefined }
       save_student_vaccination: { Args: { p_dose_no: number; p_due_on?: string; p_given_on?: string; p_notes: string; p_student_id: string; p_vaccine: string }; Returns: string }
@@ -49201,6 +49609,17 @@ export type Database = {
       save_external_result: { Args: { p_board: string; p_exam: string; p_exam_year: number; p_grade: string; p_obtained: number; p_roll_no: string; p_student_id: string; p_total: number }; Returns: string }
       ensure_behaviour_traits: { Args: never; Returns: undefined }
       save_behaviour_ratings: { Args: { p_exam_term_id: string; p_ratings: Json }; Returns: number }
+      transfer_stock: { Args: { p_from_store_id: string; p_item_id: string; p_qty: number; p_to_store_id: string }; Returns: string }
+      inventory_profit: {
+        Args: { p_from: string; p_to: string }
+        Returns: { cost_paisa: number; item_code: string; item_id: string; name: string; profit_paisa: number; qty_sold: number; revenue_paisa: number }[]
+      }
+      add_provident_fund_components: { Args: { p_employee_pct: number; p_employer_pct: number }; Returns: number }
+      gratuity_liability: {
+        Args: { p_as_of?: string }
+        Returns: { basic_paisa: number; doj: string; employee_code: string; full_name: string; gratuity_paisa: number; staff_id: string; years_completed: number }[]
+      }
+      queue_library_overdue_messages: { Args: { p_campus_id: string }; Returns: Json }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]

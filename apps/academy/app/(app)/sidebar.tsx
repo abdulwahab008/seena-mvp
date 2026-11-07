@@ -171,7 +171,7 @@ export function Sidebar({
   impersonating?: boolean;
 }) {
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-sidebar-border lg:block">
+    <aside className="hidden w-64 shrink-0 border-r border-sidebar-border lg:block print:hidden">
       <div className={cn('fixed bottom-0 left-0 w-64', impersonating ? 'top-11' : 'top-0')}>
         <SidebarContent schoolName={schoolName} features={features} role={role} />
       </div>

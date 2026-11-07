@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
 import { mapRpcError, toPaisa, type ActionError } from '@/lib/rpc-action';
-import { invItemSchema, invStoreSchema, stockReceiptSchema, stockTakeSchema } from '@/lib/validation';
+import { invItemSchema, invStoreSchema, stockReceiptSchema, stockTakeSchema, stockTransferSchema } from '@/lib/validation';
 
 const MESSAGES: [string, string][] = [
   ['INSUFFICIENT_STOCK', 'Not enough stock on hand for this movement.'],
@@ -12,6 +12,7 @@ const MESSAGES: [string, string][] = [
   ['STORE_NOT_FOUND', 'That store was not found.'],
   ['ITEM_NOT_FOUND', 'That item was not found.'],
   ['REASON_CODE_INVALID', 'Choose a reason for the stock-take variance.'],
+  ['SAME_STORE', 'Choose two different stores.'],
   ['FORBIDDEN', 'You do not have permission for this store.'],
 ];
 const first = (e: { issues: { message: string }[] } | undefined) => e?.issues[0]?.message ?? 'Invalid input.';
@@ -72,6 +73,16 @@ export async function postStockTake(input: Record<string, string>): Promise<Acti
     p_counted: p.data.counted,
     p_reason_code: p.data.reasonCode,
   });
+  if (error) return { error: mapRpcError(error.message, MESSAGES) };
+  revalidatePath('/inventory');
+  return { error: null };
+}
+
+export async function transferStock(input: Record<string, string>): Promise<ActionError> {
+  const p = stockTransferSchema.safeParse(input);
+  if (!p.success) return { error: first(p.error) };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('transfer_stock', { p_from_store_id: p.data.fromStoreId, p_to_store_id: p.data.toStoreId, p_item_id: p.data.itemId, p_qty: p.data.qty });
   if (error) return { error: mapRpcError(error.message, MESSAGES) };
   revalidatePath('/inventory');
   return { error: null };
