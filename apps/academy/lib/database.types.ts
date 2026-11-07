@@ -2076,6 +2076,7 @@ export type Database = {
           status: Database['public']['Enums']['user_status']
           tenant_id: string
           user_id: string
+          username: string | null
         }
         Insert: {
           app_role: Database['public']['Enums']['app_role']
@@ -2087,6 +2088,7 @@ export type Database = {
           status?: Database['public']['Enums']['user_status']
           tenant_id: string
           user_id: string
+          username?: string | null
         }
         Update: {
           app_role?: Database['public']['Enums']['app_role']
@@ -2098,6 +2100,7 @@ export type Database = {
           status?: Database['public']['Enums']['user_status']
           tenant_id?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: [
           {
@@ -48032,6 +48035,85 @@ export type Database = {
         Returns: Json
       }
       is_login_locked: { Args: { p_identifier: string }; Returns: boolean }
+      is_platform_admin: { Args: never; Returns: boolean }
+      list_user_accounts: {
+        Args: never
+        Returns: {
+          active: boolean
+          app_role: string
+          campuses: string[]
+          full_name: string
+          kind: string
+          last_sign_in_at: string | null
+          login_id: string
+          user_id: string
+        }[]
+      }
+      my_school_status: {
+        Args: never
+        Returns: {
+          account_active: boolean
+          status: Database['public']['Enums']['tenant_status']
+          tenant_name: string
+        }[]
+      }
+      create_user_account: {
+        Args: {
+          p_campus_ids: string[]
+          p_full_name: string
+          p_role: Database['public']['Enums']['app_role']
+          p_user_id: string
+          p_username: string | null
+        }
+        Returns: undefined
+      }
+      set_user_account_active: {
+        Args: { p_active: boolean; p_user_id: string }
+        Returns: undefined
+      }
+      set_user_account_role: {
+        Args: { p_role: Database['public']['Enums']['app_role']; p_user_id: string }
+        Returns: undefined
+      }
+      user_account_kind: { Args: { p_user_id: string }; Returns: string }
+      user_account_login_email: {
+        Args: {
+          p_campus_ids: string[]
+          p_role: Database['public']['Enums']['app_role']
+          p_username: string | null
+        }
+        Returns: string | null
+      }
+      platform_list_tenants: {
+        Args: never
+        Returns: {
+          campuses: number
+          created_at: string
+          id: string
+          last_sign_in_at: string | null
+          logins: number
+          name: string
+          owner_email: string | null
+          owner_invite_id: string | null
+          owner_name: string | null
+          slug: string
+          status: Database['public']['Enums']['tenant_status']
+          students: number
+        }[]
+      }
+      platform_provision_tenant: {
+        Args: { p_legal_name: string; p_owner_email: string; p_slug: string }
+        Returns: string
+      }
+      platform_renew_owner_invite: { Args: { p_tenant_id: string }; Returns: string | null }
+      platform_set_tenant_status: {
+        Args: {
+          p_reason: string
+          p_status: Database['public']['Enums']['tenant_status']
+          p_tenant_id: string
+        }
+        Returns: undefined
+      }
       is_otp_locked: { Args: { p_phone: string }; Returns: boolean }
       is_password_reset_throttled: {
         Args: { p_email: string }
