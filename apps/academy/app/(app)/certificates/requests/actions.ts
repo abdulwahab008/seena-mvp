@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { certificateRequestDecisionSchema, type CertificateRequestDecisionInput } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
+import { kickMessageWorker } from '@/lib/comm/kick';
 import { renderAndStoreCertificate, type IssuedCertificate } from '@/lib/certificates/issue';
 
 /**
@@ -66,6 +67,7 @@ export async function decideCertificateRequest(input: CertificateRequestDecision
   const { data: queued, error: queueError } = await supabase.rpc('queue_certificate_ready_message', { p_request_id: requestId, p_base_url: origin });
   if (queueError) return { error: null, notice: 'Certificate issued, but the WhatsApp message could not be queued.' };
   const q = queued as unknown as { queued: boolean; reason?: string };
+  if (q.queued) await kickMessageWorker();
   return {
     error: null,
     notice: q.queued ? 'Certificate issued and a WhatsApp message with a 7-day link has been queued.' : 'Certificate issued. The guardian has no phone number on file, so no message was sent.',

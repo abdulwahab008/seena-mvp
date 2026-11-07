@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServiceRole } from '@/lib/supabase/server';
 import { verifyWorkerSecret } from '@/lib/exports/worker-secret';
+import { verifyCronSecret } from '@/lib/comm/cron-auth';
 import { dispatchOutbox, type OutboxMessage } from '@/lib/comm/dispatch';
 import { HttpSmsTransport, type HttpSmsConfig } from '@/lib/comm/http-sms';
 import { ResendEmailTransport } from '@/lib/comm/email-transport';
@@ -16,6 +17,16 @@ export const maxDuration = 120;
 // dev transport instead, for local work and CI.
 export async function POST(req: NextRequest) {
   if (!verifyWorkerSecret(req.headers.get('x-worker-secret'))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  return run();
+}
+
+// Vercel Cron (see vercel.json) sends a GET with the cron secret.
+export async function GET(req: NextRequest) {
+  if (!verifyCronSecret(req.headers.get('authorization'))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  return run();
+}
+
+async function run() {
   const db = supabaseServiceRole();
   const dev = process.env.MESSAGE_TRANSPORT === 'dev' ? new DevTransport() : null;
 
