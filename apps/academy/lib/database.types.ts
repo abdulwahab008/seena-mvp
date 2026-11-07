@@ -13291,6 +13291,160 @@ export type Database = {
           },
         ]
       }
+      job_opening: {
+        Row: {
+          campus_id: string
+          closes_on: string | null
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          id: string
+          positions: number
+          salary_range: string | null
+          status: string
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          closes_on?: string | null
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          positions?: number
+          salary_range?: string | null
+          status?: string
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          closes_on?: string | null
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          positions?: number
+          salary_range?: string | null
+          status?: string
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      job_application: {
+        Row: {
+          campus_id: string
+          candidate_name: string
+          cnic: string | null
+          created_at: string
+          email: string | null
+          experience_yrs: number | null
+          id: string
+          interview_at: string | null
+          job_opening_id: string
+          phone: string | null
+          qualification: string | null
+          rating: number | null
+          source: string | null
+          stage: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          campus_id: string
+          candidate_name: string
+          cnic?: string | null
+          created_at?: string
+          email?: string | null
+          experience_yrs?: number | null
+          id?: string
+          interview_at?: string | null
+          job_opening_id: string
+          phone?: string | null
+          qualification?: string | null
+          rating?: number | null
+          source?: string | null
+          stage?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          campus_id?: string
+          candidate_name?: string
+          cnic?: string | null
+          created_at?: string
+          email?: string | null
+          experience_yrs?: number | null
+          id?: string
+          interview_at?: string | null
+          job_opening_id?: string
+          phone?: string | null
+          qualification?: string | null
+          rating?: number | null
+          source?: string | null
+          stage?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'job_application_job_opening_id_fkey'
+            columns: ['job_opening_id']
+            isOneToOne: false
+            referencedRelation: 'job_opening'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      job_application_event: {
+        Row: {
+          actor_id: string
+          application_id: string
+          campus_id: string
+          created_at: string
+          from_stage: string | null
+          id: string
+          note: string | null
+          tenant_id: string
+          to_stage: string
+        }
+        Insert: {
+          actor_id?: string
+          application_id: string
+          campus_id: string
+          created_at?: string
+          from_stage?: string | null
+          id?: string
+          note?: string | null
+          tenant_id: string
+          to_stage: string
+        }
+        Update: {
+          actor_id?: string
+          application_id?: string
+          campus_id?: string
+          created_at?: string
+          from_stage?: string | null
+          id?: string
+          note?: string | null
+          tenant_id?: string
+          to_stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'job_application_event_application_id_fkey'
+            columns: ['application_id']
+            isOneToOne: false
+            referencedRelation: 'job_application'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       halqa: {
         Row: {
           campus_id: string
@@ -48251,6 +48405,37 @@ export type Database = {
       is_guardian_otp_locked: {
         Args: { p_guardian_id: string }
         Returns: boolean
+      }
+      save_job_opening: {
+        Args: {
+          p_campus_id: string
+          p_closes_on: string | null
+          p_department_id: string | null
+          p_description: string | null
+          p_opening_id?: string
+          p_positions: number
+          p_salary_range: string | null
+          p_status?: string
+          p_title: string
+        }
+        Returns: string
+      }
+      add_job_application: {
+        Args: {
+          p_candidate_name: string
+          p_cnic: string | null
+          p_email: string | null
+          p_experience_yrs: number | null
+          p_job_opening_id: string
+          p_phone: string | null
+          p_qualification: string | null
+          p_source: string | null
+        }
+        Returns: string
+      }
+      move_job_application: {
+        Args: { p_application_id: string; p_interview_at?: string | null; p_note?: string | null; p_rating?: number | null; p_stage: string }
+        Returns: undefined
       }
       save_halqa: {
         Args: { p_campus_id: string; p_halqa_id?: string; p_name: string; p_stream: string; p_teacher_id: string | null }
