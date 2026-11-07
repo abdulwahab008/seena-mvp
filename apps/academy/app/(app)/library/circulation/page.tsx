@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IssueDesk } from './issue-desk';
 import { ReturnDesk } from './return-desk';
 import { RenewButton } from '../reservations/reservation-forms';
+import { RemindOverdueButton } from './remind-overdue-button';
+import { pickActiveCampus } from '@/lib/campus-context';
 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 const todayIso = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
@@ -32,6 +34,9 @@ export default async function LibraryCirculationPage() {
   ]);
   const names = new Map<string, string>([...(students ?? []).map((s) => [s.id, s.name_en] as const), ...(staff ?? []).map((s) => [s.user_id, s.full_name] as const)]);
   const today = todayIso();
+  const { data: campuses } = await supabase.from('campus').select('id, name').eq('status', 'active').order('code');
+  const campus = await pickActiveCampus(campuses);
+  const overdue = (loans ?? []).filter((l) => l.due_on < today && l.borrower_role === 'student').length;
 
   return (
     <div className="space-y-6">
@@ -54,7 +59,10 @@ export default async function LibraryCirculationPage() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Open loans ({loans?.length ?? 0})</CardTitle>
+          <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-base">
+            <span>Open loans ({loans?.length ?? 0})</span>
+            {campus && overdue > 0 && <RemindOverdueButton campusId={campus.id} />}
+          </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full text-left text-sm" data-testid="open-loans">
