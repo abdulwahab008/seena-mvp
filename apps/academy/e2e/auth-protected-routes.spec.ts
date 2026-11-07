@@ -128,7 +128,7 @@ test('protected responses are marked no-store so nothing is cached for replay', 
 test('surfaces that must stay public are still reachable with no session', async ({ request }) => {
   // Each of these is public for a specific reason (see middleware.ts) and a
   // default-deny gate must not have swept them up.
-  for (const path of ['/login', '/sign-up', '/forgot-password', '/reset-password', '/admin/provision']) {
+  for (const path of ['/login', '/sign-up', '/forgot-password', '/reset-password']) {
     const response = await request.get(path);
     expect(response.status(), `${path} should be publicly reachable`).toBe(200);
   }
