@@ -52,7 +52,7 @@ export type StoredReportCard = {
   pageCount?: number;
 };
 
-async function assetDataUri(supabase: ServerClient, bucket: string, storagePath: string | null): Promise<string | null> {
+export async function assetDataUri(supabase: ServerClient, bucket: string, storagePath: string | null): Promise<string | null> {
   if (!storagePath) return null;
   const { data } = await supabase.storage.from(bucket).download(storagePath);
   if (!data) return null;

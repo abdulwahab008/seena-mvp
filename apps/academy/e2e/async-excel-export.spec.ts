@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { seedFeesTenant, SEED_PASSWORD } from './support/fees-seed';
+import { todayPk } from './support/today';
 
 // FR-S08: request -> background build -> notification -> download -> dedupe -> retention (410).
 
@@ -70,7 +71,7 @@ test('45,000 rows build in the background in well under 3 minutes', async ({ req
   test.setTimeout(240000);
   const { db, tenant, campusId, challans, owner$ } = await seedFeesTenant(1, 'export-big');
   const enrolId = challans[0]!.enrolment_id;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayPk();
 
   for (let c = 0; c < 9; c++) {
     const rows = Array.from({ length: 5000 }, (_, i) => ({ tenant_id: tenant, campus_id: campusId, enrolment_id: enrolId, amount_paisa: 100 + i, mode: 'cash', value_date: today, reference_no: `bulk-${c}-${i}` }));

@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { CounterView } from './counter-view';
+import { FamilyCounterView } from './family-view';
 import { ManagePanel, ShiftPanel, type CounterOption, type OpenSession, type RecentSession } from './shift-panel';
 
 export default async function CashCounterPage() {
@@ -93,7 +94,10 @@ export default async function CashCounterPage() {
       </div>
       {runsShift && <ShiftPanel counters={counters} openSession={openSession} />}
       {canCollect ? (
-        <CounterView />
+        <>
+          <CounterView />
+          <FamilyCounterView />
+        </>
       ) : (
         !canManage &&
         !runsShift && <p className="text-sm text-muted-foreground">Only finance and front-desk staff use the cash counter.</p>
