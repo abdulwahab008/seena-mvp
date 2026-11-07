@@ -13324,6 +13324,12 @@ export type Database = {
         }
         Relationships: []
       }
+      gl_setting: {
+        Row: { locked_through: string | null; tenant_id: string; updated_at: string }
+        Insert: { locked_through?: string | null; tenant_id: string; updated_at?: string }
+        Update: { locked_through?: string | null; tenant_id?: string; updated_at?: string }
+        Relationships: []
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -48798,6 +48804,8 @@ export type Database = {
       post_journal_entry: { Args: { p_entry_date: string; p_lines: Json; p_narration: string }; Returns: string }
       reverse_journal_entry: { Args: { p_entry_id: string; p_reason: string }; Returns: string }
       post_ledger_backfill: { Args: never; Returns: number }
+      post_opening_balances: { Args: { p_date: string; p_lines: Json }; Returns: string }
+      close_financial_year: { Args: { p_year_end: string }; Returns: string }
       set_head_gl_code: { Args: { p_code: string; p_head_id: string; p_kind: string }; Returns: undefined }
       income_statement: {
         Args: { p_from: string; p_to: string }

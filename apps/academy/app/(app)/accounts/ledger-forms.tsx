@@ -5,7 +5,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { addAccount, backfillLedger, ensureChart, postVoucher, reverseVoucher, setHeadAccount } from './actions';
+import { addAccount, backfillLedger, closeYear, ensureChart, postOpeningBalances, postVoucher, reverseVoucher, setHeadAccount } from './actions';
 import { todayPk } from '@/lib/dates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -265,5 +265,106 @@ export function HeadAccountSelect({
         </option>
       ))}
     </select>
+  );
+}
+
+const openingFormSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+  amounts: z.record(z.string(), z.string().regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter an amount in rupees')),
+});
+
+export function OpeningBalancesForm({ accounts }: { accounts: { id: string; label: string }[] }) {
+  const [pending, startTransition] = useTransition();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<z.infer<typeof openingFormSchema>>({
+    resolver: zodResolver(openingFormSchema),
+    defaultValues: { date: todayPk(), amounts: Object.fromEntries(accounts.map((a) => [a.id, ''])) },
+  });
+  const total = Object.values(watch('amounts') ?? {}).filter(Boolean).length;
+  const onSubmit = handleSubmit((v) =>
+    startTransition(async () => {
+      const r = await postOpeningBalances({ date: v.date, lines: Object.entries(v.amounts).map(([accountId, amount]) => ({ accountId, amount: money(amount) })) });
+      if (r.error) return void toast.error(r.error);
+      toast.success('Opening balances posted.');
+    }),
+  );
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Opening balances</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={onSubmit} className="space-y-3" noValidate>
+          <p className="text-sm text-muted-foreground">
+            What the school already had on the day it started using Seena. Whatever does not balance goes to Owner&apos;s capital. This posts once.
+          </p>
+          <div className="space-y-1 sm:w-48">
+            <Label htmlFor="ob-date">As of</Label>
+            <Input id="ob-date" type="date" max={todayPk()} {...register('date')} />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {accounts.map((a) => (
+              <div key={a.id} className="grid grid-cols-[1fr_9rem] items-center gap-2 text-sm">
+                <Label htmlFor={`ob-${a.id}`}>{a.label}</Label>
+                <Input id={`ob-${a.id}`} inputMode="decimal" placeholder="0" {...register(`amounts.${a.id}`)} />
+              </div>
+            ))}
+          </div>
+          {errors.amounts && <p className="text-sm text-destructive">Amounts are in rupees, up to two decimals.</p>}
+          <Button type="submit" disabled={pending || total === 0}>
+            Post opening balances
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+const closeSchema = z.object({ yearEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date') });
+
+export function CloseYearForm({ defaultYearEnd }: { defaultYearEnd: string }) {
+  const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const { register, handleSubmit, getValues } = useForm<z.infer<typeof closeSchema>>({ resolver: zodResolver(closeSchema), defaultValues: { yearEnd: defaultYearEnd } });
+  const onConfirm = handleSubmit((v) =>
+    startTransition(async () => {
+      const r = await closeYear(v.yearEnd);
+      if (r.error) return void toast.error(r.error);
+      toast.success('Year closed.');
+      setOpen(false);
+    }),
+  );
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Close a financial year</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Moves the year&apos;s surplus into Retained earnings and locks every date up to the year end. Locked years cannot be reopened.
+        </p>
+        <div className="flex items-end gap-2">
+          <div className="space-y-1">
+            <Label htmlFor="close-date">Year end</Label>
+            <Input id="close-date" type="date" max={todayPk()} {...register('yearEnd')} />
+          </div>
+          <Button variant="outline" onClick={() => setOpen(true)}>
+            Close year
+          </Button>
+        </div>
+        <Modal
+          open={open}
+          onClose={() => setOpen(false)}
+          title={`Close the year ending ${open ? getValues('yearEnd') : ''}?`}
+          description="Nobody will be able to post a voucher dated on or before this day again."
+          size="sm"
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setOpen(false)} disabled={pending}>Cancel</Button>
+              <Button variant="destructive" onClick={onConfirm} disabled={pending}>Close the year</Button>
+            </>
+          }
+        />
+      </CardContent>
+    </Card>
   );
 }
