@@ -280,6 +280,8 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/gateways', label: 'Online Payments', roles: FEE_STAFF_ROLES },
       { href: '/fees/bank-statements', label: 'Bank Statements', roles: FEE_STAFF_ROLES },
       { href: '/fees/reports', label: 'Collection Reports', roles: FEE_STAFF_ROLES },
+      { href: '/fees/analytics', label: 'Fee Analytics', roles: FEE_STAFF_ROLES },
+      { href: '/fees/installments', label: 'Installments', roles: FEE_STAFF_ROLES },
     ],
   },
   {

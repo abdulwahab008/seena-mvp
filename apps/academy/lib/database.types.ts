@@ -13324,6 +13324,57 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_installment: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          challan_id: string
+          created_at: string
+          created_by: string | null
+          due_date: string
+          id: string
+          seq: number
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          challan_id: string
+          created_at?: string
+          created_by?: string | null
+          due_date: string
+          id?: string
+          seq: number
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          challan_id?: string
+          created_at?: string
+          created_by?: string | null
+          due_date?: string
+          id?: string
+          seq?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'fee_installment_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_installment_challan_id_fkey'
+            columns: ['challan_id']
+            isOneToOne: false
+            referencedRelation: 'fee_challan'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       campus_transfer: {
         Row: {
           decided_at: string | null
@@ -49190,6 +49241,11 @@ export type Database = {
         Args: { p_as_of: string }
         Returns: { account_id: string | null; amount: number; code: string | null; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
       }
+      set_challan_installments: { Args: { p_challan_id: string; p_plan: Json }; Returns: number }
+      installment_status: { Args: { p_as_of?: string }; Returns: { amount_paisa: number; challan_id: string; challan_no: string; due_date: string; enrolment_id: string; installment_id: string; is_overdue: boolean; seq: number; unpaid_paisa: number }[] }
+      queue_fee_slip_messages: { Args: { p_billing_period: string; p_campus_id: string }; Returns: Json }
+      fee_collection_by_month: { Args: { p_from: string; p_to: string }; Returns: { billed_paisa: number; collected_paisa: number; month: string }[] }
+      fee_outstanding_ageing: { Args: { p_as_of?: string }; Returns: { bucket: string; challans: number; outstanding_paisa: number }[] }
       request_campus_transfer: { Args: { p_enrolment_id: string; p_reason: string; p_to_section_id: string }; Returns: string }
       decide_campus_transfer: { Args: { p_approve: boolean; p_id: string; p_note: string }; Returns: undefined }
       save_student_vaccination: { Args: { p_dose_no: number; p_due_on?: string; p_given_on?: string; p_notes: string; p_student_id: string; p_vaccine: string }; Returns: string }
