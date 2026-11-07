@@ -13330,6 +13330,59 @@ export type Database = {
         Update: { locked_through?: string | null; tenant_id?: string; updated_at?: string }
         Relationships: []
       }
+      interview_score: {
+        Row: {
+          application_id: string
+          attitude: number
+          campus_id: string
+          comment: string | null
+          communication: number
+          id: string
+          interviewer_id: string
+          recommendation: string
+          scored_at: string
+          subject_knowledge: number
+          teaching_demo: number
+          tenant_id: string
+        }
+        Insert: {
+          application_id: string
+          attitude: number
+          campus_id: string
+          comment?: string | null
+          communication: number
+          id?: string
+          interviewer_id?: string
+          recommendation: string
+          scored_at?: string
+          subject_knowledge: number
+          teaching_demo: number
+          tenant_id: string
+        }
+        Update: {
+          application_id?: string
+          attitude?: number
+          campus_id?: string
+          comment?: string | null
+          communication?: number
+          id?: string
+          interviewer_id?: string
+          recommendation?: string
+          scored_at?: string
+          subject_knowledge?: number
+          teaching_demo?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'interview_score_application_id_fkey'
+            columns: ['application_id']
+            isOneToOne: false
+            referencedRelation: 'job_application'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -13725,6 +13778,9 @@ export type Database = {
       }
       job_application: {
         Row: {
+          staff_id: string | null
+          offer_salary_paisa: number | null
+          offer_joining_on: string | null
           campus_id: string
           candidate_name: string
           cnic: string | null
@@ -13743,6 +13799,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          staff_id?: string | null
+          offer_salary_paisa?: number | null
+          offer_joining_on?: string | null
           campus_id: string
           candidate_name: string
           cnic?: string | null
@@ -13761,6 +13820,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          staff_id?: string | null
+          offer_salary_paisa?: number | null
+          offer_joining_on?: string | null
           campus_id?: string
           candidate_name?: string
           cnic?: string | null
@@ -30846,6 +30908,7 @@ export type Database = {
       }
       staff: {
         Row: {
+          cnic_expires_on: string | null
           campus_id: string
           cnic: string | null
           contract_type: string
@@ -30868,6 +30931,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          cnic_expires_on?: string | null
           campus_id: string
           cnic?: string | null
           contract_type?: string
@@ -30890,6 +30954,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          cnic_expires_on?: string | null
           campus_id?: string
           cnic?: string | null
           contract_type?: string
@@ -48815,6 +48880,11 @@ export type Database = {
         Args: { p_as_of: string }
         Returns: { account_id: string | null; amount: number; code: string | null; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
       }
+      save_interview_score: { Args: { p_application_id: string; p_attitude: number; p_comment?: string; p_communication: number; p_recommendation: string; p_subject_knowledge: number; p_teaching_demo: number }; Returns: string }
+      make_job_offer: { Args: { p_application_id: string; p_joining_on: string; p_note?: string; p_salary_paisa: number }; Returns: undefined }
+      hire_applicant: { Args: { p_application_id: string; p_cnic?: string; p_employee_code: string; p_gender: Database['public']['Enums']['gender'] }; Returns: string }
+      set_staff_cnic_expiry: { Args: { p_expires_on: string; p_staff_id: string }; Returns: undefined }
+      hr_dashboard: { Args: { p_campus_id?: string }; Returns: Json }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
