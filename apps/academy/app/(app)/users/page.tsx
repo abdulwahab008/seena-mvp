@@ -6,6 +6,7 @@ import { Alert } from '@/components/ui/alert';
 import { PageHeader } from '@/components/ui/page-header';
 import { NewAccountButton } from './new-account-form';
 import { UserList } from './user-list';
+import { BulkPasswordReset } from './bulk-reset';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,27 +22,48 @@ export default async function UsersPage() {
   if (!actor || !MANAGERS.includes(actor.role)) notFound();
 
   const supabase = await supabaseServer();
-  const [{ data: accounts, error }, { data: campuses }, { data: tenant }] = await Promise.all([
-    supabase.rpc('list_user_accounts'),
-    supabase.from('campus').select('id, name').eq('status', 'active').order('code'),
-    supabase.from('tenant').select('slug').eq('id', actor.tenantId).maybeSingle(),
-  ]);
+  const [{ data: accounts, error }, { data: campuses }, { data: tenant }, { data: sections }] =
+    await Promise.all([
+      supabase.rpc('list_user_accounts'),
+      supabase.from('campus').select('id, name').eq('status', 'active').order('code'),
+      supabase.from('tenant').select('slug').eq('id', actor.tenantId).maybeSingle(),
+      supabase
+        .from('class_section')
+        .select('id, name, class_level(name_en, ordinal)')
+        .eq('is_active', true),
+    ]);
+  const sectionOptions = (sections ?? [])
+    .map((s) => ({ s, level: Array.isArray(s.class_level) ? s.class_level[0] : s.class_level }))
+    .sort(
+      (a, b) =>
+        (a.level?.ordinal ?? 0) - (b.level?.ordinal ?? 0) || a.s.name.localeCompare(b.s.name),
+    )
+    .map(({ s, level }) => ({ id: s.id, label: `${level?.name_en ?? ''} ${s.name}`.trim() }));
   const roles = grantableRoles(actor.role);
 
   return (
     <>
-      <PageHeader
-        title="User accounts"
-        description={`Every login in your school. Staff with a username sign in as username@${tenant?.slug ?? 'your-school'}.`}
-        actions={<NewAccountButton roles={roles} campuses={campuses ?? []} schoolSlug={tenant?.slug ?? ''} />}
-      />
-      {error ? (
-        <Alert variant="destructive" title="Could not load accounts">
-          Reload the page to try again.
-        </Alert>
-      ) : (
-        <UserList accounts={accounts ?? []} roles={roles} currentUserId={actor.userId} />
-      )}
+      <div className="print:hidden">
+        <PageHeader
+          title="User accounts"
+          description={`Every login in your school. Staff with a username sign in as username@${tenant?.slug ?? 'your-school'}.`}
+          actions={
+            <NewAccountButton
+              roles={roles}
+              campuses={campuses ?? []}
+              schoolSlug={tenant?.slug ?? ''}
+            />
+          }
+        />
+        {error ? (
+          <Alert variant="destructive" title="Could not load accounts">
+            Reload the page to try again.
+          </Alert>
+        ) : (
+          <UserList accounts={accounts ?? []} roles={roles} currentUserId={actor.userId} />
+        )}
+      </div>
+      <BulkPasswordReset sections={sectionOptions} />
     </>
   );
 }
