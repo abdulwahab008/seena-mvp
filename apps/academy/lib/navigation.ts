@@ -119,6 +119,10 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/students', label: 'All Students' },
       { href: '/students/alumni', label: 'Alumni' },
+      { href: '/students/transfers', label: 'Campus Transfers', roles: FRONT_OFFICE },
+      { href: '/students/withdrawals', label: 'Withdrawal Register', roles: FRONT_OFFICE },
+      { href: '/students/vaccinations', label: 'Vaccinations', roles: [...LEADERSHIP, 'nurse'] },
+      { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
       { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
       { href: '/students/promotion', label: 'Promotion', roles: [...LEADERSHIP, 'exam_controller'] },
       { href: '/students/recycle-bin', label: 'Recycle Bin', roles: FRONT_OFFICE },
@@ -179,6 +183,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/academic-setup/rooms', label: 'Rooms' },
       { href: '/homework', label: 'Homework', feature: 'module.homework' },
       { href: '/quizzes', label: 'Online Quizzes' },
+      { href: '/live-classes', label: 'Live Classes' },
       { href: '/hifz', label: 'Hifz & Quran' },
       { href: '/downloads', label: 'Download Centre' },
       { href: '/lesson-plans', label: 'Lesson Plans' },
@@ -241,6 +246,10 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/exams/grading', label: 'Grading Schemes' },
       { href: '/exams/results', label: 'Term Results & Positions' },
+      { href: '/exams/tabulation', label: 'Tabulation, Merit & Failure Lists' },
+      { href: '/exams/behaviour', label: 'Behaviour Ratings' },
+      { href: '/exams/rechecks', label: 'Re-checks' },
+      { href: '/exams/external-results', label: 'Board Results' },
       { href: '/exams/annual', label: 'Annual Results' },
       { href: '/exams/promotion', label: 'Promotion Decisions' },
       { href: '/exams/analytics', label: 'Subject Analytics' },
@@ -273,6 +282,8 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/bank-statements', label: 'Bank Statements', roles: FEE_STAFF_ROLES },
       { href: '/fees/reports', label: 'Collection Reports', roles: FEE_STAFF_ROLES },
       { href: '/fees/donors', label: 'Donors & Sponsorships', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
+      { href: '/fees/analytics', label: 'Fee Analytics', roles: FEE_STAFF_ROLES },
+      { href: '/fees/installments', label: 'Installments', roles: FEE_STAFF_ROLES },
     ],
   },
   {
