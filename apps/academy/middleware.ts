@@ -108,6 +108,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(loginUrlFor(pathname, search), request.url));
   }
 
+  // An account given a temporary password by an Owner/Principal (or after a
+  // reset) must choose its own before going anywhere else.
+  if (
+    user?.app_metadata?.must_change_password === true &&
+    pathname !== '/change-password' &&
+    !pathname.startsWith('/api/')
+  ) {
+    return NextResponse.redirect(new URL('/change-password', request.url));
+  }
+
   // Back-button protection. Without this, bfcache/history serves the last
   // authenticated render of a protected page after sign-out — the session is
   // gone, but the screenshot of the app is still there, including whatever
