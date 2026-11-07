@@ -194,6 +194,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/academic-setup/timetable', label: 'Timetable' },
       { href: '/academic-setup/bell-templates', label: 'Bell Templates' },
       { href: '/academic-setup/substitutions', label: 'Substitutions' },
+      { href: '/academic-setup/free-periods', label: 'Free Teachers & Rooms' },
       { href: '/academic-setup/timetable-export', label: 'Print & Export' },
       { href: '/my-timetable', label: 'My Timetable' },
     ],
