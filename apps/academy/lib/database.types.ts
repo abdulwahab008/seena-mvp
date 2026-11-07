@@ -13330,6 +13330,112 @@ export type Database = {
         Update: { locked_through?: string | null; tenant_id?: string; updated_at?: string }
         Relationships: []
       }
+      live_class: {
+        Row: {
+          campus_id: string
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          duration_min: number
+          id: string
+          meeting_url: string
+          section_id: string
+          starts_at: string
+          subject_id: string | null
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          campus_id: string
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_min: number
+          id?: string
+          meeting_url: string
+          section_id: string
+          starts_at: string
+          subject_id?: string | null
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          campus_id?: string
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_min?: number
+          id?: string
+          meeting_url?: string
+          section_id?: string
+          starts_at?: string
+          subject_id?: string | null
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'live_class_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'live_class_section_id_fkey'
+            columns: ['section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'live_class_subject_id_fkey'
+            columns: ['subject_id']
+            isOneToOne: false
+            referencedRelation: 'subject'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      live_class_attendance: {
+        Row: {
+          campus_id: string
+          joined_at: string
+          live_class_id: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          joined_at?: string
+          live_class_id: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          joined_at?: string
+          live_class_id?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'live_class_attendance_live_class_id_fkey'
+            columns: ['live_class_id']
+            isOneToOne: false
+            referencedRelation: 'live_class'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'live_class_attendance_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -48815,6 +48921,10 @@ export type Database = {
         Args: { p_as_of: string }
         Returns: { account_id: string | null; amount: number; code: string | null; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
       }
+      schedule_live_class: { Args: { p_duration_min: number; p_meeting_url: string; p_section_id: string; p_starts_at: string; p_subject_id?: string; p_title: string }; Returns: string }
+      cancel_live_class: { Args: { p_id: string }; Returns: undefined }
+      my_live_classes: { Args: never; Returns: { cancelled: boolean; duration_min: number; id: string; joined: boolean; starts_at: string; subject: string | null; title: string }[] }
+      join_live_class: { Args: { p_id: string }; Returns: string }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
