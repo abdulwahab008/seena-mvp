@@ -119,6 +119,10 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/students', label: 'All Students' },
       { href: '/students/alumni', label: 'Alumni' },
+      { href: '/students/transfers', label: 'Campus Transfers', roles: FRONT_OFFICE },
+      { href: '/students/withdrawals', label: 'Withdrawal Register', roles: FRONT_OFFICE },
+      { href: '/students/vaccinations', label: 'Vaccinations', roles: [...LEADERSHIP, 'nurse'] },
+      { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
       { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
       { href: '/students/promotion', label: 'Promotion', roles: [...LEADERSHIP, 'exam_controller'] },
       { href: '/students/recycle-bin', label: 'Recycle Bin', roles: FRONT_OFFICE },

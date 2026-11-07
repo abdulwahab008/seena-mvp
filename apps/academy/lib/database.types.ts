@@ -13324,6 +13324,150 @@ export type Database = {
         }
         Relationships: []
       }
+      campus_transfer: {
+        Row: {
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          enrolment_id: string
+          from_campus_id: string
+          id: string
+          reason: string
+          requested_at: string
+          requested_by: string | null
+          status: string
+          student_id: string
+          tenant_id: string
+          to_campus_id: string
+          to_section_id: string
+        }
+        Insert: {
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          enrolment_id: string
+          from_campus_id: string
+          id?: string
+          reason: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          student_id: string
+          tenant_id: string
+          to_campus_id: string
+          to_section_id: string
+        }
+        Update: {
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          enrolment_id?: string
+          from_campus_id?: string
+          id?: string
+          reason?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          student_id?: string
+          tenant_id?: string
+          to_campus_id?: string
+          to_section_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'campus_transfer_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campus_transfer_from_campus_id_fkey'
+            columns: ['from_campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campus_transfer_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campus_transfer_to_campus_id_fkey'
+            columns: ['to_campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'campus_transfer_to_section_id_fkey'
+            columns: ['to_section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      student_vaccination: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          dose_no: number
+          due_on: string | null
+          given_on: string | null
+          id: string
+          notes: string | null
+          student_id: string
+          tenant_id: string
+          vaccine: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          dose_no?: number
+          due_on?: string | null
+          given_on?: string | null
+          id?: string
+          notes?: string | null
+          student_id: string
+          tenant_id: string
+          vaccine: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          dose_no?: number
+          due_on?: string | null
+          given_on?: string | null
+          id?: string
+          notes?: string | null
+          student_id?: string
+          tenant_id?: string
+          vaccine?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'student_vaccination_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'student_vaccination_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -48807,6 +48951,11 @@ export type Database = {
         Args: { p_as_of: string }
         Returns: { account_id: string | null; amount: number; code: string | null; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
       }
+      request_campus_transfer: { Args: { p_enrolment_id: string; p_reason: string; p_to_section_id: string }; Returns: string }
+      decide_campus_transfer: { Args: { p_approve: boolean; p_id: string; p_note: string }; Returns: undefined }
+      save_student_vaccination: { Args: { p_dose_no: number; p_due_on?: string; p_given_on?: string; p_notes: string; p_student_id: string; p_vaccine: string }; Returns: string }
+      preview_student_merge: { Args: { p_keep_id: string; p_remove_id: string }; Returns: { row_count: number; table_name: string }[] }
+      merge_students: { Args: { p_keep_id: string; p_remove_id: string }; Returns: number }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
