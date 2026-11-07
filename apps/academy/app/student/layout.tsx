@@ -3,13 +3,14 @@ import { requireSession } from '@/lib/auth/require-session';
 import { supabaseServer } from '@/lib/supabase/server';
 import { ForcePasswordChange } from './force-password-change';
 import { Button } from '@/components/ui/button';
-import { Calendar, BookOpen, Clock, Award, LogOut, GraduationCap } from 'lucide-react';
+import { Calendar, BookOpen, Clock, Award, LogOut, GraduationCap, ListChecks } from 'lucide-react';
 
 const STUDENT_NAV_LINKS = [
   { href: '/student/timetable', label: 'Timetable', icon: Clock },
   { href: '/student/homework', label: 'Homework', icon: BookOpen },
   { href: '/student/attendance', label: 'Attendance', icon: Calendar },
   { href: '/student/results', label: 'Results', icon: Award },
+  { href: '/student/quizzes', label: 'Quizzes', icon: ListChecks },
 ];
 
 export default async function StudentPortalLayout({
