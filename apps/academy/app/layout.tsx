@@ -3,7 +3,7 @@ import { Toaster } from 'sonner';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Seena Academy — School management',
+  title: 'Classora — School management',
   description: 'Admissions, students, fees, attendance and exams for one or many campuses.',
 };
 

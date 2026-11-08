@@ -2,7 +2,7 @@ import { fetchCircularsDashboardData } from './actions';
 import { CircularDesk } from './circular-desk';
 
 export const metadata = {
-  title: 'Circular Publishing | Seena Academy',
+  title: 'Circular Publishing | Classora',
 };
 
 export default async function CommunicationCircularsPage() {

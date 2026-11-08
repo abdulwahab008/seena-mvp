@@ -2,7 +2,7 @@ import { fetchDeliveryDashboardData } from './actions';
 import { ReceiptsDesk } from './receipts-desk';
 
 export const metadata = {
-  title: 'Delivery Receipts | Seena Academy',
+  title: 'Delivery Receipts | Classora',
 };
 
 export default async function DeliveryReceiptsPage() {

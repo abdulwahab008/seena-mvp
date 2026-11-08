@@ -4,7 +4,7 @@ import { getPayrollRuns } from '../actions';
 import { RunsDesk } from './runs-desk';
 
 export const metadata: Metadata = {
-  title: 'Payroll Runs & Approvals | Payroll | Seena Academy',
+  title: 'Payroll Runs & Approvals | Payroll | Classora',
 };
 
 type SearchParams = { campus?: string };

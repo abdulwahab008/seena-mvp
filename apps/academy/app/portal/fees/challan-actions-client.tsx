@@ -81,7 +81,7 @@ export function ChallanActionsClient({ challan }: ChallanModalProps) {
               <div>
                 <span className="font-semibold text-muted-foreground">Bank:</span> {challan.bankName || 'Askari Bank Ltd'}
                 <br />
-                <span className="font-semibold text-muted-foreground">Account Title:</span> {challan.bankAccountTitle || 'Seena Academy Collection'}
+                <span className="font-semibold text-muted-foreground">Account Title:</span> {challan.bankAccountTitle || 'School Collection'}
                 <br />
                 <span className="font-semibold text-muted-foreground">A/C No:</span>{' '}
                 <span className="font-mono font-bold">{challan.bankAccountNo || '0123-4567890123'}</span>

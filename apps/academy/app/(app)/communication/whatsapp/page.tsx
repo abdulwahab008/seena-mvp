@@ -3,7 +3,7 @@ import { getWhatsAppComplianceData } from './actions';
 import { WhatsAppComplianceDesk } from './wa-compliance-desk';
 
 export const metadata: Metadata = {
-  title: 'WhatsApp Compliance & Session Desk | Communication | Seena Academy',
+  title: 'WhatsApp Compliance & Session Desk | Communication | Classora',
 };
 
 export default async function CommunicationWhatsAppPage() {

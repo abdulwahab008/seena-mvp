@@ -42,7 +42,7 @@ function layout({
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:1px solid ${BORDER};border-radius:12px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         <tr><td style="background:${BRAND};padding:20px 28px;">
           <span style="color:#ffffff;font-size:16px;font-weight:600;letter-spacing:-0.01em;">${safeSchool}</span>
-          <span style="color:#c7d2fe;font-size:13px;display:block;margin-top:2px;">Seena Academy</span>
+          <span style="color:#c7d2fe;font-size:13px;display:block;margin-top:2px;">Classora</span>
         </td></tr>
         <tr><td style="padding:28px;">
           <h1 style="margin:0 0 12px;font-size:19px;line-height:1.35;color:${INK};font-weight:600;">${escapeHtml(heading)}</h1>
@@ -116,11 +116,11 @@ export function emailVerificationEmail({ url, schoolName }: { url: string; schoo
 
 export function staffInvitationEmail({ url, schoolName, roleLabel }: { url: string; schoolName: string; roleLabel: string }) {
   return {
-    subject: `You're invited to join ${schoolName} on Seena Academy`,
+    subject: `You're invited to join ${schoolName} on Classora`,
     html: layout({
       schoolName,
       heading: `Join ${schoolName}`,
-      body: `<p style="margin:0;">You have been invited to ${escapeHtml(schoolName)} as <strong>${escapeHtml(roleLabel)}</strong>. Set a password to start using Seena Academy.</p>`,
+      body: `<p style="margin:0;">You have been invited to ${escapeHtml(schoolName)} as <strong>${escapeHtml(roleLabel)}</strong>. Set a password to start using Classora.</p>`,
       cta: { label: 'Accept invitation', url },
       footnote: 'This invitation expires in 14 days. If you were not expecting it, you can ignore this email.',
     }),

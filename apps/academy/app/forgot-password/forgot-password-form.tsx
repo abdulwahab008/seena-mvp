@@ -43,7 +43,7 @@ export function ForgotPasswordForm() {
     return (
       <Alert variant="success" title="Check your email" data-testid="reset-requested">
         <p>
-          If that address has a Seena Academy account, a password reset link is on its way. It
+          If that address has a Classora account, a password reset link is on its way. It
           expires in one hour and can be used once.
         </p>
       </Alert>

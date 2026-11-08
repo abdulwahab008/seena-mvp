@@ -3,7 +3,7 @@ import { getStaffLoans, getStaffOptions } from '../actions';
 import { LoansDesk } from './loans-desk';
 
 export const metadata: Metadata = {
-  title: 'Staff Loans & Advances | Payroll | Seena Academy',
+  title: 'Staff Loans & Advances | Payroll | Classora',
 };
 
 export default async function StaffLoansPage() {

@@ -3,7 +3,7 @@ import { requireSession } from '@/lib/auth/require-session';
 import { RemarksDesk } from './remarks-desk';
 
 export const metadata = {
-  title: 'Teacher Remarks & Moderation | Seena Academy',
+  title: 'Teacher Remarks & Moderation | Classora',
 };
 
 export default async function StaffRemarksPage() {

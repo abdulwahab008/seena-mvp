@@ -4,7 +4,7 @@ import { getOutboxMessages, getOutboxStats } from '../actions';
 import { OutboxDesk } from './outbox-desk';
 
 export const metadata: Metadata = {
-  title: 'Outbound Message Outbox | Communication | Seena Academy',
+  title: 'Outbound Message Outbox | Communication | Classora',
 };
 
 type SearchParams = { campus?: string; status?: string; channel?: string };
