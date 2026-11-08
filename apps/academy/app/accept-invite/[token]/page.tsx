@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { supabaseServer } from '@/lib/supabase/server';
+import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
 import { AcceptForm } from './accept-form';
 import { roleLabel } from '@/lib/staff-roles';
 
@@ -7,6 +7,8 @@ export default async function AcceptInvitePage({ params }: { params: Promise<{ t
   const { token } = await params;
   const supabase = await supabaseServer();
   const { data } = await supabase.rpc('get_invitation_preview', { p_token: token }).maybeSingle();
+
+  const { data: state } = data?.valid ? await supabaseServiceRole().rpc('invite_account_state', { p_token: token }).maybeSingle<{ school_code: string }>() : { data: null };
 
   if (!data || !data.valid) {
     return (
@@ -34,7 +36,7 @@ export default async function AcceptInvitePage({ params }: { params: Promise<{ t
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AcceptForm token={token} email={data.email} />
+          <AcceptForm token={token} email={data.email} schoolCode={state?.school_code ?? null} />
         </CardContent>
       </Card>
     </div>
