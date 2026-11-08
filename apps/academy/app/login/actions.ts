@@ -27,6 +27,16 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
   const supabase = await supabaseServer();
 
   let targetEmail = expandUsernameLogin(parsed.data.email);
+  // username@school-code: any member with a username, whatever address their
+  // login uses (invited staff keep their real email).
+  const usernameAtSchool = parsed.data.email.trim().match(/^([a-z0-9][a-z0-9._-]{2,31})@([a-z0-9][a-z0-9-]{2,49})$/i);
+  if (usernameAtSchool) {
+    const { data: resolvedEmail } = await supabaseServiceRole().rpc('resolve_username_login', {
+      p_username: usernameAtSchool[1]!,
+      p_school_code: usernameAtSchool[2]!,
+    });
+    if (typeof resolvedEmail === 'string' && resolvedEmail) targetEmail = resolvedEmail;
+  }
   // A bare identifier is a student's GR number; failing that, on a school's
   // own sign-in link (/login?school=code), a staff username at that school.
   if (!targetEmail.includes('@')) {
@@ -37,7 +47,8 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
     if (resolved && (resolved as any).email) {
       targetEmail = (resolved as any).email;
     } else if (/^[a-z0-9-]{3,50}$/.test(school)) {
-      targetEmail = expandUsernameLogin(`${targetEmail}@${school}`);
+      const { data: resolvedEmail } = await supabaseServiceRole().rpc('resolve_username_login', { p_username: targetEmail, p_school_code: school });
+      targetEmail = typeof resolvedEmail === 'string' && resolvedEmail ? resolvedEmail : expandUsernameLogin(`${targetEmail}@${school}`);
     }
   }
 

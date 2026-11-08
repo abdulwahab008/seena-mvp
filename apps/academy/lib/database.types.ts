@@ -49741,6 +49741,13 @@ export type Database = {
       queue_library_overdue_messages: { Args: { p_campus_id: string }; Returns: Json }
       submit_school_registration: { Args: { p_city?: string; p_contact_name: string; p_email?: string; p_message?: string; p_phone: string; p_school_name: string; p_students?: number }; Returns: string }
       platform_set_registration_status: { Args: { p_id: string; p_status: string }; Returns: undefined }
+      invite_account_state: {
+        Args: { p_token: string }
+        Returns: { confirmed: boolean | null; email: string; school_code: string; tenant_id: string; user_id: string | null; valid: boolean }[]
+      }
+      invite_username_check: { Args: { p_token: string; p_username: string }; Returns: string }
+      update_my_profile: { Args: { p_full_name: string; p_username?: string }; Returns: undefined }
+      resolve_username_login: { Args: { p_school_code: string; p_username: string }; Returns: string }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
