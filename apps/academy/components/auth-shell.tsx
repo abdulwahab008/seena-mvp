@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { GraduationCap } from 'lucide-react';
+import { BrandMark, BRAND_NAME } from '@/components/brand';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -28,8 +28,8 @@ export function AuthShell({
   const card = (
     <div className={cn('w-full space-y-4', wide ? 'max-w-xl' : 'max-w-sm')}>
       <Link href="/" className={cn('flex items-center justify-center gap-2 text-foreground', aside && 'lg:hidden')}>
-        <GraduationCap className="h-6 w-6 text-primary" aria-hidden />
-        <span className="text-lg font-semibold tracking-tight">Seena Academy</span>
+        <BrandMark className="h-8 w-8" />
+        <span className="text-lg font-semibold tracking-tight">{BRAND_NAME}</span>
       </Link>
       <Card>
         <CardHeader>
@@ -49,8 +49,8 @@ export function AuthShell({
     <div className="grid min-h-screen bg-muted/40 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <aside className="hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
         <Link href="/" className="flex items-center gap-2">
-          <GraduationCap className="h-7 w-7" aria-hidden />
-          <span className="text-xl font-semibold tracking-tight">Seena Academy</span>
+          <BrandMark className="h-9 w-9" plain />
+          <span className="text-xl font-semibold tracking-tight">{BRAND_NAME}</span>
         </Link>
         {aside}
         <p className="text-sm opacity-70">School management for Pakistan: fees, exams, attendance, staff and parents in one place.</p>

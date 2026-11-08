@@ -4,7 +4,7 @@ import { getPayrollRunDetails } from '../../actions';
 import { RunDetailDesk } from './run-detail-desk';
 
 export const metadata: Metadata = {
-  title: 'Payroll Run Breakdown | Seena Academy',
+  title: 'Payroll Run Breakdown | Classora',
 };
 
 type Params = { id: string };

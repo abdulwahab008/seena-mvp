@@ -295,7 +295,7 @@ export function OpeningBalancesForm({ accounts }: { accounts: { id: string; labe
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-3" noValidate>
           <p className="text-sm text-muted-foreground">
-            What the school already had on the day it started using Seena. Whatever does not balance goes to Owner&apos;s capital. This posts once.
+            What the school already had on the day it started using Classora. Whatever does not balance goes to Owner&apos;s capital. This posts once.
           </p>
           <div className="space-y-1 sm:w-48">
             <Label htmlFor="ob-date">As of</Label>

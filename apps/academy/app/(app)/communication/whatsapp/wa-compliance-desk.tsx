@@ -697,7 +697,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                 WhatsApp Dispatch & 24h Window Tester
               </CardTitle>
               <CardDescription className="text-xs">
-                Test how the Seena message outbox enforces 24-hour Meta session window rules and executes fallback to SMS.
+                Test how the Classora message outbox enforces 24-hour Meta session window rules and executes fallback to SMS.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 pt-0 space-y-4">

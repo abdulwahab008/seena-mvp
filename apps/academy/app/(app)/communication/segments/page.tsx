@@ -2,7 +2,7 @@ import { getSegmentsData } from './actions';
 import { DynamicSegmentDesk } from './segment-desk';
 
 export const metadata = {
-  title: 'Dynamic Audience Segments | Seena Academy',
+  title: 'Dynamic Audience Segments | Classora',
   description: 'Audience rules engine for fee defaulters, morning absentee alerts, and audit snapshots.',
 };
 

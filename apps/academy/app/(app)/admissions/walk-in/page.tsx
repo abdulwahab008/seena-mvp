@@ -2,7 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { WalkInForm } from './walk-in-form';
 
 export const metadata = {
-  title: 'Walk-in Admission Desk — Seena Academy',
+  title: 'Walk-in Admission Desk — Classora',
 };
 
 export default async function WalkInAdmissionPage() {

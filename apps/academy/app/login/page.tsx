@@ -33,7 +33,7 @@ export default async function LoginPage({
   return (
     <AuthShell
       title={schoolName ? `Sign in to ${schoolName}` : 'Sign in'}
-      description={schoolName ? 'Welcome back.' : 'Welcome back to Seena Academy.'}
+      description={schoolName ? 'Welcome back.' : 'Welcome back to Classora.'}
       aside={
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold">How to sign in</h2>

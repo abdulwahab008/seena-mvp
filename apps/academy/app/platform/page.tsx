@@ -20,7 +20,7 @@ export default async function PlatformPage() {
 
   return (
     <>
-      <PageHeader title="Schools" description="Every school on Seena. Create a school, resend its owner's invitation, or suspend it." />
+      <PageHeader title="Schools" description="Every school on Classora. Create a school, resend its owner's invitation, or suspend it." />
       <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
         {error ? (
           <Alert variant="destructive" title="Could not load schools">

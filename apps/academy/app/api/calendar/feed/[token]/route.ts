@@ -49,10 +49,10 @@ export async function GET(
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Seena Academy//Campus Events Calendar//EN',
+    'PRODID:-//Classora//Campus Events Calendar//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Seena Academy Campus Events',
+    'X-WR-CALNAME:Classora Campus Events',
     'X-WR-TIMEZONE:UTC',
   ];
 

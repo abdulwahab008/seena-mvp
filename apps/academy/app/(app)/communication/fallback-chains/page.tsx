@@ -2,7 +2,7 @@ import { getChannelChains, getOptOuts, getRecentEscalations } from './actions';
 import { FallbackChainsDesk } from './fallback-chains-desk';
 
 export const metadata = {
-  title: 'Channel Fallback Chains | Seena Academy',
+  title: 'Channel Fallback Chains | Classora',
   description: 'Multi-channel fallback routing, delivery timeout escalation, and opt-out suppression.',
 };
 

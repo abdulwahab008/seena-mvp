@@ -55,7 +55,7 @@ export default async function NoSchoolPage() {
         <Alert variant="warning" title="You can't sign in to this school right now" data-testid="school-suspended">
           <p>
             {school.status === 'closed'
-              ? 'This school no longer uses Seena Academy.'
+              ? 'This school no longer uses Classora.'
               : 'Access to this school has been paused. Your data is safe. Please contact your school administrator.'}
           </p>
         </Alert>

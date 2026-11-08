@@ -3,7 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { DepartmentsView, type DepartmentItem, type UnassignedStaffItem } from './departments-view';
 
 export const metadata: Metadata = {
-  title: 'Academic Departments — Seena Academy',
+  title: 'Academic Departments — Classora',
 };
 
 export const dynamic = 'force-dynamic';

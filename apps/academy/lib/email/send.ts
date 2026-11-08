@@ -41,7 +41,7 @@ export async function sendEmail({
   assertServer();
 
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM ?? 'Seena Academy <onboarding@resend.dev>';
+  const from = process.env.EMAIL_FROM ?? 'Classora <onboarding@resend.dev>';
 
   // Missing configuration is reported, never silently swallowed — a reset flow
   // that appears to succeed while sending nothing is worse than a clear failure.
