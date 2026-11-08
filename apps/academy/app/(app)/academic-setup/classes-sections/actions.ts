@@ -14,6 +14,47 @@ const CreateSectionSchema = z.object({
   shift: z.enum(['MORNING', 'AFTERNOON']).default('MORNING'),
 });
 
+const CreateClassSchema = z.object({
+  name: z.string().trim().min(1, 'Class name is required').max(60),
+  code: z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{1,10}$/, 'Code is 1 to 10 letters, numbers or dashes'),
+  position: z.enum(['start', 'end']),
+});
+
+// Ordinal sets promotion order, so a new class goes before the first one
+// (e.g. Playgroup) or after the last one.
+export async function createClassLevel(formData: FormData): Promise<{ error: string | null }> {
+  const parsed = CreateClassSchema.safeParse({
+    name: formData.get('name'),
+    code: formData.get('code'),
+    position: formData.get('position'),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
+
+  const supabase = await supabaseServer();
+  const { data: edge } = await supabase
+    .from('class_level')
+    .select('ordinal')
+    .order('ordinal', { ascending: parsed.data.position === 'start' })
+    .limit(1)
+    .maybeSingle();
+  const ordinal = edge ? edge.ordinal + (parsed.data.position === 'start' ? -1 : 1) : 0;
+
+  const { error } = await supabase.rpc('create_class_level', {
+    p_code: parsed.data.code,
+    p_name_en: parsed.data.name,
+    p_name_ur: '',
+    p_ordinal: ordinal,
+  });
+  if (error) {
+    if (error.code === '23505') return { error: `A class with code "${parsed.data.code}" already exists.` };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only an Owner or Principal can add classes.' };
+    return { error: 'Could not add the class.' };
+  }
+
+  revalidatePath('/academic-setup/classes-sections');
+  return { error: null };
+}
+
 const AssignTeacherSchema = z.object({
   sectionId: z.string().uuid(),
   staffId: z.string().uuid(),

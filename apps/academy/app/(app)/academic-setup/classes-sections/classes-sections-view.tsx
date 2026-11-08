@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Modal } from '@/components/ui/modal';
 import { DatePicker } from '@/components/ui/date-picker';
-import { createSection, assignClassTeacher } from './actions';
+import { createSection, assignClassTeacher, createClassLevel } from './actions';
 import { todayPk } from '@/lib/dates';
 import { roleLabel } from '@/lib/staff-roles';
 import { useRouter } from 'next/navigation';
@@ -68,6 +68,12 @@ export function ClassesSectionsView({
   const [newMedium, setNewMedium] = React.useState('ENGLISH');
   const [newShift, setNewShift] = React.useState('MORNING');
   const [isCreating, startCreateTransition] = React.useTransition();
+
+  const [classModalOpen, setClassModalOpen] = React.useState(false);
+  const [newClassName, setNewClassName] = React.useState('');
+  const [newClassCode, setNewClassCode] = React.useState('');
+  const [newClassPosition, setNewClassPosition] = React.useState<'start' | 'end'>('end');
+  const [isCreatingClass, startCreateClassTransition] = React.useTransition();
 
   // Assign Class Teacher Modal State
   const [assignModalOpen, setAssignModalOpen] = React.useState(false);
@@ -136,6 +142,26 @@ export function ClassesSectionsView({
     });
   };
 
+  const handleCreateClass = (e: React.FormEvent) => {
+    e.preventDefault();
+    const fd = new FormData();
+    fd.set('name', newClassName);
+    fd.set('code', newClassCode);
+    fd.set('position', newClassPosition);
+    startCreateClassTransition(async () => {
+      const result = await createClassLevel(fd);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Class ${newClassName.trim()} added.`);
+        setClassModalOpen(false);
+        setNewClassName('');
+        setNewClassCode('');
+        router.refresh();
+      }
+    });
+  };
+
   const handleOpenAssignModal = (sec: { id: string; name: string }, className: string) => {
     setTargetSection({ id: sec.id, name: sec.name, className });
     setSelectedStaffId(teacherAssignmentMap[sec.id] ?? '');
@@ -192,6 +218,10 @@ export function ClassesSectionsView({
             <br />
             <span>Session: {currentSession?.name ?? 'Current'}</span>
           </div>
+          <Button variant="outline" onClick={() => setClassModalOpen(true)} className="gap-1.5" data-testid="create-class-btn">
+            <Plus className="h-4 w-4" />
+            <span>Add Class</span>
+          </Button>
           <Button
             onClick={() => handleOpenAddModal()}
             className="gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
@@ -488,6 +518,47 @@ export function ClassesSectionsView({
               data-testid="submit-create-section"
             >
               {isCreating ? 'Creating Section…' : 'Create Section'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        open={classModalOpen}
+        onClose={() => setClassModalOpen(false)}
+        title="Add Class"
+        description="Add a class level your school teaches, such as Playgroup or Hifz."
+      >
+        <form onSubmit={handleCreateClass} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="class-name">Class name</Label>
+              <Input id="class-name" placeholder="e.g. Playgroup" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} required maxLength={60} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="class-code">Code</Label>
+              <Input id="class-code" placeholder="e.g. PG" value={newClassCode} onChange={(e) => setNewClassCode(e.target.value.toUpperCase())} required maxLength={10} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="class-position">Place it</Label>
+            <Select value={newClassPosition} onValueChange={(v) => setNewClassPosition(v as 'start' | 'end')}>
+              <SelectTrigger id="class-position">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="start">Before {classLevels[0]?.name_en ?? 'the first class'}</SelectItem>
+                <SelectItem value="end">After {classLevels[classLevels.length - 1]?.name_en ?? 'the last class'}</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Students are promoted in this order at year end.</p>
+          </div>
+          <div className="flex justify-end gap-2 pt-2 border-t">
+            <Button type="button" variant="outline" onClick={() => setClassModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isCreatingClass} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              {isCreatingClass ? 'Adding…' : 'Add Class'}
             </Button>
           </div>
         </form>
