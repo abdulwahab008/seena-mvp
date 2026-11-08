@@ -29,7 +29,7 @@ test("an owner resets a class's student passwords and the student signs in with 
   await sp.getByLabel('Email').fill(studentEmail);
   await sp.getByLabel('Password').fill(SEED_PASSWORD);
   await sp.getByRole('button', { name: 'Sign in' }).click();
-  await expect(sp.getByText(/invalid|incorrect|wrong/i)).toBeVisible();
+  await expect(sp.getByText('That sign-in did not match', { exact: false })).toBeVisible();
   await sp.getByLabel('Password').fill(password);
   await sp.getByRole('button', { name: 'Sign in' }).click();
   await sp.waitForURL(/\/student/);
