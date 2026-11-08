@@ -542,15 +542,16 @@ export function ClassesSectionsView({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="class-position">Place it</Label>
-            <Select value={newClassPosition} onValueChange={(v) => setNewClassPosition(v as 'start' | 'end')}>
-              <SelectTrigger id="class-position">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="start">Before {classLevels[0]?.name_en ?? 'the first class'}</SelectItem>
-                <SelectItem value="end">After {classLevels[classLevels.length - 1]?.name_en ?? 'the last class'}</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Native select: the Radix one portals beneath this <dialog> when the page loaded with it closed. */}
+            <select
+              id="class-position"
+              value={newClassPosition}
+              onChange={(e) => setNewClassPosition(e.target.value as 'start' | 'end')}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="start">Before {classLevels[0]?.name_en ?? 'the first class'}</option>
+              <option value="end">After {classLevels[classLevels.length - 1]?.name_en ?? 'the last class'}</option>
+            </select>
             <p className="text-xs text-muted-foreground">Students are promoted in this order at year end.</p>
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t">
