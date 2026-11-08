@@ -55,6 +55,21 @@ export async function createClassLevel(formData: FormData): Promise<{ error: str
   return { error: null };
 }
 
+export async function renameClassLevel(id: string, name: string): Promise<{ error: string | null }> {
+  const parsed = z.object({ id: z.string().uuid(), name: z.string().trim().min(1, 'Class name is required').max(60) }).safeParse({ id, name });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('rename_class_level', { p_id: parsed.data.id, p_name_en: parsed.data.name });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only an Owner or Principal can rename classes.' };
+    return { error: 'Could not rename the class.' };
+  }
+
+  revalidatePath('/academic-setup/classes-sections');
+  return { error: null };
+}
+
 const AssignTeacherSchema = z.object({
   sectionId: z.string().uuid(),
   staffId: z.string().uuid(),

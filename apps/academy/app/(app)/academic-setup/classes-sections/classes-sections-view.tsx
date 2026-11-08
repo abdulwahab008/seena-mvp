@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Modal } from '@/components/ui/modal';
 import { DatePicker } from '@/components/ui/date-picker';
-import { createSection, assignClassTeacher, createClassLevel } from './actions';
+import { createSection, assignClassTeacher, createClassLevel, renameClassLevel } from './actions';
 import { todayPk } from '@/lib/dates';
 import { roleLabel } from '@/lib/staff-roles';
 import { useRouter } from 'next/navigation';
@@ -74,6 +74,9 @@ export function ClassesSectionsView({
   const [newClassCode, setNewClassCode] = React.useState('');
   const [newClassPosition, setNewClassPosition] = React.useState<'start' | 'end'>('end');
   const [isCreatingClass, startCreateClassTransition] = React.useTransition();
+
+  const [renaming, setRenaming] = React.useState<{ id: string; name: string } | null>(null);
+  const [isRenaming, startRenameTransition] = React.useTransition();
 
   // Assign Class Teacher Modal State
   const [assignModalOpen, setAssignModalOpen] = React.useState(false);
@@ -157,6 +160,21 @@ export function ClassesSectionsView({
         setClassModalOpen(false);
         setNewClassName('');
         setNewClassCode('');
+        router.refresh();
+      }
+    });
+  };
+
+  const handleRenameClass = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!renaming) return;
+    startRenameTransition(async () => {
+      const result = await renameClassLevel(renaming.id, renaming.name);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Class renamed to ${renaming.name.trim()}.`);
+        setRenaming(null);
         router.refresh();
       }
     });
@@ -317,6 +335,16 @@ export function ClassesSectionsView({
                     </div>
                   </div>
 
+                  <div className="flex gap-2 self-start sm:self-auto">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setRenaming({ id: cl.id, name: cl.name_en })}
+                    className="h-7 text-xs"
+                    data-testid={`rename-class-${cl.code}`}
+                  >
+                    Rename
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
@@ -327,6 +355,7 @@ export function ClassesSectionsView({
                     <Plus className="h-3 w-3" />
                     <span>Add Section</span>
                   </Button>
+                  </div>
                 </div>
 
                 <CardContent className="p-4">
@@ -560,6 +589,29 @@ export function ClassesSectionsView({
             </Button>
             <Button type="submit" disabled={isCreatingClass} className="bg-indigo-600 hover:bg-indigo-700 text-white">
               {isCreatingClass ? 'Adding…' : 'Add Class'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal open={renaming !== null} onClose={() => setRenaming(null)} title="Rename Class" description="The class code stays the same.">
+        <form onSubmit={handleRenameClass} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="rename-class">Class name</Label>
+            <Input
+              id="rename-class"
+              value={renaming?.name ?? ''}
+              onChange={(e) => setRenaming((r) => (r ? { ...r, name: e.target.value } : r))}
+              required
+              maxLength={60}
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2 border-t">
+            <Button type="button" variant="outline" onClick={() => setRenaming(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isRenaming} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              {isRenaming ? 'Saving…' : 'Save'}
             </Button>
           </div>
         </form>
