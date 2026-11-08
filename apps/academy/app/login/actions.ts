@@ -27,13 +27,17 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
   const supabase = await supabaseServer();
 
   let targetEmail = expandUsernameLogin(parsed.data.email);
-  // Support student login by GR number
+  // A bare identifier is a student's GR number; failing that, on a school's
+  // own sign-in link (/login?school=code), a staff username at that school.
   if (!targetEmail.includes('@')) {
     const { data: resolved } = await supabaseServiceRole().rpc('resolve_student_login', {
       p_identifier: targetEmail,
     });
+    const school = String(formData.get('school') ?? '');
     if (resolved && (resolved as any).email) {
       targetEmail = (resolved as any).email;
+    } else if (/^[a-z0-9-]{3,50}$/.test(school)) {
+      targetEmail = expandUsernameLogin(`${targetEmail}@${school}`);
     }
   }
 
@@ -50,7 +54,12 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
   // outcome must be ground truth from this action's own signInWithPassword
   // call, not something a direct RPC caller could assert for themselves.
   await supabaseServiceRole().rpc('register_login_attempt', { p_identifier: targetEmail, p_succeeded: !error });
-  if (error) return { error: 'Incorrect email or password.', ok: false };
+  if (error) {
+    if (error.code === 'email_not_confirmed') {
+      return { error: 'Your email is not confirmed yet. Open the confirmation email we sent you, or ask your school to send the invitation again.', ok: false };
+    }
+    return { error: 'That sign-in did not match. Check your email, username or GR number and your password.', ok: false };
+  }
 
   return { error: null, ok: true };
 }

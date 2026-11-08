@@ -25,6 +25,7 @@ const AUTH_PATHS = new Set([
   '/login',
   '/login/otp',
   '/sign-up',
+  '/register-school',
   '/forgot-password',
   '/reset-password',
   '/no-school',

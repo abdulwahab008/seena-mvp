@@ -37,7 +37,7 @@ test('10 consecutive failed logins lock the account, even against the correct pa
   for (let i = 0; i < 10; i++) {
     await page.getByLabel('Password').fill('wrong-password');
     await page.getByRole('button', { name: 'Sign in' }).click();
-    await expect(page.getByText('Incorrect email or password.')).toBeVisible();
+    await expect(page.getByText('That sign-in did not match. Check your email, username or GR number and your password.')).toBeVisible();
   }
 
   // The 11th attempt is rejected before Supabase Auth is even asked — even

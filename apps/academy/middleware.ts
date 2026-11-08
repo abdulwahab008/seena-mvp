@@ -27,6 +27,7 @@ const PUBLIC_PATHS = new Set([
   '/login',
   '/login/otp',
   '/sign-up',
+  '/register-school',
   '/guardian/claim',
   '/forgot-password',
   '/reset-password',
