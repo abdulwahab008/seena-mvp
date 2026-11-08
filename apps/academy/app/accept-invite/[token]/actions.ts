@@ -1,15 +1,18 @@
 'use server';
 
 import { z } from 'zod';
-import { supabaseServer } from '@/lib/supabase/server';
+import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
 
 const AcceptSchema = z.object({
   token: z.string().min(1),
   password: z.string().min(10, 'Must be at least 10 characters'),
   fullName: z.string().trim().min(2, 'Enter your full name').max(120),
+  username: z.union([z.literal(''), z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9._-]{2,31}$/, 'Usernames are 3 to 32 letters, numbers, dots, dashes or underscores')]),
 });
 
 export type AcceptState = { error: string | null; ok: boolean };
+
+type InviteState = { email: string; valid: boolean; tenant_id: string; school_code: string; user_id: string | null; confirmed: boolean | null };
 
 function mapError(message: string): string {
   if (message.includes('INVITE_EXPIRED')) return 'This invitation has expired. Ask your school to send a new one.';
@@ -17,63 +20,66 @@ function mapError(message: string): string {
   if (message.includes('INVITE_EMAIL_MISMATCH')) return 'This invitation was issued to a different email address.';
   if (message.includes('ALREADY_A_MEMBER')) return 'You already have an account. Try signing in instead.';
   if (message.includes('INVITE_NOT_FOUND')) return 'This invitation link is not valid.';
+  if (message.includes('USERNAME_TAKEN')) return 'That username is already used in this school. Choose another.';
+  if (message.includes('USERNAME_INVALID')) return 'Usernames are 3 to 32 letters, numbers, dots, dashes or underscores.';
   return 'Something went wrong. Please try again.';
 }
 
-// FR-A07: create the invitee's Supabase Auth account, then immediately bind
-// it to the inviting tenant via accept_invitation() while the fresh session
-// is active — both steps have to happen in the same request or the user is
-// left with an account but no tenant membership.
-export async function acceptInvite(
-  email: string,
-  _prev: AcceptState,
-  formData: FormData,
-): Promise<AcceptState> {
-  const parsed = AcceptSchema.safeParse({ token: formData.get('token'), password: formData.get('password'), fullName: formData.get('fullName') });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.', ok: false };
-
-  const supabase = await supabaseServer();
-
-  const { error: signUpError } = await supabase.auth.signUp({
-    email,
-    password: parsed.data.password,
-    options: { data: { full_name: parsed.data.fullName } },
+// FR-A07: create the invitee's account and bind it to the inviting school in
+// one request. The account is created server-side as already confirmed: the
+// invitation link went to this address, which is the proof a confirmation
+// email would give. (A browser sign-up gets no session while the project
+// requires confirmation, which is what used to fail here.)
+export async function acceptInvite(_email: string, _prev: AcceptState, formData: FormData): Promise<AcceptState> {
+  const parsed = AcceptSchema.safeParse({
+    token: formData.get('token'),
+    password: formData.get('password'),
+    fullName: formData.get('fullName'),
+    username: formData.get('username') ?? '',
   });
-  if (signUpError) {
-    if (signUpError.message.toLowerCase().includes('already registered')) {
-      // Since /sign-up exists, "I made an account, then my school invited me"
-      // is a normal order of events — and it used to dead-end here, because
-      // the invitation can only be redeemed with a session and this action
-      // only ever created one via signUp(). Sign the existing account in with
-      // the password they just typed and carry on to accept_invitation()
-      // below; a wrong password still fails closed.
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: parsed.data.password,
-      });
-      if (signInError) {
-        return {
-          error:
-            'An account with this email already exists. Enter its password to accept this invitation, or sign in and reset it.',
-          ok: false,
-        };
-      }
-      const { data: me } = await supabase.auth.getUser();
-      if (!me.user?.user_metadata?.full_name) await supabase.auth.updateUser({ data: { full_name: parsed.data.fullName } });
-    } else {
-      return { error: 'Could not create your account.', ok: false };
-    }
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.', ok: false };
+  const { token, password, fullName, username } = parsed.data;
+
+  const admin = supabaseServiceRole();
+  const { data: state } = await admin.rpc('invite_account_state', { p_token: token }).maybeSingle<InviteState>();
+  if (!state) return { error: 'This invitation link is not valid.', ok: false };
+  if (!state.valid) return { error: 'This invitation has expired or was already used. Ask your school to send a new one.', ok: false };
+
+  if (username) {
+    const { data: check } = await admin.rpc('invite_username_check', { p_token: token, p_username: username });
+    if (check === 'taken') return { error: 'That username is already used in this school. Choose another.', ok: false };
+    if (check !== 'ok') return { error: 'Usernames are 3 to 32 letters, numbers, dots, dashes or underscores.', ok: false };
   }
 
-  const { error: acceptError } = await supabase.rpc('accept_invitation', { p_token: parsed.data.token });
+  if (!state.user_id) {
+    const { error } = await admin.auth.admin.createUser({ email: state.email, password, email_confirm: true, user_metadata: { full_name: fullName } });
+    if (error) return { error: 'Could not create your account. Please try again.', ok: false };
+  } else if (!state.confirmed) {
+    // An account was started for this address but never confirmed (an older
+    // sign-up, or a failed try at this page). Nobody has used it, and the
+    // invitation proves the address, so finish it with this password.
+    const { error } = await admin.auth.admin.updateUserById(state.user_id, { password, email_confirm: true, user_metadata: { full_name: fullName } });
+    if (error) return { error: 'Could not set up your account. Please try again.', ok: false };
+  }
+
+  const supabase = await supabaseServer();
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email: state.email, password });
+  if (signInError) {
+    // A confirmed account already exists: only its own password may link it.
+    return {
+      error: 'An account with this email already exists. Enter its password to accept this invitation, or sign in and reset it.',
+      ok: false,
+    };
+  }
+
+  const { error: acceptError } = await supabase.rpc('accept_invitation', { p_token: token });
   if (acceptError) return { error: mapError(acceptError.message), ok: false };
 
-  // The session signUp() issued was minted before accept_invitation() created
-  // the app_user/user_campus rows, so its JWT still carries the "no tenant"
-  // claims from custom_access_token_hook's not-found branch. Force a new
-  // token now so the very next request sees the real tenant_id/campus_ids —
-  // otherwise every table's RLS hides everything until the 15-minute-later
-  // natural refresh.
+  const { error: profileError } = await supabase.rpc('update_my_profile', { p_full_name: fullName, p_username: username || undefined });
+  if (profileError) return { error: mapError(profileError.message), ok: false };
+
+  // The session was minted before accept_invitation() created the membership,
+  // so its JWT still says "no school". Refresh now so the next request sees it.
   const { error: refreshError } = await supabase.auth.refreshSession();
   if (refreshError) return { error: 'Account created, but please sign in again to continue.', ok: false };
 
