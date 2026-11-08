@@ -30,7 +30,7 @@ select is(
         -- public on purpose: admission form, invitation, certificate and password-reset checks, OTP and login lockouts
         'classify_password_reset_token', 'fn_public_school_info', 'get_guardian_invite_preview', 'get_invitation_preview',
         'is_guardian_otp_locked', 'is_login_locked', 'is_otp_locked', 'issue_otp', 'register_guardian_otp_attempt', 'request_claim_manual_review',
-        'submit_public_enquiry', 'verify_certificate',
+        'submit_public_enquiry', 'submit_school_registration', 'verify_certificate',
         -- check auth.uid() or the role themselves, and are used by row-level security policies
         'add_ticket_message', 'change_student_password', 'create_support_ticket', 'edit_student_remark',
         'generate_guardian_ics_token', 'guardian_can_read_circular', 'mark_circular_read', 'moderate_student_remark',

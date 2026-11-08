@@ -4,10 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
 import { NewSchoolForm } from './new-school-form';
 import { SchoolList } from './school-list';
+import { RegistrationRequests } from './registration-requests';
 
 export default async function PlatformPage() {
   const supabase = await supabaseServer();
-  const { data: schools, error } = await supabase.rpc('platform_list_tenants');
+  const [{ data: schools, error }, { data: requests }] = await Promise.all([
+    supabase.rpc('platform_list_tenants'),
+    supabase
+      .from('school_registration_request')
+      .select('id, school_name, contact_name, phone, email, city, students, message, status, created_at')
+      .in('status', ['new', 'contacted'])
+      .order('created_at', { ascending: false })
+      .limit(100),
+  ]);
 
   return (
     <>
@@ -29,6 +38,10 @@ export default async function PlatformPage() {
           </CardContent>
         </Card>
       </div>
+      <section className="mt-8 space-y-3">
+        <h2 className="text-lg font-semibold">Join requests</h2>
+        <RegistrationRequests requests={requests ?? []} />
+      </section>
     </>
   );
 }

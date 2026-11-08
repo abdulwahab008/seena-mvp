@@ -69,3 +69,15 @@ export async function resendOwnerInvite(tenantId: string): Promise<{ error: stri
   if (!inviteId) return { error: 'This school’s owner has already joined.', delivery: null };
   return { error: null, delivery: await deliverInvitation(inviteId) };
 }
+
+const RegistrationStatusSchema = z.object({ id: z.string().uuid(), status: z.enum(['new', 'contacted', 'onboarded', 'declined']) });
+
+export async function setRegistrationStatus(input: z.input<typeof RegistrationStatusSchema>): Promise<{ error: string | null }> {
+  const parsed = RegistrationStatusSchema.safeParse(input);
+  if (!parsed.success) return { error: 'Invalid status.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('platform_set_registration_status', { p_id: parsed.data.id, p_status: parsed.data.status });
+  if (error) return { error: error.message.includes('FORBIDDEN') ? 'Only platform admins can do this.' : 'Could not update the request.' };
+  revalidatePath('/platform');
+  return { error: null };
+}
