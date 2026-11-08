@@ -563,7 +563,7 @@ export function WalkInForm({
                 applicationNo: admittedRecord.applicationNo,
                 className: admittedRecord.className,
                 sectionName: admittedRecord.sectionName,
-                campusName: selectedCampus?.name ?? 'Seena Model School & College',
+                campusName: selectedCampus?.name ?? 'Your school',
                 sessionName: selectedSession?.name ?? '2027-2028',
                 parentName,
                 feeAmount: admittedRecord.fee,

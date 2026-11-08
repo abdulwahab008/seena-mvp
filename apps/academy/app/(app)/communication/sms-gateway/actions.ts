@@ -40,7 +40,7 @@ export async function sendTestSms(to: string): Promise<{ error: string | null }>
   const { data } = await supabaseServiceRole().rpc('sms_gateway_for_dispatch', { p_tenant_id: actor.tenantId }).maybeSingle();
   if (!data) return { error: 'Save the gateway first.' };
   const result = await new HttpSmsTransport(data.config as HttpSmsConfig, data.api_key, data.sender_id ?? '').send({
-    deliveryId: 'test-sms', channel: 'sms', languageCode: 'en', toMsisdn: to, toEmail: null, title: '', body: 'Test message from Seena Academy. Your SMS gateway works.', variables: [], templateName: null,
+    deliveryId: 'test-sms', channel: 'sms', languageCode: 'en', toMsisdn: to, toEmail: null, title: '', body: 'Test message from Classora. Your SMS gateway works.', variables: [], templateName: null,
   });
   return result.ok ? { error: null } : { error: `The gateway said: ${result.errorText}` };
 }

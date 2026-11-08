@@ -3,7 +3,7 @@ import { getTemplates, getPlaceholders } from './actions';
 import { TemplateDesk } from './template-desk';
 
 export const metadata: Metadata = {
-  title: 'Message Template Library | Communication | Seena Academy',
+  title: 'Message Template Library | Communication | Classora',
 };
 
 type SearchParams = { category?: string; audience?: string; search?: string };

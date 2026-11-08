@@ -2,7 +2,7 @@ import { fetchWalletDashboardData } from './actions';
 import { WalletDesk } from './wallet-desk';
 
 export const metadata = {
-  title: 'Messaging Wallet & Cost Ledger | Seena Academy',
+  title: 'Messaging Wallet & Cost Ledger | Classora',
 };
 
 export default async function CommunicationWalletPage() {

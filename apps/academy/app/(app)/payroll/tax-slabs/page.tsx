@@ -3,7 +3,7 @@ import { getTaxSlabs } from '../actions';
 import { TaxSlabsDesk } from './tax-slabs-desk';
 
 export const metadata: Metadata = {
-  title: 'Tax Slabs & Simulator | Payroll | Seena Academy',
+  title: 'Tax Slabs & Simulator | Payroll | Classora',
 };
 
 export default async function TaxSlabsPage() {

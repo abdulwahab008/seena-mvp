@@ -3,7 +3,7 @@ import { getSalaryComponents } from '../actions';
 import { ComponentsDesk } from './components-desk';
 
 export const metadata: Metadata = {
-  title: 'Salary Components | Payroll | Seena Academy',
+  title: 'Salary Components | Payroll | Classora',
 };
 
 export default async function SalaryComponentsPage() {

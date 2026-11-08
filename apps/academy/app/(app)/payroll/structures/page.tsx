@@ -3,7 +3,7 @@ import { getEmployeeSalaryStructures, getStaffOptions } from '../actions';
 import { StructuresDesk } from './structures-desk';
 
 export const metadata: Metadata = {
-  title: 'Employee Salary Structures | Payroll | Seena Academy',
+  title: 'Employee Salary Structures | Payroll | Classora',
 };
 
 export default async function SalaryStructuresPage() {

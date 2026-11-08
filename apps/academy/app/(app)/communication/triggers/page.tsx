@@ -2,7 +2,7 @@ import { getTriggerRulesData } from './actions';
 import { TriggerRulesDesk } from './trigger-rules-desk';
 
 export const metadata = {
-  title: 'Event-Triggered Message Rules | Seena Academy',
+  title: 'Event-Triggered Message Rules | Classora',
   description: 'Automated trigger rules for attendance absence notifications, overdue fee escalation, and decoupled outbox enqueueing.',
 };
 

@@ -69,12 +69,12 @@ export async function requestPasswordReset(
  * but not yet invited into a school) simply gets the product name.
  */
 async function tenantNameFor(userId: string | null): Promise<string> {
-  if (!userId) return 'Seena Academy';
+  if (!userId) return 'Classora';
   const admin = supabaseServiceRole();
   const { data } = await admin
     .from('app_user')
     .select('tenant:tenant_id(name)')
     .eq('user_id', userId)
     .maybeSingle();
-  return data?.tenant?.name ?? 'Seena Academy';
+  return data?.tenant?.name ?? 'Classora';
 }

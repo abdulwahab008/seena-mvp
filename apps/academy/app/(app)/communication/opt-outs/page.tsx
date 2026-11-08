@@ -2,7 +2,7 @@ import { fetchOptOutDashboardData } from './actions';
 import { OptOutDesk } from './opt-out-desk';
 
 export const metadata = {
-  title: 'Opt-Outs & Suppression | Seena Academy',
+  title: 'Opt-Outs & Suppression | Classora',
 };
 
 export default async function CommunicationOptOutPage() {
