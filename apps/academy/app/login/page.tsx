@@ -27,7 +27,8 @@ export default async function LoginPage({
   // moments after they type their password.
   const redirectTo = safeRedirectTo(params.redirectTo);
   const schoolCode = params.school && /^[a-z0-9-]{3,50}$/i.test(params.school) ? params.school.toLowerCase() : null;
-  const { data: schoolName } = schoolCode ? await (await supabaseServer()).rpc('school_login_name', { p_code: schoolCode }) : { data: null };
+  const { data: school } = schoolCode ? await (await supabaseServer()).rpc('fn_public_school_info', { p_tenant_slug: schoolCode }) : { data: null };
+  const schoolName = (school as { tenant_name?: string } | null)?.tenant_name ?? null;
 
   return (
     <AuthShell

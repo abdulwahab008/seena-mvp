@@ -4,9 +4,8 @@
 -- Seena fills in a registration request instead, which lands in the
 -- platform console.
 --
--- Also a public lookup of a school's display name by its code, so a link like
--- /login?school=demo-school can greet people with their school's name. It
--- returns the name of an active school and nothing else.
+-- The school-branded sign-in link (/login?school=code) reads the school's
+-- name through the existing public fn_public_school_info.
 
 create table public.school_registration_request (
   id             uuid primary key default gen_random_uuid(),
@@ -75,15 +74,3 @@ end;
 $$;
 revoke execute on function public.platform_set_registration_status(uuid, text) from public, anon;
 grant execute on function public.platform_set_registration_status(uuid, text) to authenticated;
-
-create or replace function public.school_login_name(p_code text)
-returns text
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select coalesce(nullif(name, ''), legal_name) from public.tenant where slug = lower(btrim(p_code)) and status = 'active';
-$$;
-revoke execute on function public.school_login_name(text) from public;
-grant execute on function public.school_login_name(text) to anon, authenticated;

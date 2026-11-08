@@ -14,7 +14,7 @@ select public.submit_school_registration('Al-Noor Grammar', 'Bilal Ahmed', '0300
 select throws_ok($$ select public.submit_school_registration('Al-Noor Grammar', 'Bilal Ahmed', '03001234567') $$, '54000', 'TOO_MANY_REQUESTS',
   'the same phone at most three times a day');
 select throws_ok($$ select public.submit_school_registration('X', 'Bilal', '0300') $$, '23514', null, 'a real phone number and school name are required');
-select is(public.school_login_name('TEST-REG-SCHOOL'), 'Registration Test School', 'a school code gives its name for the sign-in page');
+select is(public.fn_public_school_info('TEST-REG-SCHOOL') ->> 'tenant_name', 'Registration Test School', 'a school code gives its name for the sign-in page');
 select throws_ok($$ select count(*) from public.school_registration_request $$, '42501', null, 'the public cannot read requests');
 
 set local role authenticated;
