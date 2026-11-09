@@ -120,6 +120,8 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/students/dashboard', label: 'Students Dashboard', roles: FRONT_OFFICE },
       { href: '/students', label: 'All Students' },
+      { href: '/students/families', label: 'Family List', roles: FRONT_OFFICE },
+      { href: '/students/reports', label: 'Student Reports', roles: FRONT_OFFICE },
       { href: '/students/documents', label: 'Student Documents', roles: FRONT_OFFICE },
       { href: '/students/alumni', label: 'Alumni' },
       { href: '/students/transfers', label: 'Campus Transfers', roles: FRONT_OFFICE },
@@ -143,6 +145,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/staff', label: 'All Staff', roles: HR_ROLES },
       { href: '/staff/directory', label: 'Directory' },
+      { href: '/staff/reports', label: 'Staff Reports', roles: HR_ROLES },
       { href: '/staff/org-chart', label: 'Org Chart' },
       { href: '/staff/departments', label: 'Departments', roles: HR_ROLES },
       { href: '/staff/qualifications', label: 'Qualifications', roles: HR_ROLES },
