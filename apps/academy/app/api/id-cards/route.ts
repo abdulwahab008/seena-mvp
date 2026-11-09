@@ -14,6 +14,10 @@ const QuerySchema = z.object({
   campusId: z.string().uuid(),
   sectionId: z.string().uuid().optional(),
   validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  gender: z.enum(['male', 'female']).optional(),
+  orientation: z.enum(['landscape', 'portrait']).default('landscape'),
+  side: z.enum(['front', 'back', 'both']).default('front'),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#1e3a8a'),
 });
 
 export async function GET(req: NextRequest) {
@@ -30,11 +34,12 @@ export async function GET(req: NextRequest) {
   if (q.data.kind === 'student') {
     let query = supabase
       .from('enrolment')
-      .select('student:student_id(name_en, father_name_en, gr_number, blood_group), class_level:class_level_id(name_en), section:section_id(name)')
+      .select('student:student_id!inner(name_en, father_name_en, gr_number, blood_group), class_level:class_level_id(name_en), section:section_id(name)')
       .eq('campus_id', campus.id)
       .eq('status', 'active')
       .limit(MAX_CARDS);
     if (q.data.sectionId) query = query.eq('section_id', q.data.sectionId);
+    if (q.data.gender) query = query.eq('student.gender', q.data.gender);
     const { data, error } = await query;
     if (error) return NextResponse.json({ error: 'Could not load students.' }, { status: 500 });
     cards = (data ?? []).flatMap((e) => {
@@ -88,6 +93,9 @@ export async function GET(req: NextRequest) {
         kindLabel: q.data.kind === 'student' ? 'Student identity card' : 'Staff identity card',
         validUntil: formatDatePk(q.data.validUntil),
         cards,
+        orientation: q.data.orientation,
+        side: q.data.side,
+        color: q.data.color,
       }),
       pageFormat: 'A4',
       landscape: false,
