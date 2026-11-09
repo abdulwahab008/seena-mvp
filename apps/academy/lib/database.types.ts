@@ -53953,7 +53953,7 @@ export type Database = {
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
       fee_commitment_status: 'open' | 'kept' | 'broken' | 'cancelled'
       gl_account_type: 'asset' | 'liability' | 'equity' | 'income' | 'expense'
-      front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found'
+      front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found' | 'complaint' | 'contact'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
       fee_ledger_direction: 'debit' | 'credit'
       fee_ledger_entry_type:
@@ -54557,7 +54557,7 @@ export const Constants = {
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
       fee_commitment_status: ['open', 'kept', 'broken', 'cancelled'],
       gl_account_type: ['asset', 'liability', 'equity', 'income', 'expense'],
-      front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found'],
+      front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found', 'complaint', 'contact'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
       fee_ledger_direction: ['debit', 'credit'],
       fee_ledger_entry_type: [
