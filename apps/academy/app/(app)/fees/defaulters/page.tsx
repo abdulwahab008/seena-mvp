@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ExportDefaultersButton } from './export-button';
+import { PromiseButton, WriteOffButton } from '../commitments/commitment-forms';
 import { formatDateTimePk } from '@/lib/dates';
 
 const PAGE = 50;
@@ -28,6 +29,8 @@ export default async function DefaultersPage({ searchParams }: { searchParams: P
   if (sp.class) q = q.eq('class_id', sp.class);
   if (!includeHardship) q = q.eq('has_active_concession', false);
 
+  const { data: verified } = await supabase.auth.getClaims();
+  const canWriteOff = ['super_admin', 'owner', 'principal'].includes(String(verified?.claims.app_role));
   const [{ data: rows, count }, { data: totals }, { data: classes }] = await Promise.all([
     q,
     supabase.rpc('fn_defaulter_bucket_totals', { p_include_hardship: includeHardship }),
@@ -104,7 +107,7 @@ export default async function DefaultersPage({ searchParams }: { searchParams: P
         <EmptyState title="No defaulters match" description="Nothing is overdue for this filter." />
       ) : (
         <div className="overflow-x-auto rounded-md border" data-testid="defaulter-table">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-muted/50 text-left">
               <tr>
                 <th className="p-2">GR</th>
@@ -114,6 +117,7 @@ export default async function DefaultersPage({ searchParams }: { searchParams: P
                 <th className="p-2">Days</th>
                 <th className="p-2">Bucket</th>
                 <th className="p-2">Guardian</th>
+                <th className="p-2" />
               </tr>
             </thead>
             <tbody>
@@ -128,6 +132,14 @@ export default async function DefaultersPage({ searchParams }: { searchParams: P
                   <td className="p-2">{r.days_overdue}</td>
                   <td className="p-2">{r.bucket}</td>
                   <td className="p-2">{r.guardian_phone ?? '—'}</td>
+                  <td className="p-2">
+                    {r.enrolment_id && (
+                      <div className="flex gap-1">
+                        <PromiseButton enrolmentId={r.enrolment_id} studentName={r.student_name ?? ''} outstandingRupees={Math.round(Number(r.outstanding_paisa) / 100)} />
+                        {canWriteOff && <WriteOffButton enrolmentId={r.enrolment_id} studentName={r.student_name ?? ''} outstandingRupees={Math.round(Number(r.outstanding_paisa) / 100)} />}
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

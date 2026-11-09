@@ -14196,6 +14196,135 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_commitment: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          enrolment_id: string
+          id: string
+          note: string | null
+          promised_date: string
+          status: Database['public']['Enums']['fee_commitment_status']
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id: string
+          id?: string
+          note?: string | null
+          promised_date: string
+          status?: Database['public']['Enums']['fee_commitment_status']
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id?: string
+          id?: string
+          note?: string | null
+          promised_date?: string
+          status?: Database['public']['Enums']['fee_commitment_status']
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'fee_commitment_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_commitment_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_commitment_tenant_id_fkey'
+            columns: ['tenant_id']
+            isOneToOne: false
+            referencedRelation: 'tenant'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      fee_bad_debt: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          enrolment_id: string
+          fee_ledger_id: string
+          id: string
+          reason: string
+          tenant_id: string
+          written_off_on: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id: string
+          fee_ledger_id: string
+          id?: string
+          reason: string
+          tenant_id: string
+          written_off_on?: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id?: string
+          fee_ledger_id?: string
+          id?: string
+          reason?: string
+          tenant_id?: string
+          written_off_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'fee_bad_debt_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_bad_debt_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_bad_debt_fee_ledger_id_fkey'
+            columns: ['fee_ledger_id']
+            isOneToOne: false
+            referencedRelation: 'fee_ledger'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_bad_debt_tenant_id_fkey'
+            columns: ['tenant_id']
+            isOneToOne: false
+            referencedRelation: 'tenant'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -49752,6 +49881,9 @@ export type Database = {
       invite_username_check: { Args: { p_token: string; p_username: string }; Returns: string }
       update_my_profile: { Args: { p_full_name: string; p_username?: string }; Returns: undefined }
       resolve_username_login: { Args: { p_school_code: string; p_username: string }; Returns: string }
+      add_fee_commitment: { Args: { p_enrolment_id: string; p_promised_date: string; p_amount_paisa: number; p_note?: string }; Returns: string }
+      set_fee_commitment_status: { Args: { p_id: string; p_status: Database['public']['Enums']['fee_commitment_status'] }; Returns: undefined }
+      write_off_bad_debt: { Args: { p_enrolment_id: string; p_amount_paisa: number; p_reason: string }; Returns: string }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
@@ -53327,6 +53459,7 @@ export type Database = {
         | 'paid'
       fee_challan_line_type: 'charge' | 'concession' | 'arrears' | 'late_fee'
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
+      fee_commitment_status: 'open' | 'kept' | 'broken' | 'cancelled'
       gl_account_type: 'asset' | 'liability' | 'equity' | 'income' | 'expense'
       front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
@@ -53930,6 +54063,7 @@ export const Constants = {
       ],
       fee_challan_line_type: ['charge', 'concession', 'arrears', 'late_fee'],
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
+      fee_commitment_status: ['open', 'kept', 'broken', 'cancelled'],
       gl_account_type: ['asset', 'liability', 'equity', 'income', 'expense'],
       front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
