@@ -19,4 +19,17 @@ describe('buildIdCardsHtml', () => {
     expect(html).not.toContain('Blood group');
     expect(html.match(/<svg/g)).toHaveLength(2);
   });
+
+  it('prints portrait fronts and backs in the chosen colour and ignores an unsafe colour', () => {
+    const base = { schoolName: 'Seena', logoDataUri: null, kindLabel: 'Student card', validUntil: '31 Mar 2027', cards: [{ name: 'Ali', code: 'GR-1', lines: [] }] };
+    const both = buildIdCardsHtml({ ...base, orientation: 'portrait', side: 'both', color: '#0f766e' });
+    expect(both).toContain('class="sheet portrait"');
+    expect(both.match(/class="card"/g)).toHaveLength(1);
+    expect(both.match(/class="card back"/g)).toHaveLength(1);
+    expect(both).toContain('background: #0f766e');
+    const backOnly = buildIdCardsHtml({ ...base, side: 'back', color: 'red;}</style><script>' });
+    expect(backOnly).not.toContain('class="card"');
+    expect(backOnly).toContain('background: #1e3a8a');
+    expect(backOnly).not.toContain('<script>');
+  });
 });
