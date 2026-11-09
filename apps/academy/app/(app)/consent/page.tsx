@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
+import { allRows } from '@/lib/supabase/all-rows';
 import { ConsentManager, type AttentionRow, type StudentOption } from './consent-manager';
 
 // record_consent() and build_marketing_gallery_export() each enforce their
@@ -24,7 +25,7 @@ export default async function ConsentPage() {
   if (canView) {
     const [{ data: campusRows }, { data: studentRows }, { data: attentionRows }, { data: purposeRows }] = await Promise.all([
       supabase.from('campus').select('id, code, name').eq('status', 'active').order('code'),
-      supabase.from('student').select('id, name_en, gr_number').eq('status', 'active').order('name_en').limit(500),
+      allRows((from, to) => supabase.from('student').select('id, name_en, gr_number').eq('status', 'active').order('name_en').order('id').range(from, to)),
       supabase
         .from('v_consent_attention')
         .select('student_id, student_name, gr_number, purpose_code, has_conflict, reconsent_required, granted_count, denied_count, last_recorded_at')

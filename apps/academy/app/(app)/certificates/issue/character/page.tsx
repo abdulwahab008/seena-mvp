@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
+import { allRows } from '@/lib/supabase/all-rows';
 import { certificateDownloadPath } from '@/lib/certificates/issue';
 import { IssueCharacterCertificate, type IssuedRow, type StudentRow, type TemplateOption } from './issue-character-certificate';
 
@@ -26,7 +27,7 @@ export default async function IssueCharacterCertificatePage() {
       // Certificate is asked for precisely by the ones who have left.
       // Soft-deleted records are excluded (FR-A15), as the issuing function
       // refuses them anyway.
-      supabase.from('student').select('id, name_en, gr_number, status').is('deleted_at', null).order('name_en').limit(500),
+      allRows((from, to) => supabase.from('student').select('id, name_en, gr_number, status').is('deleted_at', null).order('name_en').order('id').range(from, to)),
       supabase
         .from('certificate_issue')
         .select('id, serial_no, status, issued_at, pdf_path, revoke_reason, payload_snapshot, student:student_id(name_en, gr_number)')
