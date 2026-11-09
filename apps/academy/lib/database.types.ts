@@ -13899,6 +13899,141 @@ export type Database = {
           },
         ]
       }
+      gl_cost_center: {
+        Row: { code: string; created_at: string; id: string; is_active: boolean; name: string; tenant_id: string }
+        Insert: { code: string; created_at?: string; id?: string; is_active?: boolean; name: string; tenant_id: string }
+        Update: { code?: string; created_at?: string; id?: string; is_active?: boolean; name?: string; tenant_id?: string }
+        Relationships: []
+      }
+      gl_recurring_journal: {
+        Row: {
+          anchor_date: string
+          created_at: string
+          created_by: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          name: string
+          narration: string
+          next_run: string
+          tenant_id: string
+        }
+        Insert: {
+          anchor_date: string
+          created_at?: string
+          created_by?: string | null
+          frequency: string
+          id?: string
+          is_active?: boolean
+          name: string
+          narration: string
+          next_run: string
+          tenant_id: string
+        }
+        Update: {
+          anchor_date?: string
+          created_at?: string
+          created_by?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          narration?: string
+          next_run?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      gl_recurring_journal_line: {
+        Row: {
+          account_id: string
+          cost_center_id: string | null
+          credit: number
+          debit: number
+          id: string
+          memo: string | null
+          template_id: string
+          tenant_id: string
+        }
+        Insert: {
+          account_id: string
+          cost_center_id?: string | null
+          credit?: number
+          debit?: number
+          id?: string
+          memo?: string | null
+          template_id: string
+          tenant_id: string
+        }
+        Update: {
+          account_id?: string
+          cost_center_id?: string | null
+          credit?: number
+          debit?: number
+          id?: string
+          memo?: string | null
+          template_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'gl_recurring_journal_line_account_id_fkey'
+            columns: ['account_id']
+            isOneToOne: false
+            referencedRelation: 'gl_account'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'gl_recurring_journal_line_cost_center_id_fkey'
+            columns: ['cost_center_id']
+            isOneToOne: false
+            referencedRelation: 'gl_cost_center'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'gl_recurring_journal_line_template_id_fkey'
+            columns: ['template_id']
+            isOneToOne: false
+            referencedRelation: 'gl_recurring_journal'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      gl_recurring_journal_run: {
+        Row: { created_at: string; entry_id: string; run_date: string; template_id: string; tenant_id: string }
+        Insert: { created_at?: string; entry_id: string; run_date: string; template_id: string; tenant_id: string }
+        Update: { created_at?: string; entry_id?: string; run_date?: string; template_id?: string; tenant_id?: string }
+        Relationships: [
+          {
+            foreignKeyName: 'gl_recurring_journal_run_template_id_fkey'
+            columns: ['template_id']
+            isOneToOne: false
+            referencedRelation: 'gl_recurring_journal'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'gl_recurring_journal_run_entry_id_fkey'
+            columns: ['entry_id']
+            isOneToOne: false
+            referencedRelation: 'journal_entry'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      gl_budget: {
+        Row: { account_id: string; amount_paisa: number; id: string; month: string; tenant_id: string; updated_at: string; updated_by: string | null }
+        Insert: { account_id: string; amount_paisa: number; id?: string; month: string; tenant_id: string; updated_at?: string; updated_by?: string | null }
+        Update: { account_id?: string; amount_paisa?: number; id?: string; month?: string; tenant_id?: string; updated_at?: string; updated_by?: string | null }
+        Relationships: [
+          {
+            foreignKeyName: 'gl_budget_account_id_fkey'
+            columns: ['account_id']
+            isOneToOne: false
+            referencedRelation: 'gl_account'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       gl_setting: {
         Row: { locked_through: string | null; tenant_id: string; updated_at: string }
         Insert: { locked_through?: string | null; tenant_id: string; updated_at?: string }
@@ -14345,6 +14480,135 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_commitment: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          enrolment_id: string
+          id: string
+          note: string | null
+          promised_date: string
+          status: Database['public']['Enums']['fee_commitment_status']
+          tenant_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id: string
+          id?: string
+          note?: string | null
+          promised_date: string
+          status?: Database['public']['Enums']['fee_commitment_status']
+          tenant_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id?: string
+          id?: string
+          note?: string | null
+          promised_date?: string
+          status?: Database['public']['Enums']['fee_commitment_status']
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'fee_commitment_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_commitment_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_commitment_tenant_id_fkey'
+            columns: ['tenant_id']
+            isOneToOne: false
+            referencedRelation: 'tenant'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      fee_bad_debt: {
+        Row: {
+          amount_paisa: number
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          enrolment_id: string
+          fee_ledger_id: string
+          id: string
+          reason: string
+          tenant_id: string
+          written_off_on: string
+        }
+        Insert: {
+          amount_paisa: number
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id: string
+          fee_ledger_id: string
+          id?: string
+          reason: string
+          tenant_id: string
+          written_off_on?: string
+        }
+        Update: {
+          amount_paisa?: number
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          enrolment_id?: string
+          fee_ledger_id?: string
+          id?: string
+          reason?: string
+          tenant_id?: string
+          written_off_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'fee_bad_debt_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_bad_debt_enrolment_id_fkey'
+            columns: ['enrolment_id']
+            isOneToOne: false
+            referencedRelation: 'enrolment'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_bad_debt_fee_ledger_id_fkey'
+            columns: ['fee_ledger_id']
+            isOneToOne: false
+            referencedRelation: 'fee_ledger'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fee_bad_debt_tenant_id_fkey'
+            columns: ['tenant_id']
+            isOneToOne: false
+            referencedRelation: 'tenant'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -14390,6 +14654,7 @@ export type Database = {
       journal_line: {
         Row: {
           account_id: string
+          cost_center_id: string | null
           credit: number
           debit: number
           entry_id: string
@@ -14399,6 +14664,7 @@ export type Database = {
         }
         Insert: {
           account_id: string
+          cost_center_id?: string | null
           credit?: number
           debit?: number
           entry_id: string
@@ -14408,6 +14674,7 @@ export type Database = {
         }
         Update: {
           account_id?: string
+          cost_center_id?: string | null
           credit?: number
           debit?: number
           entry_id?: string
@@ -14416,6 +14683,13 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'journal_line_cost_center_id_fkey'
+            columns: ['cost_center_id']
+            isOneToOne: false
+            referencedRelation: 'gl_cost_center'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'journal_line_account_id_fkey'
             columns: ['account_id']
@@ -49878,6 +50152,31 @@ export type Database = {
       post_opening_balances: { Args: { p_date: string; p_lines: Json }; Returns: string }
       close_financial_year: { Args: { p_year_end: string }; Returns: string }
       set_head_gl_code: { Args: { p_code: string; p_head_id: string; p_kind: string }; Returns: undefined }
+      save_gl_cost_center: { Args: { p_code: string; p_id?: string; p_is_active?: boolean; p_name: string }; Returns: string }
+      cost_center_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          account_id: string
+          amount: number
+          code: string
+          cost_center_code: string | null
+          cost_center_id: string | null
+          cost_center_name: string | null
+          name: string
+          type: Database['public']['Enums']['gl_account_type']
+        }[]
+      }
+      save_recurring_journal: {
+        Args: { p_frequency: string; p_id?: string; p_is_active?: boolean; p_lines: Json; p_name: string; p_narration: string; p_next_run: string }
+        Returns: string
+      }
+      set_recurring_journal_active: { Args: { p_id: string; p_is_active: boolean }; Returns: undefined }
+      post_due_recurring_journals: { Args: never; Returns: number }
+      save_account_budget: { Args: { p_account_id: string; p_amounts: number[]; p_fy_start_year: number }; Returns: undefined }
+      budget_vs_actual: {
+        Args: { p_fy_start_year: number }
+        Returns: { account_id: string; actual: number; budget: number; code: string; month: string; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
+      }
       income_statement: {
         Args: { p_from: string; p_to: string }
         Returns: { account_id: string; amount: number; code: string; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
@@ -49950,6 +50249,10 @@ export type Database = {
       invite_username_check: { Args: { p_token: string; p_username: string }; Returns: string }
       update_my_profile: { Args: { p_full_name: string; p_username?: string }; Returns: undefined }
       resolve_username_login: { Args: { p_school_code: string; p_username: string }; Returns: string }
+      add_fee_commitment: { Args: { p_enrolment_id: string; p_promised_date: string; p_amount_paisa: number; p_note?: string }; Returns: string }
+      set_fee_commitment_status: { Args: { p_id: string; p_status: Database['public']['Enums']['fee_commitment_status'] }; Returns: undefined }
+      write_off_bad_debt: { Args: { p_enrolment_id: string; p_amount_paisa: number; p_reason: string }; Returns: string }
+      dashboard_summary: { Args: never; Returns: Json }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
@@ -53525,6 +53828,7 @@ export type Database = {
         | 'paid'
       fee_challan_line_type: 'charge' | 'concession' | 'arrears' | 'late_fee'
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
+      fee_commitment_status: 'open' | 'kept' | 'broken' | 'cancelled'
       gl_account_type: 'asset' | 'liability' | 'equity' | 'income' | 'expense'
       front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
@@ -54128,6 +54432,7 @@ export const Constants = {
       ],
       fee_challan_line_type: ['charge', 'concession', 'arrears', 'late_fee'],
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
+      fee_commitment_status: ['open', 'kept', 'broken', 'cancelled'],
       gl_account_type: ['asset', 'liability', 'equity', 'income', 'expense'],
       front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
