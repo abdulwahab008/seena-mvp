@@ -17,6 +17,16 @@ test('an owner prints student ID cards for the campus as a PDF', async ({ page, 
   expect(response.status()).toBe(200);
   expect(response.headers()['content-type']).toBe('application/pdf');
   expect((await response.body()).subarray(0, 4).toString()).toBe('%PDF');
+
+  await page.getByLabel('Template').selectOption('portrait-both');
+  await page.getByLabel('Gender').selectOption('female');
+  const portrait = context.waitForEvent('request', (r) => r.url().includes('/api/id-cards?'));
+  await page.getByRole('button', { name: 'Print cards' }).click();
+  const portraitUrl = new URL((await portrait).url());
+  expect(portraitUrl.searchParams.get('orientation')).toBe('portrait');
+  expect(portraitUrl.searchParams.get('side')).toBe('both');
+  expect(portraitUrl.searchParams.get('gender')).toBe('female');
+  expect([200, 404]).toContain((await page.request.get(portraitUrl.toString())).status());
 });
 
 test('a teacher cannot print ID cards', async ({ page }) => {
