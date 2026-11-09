@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { startRolloverSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
+import { allRows } from '@/lib/supabase/all-rows';
 
 export type RolloverRunSummary = {
   run_id: string;
@@ -71,12 +72,15 @@ export type FetchDecisionsResult = { error: string | null; decisions: RolloverDe
 // RLS, joined through session_rollover_run.
 export async function fetchRolloverDecisions(runId: string): Promise<FetchDecisionsResult> {
   const supabase = await supabaseServer();
-  const { data, error } = await supabase
-    .from('v_rollover_decision_detail')
-    .select('id, student_id, gr_number, student_name, source_class_name, decision, target_class_name, error_code, processed_at')
-    .eq('run_id', runId)
-    .order('student_name')
-    .limit(500);
+  const { data, error } = await allRows((from, to) =>
+    supabase
+      .from('v_rollover_decision_detail')
+      .select('id, student_id, gr_number, student_name, source_class_name, decision, target_class_name, error_code, processed_at')
+      .eq('run_id', runId)
+      .order('student_name')
+      .order('id')
+      .range(from, to),
+  );
   if (error) return { error: 'Could not load the decision list.', decisions: [] };
 
   // v_rollover_decision_detail's columns are typed nullable (a generic view
