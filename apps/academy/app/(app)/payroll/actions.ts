@@ -36,6 +36,7 @@ export type EmployeeSalaryStructureRow = {
   basic_paisa: number;
   component_overrides: Record<string, number>;
   approved_at: string | null;
+  pay_scale_code: string | null;
 };
 
 export type StaffLoanSummaryRow = {
@@ -117,6 +118,7 @@ function parseDbError(e: unknown): string {
   if (e && typeof e === 'object') {
     const err = e as Record<string, unknown>;
     const msg = (err.message as string) || (err.error_description as string) || 'Database operation failed';
+    if (msg.includes('BASIC_OUTSIDE_PAY_SCALE')) return 'The basic salary is outside the chosen pay scale.';
     if (msg.includes('ex_salary_structure_no_overlap')) return 'This employee already has an active salary structure in that date range.';
     if (msg.includes('PAYROLL_RUN_ALREADY_LOCKED') || msg.includes('PAYROLL_RUN_LOCKED')) return 'This payroll run is locked and cannot be recalculated or modified.';
     if (msg.includes('uq_salary_component_tenant_code')) return 'A salary component with that code already exists.';
@@ -232,7 +234,8 @@ export async function getEmployeeSalaryStructures(campusId: string | null): Prom
       basic_paisa,
       component_overrides,
       approved_at,
-      staff:staff_id (id, full_name, employee_code)
+      staff:staff_id (id, full_name, employee_code),
+      pay_scale:pay_scale_id (code)
     `)
     .order('created_at', { ascending: false });
 
@@ -266,6 +269,7 @@ export async function getEmployeeSalaryStructures(campusId: string | null): Prom
       basic_paisa: row.basic_paisa,
       component_overrides: row.component_overrides || {},
       approved_at: row.approved_at,
+      pay_scale_code: row.pay_scale?.code ?? null,
     };
   });
 }
@@ -281,6 +285,7 @@ export async function saveEmployeeSalaryStructure(
   const startDate = formData.get('start_date')?.toString() || '';
   const endDate = formData.get('end_date')?.toString() || null;
   const overridesJson = formData.get('component_overrides')?.toString() || '{}';
+  const payScaleId = formData.get('pay_scale_id')?.toString() || null;
 
   if (!staffId || !startDate || basicPkr <= 0) {
     return { error: 'Staff member, start date, and a positive basic salary are required.' };
@@ -323,6 +328,7 @@ export async function saveEmployeeSalaryStructure(
         validity: validityRange,
         basic_paisa: basicPaisa,
         component_overrides: componentOverrides,
+        pay_scale_id: payScaleId,
         approved_by: userId,
         approved_at: new Date().toISOString(),
         created_by: userId,

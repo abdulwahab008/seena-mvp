@@ -10757,6 +10757,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          pay_scale_id: string | null
           staff_id: string
           tenant_id: string
           validity: unknown
@@ -10770,6 +10771,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          pay_scale_id?: string | null
           staff_id: string
           tenant_id: string
           validity: unknown
@@ -10783,6 +10785,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          pay_scale_id?: string | null
           staff_id?: string
           tenant_id?: string
           validity?: unknown
@@ -13791,6 +13794,39 @@ export type Database = {
           notes?: string | null
           organisation?: string | null
           phone?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      pay_scale: {
+        Row: {
+          annual_increment_paisa: number
+          code: string
+          created_at: string
+          id: string
+          max_basic_paisa: number
+          min_basic_paisa: number
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          annual_increment_paisa?: number
+          code: string
+          created_at?: string
+          id?: string
+          max_basic_paisa: number
+          min_basic_paisa: number
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          annual_increment_paisa?: number
+          code?: string
+          created_at?: string
+          id?: string
+          max_basic_paisa?: number
+          min_basic_paisa?: number
+          name?: string
           tenant_id?: string
         }
         Relationships: []
@@ -49734,6 +49770,10 @@ export type Database = {
       add_team_task: { Args: { p_assigned_to?: string; p_due_on?: string; p_title: string }; Returns: string }
       complete_team_task: { Args: { p_id: string }; Returns: undefined }
       set_staff_manager: { Args: { p_manager_id: string | null; p_staff_id: string }; Returns: undefined }
+      save_pay_scale: {
+        Args: { p_annual_increment_paisa: number; p_code: string; p_id: string | null; p_max_basic_paisa: number; p_min_basic_paisa: number; p_name: string }
+        Returns: string
+      }
       autofill_section_timetable: { Args: { p_section_id: string; p_version_id: string }; Returns: Json }
       copy_section_timetable: { Args: { p_from_section_id: string; p_to_section_id: string; p_version_id: string }; Returns: Json }
       transfer_stock: { Args: { p_from_store_id: string; p_item_id: string; p_qty: number; p_to_store_id: string }; Returns: string }
