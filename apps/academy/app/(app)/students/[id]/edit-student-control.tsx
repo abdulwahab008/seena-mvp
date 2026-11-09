@@ -17,9 +17,20 @@ export type EditableStudent = {
   gender: string;
   father_name_en: string | null;
   b_form_no: string | null;
+  category_id: string | null;
+  region_id: string | null;
+  previous_school_id: string | null;
 };
 
-export function EditStudentControl({ student }: { student: EditableStudent }) {
+type Option = { id: string; label: string };
+export type StudentLookupOptions = { category: Option[]; region: Option[]; school: Option[] };
+
+export function EditStudentControl({ student, options }: { student: EditableStudent; options: StudentLookupOptions }) {
+  const lookups = [
+    { name: 'categoryId', label: 'Category', value: student.category_id, options: options.category },
+    { name: 'regionId', label: 'Region or area', value: student.region_id, options: options.region },
+    { name: 'previousSchoolId', label: 'Previous school', value: student.previous_school_id, options: options.school },
+  ];
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +111,24 @@ export function EditStudentControl({ student }: { student: EditableStudent }) {
                 placeholder="35202-1234567-1"
               />
             </div>
+            {lookups.map((l) => (
+              <div key={l.name} className="space-y-1">
+                <Label htmlFor={`edit-${l.name}`}>{l.label}</Label>
+                <select
+                  id={`edit-${l.name}`}
+                  name={l.name}
+                  defaultValue={l.value ?? ''}
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                >
+                  <option value="">None</option>
+                  {l.options.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
             {error && (
               <p role="alert" className="text-sm text-destructive sm:col-span-2">
                 {error}

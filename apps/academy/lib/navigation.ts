@@ -118,10 +118,13 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Students',
     icon: Users,
     items: [
+      { href: '/students/dashboard', label: 'Students Dashboard', roles: FRONT_OFFICE },
       { href: '/students', label: 'All Students' },
       { href: '/students/alumni', label: 'Alumni' },
       { href: '/students/transfers', label: 'Campus Transfers', roles: FRONT_OFFICE },
+      { href: '/students/admission-register', label: 'Admission Register', roles: FRONT_OFFICE },
       { href: '/students/withdrawals', label: 'Withdrawal Register', roles: FRONT_OFFICE },
+      { href: '/students/coaching', label: 'Extra Coaching', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/students/vaccinations', label: 'Vaccinations', roles: [...LEADERSHIP, 'nurse'] },
       { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
       { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
@@ -230,6 +233,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Examinations',
     icon: GraduationCap,
     items: [
+      { href: '/exams/dashboard', label: 'Exams Dashboard', roles: [...LEADERSHIP, 'exam_controller', 'head_of_department'] },
       { href: '/exams/terms', label: 'Exam Terms' },
       { href: '/exams/subjects', label: 'Subjects & Components' },
       { href: '/exams/marks', label: 'Mark Entry' },
@@ -275,6 +279,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/challans', label: 'Challans', roles: FEE_STAFF_ROLES },
       { href: '/fees/counter', label: 'Cash Counter', roles: [...FEE_STAFF_ROLES, ...FRONT_DESK_ROLES] },
       { href: '/fees/defaulters', label: 'Defaulters', roles: FEE_STAFF_ROLES },
+      { href: '/fees/commitments', label: 'Commitments & Bad Debts', roles: FEE_STAFF_ROLES },
       { href: '/fees/reminders', label: 'Reminders', roles: FEE_STAFF_ROLES },
       { href: '/fees/settlements', label: 'Withdrawal Settlements', roles: FEE_STAFF_ROLES },
       { href: '/fees/no-dues', label: 'Deposits and No-Dues', roles: FEE_STAFF_ROLES },
@@ -297,6 +302,9 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Landmark,
     items: [
       { href: '/accounts', label: 'General Ledger', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
+      { href: '/accounts/recurring', label: 'Recurring Vouchers', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
+      { href: '/accounts/cost-centres', label: 'Cost Centres', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
+      { href: '/accounts/budgets', label: 'Budget vs Actual', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
     ],
   },
   {
@@ -315,6 +323,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Transport',
     icon: Bus,
     items: [
+      { href: '/transport/dashboard', label: 'Transport Dashboard', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
       { href: '/transport/routes', label: 'Routes & Fares', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
       { href: '/transport/fleet', label: 'Fleet & Documents', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
       { href: '/transport/crew', label: 'Drivers & Crew', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
@@ -342,6 +351,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Stores & Assets',
     icon: Boxes,
     items: [
+      { href: '/inventory/dashboard', label: 'Shop Dashboard', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory', label: 'Stores and Stock', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory/sales', label: 'Counter Sales', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory/sales-report', label: 'Sales Report', roles: [...LEADERSHIP, 'accountant'] },
@@ -407,6 +417,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Library',
     icon: Library,
     items: [
+      { href: '/library/dashboard', label: 'Library Dashboard', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/titles', label: 'Catalogue', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/copies', label: 'Copies', roles: [...LEADERSHIP, 'librarian'] },
       { href: '/library/circulation', label: 'Circulation Desk', roles: [...LEADERSHIP, 'librarian'] },
@@ -429,6 +440,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/roles', label: 'Roles', roles: SCHOOL_ADMIN },
       { href: '/feature-flags', label: 'Modules', roles: SCHOOL_ADMIN },
       { href: '/settings/data-export', label: 'Export School Data', roles: SCHOOL_ADMIN },
+      { href: '/settings/student-lists', label: 'Student Lists', roles: [...SCHOOL_ADMIN, 'admissions_officer'] },
       { href: '/settings/retention', label: 'Data Retention', roles: SCHOOL_ADMIN },
     ],
   },
