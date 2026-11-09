@@ -47282,6 +47282,7 @@ export type Database = {
         Returns: undefined
       }
       cancel_student_leave: { Args: { p_leave_id: string }; Returns: undefined }
+      decide_student_leave: { Args: { p_leave_id: string; p_approve: boolean; p_note?: string }; Returns: undefined }
       certificate_merge_fields: {
         Args: { p_body_html: string }
         Returns: string[]
