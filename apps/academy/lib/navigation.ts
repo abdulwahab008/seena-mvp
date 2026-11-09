@@ -390,6 +390,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/communication/scheduled', label: 'Scheduled Sends', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/triggers', label: 'Trigger Rules', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/receipts', label: 'Delivery Receipts', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+      { href: '/communication/emails', label: 'Email Log', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/wallet', label: 'Credit & Wallet', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/opt-outs', label: 'Opt-Outs & Suppression', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/circulars', label: 'Circulars', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
