@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { supabaseServer } from '@/lib/supabase/server';
 import { getEmployeeSalaryStructures, getStaffOptions } from '../actions';
 import { StructuresDesk } from './structures-desk';
 
@@ -7,9 +8,11 @@ export const metadata: Metadata = {
 };
 
 export default async function SalaryStructuresPage() {
-  const [structures, staffList] = await Promise.all([
+  const supabase = await supabaseServer();
+  const [structures, staffList, { data: payScales }] = await Promise.all([
     getEmployeeSalaryStructures(null),
     getStaffOptions(null),
+    supabase.from('pay_scale').select('id, code, name').order('code'),
   ]);
 
   return (
@@ -17,6 +20,7 @@ export default async function SalaryStructuresPage() {
       <StructuresDesk
         initialStructures={structures}
         staffList={staffList}
+        payScales={payScales ?? []}
       />
     </div>
   );

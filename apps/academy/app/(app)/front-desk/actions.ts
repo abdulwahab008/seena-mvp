@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
 import { FRONT_DESK_KINDS } from './kinds';
+import { quickSmsSchema } from './quick-sms-schema';
 
 const opt = (max: number) => z.string().trim().max(max).optional();
 
@@ -47,4 +48,27 @@ export async function closeEntry(entryId: string): Promise<{ error: string | nul
   if (error) return { error: error.message.includes('ENTRY_NOT_FOUND') ? 'That entry is already closed.' : 'Could not update the entry.' };
   revalidatePath('/front-desk');
   return { error: null };
+}
+
+export async function sendQuickSms(input: unknown): Promise<{ error: string | null; queued?: number; skipped?: number }> {
+  const p = quickSmsSchema.safeParse(input);
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Check the message.' };
+  const v = p.data;
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('queue_quick_sms', {
+    p_campus_id: v.campusId,
+    p_audience: v.audience,
+    p_section_id: v.audience === 'section' ? v.sectionId : null,
+    p_numbers: v.audience === 'numbers' ? v.numbers.split(/[\n,;]+/).map((n) => n.trim()).filter(Boolean) : null,
+    p_body: v.body,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You cannot send messages from this campus.' };
+    if (error.message.includes('NUMBERS_INVALID')) return { error: 'Enter between 1 and 100 numbers.' };
+    if (error.message.includes('SECTION_NOT_FOUND')) return { error: 'Choose a class and section.' };
+    return { error: 'Could not queue the message.' };
+  }
+  const result = data as { queued: number; skipped: number };
+  revalidatePath('/communication/outbox');
+  return { error: null, queued: result.queued, skipped: result.skipped };
 }

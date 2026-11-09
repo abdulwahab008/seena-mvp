@@ -26,9 +26,10 @@ import { todayPk } from '@/lib/dates';
 interface Props {
   initialStructures: EmployeeSalaryStructureRow[];
   staffList: Array<{ id: string; name: string; code: string }>;
+  payScales: Array<{ id: string; code: string; name: string }>;
 }
 
-export function StructuresDesk({ initialStructures, staffList }: Props) {
+export function StructuresDesk({ initialStructures, staffList, payScales }: Props) {
   const router = useRouter();
   const [structures] = useState<EmployeeSalaryStructureRow[]>(initialStructures);
   const [search, setSearch] = useState('');
@@ -135,6 +136,7 @@ export function StructuresDesk({ initialStructures, staffList }: Props) {
                         {formatPkr(s.basic_paisa)}
                         <span className="text-xs font-normal text-slate-400">/mo</span>
                       </div>
+                      {s.pay_scale_code && <div className="text-xs text-slate-500">{s.pay_scale_code}</div>}
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 font-mono text-xs text-slate-600 dark:text-slate-300">
@@ -222,6 +224,24 @@ export function StructuresDesk({ initialStructures, staffList }: Props) {
               Basic salary is the base upon which House Rent (45%) and Medical (10%) allowances are calculated.
             </p>
           </div>
+
+          {payScales.length > 0 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="pay_scale_id">Pay Scale</Label>
+              <select
+                id="pay_scale_id"
+                name="pay_scale_id"
+                className="w-full h-10 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm"
+              >
+                <option value="">None</option>
+                {payScales.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.code} · {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">

@@ -10757,6 +10757,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          pay_scale_id: string | null
           staff_id: string
           tenant_id: string
           validity: unknown
@@ -10770,6 +10771,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          pay_scale_id?: string | null
           staff_id: string
           tenant_id: string
           validity: unknown
@@ -10783,6 +10785,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          pay_scale_id?: string | null
           staff_id?: string
           tenant_id?: string
           validity?: unknown
@@ -14078,6 +14081,107 @@ export type Database = {
           tenant_id?: string
         }
         Relationships: []
+      }
+      pay_scale: {
+        Row: {
+          annual_increment_paisa: number
+          code: string
+          created_at: string
+          id: string
+          max_basic_paisa: number
+          min_basic_paisa: number
+          name: string
+          tenant_id: string
+        }
+        Insert: {
+          annual_increment_paisa?: number
+          code: string
+          created_at?: string
+          id?: string
+          max_basic_paisa: number
+          min_basic_paisa: number
+          name: string
+          tenant_id: string
+        }
+        Update: {
+          annual_increment_paisa?: number
+          code?: string
+          created_at?: string
+          id?: string
+          max_basic_paisa?: number
+          min_basic_paisa?: number
+          name?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      discussion_thread: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          last_activity_at: string
+          reply_count: number
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          reply_count?: number
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          reply_count?: number
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      discussion_reply: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          tenant_id: string
+          thread_id: string
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          created_at?: string
+          id?: string
+          tenant_id: string
+          thread_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          tenant_id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'discussion_reply_thread_id_fkey'
+            columns: ['thread_id']
+            isOneToOne: false
+            referencedRelation: 'discussion_thread'
+            referencedColumns: ['id']
+          },
+        ]
       }
       team_task: {
         Row: {
@@ -32173,6 +32277,7 @@ export type Database = {
           id_document_type: Database['public']['Enums']['id_document_type']
           name_ur_roman: string | null
           passport_no: string | null
+          reports_to_staff_id: string | null
           tenant_id: string
           user_id: string | null
         }
@@ -32196,6 +32301,7 @@ export type Database = {
           id_document_type?: Database['public']['Enums']['id_document_type']
           name_ur_roman?: never
           passport_no?: string | null
+          reports_to_staff_id?: string | null
           tenant_id: string
           user_id?: string | null
         }
@@ -32219,6 +32325,7 @@ export type Database = {
           id_document_type?: Database['public']['Enums']['id_document_type']
           name_ur_roman?: never
           passport_no?: string | null
+          reports_to_staff_id?: string | null
           tenant_id?: string
           user_id?: string | null
         }
@@ -50227,6 +50334,14 @@ export type Database = {
       save_office_contact: { Args: { p_category: string; p_email: string; p_name: string; p_notes?: string; p_organisation: string; p_phone: string }; Returns: string }
       add_team_task: { Args: { p_assigned_to?: string; p_due_on?: string; p_title: string }; Returns: string }
       complete_team_task: { Args: { p_id: string }; Returns: undefined }
+      set_staff_manager: { Args: { p_manager_id: string | null; p_staff_id: string }; Returns: undefined }
+      post_discussion_thread: { Args: { p_body: string; p_title: string }; Returns: string }
+      post_discussion_reply: { Args: { p_body: string; p_thread_id: string }; Returns: string }
+      queue_quick_sms: { Args: { p_audience: string; p_body: string; p_campus_id: string; p_numbers: string[] | null; p_section_id: string | null }; Returns: Json }
+      save_pay_scale: {
+        Args: { p_annual_increment_paisa: number; p_code: string; p_id: string | null; p_max_basic_paisa: number; p_min_basic_paisa: number; p_name: string }
+        Returns: string
+      }
       autofill_section_timetable: { Args: { p_section_id: string; p_version_id: string }; Returns: Json }
       copy_section_timetable: { Args: { p_from_section_id: string; p_to_section_id: string; p_version_id: string }; Returns: Json }
       transfer_stock: { Args: { p_from_store_id: string; p_item_id: string; p_qty: number; p_to_store_id: string }; Returns: string }

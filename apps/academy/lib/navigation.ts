@@ -142,6 +142,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/staff', label: 'All Staff', roles: HR_ROLES },
       { href: '/staff/directory', label: 'Directory' },
+      { href: '/staff/org-chart', label: 'Org Chart' },
       { href: '/staff/departments', label: 'Departments', roles: HR_ROLES },
       { href: '/staff/qualifications', label: 'Qualifications', roles: HR_ROLES },
       { href: '/staff/compliance', label: 'Compliance', roles: HR_ROLES },
@@ -171,6 +172,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/payroll/runs', label: 'Payroll Runs', roles: PAYROLL_ROLES },
       { href: '/payroll/components', label: 'Salary Components', roles: PAYROLL_ROLES },
       { href: '/payroll/structures', label: 'Salary Structures', roles: PAYROLL_ROLES },
+      { href: '/payroll/pay-scales', label: 'Pay Scales', roles: PAYROLL_ROLES },
       { href: '/payroll/loans', label: 'Staff Loans', roles: PAYROLL_ROLES },
       { href: '/payroll/tax-slabs', label: 'Tax Slabs', roles: PAYROLL_ROLES },
       { href: '/payroll/statutory', label: 'Statutory Report', roles: PAYROLL_ROLES },
@@ -398,6 +400,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/communication/scheduled', label: 'Scheduled Sends', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/triggers', label: 'Trigger Rules', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/receipts', label: 'Delivery Receipts', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+      { href: '/communication/emails', label: 'Email Log', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/wallet', label: 'Credit & Wallet', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/opt-outs', label: 'Opt-Outs & Suppression', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/circulars', label: 'Circulars', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
@@ -406,6 +409,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/communication/templates', label: 'Template Library', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/fallback-chains', label: 'Fallback Chains', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/whatsapp', label: 'WhatsApp Compliance', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+      { href: '/communication/discussions', label: 'Staff Discussions' },
     ],
   },
   {
