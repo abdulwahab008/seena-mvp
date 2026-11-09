@@ -26,7 +26,7 @@ function staticRoutes(dir: string, segments: string[] = []): string[] {
 
 // Pages that are deliberately not in the sidebar: reached from the header, or from a page of their own.
 // Pages opened from a hub page rather than the sidebar.
-const REACHED_ELSEWHERE = new Set(['/account', '/exams/mastery/capture', '/students/reports/strength', '/students/reports/admission-form']);
+const REACHED_ELSEWHERE = new Set(['/account', '/exams/mastery/capture', '/staff/reports/strength', '/students/reports/strength', '/students/reports/admission-form']);
 
 describe('sidebar', () => {
   const hrefs = new Set(NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.href)));
