@@ -139,6 +139,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/staff', label: 'All Staff', roles: HR_ROLES },
       { href: '/staff/directory', label: 'Directory' },
+      { href: '/staff/org-chart', label: 'Org Chart' },
       { href: '/staff/departments', label: 'Departments', roles: HR_ROLES },
       { href: '/staff/qualifications', label: 'Qualifications', roles: HR_ROLES },
       { href: '/staff/compliance', label: 'Compliance', roles: HR_ROLES },

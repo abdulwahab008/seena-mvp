@@ -31740,6 +31740,7 @@ export type Database = {
           id_document_type: Database['public']['Enums']['id_document_type']
           name_ur_roman: string | null
           passport_no: string | null
+          reports_to_staff_id: string | null
           tenant_id: string
           user_id: string | null
         }
@@ -31763,6 +31764,7 @@ export type Database = {
           id_document_type?: Database['public']['Enums']['id_document_type']
           name_ur_roman?: never
           passport_no?: string | null
+          reports_to_staff_id?: string | null
           tenant_id: string
           user_id?: string | null
         }
@@ -31786,6 +31788,7 @@ export type Database = {
           id_document_type?: Database['public']['Enums']['id_document_type']
           name_ur_roman?: never
           passport_no?: string | null
+          reports_to_staff_id?: string | null
           tenant_id?: string
           user_id?: string | null
         }
@@ -49730,6 +49733,7 @@ export type Database = {
       save_office_contact: { Args: { p_category: string; p_email: string; p_name: string; p_notes?: string; p_organisation: string; p_phone: string }; Returns: string }
       add_team_task: { Args: { p_assigned_to?: string; p_due_on?: string; p_title: string }; Returns: string }
       complete_team_task: { Args: { p_id: string }; Returns: undefined }
+      set_staff_manager: { Args: { p_manager_id: string | null; p_staff_id: string }; Returns: undefined }
       autofill_section_timetable: { Args: { p_section_id: string; p_version_id: string }; Returns: Json }
       copy_section_timetable: { Args: { p_from_section_id: string; p_to_section_id: string; p_version_id: string }; Returns: Json }
       transfer_stock: { Args: { p_from_store_id: string; p_item_id: string; p_qty: number; p_to_store_id: string }; Returns: string }
