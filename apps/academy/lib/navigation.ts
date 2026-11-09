@@ -125,6 +125,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/students/transfers', label: 'Campus Transfers', roles: FRONT_OFFICE },
       { href: '/students/admission-register', label: 'Admission Register', roles: FRONT_OFFICE },
       { href: '/students/withdrawals', label: 'Withdrawal Register', roles: FRONT_OFFICE },
+      { href: '/students/discipline', label: 'Discipline Register', roles: LEADERSHIP },
       { href: '/students/coaching', label: 'Extra Coaching', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/students/vaccinations', label: 'Vaccinations', roles: [...LEADERSHIP, 'nurse'] },
       { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
