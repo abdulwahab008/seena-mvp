@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabase/server';
-import { getCurrentActor } from '@/lib/hr/current-role';
+import { getCurrentActor, one } from '@/lib/hr/current-role';
 import { pickActiveCampus } from '@/lib/campus-context';
 import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/ui/page-header';
@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FRONT_DESK_KINDS, FRONT_DESK_ROLES, KIND_CONFIG, type FrontDeskKind } from './kinds';
 import { EntryList } from './entry-list';
 import { NewEntryForm } from './new-entry-form';
+import { QuickSmsPanel } from './quick-sms-panel';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export default async function FrontDeskPage({ searchParams }: { searchParams: Pr
   if (!campus) return <EmptyState title="No campus selected" description="Choose a campus from the switcher at the top." />;
 
   const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
-  const [{ data: entries }, { data: open }] = await Promise.all([
+  const [{ data: entries }, { data: open }, { data: sectionRows }] = await Promise.all([
     supabase
       .from('front_desk_entry')
       .select('id, person_name, phone, purpose, host_name, reference, details, opened_at, follow_up_on, closed_at')
@@ -35,7 +36,12 @@ export default async function FrontDeskPage({ searchParams }: { searchParams: Pr
       .order('opened_at', { ascending: false })
       .limit(200),
     supabase.from('front_desk_entry').select('kind').eq('campus_id', campus.id).is('closed_at', null),
+    supabase.from('class_section').select('id, name, class_level:class_level_id(name_en, ordinal)').eq('campus_id', campus.id).eq('is_active', true),
   ]);
+  const sections = (sectionRows ?? [])
+    .map((s) => ({ id: s.id, label: `${one(s.class_level)?.name_en ?? ''} ${s.name}`.trim(), sort: one(s.class_level)?.ordinal ?? 0 }))
+    .sort((a, b) => a.sort - b.sort || a.label.localeCompare(b.label))
+    .map(({ id, label }) => ({ id, label }));
   const openCount = (k: string) => (open ?? []).filter((o) => o.kind === k).length;
 
   return (
@@ -56,7 +62,10 @@ export default async function FrontDeskPage({ searchParams }: { searchParams: Pr
       </nav>
       <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
         <EntryList kind={kind} entries={entries ?? []} />
-        <NewEntryForm key={kind} kind={kind} campusId={campus.id} />
+        <div className="space-y-6">
+          <NewEntryForm key={kind} kind={kind} campusId={campus.id} />
+          <QuickSmsPanel campusId={campus.id} sections={sections} />
+        </div>
       </div>
     </>
   );

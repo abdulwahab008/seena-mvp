@@ -49770,6 +49770,7 @@ export type Database = {
       add_team_task: { Args: { p_assigned_to?: string; p_due_on?: string; p_title: string }; Returns: string }
       complete_team_task: { Args: { p_id: string }; Returns: undefined }
       set_staff_manager: { Args: { p_manager_id: string | null; p_staff_id: string }; Returns: undefined }
+      queue_quick_sms: { Args: { p_audience: string; p_body: string; p_campus_id: string; p_numbers: string[] | null; p_section_id: string | null }; Returns: Json }
       save_pay_scale: {
         Args: { p_annual_increment_paisa: number; p_code: string; p_id: string | null; p_max_basic_paisa: number; p_min_basic_paisa: number; p_name: string }
         Returns: string
