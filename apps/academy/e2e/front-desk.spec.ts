@@ -33,4 +33,11 @@ test('the front desk logs a visitor in and signs them out, and a gate pass', asy
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByTestId('front-desk-entry').filter({ hasText: 'Ali Raza' }).getByTestId('entry-open')).toHaveText('Out');
   await expect(page.getByRole('link', { name: 'Gate passes (1)' })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Complaints' }).click();
+  await page.getByLabel('Complaint by').fill('Mrs Aslam');
+  await page.getByLabel('Subject').fill('Van came late');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByTestId('front-desk-entry').filter({ hasText: 'Mrs Aslam' }).getByTestId('entry-open')).toHaveText('Open');
+  await expect(page.getByRole('region', { name: 'Needs attention' })).toContainText('Open complaints1');
 });
