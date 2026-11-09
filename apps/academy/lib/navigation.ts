@@ -120,6 +120,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/students/dashboard', label: 'Students Dashboard', roles: FRONT_OFFICE },
       { href: '/students', label: 'All Students' },
+      { href: '/students/families', label: 'Family List', roles: FRONT_OFFICE },
       { href: '/students/reports', label: 'Student Reports', roles: FRONT_OFFICE },
       { href: '/students/documents', label: 'Student Documents', roles: FRONT_OFFICE },
       { href: '/students/alumni', label: 'Alumni' },
