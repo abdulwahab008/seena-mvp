@@ -14713,6 +14713,85 @@ export type Database = {
           },
         ]
       }
+      hifz_lesson: {
+        Row: {
+          campus_id: string
+          created_at: string
+          grade: string | null
+          halqa_id: string
+          id: string
+          lesson_date: string
+          lesson_type: string
+          lines: number | null
+          mistakes: number
+          para_from: number | null
+          para_to: number | null
+          portion: string | null
+          recorded_by: string
+          student_id: string
+          tajweed_mistakes: number
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          grade?: string | null
+          halqa_id: string
+          id?: string
+          lesson_date: string
+          lesson_type: string
+          lines?: number | null
+          mistakes?: number
+          para_from?: number | null
+          para_to?: number | null
+          portion?: string | null
+          recorded_by?: string
+          student_id: string
+          tajweed_mistakes?: number
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          grade?: string | null
+          halqa_id?: string
+          id?: string
+          lesson_date?: string
+          lesson_type?: string
+          lines?: number | null
+          mistakes?: number
+          para_from?: number | null
+          para_to?: number | null
+          portion?: string | null
+          recorded_by?: string
+          student_id?: string
+          tajweed_mistakes?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'hifz_lesson_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'hifz_lesson_halqa_id_fkey'
+            columns: ['halqa_id']
+            isOneToOne: false
+            referencedRelation: 'halqa'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'hifz_lesson_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
