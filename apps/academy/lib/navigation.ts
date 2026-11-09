@@ -273,6 +273,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/challans', label: 'Challans', roles: FEE_STAFF_ROLES },
       { href: '/fees/counter', label: 'Cash Counter', roles: [...FEE_STAFF_ROLES, ...FRONT_DESK_ROLES] },
       { href: '/fees/defaulters', label: 'Defaulters', roles: FEE_STAFF_ROLES },
+      { href: '/fees/commitments', label: 'Commitments & Bad Debts', roles: FEE_STAFF_ROLES },
       { href: '/fees/reminders', label: 'Reminders', roles: FEE_STAFF_ROLES },
       { href: '/fees/settlements', label: 'Withdrawal Settlements', roles: FEE_STAFF_ROLES },
       { href: '/fees/no-dues', label: 'Deposits and No-Dues', roles: FEE_STAFF_ROLES },
