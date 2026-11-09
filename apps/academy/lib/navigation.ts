@@ -298,6 +298,9 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Landmark,
     items: [
       { href: '/accounts', label: 'General Ledger', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
+      { href: '/accounts/recurring', label: 'Recurring Vouchers', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
+      { href: '/accounts/cost-centres', label: 'Cost Centres', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
+      { href: '/accounts/budgets', label: 'Budget vs Actual', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
     ],
   },
   {

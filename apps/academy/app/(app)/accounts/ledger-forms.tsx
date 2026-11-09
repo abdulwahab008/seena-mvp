@@ -87,12 +87,12 @@ export function AccountForm() {
 const voucherSchema = z.object({
   entryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   narration: z.string().trim().min(1, 'Enter a narration').max(500),
-  lines: z.array(z.object({ accountId: z.string(), debit: z.string(), credit: z.string(), memo: z.string() })),
+  lines: z.array(z.object({ accountId: z.string(), debit: z.string(), credit: z.string(), memo: z.string(), costCenterId: z.string() })),
 });
 type VoucherValues = z.infer<typeof voucherSchema>;
-const blankLine = { accountId: '', debit: '', credit: '', memo: '' };
+const blankLine = { accountId: '', debit: '', credit: '', memo: '', costCenterId: '' };
 
-export function VoucherForm({ accounts }: { accounts: { id: string; label: string }[] }) {
+export function VoucherForm({ accounts, costCenters = [] }: { accounts: { id: string; label: string }[]; costCenters?: { id: string; label: string }[] }) {
   const [pending, startTransition] = useTransition();
   const blank: VoucherValues = { entryDate: todayPk(), narration: '', lines: [blankLine, blankLine] };
   const { register, control, handleSubmit, watch, reset, formState: { errors } } = useForm<VoucherValues>({ resolver: zodResolver(voucherSchema), defaultValues: blank });
@@ -130,7 +130,7 @@ export function VoucherForm({ accounts }: { accounts: { id: string; label: strin
           </div>
           <div className="space-y-2">
             {fields.map((f, i) => (
-              <div key={f.id} className="grid gap-2 sm:grid-cols-[1fr_8rem_8rem_1fr_auto]">
+              <div key={f.id} className={costCenters.length > 0 ? 'grid gap-2 sm:grid-cols-[1fr_10rem_8rem_8rem_1fr_auto]' : 'grid gap-2 sm:grid-cols-[1fr_8rem_8rem_1fr_auto]'}>
                 <select aria-label={`Account, line ${i + 1}`} className={SELECT} {...register(`lines.${i}.accountId`)}>
                   <option value="">Account</option>
                   {accounts.map((a) => (
@@ -139,6 +139,16 @@ export function VoucherForm({ accounts }: { accounts: { id: string; label: strin
                     </option>
                   ))}
                 </select>
+                {costCenters.length > 0 && (
+                  <select aria-label={`Cost centre, line ${i + 1}`} className={SELECT} {...register(`lines.${i}.costCenterId`)}>
+                    <option value="">No cost centre</option>
+                    {costCenters.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <Input aria-label={`Debit, line ${i + 1}`} placeholder="Debit" inputMode="decimal" {...register(`lines.${i}.debit`)} />
                 <Input aria-label={`Credit, line ${i + 1}`} placeholder="Credit" inputMode="decimal" {...register(`lines.${i}.credit`)} />
                 <Input aria-label={`Memo, line ${i + 1}`} placeholder="Memo" {...register(`lines.${i}.memo`)} />

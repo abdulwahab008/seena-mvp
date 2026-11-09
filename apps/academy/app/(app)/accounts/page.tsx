@@ -102,14 +102,22 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
 
 async function JournalTab({ canWrite, accounts }: { canWrite: boolean; accounts: { id: string; code: string; name: string }[] }) {
   const supabase = await supabaseServer();
-  const { data: entries } = await supabase
-    .from('journal_entry')
-    .select('id, entry_no, entry_date, narration, reversal_of, reversed_by, source_kind, journal_line(debit, credit, account:account_id(code, name))')
-    .order('created_at', { ascending: false })
-    .limit(50);
+  const [{ data: entries }, { data: costCenters }] = await Promise.all([
+    supabase
+      .from('journal_entry')
+      .select('id, entry_no, entry_date, narration, reversal_of, reversed_by, source_kind, journal_line(debit, credit, account:account_id(code, name), cost_center:cost_center_id(code))')
+      .order('created_at', { ascending: false })
+      .limit(50),
+    supabase.from('gl_cost_center').select('id, code, name').eq('is_active', true).order('code'),
+  ]);
   return (
     <div className="space-y-6">
-      {canWrite && <VoucherForm accounts={accounts.map((a) => ({ id: a.id, label: `${a.code} · ${a.name}` }))} />}
+      {canWrite && (
+        <VoucherForm
+          accounts={accounts.map((a) => ({ id: a.id, label: `${a.code} · ${a.name}` }))}
+          costCenters={(costCenters ?? []).map((c) => ({ id: c.id, label: `${c.code} · ${c.name}` }))}
+        />
+      )}
       {canWrite && (
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <BackfillButton />
@@ -135,9 +143,11 @@ async function JournalTab({ canWrite, accounts }: { canWrite: boolean; accounts:
               <ul className="mt-1 text-muted-foreground">
                 {(e.journal_line ?? []).map((l, i) => {
                   const acc = Array.isArray(l.account) ? l.account[0] : l.account;
+                  const cc = Array.isArray(l.cost_center) ? l.cost_center[0] : l.cost_center;
                   return (
                     <li key={i}>
                       {l.debit > 0 ? 'Dr' : 'Cr'} {acc?.code} {acc?.name} · {formatPkr(l.debit || l.credit)}
+                      {cc && <span className="font-mono"> · {cc.code}</span>}
                     </li>
                   );
                 })}
