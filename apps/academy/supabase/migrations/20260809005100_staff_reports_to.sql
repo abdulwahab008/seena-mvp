@@ -5,6 +5,7 @@ alter table public.staff
   add column reports_to_staff_id uuid references public.staff(id) on delete set null,
   add constraint chk_staff_not_own_manager check (reports_to_staff_id is null or reports_to_staff_id <> id);
 create index idx_staff_reports_to on public.staff (reports_to_staff_id) where reports_to_staff_id is not null;
+grant select (reports_to_staff_id) on public.staff to authenticated;
 
 create or replace function public.set_staff_manager(p_staff_id uuid, p_manager_id uuid)
 returns void

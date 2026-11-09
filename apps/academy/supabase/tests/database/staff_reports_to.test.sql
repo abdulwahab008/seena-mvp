@@ -24,10 +24,8 @@ select throws_ok(format($$ select public.set_staff_manager(%L, %L) $$, :'head', 
 select throws_ok(format($$ select public.set_staff_manager(%L, %L) $$, :'head', :'head'), '22023', 'REPORTING_CYCLE', 'or to themselves');
 select throws_ok(format($$ select public.set_staff_manager(%L, %L) $$, :'teach', :'outsider'), 'P0002', 'MANAGER_NOT_FOUND', 'a manager from another school is refused');
 select lives_ok(format($$ select public.set_staff_manager(%L, null) $$, :'teach'), 'clearing the manager is allowed');
-reset role;
-select is((select reports_to_staff_id from public.staff where id = :'coord'), :'head'::uuid, 'the link is stored');
+select is((select reports_to_staff_id from public.staff where id = :'coord'), :'head'::uuid, 'the link is stored and readable through the API role');
 
-set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_id', 'app_role', 'subject_teacher', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select throws_ok(format($$ select public.set_staff_manager(%L, %L) $$, :'teach', :'head'), '42501', 'FORBIDDEN', 'a teacher cannot change the chart');
 
