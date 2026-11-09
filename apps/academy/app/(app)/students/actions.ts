@@ -463,7 +463,25 @@ export async function updateStudentDetails(studentId: string, _prev: UpdateStude
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit this student.' };
     return { error: 'Could not save the changes.' };
   }
+  const lookup = (name: string) => String(formData.get(name) ?? '') || null;
+  const { error: lookupError } = await supabase.rpc('set_student_lookups', {
+    p_student_id: studentId,
+    p_category_id: lookup('categoryId'),
+    p_region_id: lookup('regionId'),
+    p_previous_school_id: lookup('previousSchoolId'),
+  });
+  if (lookupError) return { error: 'The details were saved, but not the category, region or previous school.' };
   revalidatePath(`/students/${studentId}`);
   revalidatePath('/students');
+  return { error: null };
+}
+
+export async function setGuardianProfession(guardianId: string, professionId: string | null): Promise<{ error: string | null }> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_guardian_profession', { p_guardian_id: guardianId, p_profession_id: professionId });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit this guardian.' };
+    return { error: 'Could not save the profession.' };
+  }
   return { error: null };
 }
