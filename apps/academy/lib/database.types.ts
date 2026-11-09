@@ -13831,6 +13831,74 @@ export type Database = {
         }
         Relationships: []
       }
+      discussion_thread: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          last_activity_at: string
+          reply_count: number
+          tenant_id: string
+          title: string
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          reply_count?: number
+          tenant_id: string
+          title: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          last_activity_at?: string
+          reply_count?: number
+          tenant_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      discussion_reply: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          tenant_id: string
+          thread_id: string
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          created_at?: string
+          id?: string
+          tenant_id: string
+          thread_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          tenant_id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'discussion_reply_thread_id_fkey'
+            columns: ['thread_id']
+            isOneToOne: false
+            referencedRelation: 'discussion_thread'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       team_task: {
         Row: {
           assigned_to: string | null
@@ -49770,6 +49838,8 @@ export type Database = {
       add_team_task: { Args: { p_assigned_to?: string; p_due_on?: string; p_title: string }; Returns: string }
       complete_team_task: { Args: { p_id: string }; Returns: undefined }
       set_staff_manager: { Args: { p_manager_id: string | null; p_staff_id: string }; Returns: undefined }
+      post_discussion_thread: { Args: { p_body: string; p_title: string }; Returns: string }
+      post_discussion_reply: { Args: { p_body: string; p_thread_id: string }; Returns: string }
       queue_quick_sms: { Args: { p_audience: string; p_body: string; p_campus_id: string; p_numbers: string[] | null; p_section_id: string | null }; Returns: Json }
       save_pay_scale: {
         Args: { p_annual_increment_paisa: number; p_code: string; p_id: string | null; p_max_basic_paisa: number; p_min_basic_paisa: number; p_name: string }

@@ -399,6 +399,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/communication/templates', label: 'Template Library', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/fallback-chains', label: 'Fallback Chains', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/whatsapp', label: 'WhatsApp Compliance', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+      { href: '/communication/discussions', label: 'Staff Discussions' },
     ],
   },
   {
