@@ -11,6 +11,9 @@ const schema = z.object({
   kind: z.enum(['student', 'staff']),
   sectionId: z.string(),
   validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a date'),
+  gender: z.enum(['', 'male', 'female']),
+  template: z.enum(['landscape-front', 'landscape-back', 'landscape-both', 'portrait-front', 'portrait-back', 'portrait-both']),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
 });
 type Values = z.infer<typeof schema>;
 
@@ -21,13 +24,15 @@ export function IdCardForm({ campusId, sections }: { campusId: string; sections:
   const nextYear = `${new Date().getFullYear() + 1}-03-31`;
   const { register, handleSubmit, watch, formState: { errors } } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { kind: 'student', sectionId: '', validUntil: nextYear },
+    defaultValues: { kind: 'student', sectionId: '', validUntil: nextYear, gender: '', template: 'landscape-front', color: '#1e3a8a' },
   });
   const kind = watch('kind');
 
   const onSubmit = handleSubmit((v) => {
-    const params = new URLSearchParams({ kind: v.kind, campusId, validUntil: v.validUntil });
+    const [orientation, side] = v.template.split('-') as [string, string];
+    const params = new URLSearchParams({ kind: v.kind, campusId, validUntil: v.validUntil, orientation, side, color: v.color });
     if (v.kind === 'student' && v.sectionId) params.set('sectionId', v.sectionId);
+    if (v.kind === 'student' && v.gender) params.set('gender', v.gender);
     window.open(`/api/id-cards?${params}`, '_blank', 'noopener');
   });
 
@@ -57,6 +62,31 @@ export function IdCardForm({ campusId, sections }: { campusId: string; sections:
           </select>
         </div>
       )}
+      <div className="space-y-1">
+        <Label htmlFor="card-template">Template</Label>
+        <select id="card-template" className={SELECT} {...register('template')}>
+          <option value="landscape-front">Front side (landscape)</option>
+          <option value="landscape-back">Back side (landscape)</option>
+          <option value="landscape-both">Front and back (landscape)</option>
+          <option value="portrait-front">Front side (portrait)</option>
+          <option value="portrait-back">Back side (portrait)</option>
+          <option value="portrait-both">Front and back (portrait)</option>
+        </select>
+      </div>
+      {kind === 'student' && (
+        <div className="space-y-1">
+          <Label htmlFor="card-gender">Gender</Label>
+          <select id="card-gender" className={SELECT} {...register('gender')}>
+            <option value="">All genders</option>
+            <option value="male">Boys</option>
+            <option value="female">Girls</option>
+          </select>
+        </div>
+      )}
+      <div className="space-y-1">
+        <Label htmlFor="card-color">Card colour</Label>
+        <input id="card-color" type="color" className="h-10 w-20 rounded-md border border-input bg-background p-1" {...register('color')} />
+      </div>
       <div className="space-y-1">
         <Label htmlFor="card-valid">Valid until</Label>
         <Input id="card-valid" type="date" {...register('validUntil')} />
