@@ -49884,6 +49884,7 @@ export type Database = {
       add_fee_commitment: { Args: { p_enrolment_id: string; p_promised_date: string; p_amount_paisa: number; p_note?: string }; Returns: string }
       set_fee_commitment_status: { Args: { p_id: string; p_status: Database['public']['Enums']['fee_commitment_status'] }; Returns: undefined }
       write_off_bad_debt: { Args: { p_enrolment_id: string; p_amount_paisa: number; p_reason: string }; Returns: string }
+      dashboard_summary: { Args: never; Returns: Json }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
