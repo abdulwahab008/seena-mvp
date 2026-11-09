@@ -62,7 +62,7 @@ export function QuickSmsPanel({ campusId, sections }: { campusId: string; sectio
           {audience === 'numbers' && (
             <div className="space-y-1">
               <Label htmlFor="qs-numbers">Mobile numbers</Label>
-              <Textarea id="qs-numbers" placeholder="0300 1234567, 0321 7654321" {...register('numbers')} />
+              <Textarea id="qs-numbers" placeholder="0300 1234567, 0321 7654321 (comma or one per line)" {...register('numbers')} />
               {errors.numbers && <p className="text-sm text-destructive">{errors.numbers.message}</p>}
             </div>
           )}

@@ -59,7 +59,7 @@ export async function sendQuickSms(input: unknown): Promise<{ error: string | nu
     p_campus_id: v.campusId,
     p_audience: v.audience,
     p_section_id: v.audience === 'section' ? v.sectionId : null,
-    p_numbers: v.audience === 'numbers' ? v.numbers.split(/[\s,;]+/).filter(Boolean) : null,
+    p_numbers: v.audience === 'numbers' ? v.numbers.split(/[\n,;]+/).map((n) => n.trim()).filter(Boolean) : null,
     p_body: v.body,
   });
   if (error) {
