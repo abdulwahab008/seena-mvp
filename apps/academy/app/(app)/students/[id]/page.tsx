@@ -30,7 +30,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   // a deleted student's record now.
   const { data: student } = await supabase
     .from('student')
-    .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status, father_name_en, b_form_no')
+    .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status, father_name_en, b_form_no, category_id, region_id, previous_school_id')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
@@ -46,7 +46,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     .order('occurred_on', { ascending: false })
     .limit(50);
 
-  const [{ data: enrolment }, { data: sections }, { data: guardianLinks }, { data: appUser }] = await Promise.all([
+  const [{ data: enrolment }, { data: sections }, { data: guardianLinks }, { data: appUser }, { data: lookups }] = await Promise.all([
     // FR-A15: explicit filter — an enrolment can be soft-deleted on its
     // own (not only cascaded from its student), and an Owner/Super Admin
     // also matches enrolment_recycle_bin_read, so this would otherwise
@@ -61,10 +61,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     supabase.from('class_section').select('id, name, class_level(name_en)').eq('campus_id', student.campus_id).eq('is_active', true),
     supabase
       .from('student_guardian')
-      .select('guardian_id, relationship, is_primary, receives_billing, may_collect_child, guardian(name_en, phone_e164, cnic, auth_user_id)')
+      .select('guardian_id, relationship, is_primary, receives_billing, may_collect_child, guardian(name_en, phone_e164, cnic, auth_user_id, profession_id)')
       .eq('student_id', id)
       .is('to_date', null),
     supabase.from('app_user').select('app_role').eq('user_id', user!.id).single(),
+    supabase.from('student_lookup').select('id, kind, name, area, is_active').order('name'),
   ]);
 
   // Fee data (plan, payments, ledger) is for the fee staff; the admissions officer also sees concession
@@ -108,6 +109,14 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   // FR-A15: mirrors soft_delete()'s own FORBIDDEN role list — the roles who
   // can admit a student are the roles who can undo admitting one.
   const canDelete = role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'admissions_officer';
+  const lookupName = new Map((lookups ?? []).map((l) => [l.id, l.area ? `${l.name} (${l.area})` : l.name]));
+  const lookupOptions = (kind: string, current: (string | null)[]) =>
+    (lookups ?? []).filter((l) => l.kind === kind && (l.is_active || current.includes(l.id))).map((l) => ({ id: l.id, label: lookupName.get(l.id)! }));
+  const profile = [
+    ['Category', student.category_id],
+    ['Region', student.region_id],
+    ['Previous school', student.previous_school_id],
+  ].flatMap(([label, id]) => (id ? [`${label}: ${lookupName.get(id) ?? ''}`] : []));
 
   const { data: schemes } = await supabase
     .from('concession_scheme')
@@ -235,10 +244,22 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           <p className="text-sm text-muted-foreground">
             GR {student.gr_number} · {student.gender} · DOB {student.dob} · {student.status}
           </p>
+          {profile.length > 0 && (
+            <p className="text-sm text-muted-foreground" data-testid="student-lookups">
+              {profile.join(' · ')}
+            </p>
+          )}
         </div>
         {canDelete && (
           <div className="flex gap-2">
-            <EditStudentControl student={student} />
+            <EditStudentControl
+              student={student}
+              options={{
+                category: lookupOptions('category', [student.category_id]),
+                region: lookupOptions('region', [student.region_id]),
+                school: lookupOptions('school', [student.previous_school_id]),
+              }}
+            />
             <DeleteStudentControl studentId={student.id} studentName={student.name_en} />
           </div>
         )}
@@ -273,7 +294,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
       <section className="space-y-2">
         <h2 className="text-lg font-medium">Guardians</h2>
-        <GuardianList links={guardianLinks ?? []} />
+        <GuardianList
+          links={guardianLinks ?? []}
+          professions={lookupOptions('profession', (guardianLinks ?? []).map((l) => one(l.guardian)?.profession_id ?? null))}
+          canEditProfession={canDelete}
+        />
         <GuardianForm studentId={student.id} />
       </section>
 
