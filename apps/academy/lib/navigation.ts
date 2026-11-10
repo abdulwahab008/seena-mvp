@@ -380,6 +380,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/assets/maintenance', label: 'Maintenance', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/purchasing', label: 'Requisitions', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/purchasing/orders', label: 'Purchase Orders', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/purchasing/suppliers', label: 'Supplier Report', roles: [...LEADERSHIP, 'accountant'] },
     ],
   },
   {
