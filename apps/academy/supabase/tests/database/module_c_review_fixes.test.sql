@@ -113,9 +113,13 @@ select throws_ok(
 
 select public.create_student(:'campus_id'::uuid, 'Roll Test Child', '2017-01-01'::date, 'female') as roll_student_id \gset
 select public.enrol_student(:'section_b_id'::uuid, :'roll_student_id'::uuid) as roll_enrol_id \gset
+reset role;
+update public.enrolment set roll_no = null where id = :'roll_enrol_id';
+select coalesce(max(roll_no), 0) + 1 as next_roll from public.enrolment where section_id = :'section_b_id' and status = 'active' \gset
+set local role authenticated;
 select is(
   public.fn_assign_next_roll_no(:'roll_enrol_id'::uuid),
-  1,
+  :'next_roll'::int,
   'the advisory lock does not regress ordinary sequential roll number assignment'
 );
 

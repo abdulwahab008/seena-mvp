@@ -24,11 +24,9 @@ select public.enrol_student(:'section_a_id'::uuid, (public.create_student(:'camp
 select public.enrol_student(:'section_a_id'::uuid, (public.create_student(:'campus_id'::uuid, 'Bilal Ahmed', '2014-01-01'::date, 'male'))::uuid) as bilal_enrolment_id \gset
 select public.enrol_student(:'section_a_id'::uuid, (public.create_student(:'campus_id'::uuid, 'Ahmed Raza', '2014-01-01'::date, 'male'))::uuid) as ahmed_enrolment_id \gset
 
--- ── fn_assign_next_roll_no: sequential as each student joins ──────────
+-- ── enrolling assigns the next roll number, in join order ──────────────
 
-select public.fn_assign_next_roll_no(:'zainab_enrolment_id'::uuid);
-select public.fn_assign_next_roll_no(:'bilal_enrolment_id'::uuid);
-select public.fn_assign_next_roll_no(:'ahmed_enrolment_id'::uuid) as ahmed_roll \gset
+select roll_no as ahmed_roll from public.enrolment where id = :'ahmed_enrolment_id' \gset
 select is(:'ahmed_roll'::int, 3, 'the 3rd student to join gets roll number 3, in join order');
 
 -- ── manual duplicate is rejected by the unique index, scoped per section ─
@@ -72,7 +70,6 @@ select is(
 -- ── the existing three are untouched ───────────────────────────────
 
 select public.enrol_student(:'section_a_id'::uuid, (public.create_student(:'campus_id'::uuid, 'Omar Sheikh', '2014-01-01'::date, 'male'))::uuid) as omar_enrolment_id \gset
-select public.fn_assign_next_roll_no(:'omar_enrolment_id'::uuid);
 select is(
   (select array_agg(roll_no order by roll_no) from public.enrolment where section_id = :'section_a_id' and status = 'active'),
   array[1, 2, 3, 4],
