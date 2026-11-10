@@ -265,6 +265,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/exams/grading', label: 'Grading Schemes' },
       { href: '/exams/results', label: 'Term Results & Positions' },
+      { href: '/exams/failures', label: 'Failure List' },
       { href: '/exams/tabulation', label: 'Tabulation, Merit & Failure Lists' },
       { href: '/exams/behaviour', label: 'Behaviour Ratings' },
       { href: '/exams/rechecks', label: 'Re-checks' },
