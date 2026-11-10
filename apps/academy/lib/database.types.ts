@@ -14949,6 +14949,76 @@ export type Database = {
           },
         ]
       }
+      transport_request: {
+        Row: {
+          campus_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          kind: string
+          note: string | null
+          requested_by: string | null
+          route_id: string | null
+          status: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          requested_by?: string | null
+          route_id?: string | null
+          status?: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          requested_by?: string | null
+          route_id?: string | null
+          status?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'transport_request_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'transport_request_route_id_fkey'
+            columns: ['route_id']
+            isOneToOne: false
+            referencedRelation: 'transport_route'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'transport_request_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -50617,6 +50687,8 @@ export type Database = {
       create_class_test: { Args: { p_section_id: string; p_subject_id: string | null; p_title: string; p_test_date: string; p_total_marks: number }; Returns: string }
       save_class_test_marks: { Args: { p_test_id: string; p_rows: Json }; Returns: number }
       send_class_test_results: { Args: { p_test_id: string }; Returns: Json }
+      submit_transport_request: { Args: { p_student_id: string; p_kind: string; p_route_id?: string; p_note?: string }; Returns: string }
+      decide_transport_request: { Args: { p_request_id: string; p_approve: boolean; p_note?: string }; Returns: undefined }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]

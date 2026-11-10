@@ -6,19 +6,29 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { decideStudentLeave } from './actions';
 
-const schema = z.object({ note: z.string().trim().max(500, 'Keep it under 500 characters') });
+const schema = z.object({ note: z.string().trim().max(300, 'Keep it under 300 characters') });
 
-export function DecideButtons({ id }: { id: string }) {
+// Approve / Reject with an optional note, for request queues (leave, bus requests).
+export function DecideButtons({
+  id,
+  action,
+  approvedText,
+  rejectedText,
+}: {
+  id: string;
+  action: (input: { id: string; approve: boolean; note?: string }) => Promise<{ error: string | null }>;
+  approvedText: string;
+  rejectedText: string;
+}) {
   const [pending, startTransition] = useTransition();
   const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { note: '' } });
   const decide = (approve: boolean) =>
     handleSubmit((v) =>
       startTransition(async () => {
-        const res = await decideStudentLeave({ id, approve, note: v.note });
+        const res = await action({ id, approve, note: v.note });
         if (res.error) toast.error(res.error);
-        else toast.success(approve ? 'Leave approved.' : 'Leave rejected.');
+        else toast.success(approve ? approvedText : rejectedText);
       }),
     )();
 
