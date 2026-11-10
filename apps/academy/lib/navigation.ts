@@ -226,6 +226,8 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: BadgeCheck,
     items: [
       { href: '/attendance/register', label: 'Daily Register' },
+      { href: '/attendance/student-leaves', label: 'Student Leave Requests', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'admissions_officer', 'receptionist', 'class_teacher', 'head_of_department'] },
+      { href: '/attendance/staff', label: 'Staff Attendance', roles: ['super_admin', 'owner', 'principal', 'hr_manager'] },
       { href: '/attendance/periods', label: 'Period Attendance' },
       { href: '/attendance/corrections', label: 'Corrections' },
       { href: '/attendance/unmarked', label: 'Unmarked Registers' },
@@ -244,6 +246,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/terms', label: 'Exam Terms' },
       { href: '/exams/subjects', label: 'Subjects & Components' },
       { href: '/exams/marks', label: 'Mark Entry' },
+      { href: '/exams/class-tests', label: 'Class Tests', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'head_of_department', 'exam_controller', 'class_teacher', 'subject_teacher'] },
       { href: '/exams/paper-scope', label: 'Syllabus Paper Scope' },
       { href: '/exams/remarks', label: 'Teacher Remarks' },
       { href: '/exams/moderation', label: 'Moderation' },

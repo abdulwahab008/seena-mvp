@@ -14843,6 +14843,112 @@ export type Database = {
           },
         ]
       }
+      class_test: {
+        Row: {
+          campus_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          results_sent_at: string | null
+          section_id: string
+          subject_id: string | null
+          tenant_id: string
+          test_date: string
+          title: string
+          total_marks: number
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          results_sent_at?: string | null
+          section_id: string
+          subject_id?: string | null
+          tenant_id: string
+          test_date: string
+          title: string
+          total_marks: number
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          results_sent_at?: string | null
+          section_id?: string
+          subject_id?: string | null
+          tenant_id?: string
+          test_date?: string
+          title?: string
+          total_marks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'class_test_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'class_test_section_id_fkey'
+            columns: ['section_id']
+            isOneToOne: false
+            referencedRelation: 'class_section'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'class_test_subject_id_fkey'
+            columns: ['subject_id']
+            isOneToOne: false
+            referencedRelation: 'subject'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      class_test_mark: {
+        Row: {
+          absent: boolean
+          marks: number | null
+          student_id: string
+          tenant_id: string
+          test_id: string
+          updated_at: string
+        }
+        Insert: {
+          absent?: boolean
+          marks?: number | null
+          student_id: string
+          tenant_id: string
+          test_id: string
+          updated_at?: string
+        }
+        Update: {
+          absent?: boolean
+          marks?: number | null
+          student_id?: string
+          tenant_id?: string
+          test_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'class_test_mark_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'class_test_mark_test_id_fkey'
+            columns: ['test_id']
+            isOneToOne: false
+            referencedRelation: 'class_test'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       journal_entry: {
         Row: {
           created_at: string
@@ -47420,6 +47526,7 @@ export type Database = {
         Returns: undefined
       }
       cancel_student_leave: { Args: { p_leave_id: string }; Returns: undefined }
+      decide_student_leave: { Args: { p_leave_id: string; p_approve: boolean; p_note?: string }; Returns: undefined }
       certificate_merge_fields: {
         Args: { p_body_html: string }
         Returns: string[]
@@ -50507,6 +50614,9 @@ export type Database = {
       write_off_bad_debt: { Args: { p_enrolment_id: string; p_amount_paisa: number; p_reason: string }; Returns: string }
       dashboard_summary: { Args: never; Returns: Json }
       mark_hostel_roll_call: { Args: { p_campus_id: string; p_date: string; p_session: string; p_rows: Json }; Returns: number }
+      create_class_test: { Args: { p_section_id: string; p_subject_id: string | null; p_title: string; p_test_date: string; p_total_marks: number }; Returns: string }
+      save_class_test_marks: { Args: { p_test_id: string; p_rows: Json }; Returns: number }
+      send_class_test_results: { Args: { p_test_id: string }; Returns: Json }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
