@@ -351,6 +351,7 @@ export async function getStaffLoans(campusId: string | null): Promise<StaffLoanS
   let query = (supabase as any)
     .from('v_staff_loan_summary')
     .select('*')
+    .neq('loan_type', 'security_deposit')
     .order('created_at', { ascending: false });
 
   if (campusId) {
