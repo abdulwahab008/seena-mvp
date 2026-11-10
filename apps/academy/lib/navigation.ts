@@ -344,6 +344,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/transport/assignments', label: 'Assignments', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
       { href: '/transport/allocations', label: 'Student Allocation', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
       { href: '/transport/requests', label: 'Parent Requests', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager'] },
+      { href: '/transport/report', label: 'Transport Reports', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
       { href: '/transport/boarding', label: 'Boarding', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
       { href: '/transport/live', label: 'Live Tracking', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
     ],
