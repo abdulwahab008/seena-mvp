@@ -14792,6 +14792,57 @@ export type Database = {
           },
         ]
       }
+      hostel_roll_call: {
+        Row: {
+          campus_id: string
+          id: string
+          marked_at: string
+          marked_by: string | null
+          roll_date: string
+          session: string
+          status: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          id?: string
+          marked_at?: string
+          marked_by?: string | null
+          roll_date: string
+          session: string
+          status: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          id?: string
+          marked_at?: string
+          marked_by?: string | null
+          roll_date?: string
+          session?: string
+          status?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'hostel_roll_call_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'hostel_roll_call_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       class_test: {
         Row: {
           campus_id: string
@@ -50562,6 +50613,7 @@ export type Database = {
       set_fee_commitment_status: { Args: { p_id: string; p_status: Database['public']['Enums']['fee_commitment_status'] }; Returns: undefined }
       write_off_bad_debt: { Args: { p_enrolment_id: string; p_amount_paisa: number; p_reason: string }; Returns: string }
       dashboard_summary: { Args: never; Returns: Json }
+      mark_hostel_roll_call: { Args: { p_campus_id: string; p_date: string; p_session: string; p_rows: Json }; Returns: number }
       create_class_test: { Args: { p_section_id: string; p_subject_id: string | null; p_title: string; p_test_date: string; p_total_marks: number }; Returns: string }
       save_class_test_marks: { Args: { p_test_id: string; p_rows: Json }; Returns: number }
       send_class_test_results: { Args: { p_test_id: string }; Returns: Json }

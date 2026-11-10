@@ -350,6 +350,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/hostel', label: 'Blocks & Beds', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/hostel/allocations', label: 'Bed Allocation', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/hostel/roll-call', label: 'Roll Call', roles: LEADERSHIP },
       { href: '/hostel/gate-passes', label: 'Gate Passes', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/hostel/visitors', label: 'Visitors', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/hostel/mess', label: 'Mess Menu & Mess-off', roles: [...LEADERSHIP, 'accountant'] },
