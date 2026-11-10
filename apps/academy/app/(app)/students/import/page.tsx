@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import type { Json } from '@/lib/database.types';
 import { CommitImportButton, UndoImportButton } from './commit-actions';
 import { ImportForm } from './import-form';
+import { GuardianImportForm } from './guardian-import-form';
 import { formatDateTimePk } from '@/lib/dates';
 
 // Same roles create_import_batch() itself admits, and the same set
@@ -106,6 +107,8 @@ export default async function StudentImportPage({ searchParams }: { searchParams
       {heading}
 
       <ImportForm campuses={campuses ?? []} sessions={sessions ?? []} />
+
+      <GuardianImportForm />
 
       {batchId && !batch && (
         <p className="text-sm text-muted-foreground" data-testid="import-batch-missing">

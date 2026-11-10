@@ -16,6 +16,7 @@ import {
   type FailureReportRow,
   type ImportIssue,
 } from '@/lib/student-import';
+import { toGuardianImportRows } from '@/lib/guardian-import';
 
 export type ValidateImportState = { error: string | null; batchId: string | null };
 
@@ -191,4 +192,34 @@ export async function undoStudentImport(batchId: string): Promise<{ error: strin
 
   revalidatePath('/students/import');
   return { error: null };
+}
+
+// ── Link fathers to students already on the register ─────────────────────
+
+export type GuardianImportResult = {
+  error: string | null;
+  linked: number;
+  failed: number;
+  errors: { row: number; gr_number: string; message: string }[];
+};
+
+export async function importGuardianContacts(formData: FormData): Promise<GuardianImportResult> {
+  const empty = { linked: 0, failed: 0, errors: [] };
+  const file = formData.get('file');
+  if (!(file instanceof File) || file.size === 0) return { error: 'Choose a CSV file.', ...empty };
+  if (file.size > MAX_IMPORT_FILE_SIZE) return { error: 'Maximum file size 10 MB.', ...empty };
+
+  const parsed = toGuardianImportRows(parseCsv(await file.text()));
+  if (!parsed.ok) return { error: parsed.message, ...empty };
+  if (parsed.rows.length === 0) return { error: 'That file has a header but no rows.', ...empty };
+  if (parsed.rows.length > 5000) return { error: 'Split the file: at most 5,000 rows at a time.', ...empty };
+
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('import_guardian_contacts', { p_rows: parsed.rows });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to import guardians.', ...empty };
+    return { error: 'Could not import the guardians.', ...empty };
+  }
+  revalidatePath('/students');
+  return { error: null, ...(data as Omit<GuardianImportResult, 'error'>) };
 }

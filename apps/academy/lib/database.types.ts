@@ -50499,6 +50499,10 @@ export type Database = {
         Returns: string[]
       }
       impersonation_note_reads: { Args: { p_rows?: number }; Returns: number }
+      import_guardian_contacts: {
+        Args: { p_rows: Json }
+        Returns: Json
+      }
       import_library_copies: {
         Args: { p_campus_id: string; p_rows: Json }
         Returns: Json
