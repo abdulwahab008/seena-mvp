@@ -191,6 +191,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/academic-setup/subjects', label: 'Subjects' },
       { href: '/academic-setup/classes-sections', label: 'Classes & Sections' },
+      { href: '/academic-setup/class-reports', label: 'Class Reports' },
       { href: '/academic-setup/curriculum', label: 'Curriculum' },
       { href: '/academic-setup/syllabus', label: 'Syllabus' },
       { href: '/academic-setup/rooms', label: 'Rooms' },
