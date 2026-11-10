@@ -74,6 +74,27 @@ test('an off-site redirectTo is refused and falls back to the dashboard', async 
   expect(page.url()).not.toContain('evil.example');
 });
 
+test('a form submitted after the session expired sends the user to sign in instead of crashing', async ({ page, context }) => {
+  const { email } = await seedOwner();
+
+  await page.goto('/login?redirectTo=%2Ffees%2Fheads');
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/fees\/heads$/);
+  await page.waitForLoadState('networkidle');
+
+  await page.getByPlaceholder('LIBRARY').fill('EXPIRED');
+  await page.getByPlaceholder('Library Fee').fill('Expired session fee');
+  await page.getByPlaceholder('لائبریری فیس').fill('فیس');
+  await context.clearCookies();
+  await page.getByRole('button', { name: 'Add fee head' }).click();
+
+  await expect(page).toHaveURL('/login?redirectTo=%2Ffees%2Fheads');
+  await expect(page.getByText('Application error')).toHaveCount(0);
+});
+
 test('after sign-out the app is unreachable, including via the back button', async ({ page }) => {
   const { email } = await seedOwner();
 
