@@ -14713,6 +14713,85 @@ export type Database = {
           },
         ]
       }
+      hifz_lesson: {
+        Row: {
+          campus_id: string
+          created_at: string
+          grade: string | null
+          halqa_id: string
+          id: string
+          lesson_date: string
+          lesson_type: string
+          lines: number | null
+          mistakes: number
+          para_from: number | null
+          para_to: number | null
+          portion: string | null
+          recorded_by: string
+          student_id: string
+          tajweed_mistakes: number
+          tenant_id: string
+        }
+        Insert: {
+          campus_id: string
+          created_at?: string
+          grade?: string | null
+          halqa_id: string
+          id?: string
+          lesson_date: string
+          lesson_type: string
+          lines?: number | null
+          mistakes?: number
+          para_from?: number | null
+          para_to?: number | null
+          portion?: string | null
+          recorded_by?: string
+          student_id: string
+          tajweed_mistakes?: number
+          tenant_id: string
+        }
+        Update: {
+          campus_id?: string
+          created_at?: string
+          grade?: string | null
+          halqa_id?: string
+          id?: string
+          lesson_date?: string
+          lesson_type?: string
+          lines?: number | null
+          mistakes?: number
+          para_from?: number | null
+          para_to?: number | null
+          portion?: string | null
+          recorded_by?: string
+          student_id?: string
+          tajweed_mistakes?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'hifz_lesson_campus_id_fkey'
+            columns: ['campus_id']
+            isOneToOne: false
+            referencedRelation: 'campus'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'hifz_lesson_halqa_id_fkey'
+            columns: ['halqa_id']
+            isOneToOne: false
+            referencedRelation: 'halqa'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'hifz_lesson_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       hostel_roll_call: {
         Row: {
           campus_id: string
@@ -15404,7 +15483,15 @@ export type Database = {
           student_id?: string
           tenant_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'student_incident_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'student'
+            referencedColumns: ['id']
+          },
+        ]
       }
       download_item: {
         Row: {
@@ -53997,7 +54084,7 @@ export type Database = {
       fee_challan_status: 'unpaid' | 'part_paid' | 'paid' | 'cancelled'
       fee_commitment_status: 'open' | 'kept' | 'broken' | 'cancelled'
       gl_account_type: 'asset' | 'liability' | 'equity' | 'income' | 'expense'
-      front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found'
+      front_desk_kind: 'visitor' | 'call' | 'appointment' | 'parcel' | 'gate_pass' | 'lost_found' | 'complaint' | 'contact'
       fee_frequency: 'monthly' | 'quarterly' | 'annual' | 'one_time'
       fee_ledger_direction: 'debit' | 'credit'
       fee_ledger_entry_type:
@@ -54601,7 +54688,7 @@ export const Constants = {
       fee_challan_status: ['unpaid', 'part_paid', 'paid', 'cancelled'],
       fee_commitment_status: ['open', 'kept', 'broken', 'cancelled'],
       gl_account_type: ['asset', 'liability', 'equity', 'income', 'expense'],
-      front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found'],
+      front_desk_kind: ['visitor', 'call', 'appointment', 'parcel', 'gate_pass', 'lost_found', 'complaint', 'contact'],
       fee_frequency: ['monthly', 'quarterly', 'annual', 'one_time'],
       fee_ledger_direction: ['debit', 'credit'],
       fee_ledger_entry_type: [
