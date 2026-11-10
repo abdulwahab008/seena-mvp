@@ -33,7 +33,8 @@ select public.complete_staff_exit(:'ex'::uuid);
 -- the cached token (old claims epoch) is refused for mark entry
 select set_config('request.jwt.claims', json_build_object('sub', :'teach_uid', 'tenant_id', :'tenant_id', 'app_role', 'subject_teacher', 'cv', :'old_cv'::int, 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select throws_ok($$ select public.fn_upsert_marks('[]'::jsonb) $$, '28000', 'TOKEN_EPOCH_STALE', 'AC3: the cached token is rejected when the departed teacher enters marks');
-select throws_ok($$ select count(*) from public.mark_entry $$, '28000', 'TOKEN_EPOCH_STALE', 'AC3: and the mark table cannot even be read with it');
+-- RLS helpers run once per query (InitPlan), so the epoch check fires when a row is checked, not on an empty table: read a table with a row.
+select throws_ok($$ select count(*) from public.staff $$, '28000', 'TOKEN_EPOCH_STALE', 'AC3: and the school''s records cannot even be read with it');
 reset role;
 select is((select status::text from public.app_user where user_id = :'teach_uid'), 'terminated', 'the login itself is terminated');
 
