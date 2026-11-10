@@ -111,7 +111,11 @@ export const createStudentSchema = z.object({
   gender: z.enum(['male', 'female', 'other']),
   fatherNameEn: z.string().max(200).optional(),
   fatherNameUr: z.string().max(200).optional(),
-  bFormNo: z.string().max(20).optional(),
+  bFormNo: z
+    .string()
+    .max(20)
+    .refine((v) => v.trim() === '' || v.replace(/\D/g, '').length === 13, 'B-Form number must have 13 digits.')
+    .optional(),
 });
 export type CreateStudentInput = z.infer<typeof createStudentSchema>;
 

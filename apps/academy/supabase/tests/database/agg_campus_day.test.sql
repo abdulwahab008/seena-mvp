@@ -64,7 +64,8 @@ reset role;
 select public.refresh_agg_nightly();
 select is((select collected_paisa from public.agg_campus_day where campus_id = :'campus_id' and day = current_date - 20), 200000::bigint, 'AC: the back-dated receipt lands on its own day');
 select is((select last_refreshed_at > '2000-01-01' from public.agg_campus_day where campus_id = :'campus_id' and day = current_date - 20), true, 'and that day was recomputed');
-select is((select last_refreshed_at from public.agg_campus_day where campus_id = :'campus_id' and day = current_date - 10), '2000-01-01'::timestamptz, 'AC: an untouched older day was NOT rebuilt');
+-- The challans above post on the 1st of the month, so on the 11th "ten days ago" is a touched day; step back one more then.
+select is((select last_refreshed_at from public.agg_campus_day where campus_id = :'campus_id' and day = current_date - 10 - (extract(day from current_date - 10) = 1)::int), '2000-01-01'::timestamptz, 'AC: an untouched older day was NOT rebuilt');
 
 -- ── failure keeps previous rows, logs, and goes stale after 26 hours ──────
 

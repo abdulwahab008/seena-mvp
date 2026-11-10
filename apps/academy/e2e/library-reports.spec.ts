@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { seedFeesTenant } from './support/fees-seed';
 import { signInAs } from './support/hr-seed';
+import { todayPk } from './support/today';
 
 test('library reports list circulation, overdue loans with days late, and fines by borrower', async ({ page }) => {
   const { db, email, tenant, campusId, challans } = await seedFeesTenant(1, 'lib-reports-e2e');
@@ -8,7 +9,7 @@ test('library reports list circulation, overdue loans with days late, and fines 
   const { data: student } = await db.from('student').select('name_en').eq('id', enrol!.student_id).single();
   const { data: title } = await db.from('library_title').insert({ tenant_id: tenant, title: 'Chemistry 10' }).select('id').single();
   const { data: copy } = await db.from('library_copy').insert({ tenant_id: tenant, campus_id: campusId, title_id: title!.id, accession_no: 'ACC-77', barcode: `BC77-${tenant.slice(0, 8)}` }).select('id').single();
-  const due = new Date(Date.now() - 4 * 86400000).toISOString().slice(0, 10);
+  const due = new Date(Date.parse(`${todayPk()}T00:00:00Z`) - 4 * 86400000).toISOString().slice(0, 10);
   const { data: loan, error } = await db
     .from('library_loan')
     .insert({ tenant_id: tenant, campus_id: campusId, copy_id: copy!.id, borrower_id: enrol!.student_id, borrower_role: 'student', due_on: due, policy_snapshot: {} })

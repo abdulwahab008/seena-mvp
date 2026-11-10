@@ -53,6 +53,19 @@ export function EditStudentControl({ student, options }: { student: EditableStud
             onSubmit={(e) => {
               e.preventDefault();
               const fd = new FormData(e.currentTarget);
+              // Send only what this user changed, so a stale form cannot overwrite another user's edit.
+              const original: Record<string, string> = {
+                nameEn: student.name_en,
+                nameUr: student.name_ur ?? '',
+                dob: student.dob,
+                gender: student.gender,
+                fatherNameEn: student.father_name_en ?? '',
+                bFormNo: student.b_form_no ?? '',
+                categoryId: student.category_id ?? '',
+                regionId: student.region_id ?? '',
+                previousSchoolId: student.previous_school_id ?? '',
+              };
+              for (const [name, value] of Object.entries(original)) if (fd.get(name) === value) fd.delete(name);
               startTransition(async () => {
                 const r = await updateStudentDetails(student.id, { error: null }, fd);
                 if (r.error) setError(r.error);

@@ -438,23 +438,33 @@ export async function setElectiveChoice(studentId: string, _prev: SetElectiveCho
 export type UpdateStudentState = { error: string | null };
 
 // Correct a student's own details. The GR number is permanent and is not part of this.
+// The form posts only the fields its user changed; every other field keeps the value currently saved,
+// so two people editing different fields of the same student do not overwrite each other.
 export async function updateStudentDetails(studentId: string, _prev: UpdateStudentState, formData: FormData): Promise<UpdateStudentState> {
-  const gender = String(formData.get('gender') ?? '');
-  const nameEn = String(formData.get('nameEn') ?? '').trim();
-  const dob = String(formData.get('dob') ?? '');
+  const supabase = await supabaseServer();
+  const { data: current } = await supabase
+    .from('student')
+    .select('name_en, name_ur, dob, gender, father_name_en, b_form_no, category_id, region_id, previous_school_id')
+    .eq('id', studentId)
+    .maybeSingle();
+  if (!current) return { error: 'This student could not be found.' };
+  const field = (name: string, saved: string | null) => (formData.has(name) ? String(formData.get(name) ?? '') : (saved ?? ''));
+
+  const gender = field('gender', current.gender);
+  const nameEn = field('nameEn', current.name_en).trim();
+  const dob = field('dob', current.dob);
   if (!nameEn) return { error: "Enter the student's name." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) return { error: 'Enter a date of birth.' };
   if (gender !== 'male' && gender !== 'female' && gender !== 'other') return { error: 'Choose a gender.' };
 
-  const supabase = await supabaseServer();
   const { error } = await supabase.rpc('update_student_details', {
     p_student_id: studentId,
     p_name_en: nameEn,
     p_dob: dob,
     p_gender: gender,
-    p_name_ur: String(formData.get('nameUr') ?? '') || undefined,
-    p_father_name_en: String(formData.get('fatherNameEn') ?? '') || undefined,
-    p_b_form_no: String(formData.get('bFormNo') ?? '') || undefined,
+    p_name_ur: field('nameUr', current.name_ur) || undefined,
+    p_father_name_en: field('fatherNameEn', current.father_name_en) || undefined,
+    p_b_form_no: field('bFormNo', current.b_form_no) || undefined,
   });
   if (error) {
     if (error.message.includes('BFORM_INVALID_FORMAT')) return { error: 'A B-Form number has 13 digits.' };
@@ -463,12 +473,11 @@ export async function updateStudentDetails(studentId: string, _prev: UpdateStude
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit this student.' };
     return { error: 'Could not save the changes.' };
   }
-  const lookup = (name: string) => String(formData.get(name) ?? '') || null;
   const { error: lookupError } = await supabase.rpc('set_student_lookups', {
     p_student_id: studentId,
-    p_category_id: lookup('categoryId'),
-    p_region_id: lookup('regionId'),
-    p_previous_school_id: lookup('previousSchoolId'),
+    p_category_id: field('categoryId', current.category_id) || null,
+    p_region_id: field('regionId', current.region_id) || null,
+    p_previous_school_id: field('previousSchoolId', current.previous_school_id) || null,
   });
   if (lookupError) return { error: 'The details were saved, but not the category, region or previous school.' };
   revalidatePath(`/students/${studentId}`);
