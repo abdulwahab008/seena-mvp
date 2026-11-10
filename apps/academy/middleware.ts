@@ -106,6 +106,14 @@ export async function middleware(request: NextRequest) {
         { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );
     }
+    // A server action that follows a plain redirect gets the login page's HTML, resolves to undefined and
+    // crashes the form that awaited it. Next's own action-redirect header makes the client navigate instead.
+    if (request.headers.has('next-action')) {
+      return new NextResponse(null, {
+        status: 200,
+        headers: { 'x-action-redirect': `${loginUrlFor(pathname, search)};replace`, 'Cache-Control': 'no-store' },
+      });
+    }
     return NextResponse.redirect(new URL(loginUrlFor(pathname, search), request.url));
   }
 
