@@ -374,6 +374,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/inventory', label: 'Stores and Stock', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory/sales', label: 'Counter Sales', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory/sales-report', label: 'Sales Report', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/inventory/dues', label: 'Shop Dues', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory/movements', label: 'Stock Movements', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory/profit', label: 'Shop Profit', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets', label: 'Asset Register', roles: [...LEADERSHIP, 'accountant'] },
