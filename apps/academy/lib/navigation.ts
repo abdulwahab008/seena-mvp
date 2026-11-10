@@ -382,6 +382,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/assets/reports', label: 'Asset & Stock Reports', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/purchasing', label: 'Requisitions', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/purchasing/orders', label: 'Purchase Orders', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/purchasing/suppliers', label: 'Supplier Report', roles: [...LEADERSHIP, 'accountant'] },
     ],
   },
   {
