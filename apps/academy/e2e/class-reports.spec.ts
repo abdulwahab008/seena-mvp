@@ -24,5 +24,6 @@ test('class reports show seats filled and open a printable class list', async ({
   await row.getByRole('link', { name: 'View' }).click();
   await expect(page.getByRole('heading', { name: 'Class list: Class 5 A' })).toBeVisible();
   await expect(page.getByTestId('class-list-row')).toHaveCount(2);
-  await expect(page.getByTestId('class-list-row').first()).toContainText('Amna Riaz');
+  // Enrolling numbers students in join order, and the class list is in roll order.
+  await expect(page.getByTestId('class-list-row').first()).toContainText('Zain Ali');
 });

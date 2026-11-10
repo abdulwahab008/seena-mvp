@@ -14,7 +14,6 @@ import {
   enrolFromOfferSchema,
 } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
-import { assignRollNumberAfterEnrolment } from '@/lib/enrolment-roll';
 
 export type IssueOfferState = { error: string | null };
 
@@ -386,7 +385,6 @@ export async function enrolFromOffer(_prev: EnrolFromOfferState, formData: FormD
   }
 
   const enrolled = data as { gr_number: string; enrolment_id?: string; is_replay?: boolean } | null;
-  if (enrolled && !enrolled.is_replay) await assignRollNumberAfterEnrolment(supabase, { enrolmentId: enrolled.enrolment_id ?? null });
 
   revalidatePath('/admissions/applications');
   revalidatePath('/students');
@@ -466,7 +464,6 @@ export async function quickAdmission(
   revalidatePath('/students');
 
   const res = data as unknown as { gr_number: string; student_id: string; application_no: string; receipt_no: string | null } | null;
-  if (res?.student_id) await assignRollNumberAfterEnrolment(supabase, { studentId: res.student_id });
   return {
     error: null,
     grNumber: res?.gr_number ?? null,
