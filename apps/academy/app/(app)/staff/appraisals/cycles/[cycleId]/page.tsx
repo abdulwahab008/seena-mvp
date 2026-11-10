@@ -13,8 +13,9 @@ type Report = {
   excluded: { staff_id: string; name: string; employee_code: string; service_days: number }[]; excluded_count: number; min_service_days: number; closes_on: string;
 };
 
-export default async function AppraisalCyclePage({ params }: { params: Promise<{ cycleId: string }> }) {
+export default async function AppraisalCyclePage({ params, searchParams }: { params: Promise<{ cycleId: string }>; searchParams: Promise<{ copyFrom?: string }> }) {
   const { cycleId } = await params;
+  const { copyFrom } = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(cycleId)) notFound();
   const actor = await getCurrentActor();
   if (!isHrWriter(actor?.role)) {
@@ -41,6 +42,16 @@ export default async function AppraisalCyclePage({ params }: { params: Promise<{
   const raterName = new Map((raters ?? []).map((r) => [r.user_id, r.full_name]));
   const sum = (competencies ?? []).reduce((s, c) => s + Math.round(Number(c.weight_pct) * 100), 0) / 100;
   const text = (competencies ?? []).map((c) => `${c.name} | ${Number(c.weight_pct)}`).join('\n');
+  // A cycle's criteria work as a reusable review form: a draft can start from another cycle's.
+  const [{ data: otherCycles }, { data: copied }] = cycle.status === 'draft'
+    ? await Promise.all([
+        supabase.from('appraisal_cycle').select('id, name').neq('id', cycleId).order('opens_on', { ascending: false }),
+        copyFrom && /^[0-9a-f-]{36}$/i.test(copyFrom)
+          ? supabase.from('appraisal_competency').select('name, weight_pct').eq('cycle_id', copyFrom).order('sort_order')
+          : Promise.resolve({ data: null }),
+      ])
+    : [{ data: null }, { data: null }];
+  const startText = copied?.length ? copied.map((c) => `${c.name} | ${Number(c.weight_pct)}`).join('\n') : text;
 
   return (
     <div className="space-y-6">
@@ -70,7 +81,23 @@ export default async function AppraisalCyclePage({ params }: { params: Promise<{
         <CardContent className="space-y-3 text-sm">
           {cycle.status === 'draft' ? (
             <>
-              <CompetenciesForm cycleId={cycleId} initialText={text} />
+              {(otherCycles ?? []).length > 0 && (
+                <form method="get" className="flex flex-wrap items-center gap-2">
+                  <select name="copyFrom" defaultValue={copyFrom ?? ''} aria-label="Copy criteria from" className="h-9 rounded-md border bg-background px-2">
+                    <option value="">Copy criteria from another cycle…</option>
+                    {(otherCycles ?? []).map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button type="submit" className="h-9 rounded-md border px-3">
+                    Copy
+                  </button>
+                  {copied?.length ? <span className="text-muted-foreground">Copied {copied.length} criteria. Save to keep them.</span> : null}
+                </form>
+              )}
+              <CompetenciesForm key={startText} cycleId={cycleId} initialText={startText} />
               <p className="text-muted-foreground">Saved weights add up to {sum}. A cycle can only be published when they add up to exactly 100; publishing freezes the template.</p>
               <PublishButton cycleId={cycleId} />
             </>
