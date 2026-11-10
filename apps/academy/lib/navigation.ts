@@ -246,6 +246,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/terms', label: 'Exam Terms' },
       { href: '/exams/subjects', label: 'Subjects & Components' },
       { href: '/exams/marks', label: 'Mark Entry' },
+      { href: '/exams/class-tests', label: 'Class Tests', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'head_of_department', 'exam_controller', 'class_teacher', 'subject_teacher'] },
       { href: '/exams/paper-scope', label: 'Syllabus Paper Scope' },
       { href: '/exams/remarks', label: 'Teacher Remarks' },
       { href: '/exams/moderation', label: 'Moderation' },
