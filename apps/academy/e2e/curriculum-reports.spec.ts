@@ -24,9 +24,17 @@ test('curriculum reports flag a subject with no teacher and count the question b
     await must(db.from('question_bank_item').insert({ tenant_id, campus_id, subject_id: maths.id, class_level_id: level.id, question_type: 'short', question_text: `Q ${difficulty} ${Math.random()}`, difficulty, marks: 2 }).select('id').single());
   }
 
+  const unit = await must(
+    db.from('syllabus_unit').insert({ tenant_id, campus_id, session_id: session.id, class_level_id: level.id, subject_id: maths.id, board: 'PUNJAB', title: 'Fractions', sequence: 1, planned_periods: 10, target_month: '2026-09-01' }).select('id').single(),
+  );
+  await must(db.from('syllabus_topic').insert({ tenant_id, syllabus_unit_id: unit.id, title: 'Adding fractions', sequence: 1, planned_periods: 4 }).select('id').single());
+
   await signInAs(page, owner.email);
   await page.goto('/academic-setup/curriculum-reports');
   await expect(page.getByTestId('assignment-row').filter({ hasText: 'Maths' })).toContainText('maths-teacher user');
   await expect(page.getByTestId('assignment-row').filter({ hasText: 'Urdu' })).toContainText('No teacher');
   await expect(page.getByTestId('bank-row').locator('td')).toHaveText(['Maths', '1', '2', '3']);
+  await expect(page.getByTestId('coverage-row').filter({ hasText: 'Maths' }).locator('td')).toHaveText(['Class 5', 'Maths', '1', '0%', '—', '1']);
+  await expect(page.getByTestId('completeness-row').filter({ hasText: 'Maths' }).locator('td')).toHaveText(['Class 5', 'Maths', '1', '1', 'Yes', '3']);
+  await expect(page.getByTestId('completeness-row').filter({ hasText: 'Urdu' }).locator('td')).toHaveText(['Class 5', 'Urdu', '0', '0', 'No', '0']);
 });
