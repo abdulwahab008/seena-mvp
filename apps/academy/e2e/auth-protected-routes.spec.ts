@@ -85,9 +85,9 @@ test('a form submitted after the session expired sends the user to sign in inste
   await expect(page).toHaveURL(/\/fees\/heads$/);
   await page.waitForLoadState('networkidle');
 
-  await page.getByPlaceholder('LIBRARY').fill('EXPIRED');
-  await page.getByPlaceholder('Library Fee').fill('Expired session fee');
-  await page.getByPlaceholder('لائبریری فیس').fill('فیس');
+  await page.locator('#code').fill('EXPIRED');
+  await page.locator('#nameEn').fill('Expired session fee');
+  await page.locator('#nameUr').fill('فیس');
   await context.clearCookies();
   await page.getByRole('button', { name: 'Add fee head' }).click();
 
