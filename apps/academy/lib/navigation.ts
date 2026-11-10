@@ -167,6 +167,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/leave', label: 'Leave' },
       { href: '/academic-setup/competency', label: 'Teacher Competency', roles: ACADEMIC_LEADS },
       { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects', roles: ACADEMIC_LEADS },
+      { href: '/academic-setup/curriculum-reports', label: 'Curriculum Reports', roles: ACADEMIC_LEADS },
     ],
   },
   {
