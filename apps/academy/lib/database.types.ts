@@ -33758,6 +33758,7 @@ export type Database = {
           loan_type: string
           notes: string | null
           principal_paisa: number
+          refunded_at: string | null
           repayment_start_month: string
           staff_id: string
           status: string
@@ -33775,6 +33776,7 @@ export type Database = {
           loan_type?: string
           notes?: string | null
           principal_paisa: number
+          refunded_at?: string | null
           repayment_start_month: string
           staff_id: string
           status?: string
@@ -33792,6 +33794,7 @@ export type Database = {
           loan_type?: string
           notes?: string | null
           principal_paisa?: number
+          refunded_at?: string | null
           repayment_start_month?: string
           staff_id?: string
           status?: string
@@ -47596,6 +47599,7 @@ export type Database = {
         Returns: undefined
       }
       cancel_student_leave: { Args: { p_leave_id: string }; Returns: undefined }
+      create_staff_security_deposit: { Args: { p_staff_id: string; p_target_paisa: number; p_installment_paisa: number; p_start_month: string; p_notes?: string }; Returns: string }
       decide_student_leave: { Args: { p_leave_id: string; p_approve: boolean; p_note?: string }; Returns: undefined }
       certificate_merge_fields: {
         Args: { p_body_html: string }
