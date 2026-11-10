@@ -59,7 +59,7 @@ export function NewStudentForm({ campuses }: { campuses: Campus[] }) {
           name="campusId"
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger data-testid="student-campus-trigger">
+              <SelectTrigger id="campusId" data-testid="student-campus-trigger">
                 <SelectValue placeholder="Select a campus" />
               </SelectTrigger>
               <SelectContent>
@@ -72,6 +72,7 @@ export function NewStudentForm({ campuses }: { campuses: Campus[] }) {
             </Select>
           )}
         />
+        {errors.campusId && <p className="text-xs text-destructive">{errors.campusId.message}</p>}
       </div>
       <div className="space-y-1">
         <Label htmlFor="nameEn">Name</Label>
@@ -81,6 +82,7 @@ export function NewStudentForm({ campuses }: { campuses: Campus[] }) {
       <div className="space-y-1">
         <Label htmlFor="nameUr">Name (Urdu)</Label>
         <Input id="nameUr" {...register('nameUr')} />
+        {errors.nameUr && <p className="text-xs text-destructive">{errors.nameUr.message}</p>}
       </div>
       <div className="space-y-1">
         <Label htmlFor="dob">Date of birth</Label>
@@ -122,10 +124,12 @@ export function NewStudentForm({ campuses }: { campuses: Campus[] }) {
       <div className="space-y-1">
         <Label htmlFor="fatherNameEn">Father's name</Label>
         <Input id="fatherNameEn" {...register('fatherNameEn')} />
+        {errors.fatherNameEn && <p className="text-xs text-destructive">{errors.fatherNameEn.message}</p>}
       </div>
       <div className="space-y-1">
         <Label htmlFor="bFormNo">B-Form number (optional)</Label>
         <Input id="bFormNo" placeholder="3520212345678" {...register('bFormNo')} />
+        {errors.bFormNo && <p className="text-xs text-destructive">{errors.bFormNo.message}</p>}
       </div>
 
       <Button type="submit" disabled={pending} className="col-span-full w-fit">
