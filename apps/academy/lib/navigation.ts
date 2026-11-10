@@ -227,6 +227,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/attendance/register', label: 'Daily Register' },
       { href: '/attendance/student-leaves', label: 'Student Leave Requests', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'admissions_officer', 'receptionist', 'class_teacher', 'head_of_department'] },
+      { href: '/attendance/staff', label: 'Staff Attendance', roles: ['super_admin', 'owner', 'principal', 'hr_manager'] },
       { href: '/attendance/periods', label: 'Period Attendance' },
       { href: '/attendance/corrections', label: 'Corrections' },
       { href: '/attendance/unmarked', label: 'Unmarked Registers' },
