@@ -50617,6 +50617,24 @@ export type Database = {
       create_class_test: { Args: { p_section_id: string; p_subject_id: string | null; p_title: string; p_test_date: string; p_total_marks: number }; Returns: string }
       save_class_test_marks: { Args: { p_test_id: string; p_rows: Json }; Returns: number }
       send_class_test_results: { Args: { p_test_id: string }; Returns: Json }
+      fee_class_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          class_level_id: string
+          class_name: string
+          ordinal: number
+          students: number
+          billed_paisa: number
+          concession_paisa: number
+          collected_paisa: number
+          written_off_paisa: number
+          balance_paisa: number
+          due_0_30_paisa: number
+          due_31_60_paisa: number
+          due_61_90_paisa: number
+          due_90_plus_paisa: number
+        }[]
+      }
       trial_balance: {
         Args: { p_as_of: string }
         Returns: { account_id: string; balance: number; code: string; credit: number; debit: number; name: string; type: Database['public']['Enums']['gl_account_type'] }[]
