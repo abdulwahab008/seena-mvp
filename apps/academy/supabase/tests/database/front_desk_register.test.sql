@@ -1,5 +1,5 @@
 begin;
-select plan(8);
+select plan(10);
 
 select public.provision_tenant('test-front-desk-co', 'Front Desk Co', 'owner@frontdesk.test') as tenant_id \gset
 select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
@@ -15,6 +15,8 @@ select is((select count(*)::int from public.front_desk_entry where kind = 'visit
 select lives_ok(format($$ select public.close_front_desk_entry(%L, 'Left at 11') $$, :'visit_id'), 'the visitor is signed out');
 select isnt((select closed_at from public.front_desk_entry where id = :'visit_id'), null, 'the time out is recorded');
 select throws_ok(format($$ select public.close_front_desk_entry(%L) $$, :'visit_id'), 'P0002', 'ENTRY_NOT_FOUND', 'an entry cannot be closed twice');
+select lives_ok(format($$ select public.log_front_desk_entry(%L, 'complaint', 'Mrs Aslam', null, 'Van late', 'Transport') $$, :'campus_id'), 'a complaint goes on the register');
+select lives_ok(format($$ select public.log_front_desk_entry(%L, 'contact', 'Ali Plumber', '03009998887', 'Plumber') $$, :'campus_id'), 'a contact goes in the people directory');
 select throws_ok(format($$ select public.log_front_desk_entry(%L, 'call', 'Parent') $$, :'dha_id'), '42501', 'FORBIDDEN', 'another campus''s register is out of scope');
 
 select set_config('request.jwt.claims', json_build_object('sub', :'uid', 'tenant_id', :'tenant_id', 'app_role', 'subject_teacher', 'campus_ids', json_build_array(:'campus_id'))::text, true);
