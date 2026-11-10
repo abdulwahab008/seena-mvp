@@ -6,6 +6,8 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { getLang } from '@/lib/i18n/server';
 import { dirFor, t, type MessageKey } from '@/lib/i18n/messages';
 import { LanguageToggle } from '@/components/language-toggle';
+import { Button } from '@/components/ui/button';
+import { LogOut } from 'lucide-react';
 
 const PORTAL_LINKS: { href: string; key: MessageKey }[] = [
   { href: '/portal/attendance', key: 'nav.attendance' },
@@ -68,7 +70,15 @@ export default async function PortalLayout({ children }: { children: React.React
     <div className="mx-auto max-w-2xl p-4 sm:p-6" dir={dirFor(lang)} lang={lang}>
       <div className="mb-2 flex items-center justify-between gap-2">
         <h1 className="text-lg font-semibold">{t(lang, 'portal.title')}</h1>
-        <LanguageToggle lang={lang} />
+        <div className="flex items-center gap-2">
+          <LanguageToggle lang={lang} />
+          <form action="/api/auth/sign-out" method="POST">
+            <Button variant="ghost" size="sm" type="submit" className="gap-2 text-muted-foreground hover:text-foreground">
+              <LogOut className="h-4 w-4" />
+              {t(lang, 'portal.signOut')}
+            </Button>
+          </form>
+        </div>
       </div>
       <nav className="mb-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
         {PORTAL_LINKS.map((l) => (

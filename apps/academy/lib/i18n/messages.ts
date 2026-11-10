@@ -12,6 +12,7 @@ export function isLang(value: unknown): value is Lang {
 
 export const en = {
   'portal.title': 'Parent Portal',
+  'portal.signOut': 'Sign out',
   'nav.attendance': 'Attendance',
   'nav.fees': 'Fees',
   'nav.homework': 'Homework',
@@ -172,6 +173,7 @@ export type MessageKey = keyof typeof en;
 
 export const ur: Partial<Record<MessageKey, string>> = {
   'portal.title': 'والدین پورٹل',
+  'portal.signOut': 'سائن آؤٹ',
   'nav.attendance': 'حاضری',
   'nav.fees': 'فیس',
   'nav.homework': 'ہوم ورک',
