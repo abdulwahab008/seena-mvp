@@ -145,6 +145,8 @@ select public.enrol_student(:'sec_c', :'st_ghazala') as enr_ghazala \gset
 -- AC3's order is section then ROLL NUMBER, so the roll numbers have to exist
 -- and must not agree with the alphabet, or the test would pass on the name.
 reset role;
+-- Enrolling already numbered them 1, 2, ... in join order; clear those before setting the test's own order.
+update public.enrolment set roll_no = null where id in (:'enr_ayesha', :'enr_bilal', :'enr_chandni', :'enr_danish', :'enr_erum', :'enr_farhan');
 update public.enrolment set roll_no = 4 where id = :'enr_ayesha';
 update public.enrolment set roll_no = 3 where id = :'enr_bilal';
 update public.enrolment set roll_no = 2 where id = :'enr_chandni';
