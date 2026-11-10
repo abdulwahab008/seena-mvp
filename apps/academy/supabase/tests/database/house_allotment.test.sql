@@ -79,17 +79,18 @@ select public.create_house(:'campus_id'::uuid, 'Spare') as h_spare \gset
 select lives_ok(format($$ select public.delete_house(%L) $$, :'h_spare'), 'an unused house can be deleted');
 
 -- ── AC4: a mid-year move does not rewrite last term's points ─────────────
-select public.award_house_points(:'stu41'::uuid, 10, '2026-11-10'::date, 'sports', 'Relay race') as pt1 \gset
+-- Dates are relative to today: auto_assign_houses starts every house on current_date.
+select public.award_house_points(:'stu41'::uuid, 10, current_date, 'sports', 'Relay race') as pt1 \gset
 select house_id as old_house from public.student where id = :'stu41'::uuid \gset
 select id as new_house from public.house where campus_id = :'campus_id' and id <> :'old_house'::uuid limit 1 \gset
-select public.set_student_house(:'stu41'::uuid, :'new_house'::uuid, '2027-02-01'::date);
+select public.set_student_house(:'stu41'::uuid, :'new_house'::uuid, current_date + 60);
 select is((select house_id from public.student where id = :'stu41'::uuid), :'new_house'::uuid, 'the student is now in the new house');
-select is(public.house_on_date(:'stu41'::uuid, '2026-11-10'::date), :'old_house'::uuid, 'AC4: history says November belonged to the previous house');
-select is(public.house_on_date(:'stu41'::uuid, '2027-01-31'::date), :'old_house'::uuid, 'the previous house holds through 31 January');
-select is(public.house_on_date(:'stu41'::uuid, '2027-02-01'::date), :'new_house'::uuid, 'and the new house from 1 February');
-select is((select points from public.house_standings(:'campus_id'::uuid, '2026-11-01', '2026-11-30') where house_id = :'old_house'::uuid), 10::bigint, 'AC4: November''s points remain with the previous house');
-select is((select points from public.house_standings(:'campus_id'::uuid, '2026-11-01', '2026-11-30') where house_id = :'new_house'::uuid), 0::bigint, 'and none moved to the new house');
-select throws_ok(format($$ select public.set_student_house(%L, %L, '2027-01-01') $$, :'stu41', :'old_house'), 'EFFECTIVE_DATE_BEFORE_CURRENT_HOUSE', 'a move cannot be dated before the current house began');
+select is(public.house_on_date(:'stu41'::uuid, current_date), :'old_house'::uuid, 'AC4: history says the points day belonged to the previous house');
+select is(public.house_on_date(:'stu41'::uuid, current_date + 59), :'old_house'::uuid, 'the previous house holds until the day before the move');
+select is(public.house_on_date(:'stu41'::uuid, current_date + 60), :'new_house'::uuid, 'and the new house from the move date');
+select is((select points from public.house_standings(:'campus_id'::uuid, date_trunc('month', current_date)::date, (date_trunc('month', current_date) + interval '1 month - 1 day')::date) where house_id = :'old_house'::uuid), 10::bigint, 'AC4: the month''s points remain with the previous house');
+select is((select points from public.house_standings(:'campus_id'::uuid, date_trunc('month', current_date)::date, (date_trunc('month', current_date) + interval '1 month - 1 day')::date) where house_id = :'new_house'::uuid), 0::bigint, 'and none moved to the new house');
+select throws_ok(format($$ select public.set_student_house(%L, %L, %L) $$, :'stu41', :'old_house', current_date + 30), 'EFFECTIVE_DATE_BEFORE_CURRENT_HOUSE', 'a move cannot be dated before the current house began');
 
 -- ── balancing off: non-siblings are spread by hash, siblings still follow ─
 select public.set_house_capacity_balancing(:'campus_id'::uuid, false);
