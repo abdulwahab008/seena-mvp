@@ -1,6 +1,6 @@
 -- pgTAP tests for FR-K07: sibling detection and discount proposal.
 begin;
-select plan(17);
+select plan(19);
 
 select public.provision_tenant('test-sibling-disc-co', 'Sibling Disc Co', 'owner@siblingdiscco.test');
 select id as tenant_id from public.tenant where slug = 'test-sibling-disc-co' \gset
@@ -162,6 +162,25 @@ select throws_ok(
   'FORBIDDEN',
   'a teacher cannot run the sibling detection scan'
 );
+
+-- ── rank follows age, not the order the records were created ─────────
+select set_config(
+  'request.jwt.claims',
+  json_build_object('tenant_id', :'tenant_id', 'app_role', 'owner', 'campus_ids', json_build_array(:'campus_id'))::text,
+  true
+);
+select public.fn_find_or_create_guardian(p_name_en => 'Import Father', p_cnic => '61101-5555555-5') as import_father_id \gset
+select public.create_student(:'campus_id'::uuid, 'Younger Imported First', '2017-05-01'::date, 'female') as younger_id \gset
+select public.link_guardian(:'younger_id'::uuid, :'import_father_id'::uuid, 'father', true, true);
+select public.enrol_student(:'section_id'::uuid, :'younger_id'::uuid) as enrol_younger_id \gset
+select public.create_student(:'campus_id'::uuid, 'Older Imported Second', '2013-05-01'::date, 'male') as older_id \gset
+select public.link_guardian(:'older_id'::uuid, :'import_father_id'::uuid, 'father', true, true);
+select public.enrol_student(:'section_id'::uuid, :'older_id'::uuid) as enrol_older_id \gset
+select public.detect_sibling_groups(:'campus_id'::uuid, :'session_id'::uuid);
+select is((select count(*)::int from public.concession_award where enrolment_id = :'enrol_older_id'), 0,
+  'the older child is rank 1 and gets no sibling award, though their record was created second');
+select is((select count(*)::int from public.concession_award where enrolment_id = :'enrol_younger_id'), 1,
+  'the younger child gets the rank-2 sibling award');
 
 select * from finish();
 rollback;
