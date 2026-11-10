@@ -120,12 +120,14 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/students/dashboard', label: 'Students Dashboard', roles: FRONT_OFFICE },
       { href: '/students', label: 'All Students' },
+      { href: '/students/families', label: 'Family List', roles: FRONT_OFFICE },
       { href: '/students/reports', label: 'Student Reports', roles: FRONT_OFFICE },
       { href: '/students/documents', label: 'Student Documents', roles: FRONT_OFFICE },
       { href: '/students/alumni', label: 'Alumni' },
       { href: '/students/transfers', label: 'Campus Transfers', roles: FRONT_OFFICE },
       { href: '/students/admission-register', label: 'Admission Register', roles: FRONT_OFFICE },
       { href: '/students/withdrawals', label: 'Withdrawal Register', roles: FRONT_OFFICE },
+      { href: '/students/discipline', label: 'Discipline Register', roles: LEADERSHIP },
       { href: '/students/coaching', label: 'Extra Coaching', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/students/vaccinations', label: 'Vaccinations', roles: [...LEADERSHIP, 'nurse'] },
       { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
@@ -144,6 +146,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/staff', label: 'All Staff', roles: HR_ROLES },
       { href: '/staff/directory', label: 'Directory' },
+      { href: '/staff/reports', label: 'Staff Reports', roles: HR_ROLES },
       { href: '/staff/org-chart', label: 'Org Chart' },
       { href: '/staff/departments', label: 'Departments', roles: HR_ROLES },
       { href: '/staff/qualifications', label: 'Qualifications', roles: HR_ROLES },
@@ -188,6 +191,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/academic-setup/subjects', label: 'Subjects' },
       { href: '/academic-setup/classes-sections', label: 'Classes & Sections' },
+      { href: '/academic-setup/class-reports', label: 'Class Reports' },
       { href: '/academic-setup/curriculum', label: 'Curriculum' },
       { href: '/academic-setup/syllabus', label: 'Syllabus' },
       { href: '/academic-setup/rooms', label: 'Rooms' },
@@ -195,6 +199,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/quizzes', label: 'Online Quizzes' },
       { href: '/live-classes', label: 'Live Classes' },
       { href: '/hifz', label: 'Hifz & Quran' },
+      { href: '/hifz/progress', label: 'Hifz Progress Register' },
       { href: '/downloads', label: 'Download Centre' },
       { href: '/lesson-plans', label: 'Lesson Plans' },
       { href: '/syllabus-coverage', label: 'Syllabus Coverage' },
