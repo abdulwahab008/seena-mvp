@@ -362,6 +362,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/hostel/visitors', label: 'Visitors', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/hostel/mess', label: 'Mess Menu & Mess-off', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/hostel/fees', label: 'Hostel & Mess Fees', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/hostel/reports', label: 'Hostel Reports', roles: [...LEADERSHIP, 'accountant'] },
     ],
   },
   {
@@ -378,6 +379,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/assets', label: 'Asset Register', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets/custody', label: 'Asset Custody', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets/maintenance', label: 'Maintenance', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/assets/reports', label: 'Asset & Stock Reports', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/purchasing', label: 'Requisitions', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/purchasing/orders', label: 'Purchase Orders', roles: [...LEADERSHIP, 'accountant'] },
     ],
