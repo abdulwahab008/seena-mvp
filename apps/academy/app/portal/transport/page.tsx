@@ -4,6 +4,8 @@ import { t } from '@/lib/i18n/messages';
 import { loose, todayPk } from '@/lib/transport/rpc';
 import { PositionPanel } from './position-panel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SpecForm } from '@/components/spec-form';
+import { requestTransportChange } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +46,14 @@ export default async function PortalTransportPage() {
   const { data: live } = await supabase.from('transport_vehicle_position_latest').select('vehicle_id, lat, lng, speed_kmh, pinged_at');
   const hhmm = (v: string | null) => v?.slice(0, 5) ?? '-';
   const stopName = (s: Stop) => (lang === 'ur' && s.stop_name_ur ? s.stop_name_ur : s.stop_name);
+  const typed = await supabaseServer();
+  const [{ data: children }, { data: requests }] = await Promise.all([
+    typed.from('student').select('id, name_en, name_ur').is('deleted_at', null).order('name_en'),
+    typed.from('transport_request').select('id, kind, status, decision_note, created_at, student:student_id(name_en, name_ur)').order('created_at', { ascending: false }).limit(10),
+  ]);
+  const kindLabel = { start: t(lang, 'transport.request.start'), stop: t(lang, 'transport.request.stop'), change_route: t(lang, 'transport.request.changeRoute'), change_stop: t(lang, 'transport.request.changeStop') } as const;
+  const statusLabel = { pending: t(lang, 'transport.request.pending'), approved: t(lang, 'transport.request.approved'), rejected: t(lang, 'transport.request.rejected') } as const;
+  const childName = (c: { name_en: string; name_ur: string | null } | null) => (lang === 'ur' && c?.name_ur ? c.name_ur : (c?.name_en ?? ''));
 
   return (
     <div className="space-y-6">
@@ -96,6 +106,39 @@ export default async function PortalTransportPage() {
           </Card>
         );
       })}
+      {(children ?? []).length > 0 && (
+        <Card data-testid="transport-request-card">
+          <CardHeader>
+            <CardTitle className="text-base">{t(lang, 'transport.request.title')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <SpecForm
+              testId="transport-request-form"
+              submitLabel={t(lang, 'transport.request.submit')}
+              action={requestTransportChange}
+              columns={3}
+              fields={[
+                { name: 'studentId', label: t(lang, 'transport.request.child'), type: 'select', required: true, defaultValue: children?.[0]?.id, options: (children ?? []).map((c) => ({ value: c.id, label: childName(c) })) },
+                { name: 'kind', label: t(lang, 'transport.request.kind'), type: 'select', required: true, options: Object.entries(kindLabel).map(([value, label]) => ({ value, label })) },
+                { name: 'note', label: t(lang, 'transport.request.note') },
+              ]}
+            />
+            {(requests ?? []).length > 0 && (
+              <div className="space-y-1">
+                <p className="font-medium">{t(lang, 'transport.request.mine')}</p>
+                <ul className="space-y-1" data-testid="my-transport-requests">
+                  {(requests ?? []).map((r) => (
+                    <li key={r.id}>
+                      {childName(one(r.student))} · {kindLabel[r.kind as keyof typeof kindLabel] ?? r.kind} · {statusLabel[r.status as keyof typeof statusLabel] ?? r.status}
+                      {r.decision_note ? ` · ${r.decision_note}` : ''}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

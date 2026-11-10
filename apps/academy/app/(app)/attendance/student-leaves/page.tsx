@@ -3,7 +3,8 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { formatDatePk } from '@/lib/dates';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DecideButtons } from './decide-buttons';
+import { DecideButtons } from '@/components/decide-buttons';
+import { decideStudentLeave } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +80,7 @@ export default async function StudentLeavesPage({ searchParams }: { searchParams
                   <TableCell>
                     <Badge variant={STATUS_TONE[l.status]}>{l.status}</Badge>
                   </TableCell>
-                  <TableCell>{l.status === 'pending' ? <DecideButtons id={l.id} /> : (l.decision_note ?? '')}</TableCell>
+                  <TableCell>{l.status === 'pending' ? <DecideButtons id={l.id} action={decideStudentLeave} approvedText="Leave approved." rejectedText="Leave rejected." /> : (l.decision_note ?? '')}</TableCell>
                 </TableRow>
               );
             })}
