@@ -24,8 +24,9 @@ test('the failure list shows students who failed a subject with their marks', as
     { ...base, enrolment_id: challans[1]!.enrolment_id, obtained: 77, pct: 77, is_pass: true },
   ]);
   expect(error).toBeNull();
-  const { data: failing } = await db.from('enrolment').select('student:student_id(name_en)').eq('id', challans[0]!.enrolment_id).single();
-  const failingName = failing!.student!.name_en;
+  const { data: failingEnrolment } = await db.from('enrolment').select('student_id').eq('id', challans[0]!.enrolment_id).single();
+  const { data: failingStudent } = await db.from('student').select('name_en').eq('id', failingEnrolment!.student_id).single();
+  const failingName: string = failingStudent!.name_en;
 
   await signInAs(page, email);
   await page.goto('/exams/failures');
