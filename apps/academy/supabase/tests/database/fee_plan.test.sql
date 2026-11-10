@@ -1,6 +1,6 @@
 -- pgTAP tests for FR-K04: per-student fee plan snapshot.
 begin;
-select plan(13);
+select plan(14);
 
 select public.provision_tenant('test-fee-plan-co', 'Fee Plan Co', 'owner@feeplanco.test');
 select id as tenant_id from public.tenant where slug = 'test-fee-plan-co' \gset
@@ -46,6 +46,11 @@ select public.create_draft_structure(:'campus_id'::uuid, :'session_id'::uuid) as
 select public.add_structure_line(:'structure_id'::uuid, :'class1_id'::uuid, :'tuition_id'::uuid, 500000::bigint, 'monthly'::public.fee_frequency) as tuition_line_id \gset
 select public.add_structure_line(:'structure_id'::uuid, :'class1_id'::uuid, :'transport_id'::uuid, 200000::bigint, 'monthly'::public.fee_frequency) as transport_line_id \gset
 select public.publish_fee_structure(:'structure_id'::uuid);
+select is(
+  (select count(*)::int from public.fee_plan where enrolment_id = :'enrolment0_id'),
+  1,
+  'publishing the structure builds the plan for the student who enrolled before it'
+);
 
 -- ── a student with no transport opt-in gets only the TUITION line ──────
 

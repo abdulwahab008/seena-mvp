@@ -24,8 +24,8 @@ select set_config(
 select public.set_class_level_active(id, false) from public.class_level where tenant_id = :'tenant_id' and code <> '1';
 select public.create_section(:'campus_id'::uuid, :'session_id'::uuid, :'class1_id'::uuid, 'A', 20) as section_id \gset
 
--- ── student a enrols before any fee structure exists — no fee_plan ever
---    gets built for it, which is exactly the NO_FEE_PLAN case ───────────
+-- ── student a enrols before any fee structure exists; publishing builds its plan, which is then removed
+--    below to exercise the NO_FEE_PLAN case ───────────
 
 select public.create_student(:'campus_id'::uuid, 'Student A NoPlan', '2015-01-01'::date, 'male') as student_a_id \gset
 select public.enrol_student(:'section_id'::uuid, :'student_a_id'::uuid) as enrol_a_id \gset
@@ -37,6 +37,9 @@ select id as tuition_id from public.fee_head where tenant_id = :'tenant_id' and 
 select public.create_draft_structure(:'campus_id'::uuid, :'session_id'::uuid) as structure_id \gset
 select public.add_structure_line(:'structure_id'::uuid, :'class1_id'::uuid, :'tuition_id'::uuid, 500000::bigint, 'monthly'::public.fee_frequency) as tuition_line_id \gset
 select public.publish_fee_structure(:'structure_id'::uuid);
+reset role;
+delete from public.fee_plan where enrolment_id = :'enrol_a_id';
+set local role authenticated;
 
 select public.create_concession_scheme(
   'SIB20', 'Sibling 20%', 'بہن بھائی 20%', 'percentage', 20, array[:'tuition_id']::uuid[], p_approver_role => 'principal'
