@@ -237,6 +237,16 @@ describe('createStudentSchema', () => {
   it('rejects an invalid gender value', () => {
     expect(createStudentSchema.safeParse({ ...base, gender: 'unknown' }).success).toBe(false);
   });
+
+  it('accepts a B-Form of 13 digits with or without dashes, or none', () => {
+    expect(createStudentSchema.safeParse({ ...base, bFormNo: '3520212345678' }).success).toBe(true);
+    expect(createStudentSchema.safeParse({ ...base, bFormNo: '35202-1234567-8' }).success).toBe(true);
+    expect(createStudentSchema.safeParse({ ...base, bFormNo: '' }).success).toBe(true);
+  });
+
+  it('rejects a B-Form that does not have 13 digits', () => {
+    expect(createStudentSchema.safeParse({ ...base, bFormNo: '123abc' }).success).toBe(false);
+  });
 });
 
 describe('issueOfferSchema', () => {
