@@ -199,6 +199,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/quizzes', label: 'Online Quizzes' },
       { href: '/live-classes', label: 'Live Classes' },
       { href: '/hifz', label: 'Hifz & Quran' },
+      { href: '/hifz/progress', label: 'Hifz Progress Register' },
       { href: '/downloads', label: 'Download Centre' },
       { href: '/lesson-plans', label: 'Lesson Plans' },
       { href: '/syllabus-coverage', label: 'Syllabus Coverage' },
