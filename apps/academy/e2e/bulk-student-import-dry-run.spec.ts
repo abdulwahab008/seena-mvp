@@ -5,17 +5,17 @@ import { randomUUID } from 'node:crypto';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-const HEADER = 'gr_number,name_en,name_ur,father_name_en,father_name_ur,dob,gender,class,b_form_no,religion,nationality,blood_group';
+const HEADER = 'gr_number,name_en,name_ur,father_name_en,father_name_ur,dob,gender,class,b_form_no,religion,nationality,blood_group,father_phone';
 
 // Row 2 is clean; row 3 has no B-Form (warning, still importable); row 4
 // names a class that is not configured; rows 5 and 6 share a GR number.
 const REGISTER_CSV = [
   HEADER,
-  ',Ayesha Khan,,Imran Khan,,2016-04-12,female,1,42101-0000001-1,,PK,',
-  ',Bilal Ahmed,,Imran Khan,,2016-05-12,male,2,,,PK,',
-  ',Sana Malik,,Imran Khan,,2016-06-12,female,Class One,42101-0000002-1,,PK,',
-  'PAPER-7,Hassan Ali,,Imran Khan,,2016-07-12,male,3,42101-0000003-1,,PK,',
-  'PAPER-7,Zoya Ali,,Imran Khan,,2016-08-12,female,4,42101-0000004-1,,PK,',
+  ',Ayesha Khan,,Imran Khan,,2016-04-12,female,1,42101-0000001-1,,PK,,0300 1234567',
+  ',Bilal Ahmed,,Imran Khan,,2016-05-12,male,2,,,PK,,0300 1234567',
+  ',Sana Malik,,Imran Khan,,2016-06-12,female,Class One,42101-0000002-1,,PK,,0300 1234567',
+  'PAPER-7,Hassan Ali,,Imran Khan,,2016-07-12,male,3,42101-0000003-1,,PK,,0300 1234567',
+  'PAPER-7,Zoya Ali,,Imran Khan,,2016-08-12,female,4,42101-0000004-1,,PK,,0300 1234567',
   '',
 ].join('\n');
 
@@ -72,7 +72,7 @@ test('a principal validates a register as a dry run and sees every blocked row w
   await expect(templateLink).toBeVisible();
   const templateResponse = await page.request.get((await templateLink.getAttribute('href'))!);
   expect(templateResponse.ok()).toBe(true);
-  expect(await templateResponse.text()).toContain('gr_number,name_en');
+  expect(await templateResponse.text()).toContain('name_en,father_name_en');
 
   // Nothing was staged: a rejected header never reaches the database.
   const { count: batchesAfterReject } = await admin

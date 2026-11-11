@@ -45,9 +45,14 @@ export type NavItem = {
   roles?: readonly string[];
 };
 
+export const NAV_GROUPS = ['Students', 'Teaching', 'Exams', 'Finance', 'People', 'Campus', 'Administration'] as const;
+export type NavGroup = (typeof NAV_GROUPS)[number];
+
 export type NavSection = {
   id: string;
   label: string;
+  /** Heading the sidebar shows above the first section of each group; absent for the top items. */
+  group?: NavGroup;
   icon: LucideIcon;
   items: NavItem[];
 };
@@ -69,8 +74,8 @@ const ACADEMIC_LEADS = [...LEADERSHIP, 'head_of_department', 'hr_manager'] as co
 const FEES_ADMISSIONS_ROLES = [...FEE_STAFF_ROLES, 'admissions_officer'] as const;
 
 /**
- * The app's information architecture. Sections mirror how a school is actually
- * run (admissions -> students -> academics -> attendance -> exams -> money),
+ * The app's information architecture. Sections are grouped the way a school is run
+ * (students -> teaching -> exams -> money -> people -> campus -> administration),
  * not the order the features happened to be built in.
  *
  * Every entry here points at a route that exists. Nothing aspirational.
@@ -99,6 +104,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: 'admissions',
+    group: 'Students',
     label: 'Admissions',
     icon: ClipboardCheck,
     items: [
@@ -115,6 +121,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: 'students',
+    group: 'Students',
     label: 'Students',
     icon: Users,
     items: [
@@ -132,6 +139,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/students/vaccinations', label: 'Vaccinations', roles: [...LEADERSHIP, 'nurse'] },
       { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
       { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
+      { href: '/id-cards', label: 'Student & Staff ID Cards', roles: [...FRONT_OFFICE, 'hr_manager'] },
       { href: '/students/promotion', label: 'Promotion', roles: [...LEADERSHIP, 'exam_controller'] },
       { href: '/students/recycle-bin', label: 'Recycle Bin', roles: FRONT_OFFICE },
       { href: '/consent', label: 'Consent' },
@@ -140,55 +148,26 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    id: 'staff',
-    label: 'Staff',
-    icon: UserCog,
+    id: 'certificates',
+    group: 'Students',
+    label: 'Certificates',
+    icon: Award,
     items: [
-      { href: '/staff', label: 'All Staff', roles: HR_ROLES },
-      { href: '/staff/directory', label: 'Directory' },
-      { href: '/staff/reports', label: 'Staff Reports', roles: HR_ROLES },
-      { href: '/staff/org-chart', label: 'Org Chart' },
-      { href: '/staff/departments', label: 'Departments', roles: HR_ROLES },
-      { href: '/staff/qualifications', label: 'Qualifications', roles: HR_ROLES },
-      { href: '/staff/compliance', label: 'Compliance', roles: HR_ROLES },
-      { href: '/staff/biometric', label: 'Biometric Attendance', roles: HR_ROLES },
-      { href: '/staff/discipline', label: 'Disciplinary', roles: HR_ROLES },
-      { href: '/staff/exits', label: 'Exits', roles: HR_ROLES },
-      { href: '/staff/certificates', label: 'Certificates', roles: HR_ROLES },
-      { href: '/id-cards', label: 'ID Cards', roles: [...FRONT_OFFICE, 'hr_manager'] },
-      { href: '/staff/workload', label: 'Teacher Workload', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
-      { href: '/staff/recruitment', label: 'Recruitment', roles: HR_ROLES },
-      { href: '/staff/hr-dashboard', label: 'HR Dashboard', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'hr_manager'] },
-      { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
-      { href: '/staff/training', label: 'Training & CPD', roles: SCHOOL_ADMIN_HR },
-      { href: '/staff/grievances', label: 'Grievances' },
-      { href: '/staff/remarks', label: 'Remarks Moderation', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
-      { href: '/staff/tickets', label: 'Support Tickets' },
-      { href: '/leave', label: 'Leave' },
-      { href: '/academic-setup/competency', label: 'Teacher Competency', roles: ACADEMIC_LEADS },
-      { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects', roles: ACADEMIC_LEADS },
-      { href: '/academic-setup/curriculum-reports', label: 'Curriculum Reports', roles: ACADEMIC_LEADS },
-    ],
-  },
-  {
-    id: 'payroll',
-    label: 'Payroll',
-    icon: Banknote,
-    items: [
-      { href: '/payroll/runs', label: 'Payroll Runs', roles: PAYROLL_ROLES },
-      { href: '/payroll/components', label: 'Salary Components', roles: PAYROLL_ROLES },
-      { href: '/payroll/structures', label: 'Salary Structures', roles: PAYROLL_ROLES },
-      { href: '/payroll/pay-scales', label: 'Pay Scales', roles: PAYROLL_ROLES },
-      { href: '/payroll/reports', label: 'Payroll Reports', roles: PAYROLL_ROLES },
-      { href: '/payroll/loans', label: 'Staff Loans', roles: PAYROLL_ROLES },
-      { href: '/payroll/security-deposits', label: 'Security Deposits', roles: PAYROLL_ROLES },
-      { href: '/payroll/tax-slabs', label: 'Tax Slabs', roles: PAYROLL_ROLES },
-      { href: '/payroll/statutory', label: 'Statutory Report', roles: PAYROLL_ROLES },
-      { href: '/payroll/gratuity', label: 'Gratuity & Provident Fund', roles: ['super_admin', 'owner', 'hr_manager', 'accountant'] },
+      { href: '/certificates/issue', label: 'Issue Transfer Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/issue/character', label: 'Issue Character Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/issue/leaving', label: 'Issue Leaving Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/requests', label: 'Bonafide Requests', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/verification', label: 'Verification Activity', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/register', label: 'Register', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/templates', label: 'Templates', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/serials', label: 'Serial Numbers', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/signing', label: 'Signing Identities', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      { href: '/certificates/board-export', label: 'Board Registration Export', roles: [...FRONT_OFFICE, 'exam_controller'] },
     ],
   },
   {
     id: 'academics',
+    group: 'Teaching',
     label: 'Academics',
     icon: BookOpen,
     items: [
@@ -208,10 +187,14 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/syllabus-coverage', label: 'Syllabus Coverage' },
       { href: '/syllabus-variance', label: 'Syllabus Variance' },
       { href: '/academic-setup/rollover', label: 'Session Rollover' },
+      { href: '/academic-setup/competency', label: 'Teacher Competency', roles: ACADEMIC_LEADS },
+      { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects', roles: ACADEMIC_LEADS },
+      { href: '/academic-setup/curriculum-reports', label: 'Curriculum Reports', roles: ACADEMIC_LEADS },
     ],
   },
   {
     id: 'timetable',
+    group: 'Teaching',
     label: 'Timetable',
     icon: CalendarClock,
     items: [
@@ -225,6 +208,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: 'attendance',
+    group: 'Teaching',
     label: 'Attendance',
     icon: BadgeCheck,
     items: [
@@ -243,6 +227,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: 'exams',
+    group: 'Exams',
     label: 'Examinations',
     icon: GraduationCap,
     items: [
@@ -264,6 +249,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: 'results',
+    group: 'Exams',
     label: 'Results',
     icon: FileBarChart,
     items: [
@@ -286,6 +272,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: 'fees',
+    group: 'Finance',
     label: 'Fees',
     icon: Wallet,
     items: [
@@ -314,6 +301,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: 'accounts',
+    group: 'Finance',
     label: 'Accounts',
     icon: Landmark,
     items: [
@@ -325,6 +313,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     id: 'expenses',
+    group: 'Finance',
     label: 'Expenses',
     icon: Receipt,
     items: [
@@ -335,87 +324,54 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    id: 'transport',
-    label: 'Transport',
-    icon: Bus,
+    id: 'payroll',
+    group: 'Finance',
+    label: 'Payroll',
+    icon: Banknote,
     items: [
-      { href: '/transport/dashboard', label: 'Transport Dashboard', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
-      { href: '/transport/routes', label: 'Routes & Fares', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
-      { href: '/transport/fleet', label: 'Fleet & Documents', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
-      { href: '/transport/crew', label: 'Drivers & Crew', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
-      { href: '/transport/assignments', label: 'Assignments', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
-      { href: '/transport/allocations', label: 'Student Allocation', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
-      { href: '/transport/requests', label: 'Parent Requests', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager'] },
-      { href: '/transport/report', label: 'Transport Reports', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
-      { href: '/transport/boarding', label: 'Boarding', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
-      { href: '/transport/live', label: 'Live Tracking', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/payroll/runs', label: 'Payroll Runs', roles: PAYROLL_ROLES },
+      { href: '/payroll/components', label: 'Salary Components', roles: PAYROLL_ROLES },
+      { href: '/payroll/structures', label: 'Salary Structures', roles: PAYROLL_ROLES },
+      { href: '/payroll/pay-scales', label: 'Pay Scales', roles: PAYROLL_ROLES },
+      { href: '/payroll/reports', label: 'Payroll Reports', roles: PAYROLL_ROLES },
+      { href: '/payroll/loans', label: 'Staff Loans', roles: PAYROLL_ROLES },
+      { href: '/payroll/security-deposits', label: 'Security Deposits', roles: PAYROLL_ROLES },
+      { href: '/payroll/tax-slabs', label: 'Tax Slabs', roles: PAYROLL_ROLES },
+      { href: '/payroll/statutory', label: 'Statutory Report', roles: PAYROLL_ROLES },
+      { href: '/payroll/gratuity', label: 'Gratuity & Provident Fund', roles: ['super_admin', 'owner', 'hr_manager', 'accountant'] },
     ],
   },
   {
-    id: 'hostel',
-    label: 'Hostel',
-    icon: BedDouble,
+    id: 'staff',
+    group: 'People',
+    label: 'Staff',
+    icon: UserCog,
     items: [
-      { href: '/hostel', label: 'Blocks & Beds', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/hostel/allocations', label: 'Bed Allocation', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/hostel/roll-call', label: 'Roll Call', roles: LEADERSHIP },
-      { href: '/hostel/gate-passes', label: 'Gate Passes', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/hostel/visitors', label: 'Visitors', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/hostel/mess', label: 'Mess Menu & Mess-off', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/hostel/fees', label: 'Hostel & Mess Fees', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/hostel/reports', label: 'Hostel Reports', roles: [...LEADERSHIP, 'accountant'] },
-    ],
-  },
-  {
-    id: 'inventory',
-    label: 'Stores & Assets',
-    icon: Boxes,
-    items: [
-      { href: '/inventory/dashboard', label: 'Shop Dashboard', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory', label: 'Stores and Stock', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory/sales', label: 'Counter Sales', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory/sales-report', label: 'Sales Report', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory/dues', label: 'Shop Dues', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory/movements', label: 'Stock Movements', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory/profit', label: 'Shop Profit', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/assets', label: 'Asset Register', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/assets/custody', label: 'Asset Custody', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/assets/maintenance', label: 'Maintenance', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/assets/reports', label: 'Asset & Stock Reports', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/purchasing', label: 'Requisitions', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/purchasing/orders', label: 'Purchase Orders', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/purchasing/suppliers', label: 'Supplier Report', roles: [...LEADERSHIP, 'accountant'] },
-    ],
-  },
-  {
-    id: 'certificates',
-    label: 'Certificates',
-    icon: Award,
-    items: [
-      { href: '/certificates/issue', label: 'Issue Transfer Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/issue/character', label: 'Issue Character Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/issue/leaving', label: 'Issue Leaving Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/requests', label: 'Bonafide Requests', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/verification', label: 'Verification Activity', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/register', label: 'Register', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/templates', label: 'Templates', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/serials', label: 'Serial Numbers', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/signing', label: 'Signing Identities', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/board-export', label: 'Board Registration Export', roles: [...FRONT_OFFICE, 'exam_controller'] },
-    ],
-  },
-  {
-    id: 'compliance',
-    label: 'Compliance',
-    icon: ShieldCheck,
-    items: [
-      { href: '/audit-export', label: 'Audit Trail Export', roles: SCHOOL_ADMIN },
-      { href: '/compliance/census', label: 'Census & EMIS Returns', roles: SCHOOL_ADMIN },
-      { href: '/impersonation', label: 'Support Access', roles: SCHOOL_ADMIN },
+      { href: '/staff', label: 'All Staff', roles: HR_ROLES },
+      { href: '/staff/directory', label: 'Directory' },
+      { href: '/staff/reports', label: 'Staff Reports', roles: HR_ROLES },
+      { href: '/staff/org-chart', label: 'Org Chart' },
+      { href: '/staff/departments', label: 'Departments', roles: HR_ROLES },
+      { href: '/staff/qualifications', label: 'Qualifications', roles: HR_ROLES },
+      { href: '/staff/compliance', label: 'Compliance', roles: HR_ROLES },
+      { href: '/staff/biometric', label: 'Biometric Attendance', roles: HR_ROLES },
+      { href: '/staff/discipline', label: 'Disciplinary', roles: HR_ROLES },
+      { href: '/staff/exits', label: 'Exits', roles: HR_ROLES },
+      { href: '/staff/certificates', label: 'Certificates', roles: HR_ROLES },
+      { href: '/staff/workload', label: 'Teacher Workload', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
+      { href: '/staff/recruitment', label: 'Recruitment', roles: HR_ROLES },
+      { href: '/staff/hr-dashboard', label: 'HR Dashboard', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'hr_manager'] },
+      { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
+      { href: '/staff/training', label: 'Training & CPD', roles: SCHOOL_ADMIN_HR },
+      { href: '/staff/grievances', label: 'Grievances' },
+      { href: '/staff/remarks', label: 'Remarks Moderation', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
+      { href: '/staff/tickets', label: 'Support Tickets' },
+      { href: '/leave', label: 'Leave' },
     ],
   },
   {
     id: 'communication',
+    group: 'People',
     label: 'Communication',
     icon: MessageSquare,
     items: [
@@ -437,7 +393,42 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: 'transport',
+    group: 'Campus',
+    label: 'Transport',
+    icon: Bus,
+    items: [
+      { href: '/transport/dashboard', label: 'Transport Dashboard', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/transport/routes', label: 'Routes & Fares', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/transport/fleet', label: 'Fleet & Documents', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/transport/crew', label: 'Drivers & Crew', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/transport/assignments', label: 'Assignments', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/transport/allocations', label: 'Student Allocation', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/transport/requests', label: 'Parent Requests', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager'] },
+      { href: '/transport/report', label: 'Transport Reports', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/transport/boarding', label: 'Boarding', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+      { href: '/transport/live', label: 'Live Tracking', feature: 'module.transport', roles: [...LEADERSHIP, 'transport_manager', 'accountant'] },
+    ],
+  },
+  {
+    id: 'hostel',
+    group: 'Campus',
+    label: 'Hostel',
+    icon: BedDouble,
+    items: [
+      { href: '/hostel', label: 'Blocks & Beds', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/hostel/allocations', label: 'Bed Allocation', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/hostel/roll-call', label: 'Roll Call', roles: LEADERSHIP },
+      { href: '/hostel/gate-passes', label: 'Gate Passes', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/hostel/visitors', label: 'Visitors', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/hostel/mess', label: 'Mess Menu & Mess-off', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/hostel/fees', label: 'Hostel & Mess Fees', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/hostel/reports', label: 'Hostel Reports', roles: [...LEADERSHIP, 'accountant'] },
+    ],
+  },
+  {
     id: 'library',
+    group: 'Campus',
     label: 'Library',
     icon: Library,
     items: [
@@ -454,7 +445,54 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: 'inventory',
+    group: 'Campus',
+    label: 'Stores & Assets',
+    icon: Boxes,
+    items: [
+      { href: '/inventory/dashboard', label: 'Shop Dashboard', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/inventory', label: 'Stores and Stock', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/inventory/sales', label: 'Counter Sales', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/inventory/sales-report', label: 'Sales Report', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/inventory/dues', label: 'Shop Dues', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/inventory/movements', label: 'Stock Movements', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/inventory/profit', label: 'Shop Profit', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/assets', label: 'Asset Register', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/assets/custody', label: 'Asset Custody', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/assets/maintenance', label: 'Maintenance', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/assets/reports', label: 'Asset & Stock Reports', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/purchasing', label: 'Requisitions', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/purchasing/orders', label: 'Purchase Orders', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/purchasing/suppliers', label: 'Supplier Report', roles: [...LEADERSHIP, 'accountant'] },
+    ],
+  },
+  {
+    id: 'reports',
+    group: 'Administration',
+    label: 'Reports',
+    icon: FileBarChart,
+    items: [
+      { href: '/reports/exports', label: 'Excel Exports', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/reports/audit', label: 'Export Audit', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/reports/digests', label: 'Scheduled Digests', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/reports/year-on-year', label: 'Year on Year', roles: [...LEADERSHIP, 'accountant'] },
+      { href: '/reports/builder', label: 'Report Builder', roles: [...LEADERSHIP, 'accountant'] },
+    ],
+  },
+  {
+    id: 'compliance',
+    group: 'Administration',
+    label: 'Compliance',
+    icon: ShieldCheck,
+    items: [
+      { href: '/audit-export', label: 'Audit Trail Export', roles: SCHOOL_ADMIN },
+      { href: '/compliance/census', label: 'Census & EMIS Returns', roles: SCHOOL_ADMIN },
+      { href: '/impersonation', label: 'Support Access', roles: SCHOOL_ADMIN },
+    ],
+  },
+  {
     id: 'settings',
+    group: 'Administration',
     label: 'Settings',
     icon: Building2,
     items: [
@@ -467,18 +505,6 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/settings/data-export', label: 'Export School Data', roles: SCHOOL_ADMIN },
       { href: '/settings/student-lists', label: 'Student Lists', roles: [...SCHOOL_ADMIN, 'admissions_officer'] },
       { href: '/settings/retention', label: 'Data Retention', roles: SCHOOL_ADMIN },
-    ],
-  },
-  {
-    id: 'reports',
-    label: 'Reports',
-    icon: FileBarChart,
-    items: [
-      { href: '/reports/exports', label: 'Excel Exports', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/reports/audit', label: 'Export Audit', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/reports/digests', label: 'Scheduled Digests', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/reports/year-on-year', label: 'Year on Year', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/reports/builder', label: 'Report Builder', roles: [...LEADERSHIP, 'accountant'] },
     ],
   },
 ];

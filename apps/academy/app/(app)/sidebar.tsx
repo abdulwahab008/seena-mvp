@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import { BrandMark } from '@/components/brand';
 import { cn } from '@/lib/utils';
 import { NAV_SECTIONS, findActiveItem, navSectionsForRole, type NavSection } from '@/lib/navigation';
@@ -131,6 +131,13 @@ export function SidebarContent({
   const pathname = usePathname();
   const forRole = navSectionsForRole(NAV_SECTIONS, role);
   const sections = features ? visibleNavSections(forRole, features) : forRole;
+  const [query, setQuery] = React.useState('');
+  const q = query.trim().toLowerCase();
+  const matches = q
+    ? sections.flatMap((s) =>
+        s.items.filter((i) => i.label.toLowerCase().includes(q) || s.label.toLowerCase().includes(q)).map((i) => ({ ...i, section: s.label })),
+      )
+    : [];
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
@@ -147,10 +154,53 @@ export function SidebarContent({
         </div>
       </div>
 
-      <nav aria-label="Main" className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {sections.map((section) => (
-          <SectionGroup key={section.id} section={section} pathname={pathname} onNavigate={onNavigate} />
-        ))}
+      <div className="px-3 pt-3">
+        <label className="relative block">
+          <span className="sr-only">Search the menu</span>
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sidebar-muted" aria-hidden />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search the menu"
+            className="w-full rounded-md border border-sidebar-border bg-transparent py-1.5 pl-8 pr-2 text-sm text-white placeholder:text-sidebar-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-accent"
+          />
+        </label>
+      </div>
+
+      <nav aria-label="Main" className="flex-1 space-y-1 overflow-y-auto px-3 py-3">
+        {q ? (
+          matches.length ? (
+            <ul className="space-y-0.5">
+              {matches.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => {
+                      setQuery('');
+                      onNavigate?.();
+                    }}
+                    className="block rounded-md px-3 py-1.5 text-sm text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-white"
+                  >
+                    {item.label}
+                    <span className="block text-xs text-sidebar-muted">{item.section}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="px-3 py-2 text-sm text-sidebar-muted">Nothing matches “{query.trim()}”.</p>
+          )
+        ) : (
+          sections.map((section, i) => (
+            <React.Fragment key={section.id}>
+              {section.group && section.group !== sections[i - 1]?.group ? (
+                <p className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-sidebar-muted">{section.group}</p>
+              ) : null}
+              <SectionGroup section={section} pathname={pathname} onNavigate={onNavigate} />
+            </React.Fragment>
+          ))
+        )}
       </nav>
     </div>
   );

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MAX_IMPORT_FILE_SIZE } from '@/lib/student-import';
+import { MAX_IMPORT_FILE_SIZE, OPTIONAL_IMPORT_COLUMNS, REQUIRED_IMPORT_COLUMNS } from '@/lib/student-import';
 import { validateStudentImport } from './actions';
 
 export type CampusChoice = { id: string; code: string; name: string };
@@ -94,6 +94,17 @@ export function ImportForm({ campuses, sessions }: { campuses: CampusChoice[]; s
         <a href="/students/import/template" className="text-sm underline" download data-testid="import-template-link">
           Download the template
         </a>
+      </div>
+
+      <div className="space-y-1 text-sm" data-testid="import-columns">
+        <p>
+          <span className="font-medium">Required:</span> <span className="font-mono text-xs">{REQUIRED_IMPORT_COLUMNS.join(', ')}</span>
+        </p>
+        <p className="text-muted-foreground">
+          <span className="font-medium">Optional:</span> <span className="font-mono text-xs">{OPTIONAL_IMPORT_COLUMNS.join(', ')}</span>. A blank
+          section places the student in the least-filled section of the class. The father&apos;s CNIC links siblings for
+          the sibling discount; the phone is used for fee and absence messages.
+        </p>
       </div>
 
       {error && (
