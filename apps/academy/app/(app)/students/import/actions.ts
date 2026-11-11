@@ -49,8 +49,11 @@ export async function validateStudentImport(_prev: ValidateImportState, formData
   if (rows.length === 0) return { error: 'That file has a header but no rows to import.', batchId: null };
 
   const supabase = await supabaseServer();
-  const { data: classes } = await supabase.from('class_level').select('id, code, name_en').eq('is_active', true).order('ordinal');
-  const validated = validateStudentImportRows(rows, (classes ?? []) as ClassOption[]);
+  const [{ data: classes }, { data: sections }] = await Promise.all([
+    supabase.from('class_level').select('id, code, name_en').eq('is_active', true).order('ordinal'),
+    supabase.from('class_section').select('id, class_level_id, name').eq('campus_id', campusId).eq('session_id', sessionId).eq('is_active', true),
+  ]);
+  const validated = validateStudentImportRows(rows, (classes ?? []) as ClassOption[], new Date(), sections ?? []);
 
   const { data: batch, error: batchError } = await supabase.rpc('create_import_batch', {
     p_campus_id: campusId,

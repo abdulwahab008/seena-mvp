@@ -15,20 +15,21 @@
 // The database is the gate; these are what make the dry-run report useful
 // before anything reaches it.
 
-export const STUDENT_IMPORT_COLUMNS = [
+// Required columns must be in the file and filled on every row; optional ones may be left out entirely.
+export const REQUIRED_IMPORT_COLUMNS = ['name_en', 'father_name_en', 'dob', 'gender', 'class'] as const;
+export const OPTIONAL_IMPORT_COLUMNS = [
   'gr_number',
-  'name_en',
+  'section',
+  'father_cnic',
+  'father_phone',
   'name_ur',
-  'father_name_en',
   'father_name_ur',
-  'dob',
-  'gender',
-  'class',
   'b_form_no',
   'religion',
   'nationality',
   'blood_group',
 ] as const;
+export const STUDENT_IMPORT_COLUMNS = [...REQUIRED_IMPORT_COLUMNS, ...OPTIONAL_IMPORT_COLUMNS] as const;
 
 export type StudentImportColumn = (typeof STUDENT_IMPORT_COLUMNS)[number];
 
@@ -59,6 +60,9 @@ export type NormalisedStudentRow = {
   dob: string | null;
   gender: string | null;
   class_level_id: string | null;
+  section_id: string | null;
+  father_cnic: string | null;
+  father_phone: string | null;
   b_form_no: string | null;
   religion: string | null;
   nationality: string | null;
@@ -72,6 +76,7 @@ export type ValidatedImportRow = RawImportRow & {
 };
 
 export type ClassOption = { id: string; code: string; name_en: string };
+export type SectionOption = { id: string; class_level_id: string; name: string };
 
 // ── parsing ──────────────────────────────────────────────────────────────
 
@@ -135,7 +140,7 @@ export function validateImportHeader(cells: string[]): HeaderCheckResult {
   const seen = cells.map(normaliseHeaderCell).filter((c) => c.length > 0);
   const expected = new Set<string>(STUDENT_IMPORT_COLUMNS);
 
-  const missing = STUDENT_IMPORT_COLUMNS.filter((c) => !seen.includes(c));
+  const missing = REQUIRED_IMPORT_COLUMNS.filter((c) => !seen.includes(c));
   const unexpected = [...new Set(seen.filter((c) => !expected.has(c)))];
   const duplicated = [...new Set(seen.filter((c, i) => seen.indexOf(c) !== i))];
 
@@ -153,7 +158,7 @@ export function validateImportHeader(cells: string[]): HeaderCheckResult {
     missing,
     unexpected,
     duplicated,
-    message: `This file's columns do not match the student import template (${parts.join('; ')}). Download the template, copy your data into it, and upload again.`,
+    message: `This file's columns do not match the student import template (${parts.join('; ')}). Required: ${REQUIRED_IMPORT_COLUMNS.join(', ')}. Optional: ${OPTIONAL_IMPORT_COLUMNS.join(', ')}. Download the template, copy your data into it, and upload again.`,
   };
 }
 
@@ -227,6 +232,15 @@ function parseIsoDate(value: string): Date | null {
   return dt;
 }
 
+/** +92 form of a Pakistani mobile number, or null; the same forms import_guardian_contacts() accepts. */
+export function toPkMobile(value: string): string | null {
+  const d = value.replace(/[^0-9]/g, '');
+  if (/^923\d{9}$/.test(d)) return `+${d}`;
+  if (/^03\d{9}$/.test(d)) return `+92${d.slice(1)}`;
+  if (/^3\d{9}$/.test(d)) return `+92${d}`;
+  return null;
+}
+
 function severityOf(errors: ImportIssue[]): ImportRowSeverity {
   if (errors.some((e) => e.severity === 'error')) return 'error';
   if (errors.some((e) => e.severity === 'warning')) return 'warning';
@@ -242,6 +256,7 @@ export function validateStudentImportRows(
   rows: RawImportRow[],
   classes: ClassOption[],
   today: Date = new Date(),
+  sections: SectionOption[] = [],
 ): ValidatedImportRow[] {
   const classChoices = formatClassChoices(classes);
   const classByKey = new Map<string, ClassOption>();
@@ -261,6 +276,10 @@ export function validateStudentImportRows(
     const nameEn = get('name_en');
     if (nameEn === '') {
       errors.push({ column: 'name_en', code: 'REQUIRED', severity: 'error', message: 'Student name is required.' });
+    }
+
+    if (get('father_name_en') === '') {
+      errors.push({ column: 'father_name_en', code: 'REQUIRED', severity: 'error', message: "Father's name is required." });
     }
 
     const dobRaw = get('dob');
@@ -329,6 +348,47 @@ export function validateStudentImportRows(
       } else classLevelId = match.id;
     }
 
+    const sectionRaw = get('section');
+    let sectionId: string | null = null;
+    if (sectionRaw !== '' && classLevelId) {
+      const ofClass = sections.filter((s) => s.class_level_id === classLevelId);
+      const match = ofClass.find((s) => key(s.name) === key(sectionRaw));
+      if (match) sectionId = match.id;
+      else {
+        errors.push({
+          column: 'section',
+          code: 'UNKNOWN_SECTION',
+          severity: 'error',
+          message: ofClass.length
+            ? `Unknown section '${sectionRaw}' for class '${classRaw}' - expected one of ${ofClass.map((s) => s.name).join(', ')}, or leave it blank to place the student automatically.`
+            : `Class '${classRaw}' has no sections in this session - add them under Classes & Sections first.`,
+        });
+      }
+    }
+
+    const cnicRaw = get('father_cnic');
+    const cnicDigits = cnicRaw.replace(/[^0-9]/g, '');
+    let fatherCnic: string | null = null;
+    if (cnicRaw !== '') {
+      if (cnicDigits.length !== 13) {
+        errors.push({ column: 'father_cnic', code: 'CNIC_INVALID', severity: 'error', message: `'${cnicRaw}' is not a valid CNIC - it must have 13 digits, e.g. 35202-1234567-1.` });
+      } else fatherCnic = `${cnicDigits.slice(0, 5)}-${cnicDigits.slice(5, 12)}-${cnicDigits.slice(12)}`;
+    }
+
+    const phoneRaw = get('father_phone');
+    const fatherPhone = phoneRaw === '' ? null : toPkMobile(phoneRaw);
+    if (phoneRaw !== '' && !fatherPhone) {
+      errors.push({ column: 'father_phone', code: 'PHONE_INVALID', severity: 'error', message: `'${phoneRaw}' is not a Pakistani mobile number - e.g. 0300 1234567.` });
+    }
+    if (cnicRaw === '' && phoneRaw === '') {
+      errors.push({
+        column: 'father_cnic',
+        code: 'FATHER_CONTACT_MISSING',
+        severity: 'warning',
+        message: "No father's CNIC or phone - the student imports, but no parent is linked: no sibling discount, parent portal or SMS until one is added.",
+      });
+    }
+
     // AC: a missing B-Form number is a WARNING and the row stays
     // importable — it is only required downstream, at board registration.
     const bFormRaw = get('b_form_no');
@@ -363,6 +423,9 @@ export function validateStudentImportRows(
       dob,
       gender,
       class_level_id: classLevelId,
+      section_id: sectionId,
+      father_cnic: fatherCnic,
+      father_phone: fatherPhone,
       b_form_no: bForm,
       religion: orNull(get('religion')),
       nationality: orNull(get('nationality')) ?? 'PK',
@@ -476,19 +539,22 @@ export function buildFailureReportCsv(rows: FailureReportRow[]): string {
 }
 
 export function buildStudentImportTemplateCsv(): string {
-  const example = [
-    '', // gr_number — leave blank to have one allocated at commit
-    'Ayesha Khan',
-    '',
-    'Imran Khan',
-    '',
-    '2016-04-12',
-    'female',
-    '1',
-    '42101-1234567-8',
-    '',
-    'PK',
-    '',
-  ];
-  return `${STUDENT_IMPORT_COLUMNS.join(',')}\n${example.join(',')}\n`;
+  const example: Record<StudentImportColumn, string> = {
+    name_en: 'Ayesha Khan',
+    father_name_en: 'Imran Khan',
+    dob: '2016-04-12',
+    gender: 'female',
+    class: '1',
+    gr_number: '', // blank: one is allocated at commit
+    section: '', // blank: the least-filled section of the class
+    father_cnic: '42101-1234567-1',
+    father_phone: '0300 1234567',
+    name_ur: '',
+    father_name_ur: '',
+    b_form_no: '42101-1234567-8',
+    religion: '',
+    nationality: 'PK',
+    blood_group: '',
+  };
+  return `${STUDENT_IMPORT_COLUMNS.join(',')}\n${STUDENT_IMPORT_COLUMNS.map((c) => example[c]).join(',')}\n`;
 }

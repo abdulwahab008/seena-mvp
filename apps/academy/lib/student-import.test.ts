@@ -12,6 +12,7 @@ import {
   validateImportHeader,
   validateStudentImportRows,
   type ClassOption,
+  type SectionOption,
   type FailureReportRow,
   type ValidatedImportRow,
 } from './student-import';
@@ -26,6 +27,12 @@ const CLASSES: ClassOption[] = [
 
 const TODAY = new Date(Date.UTC(2026, 7, 13));
 
+const SECTIONS: SectionOption[] = [
+  { id: 's-1a', class_level_id: 'c-1', name: 'A' },
+  { id: 's-1b', class_level_id: 'c-1', name: 'B' },
+  { id: 's-2a', class_level_id: 'c-2', name: 'A' },
+];
+
 const HEADER = STUDENT_IMPORT_COLUMNS.join(',');
 
 function fileOf(...dataLines: string[]): string {
@@ -36,7 +43,7 @@ function validate(csv: string): ValidatedImportRow[] {
   const matrix = parseCsv(csv);
   const header = validateImportHeader(matrix[0]!);
   if (!header.ok) throw new Error(`unexpected header rejection: ${header.message}`);
-  return validateStudentImportRows(toRawRows(matrix, header.columns), CLASSES, TODAY);
+  return validateStudentImportRows(toRawRows(matrix, header.columns), CLASSES, TODAY, SECTIONS);
 }
 
 // A well-formed row: no GR (allocated at commit), valid class, valid
@@ -58,6 +65,7 @@ function goodRow(overrides: Partial<Record<string, string>> = {}): string {
     religion: '',
     nationality: 'PK',
     blood_group: '',
+    father_phone: '0300 1234567',
   };
   return STUDENT_IMPORT_COLUMNS.map((c) => ({ ...base, ...overrides })[c] ?? '').join(',');
 }
@@ -211,9 +219,56 @@ describe('validateStudentImportRows', () => {
     expect(row!.normalised.b_form_no).toBe('42101-1234567-8');
   });
 
-  it('requires a name, a date of birth and a gender', () => {
-    const [row] = validate(fileOf(goodRow({ name_en: '', dob: '', gender: '' })));
-    expect(row!.errors.map((e) => `${e.column}:${e.code}`).sort()).toEqual(['dob:REQUIRED', 'gender:REQUIRED', 'name_en:REQUIRED']);
+  it("requires a name, the father's name, a date of birth and a gender", () => {
+    const [row] = validate(fileOf(goodRow({ name_en: '', father_name_en: '', dob: '', gender: '' })));
+    expect(row!.errors.map((e) => `${e.column}:${e.code}`).sort()).toEqual([
+      'dob:REQUIRED',
+      'father_name_en:REQUIRED',
+      'gender:REQUIRED',
+      'name_en:REQUIRED',
+    ]);
+  });
+
+  it('accepts a file with only the required columns', () => {
+    const csv = 'name_en,father_name_en,dob,gender,class\nAyesha Khan,Imran Khan,2016-04-12,female,1\n';
+    const matrix = parseCsv(csv);
+    const header = validateImportHeader(matrix[0]!);
+    expect(header.ok).toBe(true);
+    const [row] = validateStudentImportRows(toRawRows(matrix, (header as { columns: string[] }).columns), CLASSES, TODAY);
+    expect(row!.severity).toBe('warning');
+    expect(row!.errors.map((e) => e.code).sort()).toEqual(['BFORM_MISSING', 'FATHER_CONTACT_MISSING']);
+  });
+
+  it('rejects a file missing a required column and lists required and optional columns', () => {
+    const result = validateImportHeader(['name_en', 'dob', 'gender', 'class']);
+    expect(result).toMatchObject({ ok: false, missing: ['father_name_en'] });
+    if (!result.ok) expect(result.message).toContain('Optional: gr_number, section');
+  });
+
+  it("places a student in the named section of their class, and blocks a section the class doesn't have", () => {
+    const rows = validate(fileOf(goodRow({ section: 'b' }), goodRow({ section: 'C' }), goodRow({ class: '2', section: 'B' }), goodRow()));
+    expect(rows.map((r) => r.normalised.section_id)).toEqual(['s-1b', null, null, null]);
+    expect(rows[1]!.errors[0]).toMatchObject({ column: 'section', code: 'UNKNOWN_SECTION' });
+    expect(rows[1]!.errors[0]!.message).toContain('A, B');
+    expect(rows[2]!.errors[0]).toMatchObject({ column: 'section', code: 'UNKNOWN_SECTION' });
+    expect(rows[3]!.severity).toBe('ok');
+  });
+
+  it("normalises the father's CNIC and phone and blocks malformed ones", () => {
+    const rows = validate(
+      fileOf(
+        goodRow({ father_cnic: '3520212345671', father_phone: '+92 300 1234567' }),
+        goodRow({ father_cnic: '35202-123', father_phone: '0423 1234567' }),
+      ),
+    );
+    expect(rows[0]!.normalised).toMatchObject({ father_cnic: '35202-1234567-1', father_phone: '+923001234567' });
+    expect(rows[1]!.errors.map((e) => e.code)).toEqual(['CNIC_INVALID', 'PHONE_INVALID']);
+  });
+
+  it("warns, without blocking, when neither the father's CNIC nor phone is given", () => {
+    const [row] = validate(fileOf(goodRow({ father_phone: '' })));
+    expect(row!.severity).toBe('warning');
+    expect(row!.errors[0]).toMatchObject({ code: 'FATHER_CONTACT_MISSING', severity: 'warning' });
   });
 
   it('blocks an unparseable date and a date outside the 25-year window', () => {

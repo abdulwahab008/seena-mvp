@@ -5,23 +5,24 @@ import { randomUUID } from 'node:crypto';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-const HEADER = 'gr_number,name_en,name_ur,father_name_en,father_name_ur,dob,gender,class,b_form_no,religion,nationality,blood_group';
+const HEADER = 'gr_number,name_en,name_ur,father_name_en,father_name_ur,dob,gender,class,b_form_no,religion,nationality,blood_group,section,father_cnic';
 
 // Three importable rows — one of them carrying the school's own historical
-// GR number 8450 — and one blocked by an unknown class.
+// GR number 8450 and a chosen section — and one blocked by an unknown class.
+// Ayesha and Bilal share a father's CNIC, written two ways.
 const REGISTER_CSV = [
   HEADER,
-  ',Ayesha Khan,,Imran Khan,,2016-04-12,female,1,42101-0000001-1,,PK,',
-  ',Bilal Ahmed,,Imran Khan,,2016-05-12,male,1,42101-0000002-1,,PK,',
-  '8450,Hassan Ali,,Imran Khan,,2016-07-12,male,1,42101-0000003-1,,PK,',
-  ',Sana Malik,,Imran Khan,,2016-06-12,female,Class One,42101-0000004-1,,PK,',
+  ',Ayesha Khan,,Imran Khan,,2016-04-12,female,1,42101-0000001-1,,PK,,,35202-1111111-1',
+  ',Bilal Ahmed,,Imran Khan,,2016-05-12,male,1,42101-0000002-1,,PK,,,3520211111111',
+  '8450,Hassan Ali,,Imran Khan,,2016-07-12,male,1,42101-0000003-1,,PK,,B,35202-2222222-2',
+  ',Sana Malik,,Imran Khan,,2016-06-12,female,Class One,42101-0000004-1,,PK,,,',
   '',
 ].join('\n');
 
 const SECOND_CSV = [
   HEADER,
-  ',Zoya Ali,,Imran Khan,,2016-08-12,female,1,42101-0000005-1,,PK,',
-  ',Umar Farooq,,Imran Khan,,2016-09-12,male,1,42101-0000006-1,,PK,',
+  ',Zoya Ali,,Imran Khan,,2016-08-12,female,1,42101-0000005-1,,PK,,,',
+  ',Umar Farooq,,Imran Khan,,2016-09-12,male,1,42101-0000006-1,,PK,,,',
   '',
 ].join('\n');
 
@@ -65,6 +66,15 @@ async function seedSchool() {
     capacity: 50,
   });
   if (e4) throw e4;
+  const { error: e5 } = await admin.from('class_section').insert({
+    tenant_id: tenantId as string,
+    campus_id: campus!.id,
+    session_id: session!.id,
+    class_level_id: classOne!.id,
+    name: 'B',
+    capacity: 50,
+  });
+  if (e5) throw e5;
 
   return { admin, tenantId: tenantId as string, campusId: campus!.id, sessionId: session!.id, email, password };
 }
@@ -122,6 +132,19 @@ test('an owner commits a validated register atomically, keeps the school GR numb
     .eq('tenant_id', tenantId)
     .eq('session_id', sessionId);
   expect(enrolments).toBe(3);
+
+  // The chosen section is kept, and fathers from the file are linked: siblings share one guardian.
+  const { data: hassan } = await admin
+    .from('enrolment')
+    .select('class_section!inner(name), student!inner(gr_number)')
+    .eq('tenant_id', tenantId)
+    .eq('student.gr_number', '8450')
+    .single();
+  expect(hassan!.class_section).toMatchObject({ name: 'B' });
+  const { data: fathers } = await admin.from('student_guardian').select('guardian_id, is_primary').eq('tenant_id', tenantId).eq('relationship', 'father');
+  expect(fathers).toHaveLength(3);
+  expect(new Set(fathers!.map((f) => f.guardian_id)).size).toBe(2);
+  expect(fathers!.every((f) => f.is_primary)).toBe(true);
 
   // AC3: the school's own 8450 goes onto the permanent register as-is, and
   // the campus counter jumps past it so the two allocated numbers land at
