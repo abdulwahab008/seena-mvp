@@ -145,6 +145,9 @@ test('an owner commits a validated register atomically, keeps the school GR numb
   expect(fathers).toHaveLength(3);
   expect(new Set(fathers!.map((f) => f.guardian_id)).size).toBe(2);
   expect(fathers!.every((f) => f.is_primary)).toBe(true);
+  const { data: families } = await admin.from('student').select('family_group_id').eq('tenant_id', tenantId).not('family_group_id', 'is', null);
+  expect(families).toHaveLength(3);
+  expect(new Set(families!.map((f) => f.family_group_id)).size).toBe(2);
 
   // AC3: the school's own 8450 goes onto the permanent register as-is, and
   // the campus counter jumps past it so the two allocated numbers land at

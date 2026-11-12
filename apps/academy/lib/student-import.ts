@@ -76,7 +76,8 @@ export type ValidatedImportRow = RawImportRow & {
 };
 
 export type ClassOption = { id: string; code: string; name_en: string };
-export type SectionOption = { id: string; class_level_id: string; name: string };
+/** `seats_free` (capacity minus active students) lets the dry run catch a full section before commit does. */
+export type SectionOption = { id: string; class_level_id: string; name: string; seats_free?: number };
 
 // ── parsing ──────────────────────────────────────────────────────────────
 
@@ -256,7 +257,7 @@ export function validateStudentImportRows(
   rows: RawImportRow[],
   classes: ClassOption[],
   today: Date = new Date(),
-  sections: SectionOption[] = [],
+  sections?: SectionOption[],
 ): ValidatedImportRow[] {
   const classChoices = formatClassChoices(classes);
   const classByKey = new Map<string, ClassOption>();
@@ -351,7 +352,7 @@ export function validateStudentImportRows(
     const sectionRaw = get('section');
     let sectionId: string | null = null;
     if (sectionRaw !== '' && classLevelId) {
-      const ofClass = sections.filter((s) => s.class_level_id === classLevelId);
+      const ofClass = (sections ?? []).filter((s) => s.class_level_id === classLevelId);
       const match = ofClass.find((s) => key(s.name) === key(sectionRaw));
       if (match) sectionId = match.id;
       else {
@@ -437,9 +438,39 @@ export function validateStudentImportRows(
 
   markDuplicates(validated, 'gr_number', 'GR number');
   markDuplicates(validated, 'b_form_no', 'B-Form number');
+  if (sections) markFullSections(validated, sections);
 
   for (const row of validated) row.severity = severityOf(row.errors);
   return validated;
+}
+
+/**
+ * Places rows the way commit_import_batch() does (the named section, else the class's section with the
+ * most free seats) and blocks the rows that would not fit, so the dry run does not promise rows the
+ * commit then refuses. Skipped when seat counts were not supplied.
+ */
+function markFullSections(rows: ValidatedImportRow[], sections: SectionOption[]): void {
+  if (sections.some((s) => s.seats_free === undefined)) return;
+  const free = new Map(sections.map((s) => [s.id, s.seats_free!]));
+  for (const row of rows) {
+    const { class_level_id: classId, section_id: sectionId } = row.normalised;
+    if (!classId || row.errors.some((e) => e.severity === 'error')) continue;
+    const candidates = sections.filter((s) => (sectionId ? s.id === sectionId : s.class_level_id === classId));
+    const best = candidates.reduce<SectionOption | null>((b, s) => (free.get(s.id)! > (b ? free.get(b.id)! : 0) ? s : b), null);
+    if (best) {
+      free.set(best.id, free.get(best.id)! - 1);
+      continue;
+    }
+    const cls = row.raw.class ?? '';
+    row.errors.push({
+      column: sectionId ? 'section' : 'class',
+      code: 'SECTION_FULL',
+      severity: 'error',
+      message: sectionId
+        ? `Section '${row.raw.section}' of class '${cls}' is full - raise its capacity under Classes & Sections or choose another section.`
+        : `Class '${cls}' has no free seats left in any section - raise a section's capacity or add a section under Classes & Sections.`,
+    });
+  }
 }
 
 /**

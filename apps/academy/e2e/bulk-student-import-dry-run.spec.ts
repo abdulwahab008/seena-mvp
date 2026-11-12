@@ -40,6 +40,15 @@ async function seedOwner() {
     .insert({ user_id: created.user.id, tenant_id: tenantId as string, app_role: 'owner', full_name: 'E2E Owner' });
   if (e3) throw e3;
 
+  // Classes 1 and 2 get a section with seats; the dry run blocks rows that commit could not place.
+  const { data: campus } = await admin.from('campus').select('id').eq('tenant_id', tenantId as string).single();
+  const { data: session } = await admin.from('academic_session').select('id').eq('tenant_id', tenantId as string).single();
+  const { data: levels } = await admin.from('class_level').select('id').eq('tenant_id', tenantId as string).in('code', ['1', '2']);
+  const { error: e4 } = await admin.from('class_section').insert(
+    levels!.map((l) => ({ tenant_id: tenantId as string, campus_id: campus!.id, session_id: session!.id, class_level_id: l.id, name: 'A', capacity: 50 })),
+  );
+  if (e4) throw e4;
+
   return { admin, tenantId: tenantId as string, email, password };
 }
 

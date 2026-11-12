@@ -254,6 +254,19 @@ describe('validateStudentImportRows', () => {
     expect(rows[3]!.severity).toBe('ok');
   });
 
+  it('blocks the rows that would not fit in a full section, the way commit places them', () => {
+    const csv = fileOf(goodRow({ section: 'A' }), goodRow({ section: 'A' }), goodRow(), goodRow(), goodRow({ class: '2' }));
+    const matrix = parseCsv(csv);
+    const header = validateImportHeader(matrix[0]!);
+    const seats: SectionOption[] = [
+      { id: 's-1a', class_level_id: 'c-1', name: 'A', seats_free: 1 },
+      { id: 's-1b', class_level_id: 'c-1', name: 'B', seats_free: 1 },
+      { id: 's-2a', class_level_id: 'c-2', name: 'A', seats_free: 0 },
+    ];
+    const rows = validateStudentImportRows(toRawRows(matrix, (header as { columns: string[] }).columns), CLASSES, TODAY, seats);
+    expect(rows.map((r) => r.errors.find((e) => e.code === 'SECTION_FULL')?.column ?? 'ok')).toEqual(['ok', 'section', 'ok', 'class', 'class']);
+  });
+
   it("normalises the father's CNIC and phone and blocks malformed ones", () => {
     const rows = validate(
       fileOf(

@@ -1,6 +1,6 @@
 -- pgTAP tests for import_guardian_contacts: bulk-linking fathers to students already on the register.
 begin;
-select plan(14);
+select plan(17);
 
 select public.provision_tenant('test-guardian-import', 'Guardian Import Co', 'owner@guardianimport.test');
 select id as tenant_id from public.tenant where slug = 'test-guardian-import' \gset
@@ -55,6 +55,12 @@ select set_config('request.jwt.claims', json_build_object('tenant_id', :'tenant_
 select throws_ok($$ select public.import_guardian_contacts('[]'::jsonb) $$, 'FORBIDDEN', 'a teacher cannot import guardians');
 
 reset role;
+select is((select count(distinct family_group_id)::int from public.student where gr_number in ('GI-1', 'GI-2') and family_group_id is not null), 1,
+  'siblings whose father has a CNIC land in one family');
+select is((select f.father_cnic from public.family_group f join public.student s on s.family_group_id = f.id where s.gr_number = 'GI-2'), '35202-1234567-1',
+  'the family is keyed by the father''s CNIC');
+select is((select family_group_id from public.student where gr_number = 'GI-3'), null::uuid,
+  'a father with only a phone does not form a family');
 select is((select count(*)::int from public.guardian where tenant_id = :'tenant_id'), 2, 'only two guardian records were created (one shared by the siblings)');
 
 select * from finish();
