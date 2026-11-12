@@ -278,6 +278,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/fees/heads', label: 'Fee Heads', roles: FEE_STAFF_ROLES },
       { href: '/fees/structure', label: 'Fee Structure', roles: FEE_STAFF_ROLES },
+      { href: '/fees/student-fees', label: 'Student Fees', roles: FEE_STAFF_ROLES },
       { href: '/fees/challans', label: 'Challans', roles: FEE_STAFF_ROLES },
       { href: '/fees/counter', label: 'Cash Counter', roles: [...FEE_STAFF_ROLES, ...FRONT_DESK_ROLES] },
       { href: '/fees/defaulters', label: 'Defaulters', roles: FEE_STAFF_ROLES },

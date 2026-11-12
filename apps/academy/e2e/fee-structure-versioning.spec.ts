@@ -90,8 +90,8 @@ test('an owner revises a published fee structure into a new version without touc
   await page.getByRole('button', { name: 'Edit' }).click();
   await page.locator('input[type="number"]').last().fill('5500');
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByText('Amount updated.')).toBeVisible();
-  await expect(page.getByText('PKR 5,500')).toBeVisible();
+  await expect(page.getByText('Line updated.')).toBeVisible();
+  await expect(page.getByTestId('structure-line-row-Class 1-Tuition Fee-all')).toContainText('PKR 5,500');
 
   await page.getByTestId('publish-structure-button').click();
   await expect(page.getByText('Structure published.')).toBeVisible();

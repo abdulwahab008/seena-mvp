@@ -49,7 +49,8 @@ import {
   setFeePolicySchema,
   setSiblingDiscountSchemeSchema,
   createNextStructureVersionSchema,
-  updateStructureLineAmountSchema,
+  updateStructureLineSchema,
+  bulkFeePlanOverrideSchema,
   setChallanTemplateSchema,
   recordPaymentSchema,
   lookupChallanSchema,
@@ -304,7 +305,7 @@ describe('createFeeHeadSchema', () => {
 describe('addStructureLineSchema', () => {
   const base = {
     structureId: '11111111-1111-1111-1111-111111111111',
-    classId: '22222222-2222-2222-2222-222222222222',
+    classFromId: '22222222-2222-2222-2222-222222222222',
     feeHeadId: '33333333-3333-3333-3333-333333333333',
     amountRupees: 5000,
     frequency: 'monthly' as const,
@@ -526,17 +527,19 @@ describe('createNextStructureVersionSchema', () => {
   });
 });
 
-describe('updateStructureLineAmountSchema', () => {
-  it('accepts a non-negative amount', () => {
-    expect(
-      updateStructureLineAmountSchema.safeParse({ lineId: '11111111-1111-1111-1111-111111111111', amountRupees: 5500 }).success
-    ).toBe(true);
+describe('updateStructureLineSchema', () => {
+  const base = { lineId: '11111111-1111-1111-1111-111111111111', amountRupees: 5500, frequency: 'one_time' as const, months: [3] };
+
+  it('accepts a changed amount, frequency and months', () => {
+    expect(updateStructureLineSchema.safeParse(base).success).toBe(true);
   });
 
   it('rejects a negative amount', () => {
-    expect(
-      updateStructureLineAmountSchema.safeParse({ lineId: '11111111-1111-1111-1111-111111111111', amountRupees: -1 }).success
-    ).toBe(false);
+    expect(updateStructureLineSchema.safeParse({ ...base, amountRupees: -1 }).success).toBe(false);
+  });
+
+  it('rejects no months selected', () => {
+    expect(updateStructureLineSchema.safeParse({ ...base, months: [] }).success).toBe(false);
   });
 });
 
@@ -2026,3 +2029,20 @@ describe('FR-I14 OCR review', () => {
     );
   });
 });
+
+describe('bulkFeePlanOverrideSchema', () => {
+  const base = { lineIds: ['11111111-1111-1111-1111-111111111111'], amountRupees: 2500, reason: 'Staff child', approve: false };
+
+  it('accepts a change for selected students', () => {
+    expect(bulkFeePlanOverrideSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects no students selected', () => {
+    expect(bulkFeePlanOverrideSchema.safeParse({ ...base, lineIds: [] }).success).toBe(false);
+  });
+
+  it('rejects a blank reason', () => {
+    expect(bulkFeePlanOverrideSchema.safeParse({ ...base, reason: '  ' }).success).toBe(false);
+  });
+});
+

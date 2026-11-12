@@ -168,8 +168,9 @@ export const MONTH_LABELS = [
 // never carried as a float through the schema itself.
 export const addStructureLineSchema = z.object({
   structureId: z.string().uuid(),
-  // ALL_CLASSES adds the same line to every active class in one step.
-  classId: z.union([z.string().uuid('Choose a class'), z.literal('__all__')], { message: 'Choose a class' }),
+  // From/To class, in class order; the line is set for every class in the range. To defaults to From.
+  classFromId: z.string().uuid('Choose a class'),
+  classToId: z.string().uuid().optional().or(z.literal('')),
   groupCode: z.string().max(50).optional(),
   feeHeadId: z.string().uuid('Choose a fee head'),
   amountRupees: z.coerce.number().nonnegative('Enter an amount'),
@@ -190,6 +191,15 @@ export const proposeFeePlanOverrideSchema = z.object({
   reason: z.string().min(1, 'A reason is required').max(500),
 });
 export type ProposeFeePlanOverrideInput = z.infer<typeof proposeFeePlanOverrideSchema>;
+
+// Mirrors bulk_propose_fee_plan_override(): the same change for many students' fee plan lines.
+export const bulkFeePlanOverrideSchema = z.object({
+  lineIds: z.array(z.string().uuid()).min(1, 'Select at least one student').max(2000),
+  amountRupees: z.coerce.number().nonnegative('Enter an amount'),
+  reason: z.string().trim().min(1, 'A reason is required').max(500),
+  approve: z.boolean(),
+});
+export type BulkFeePlanOverrideInput = z.infer<typeof bulkFeePlanOverrideSchema>;
 
 export const CONCESSION_CALC_TYPES = ['percentage', 'fixed_amount'] as const;
 
@@ -412,11 +422,13 @@ export const createNextStructureVersionSchema = z.object({
 });
 export type CreateNextStructureVersionInput = z.infer<typeof createNextStructureVersionSchema>;
 
-export const updateStructureLineAmountSchema = z.object({
+export const updateStructureLineSchema = z.object({
   lineId: z.string().uuid(),
   amountRupees: z.coerce.number().nonnegative('Enter an amount'),
+  frequency: z.enum(FEE_FREQUENCIES),
+  months: z.array(z.coerce.number().int().min(0).max(11)).min(1, 'Choose at least one month'),
 });
-export type UpdateStructureLineAmountInput = z.infer<typeof updateStructureLineAmountSchema>;
+export type UpdateStructureLineInput = z.infer<typeof updateStructureLineSchema>;
 
 // Mirrors publish_fee_structure()'s own REGULATOR_REFERENCE_REQUIRED
 // check — required only when the DB rejects a publish for exceeding the

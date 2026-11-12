@@ -65,7 +65,7 @@ export default async function FeeStructurePage() {
     if (structure) {
       const { data: lineRows } = await supabase
         .from('fee_structure_line')
-        .select('id, class_id, fee_head_id, group_code, amount_paisa, frequency, class_level(name_en), fee_head(code, name_en)')
+        .select('id, class_id, fee_head_id, group_code, amount_paisa, frequency, billing_month_mask, class_level(name_en), fee_head(code, name_en)')
         .eq('structure_id', structure.id);
 
       // Audit: publishing needs a line for every active class and mandatory fee head, but the page
@@ -88,6 +88,7 @@ export default async function FeeStructurePage() {
         headName: one(l.fee_head)?.name_en ?? 'Unknown',
         amountPaisa: l.amount_paisa,
         frequency: l.frequency,
+        billingMonthMask: l.billing_month_mask,
       }));
     }
   }
