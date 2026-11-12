@@ -47571,6 +47571,19 @@ export type Database = {
         }
         Returns: number
       }
+      bulk_decide_fee_plan_override: {
+        Args: { p_approve: boolean; p_line_ids: string[] }
+        Returns: number
+      }
+      bulk_propose_fee_plan_override: {
+        Args: {
+          p_approve?: boolean
+          p_line_ids: string[]
+          p_new_amount_paisa: number
+          p_reason: string
+        }
+        Returns: number
+      }
       can_manage_invitation: {
         Args: { p_invitation_id: string }
         Returns: boolean
@@ -50566,9 +50579,25 @@ export type Database = {
       }
       save_sms_gateway: { Args: { p_api_key?: string; p_config: Json; p_sender_id: string }; Returns: undefined }
       sms_gateway_settings: { Args: never; Returns: { config: Json; has_key: boolean; is_active: boolean; sender_id: string | null }[] }
+      remove_structure_line: {
+        Args: { p_line_id: string }
+        Returns: undefined
+      }
       rename_class_level: {
         Args: { p_id: string; p_name_en: string }
         Returns: undefined
+      }
+      set_structure_lines: {
+        Args: {
+          p_amount_paisa: number
+          p_billing_month_mask?: number
+          p_class_ids: string[]
+          p_fee_head_id: string
+          p_frequency: Database['public']['Enums']['fee_frequency']
+          p_group_code?: string
+          p_structure_id: string
+        }
+        Returns: Json
       }
       sms_gateway_for_dispatch: {
         Args: { p_tenant_id: string }
@@ -50951,6 +50980,15 @@ export type Database = {
         Returns: undefined
       }
       user_account_kind: { Args: { p_user_id: string }; Returns: string }
+      update_structure_line: {
+        Args: {
+          p_amount_paisa: number
+          p_billing_month_mask: number
+          p_frequency: Database['public']['Enums']['fee_frequency']
+          p_line_id: string
+        }
+        Returns: undefined
+      }
       user_account_login_email: {
         Args: {
           p_campus_ids: string[]

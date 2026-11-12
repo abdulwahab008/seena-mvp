@@ -5,7 +5,7 @@ import {
   addStructureLineSchema,
   createDraftStructureSchema,
   createNextStructureVersionSchema,
-  updateStructureLineAmountSchema,
+  updateStructureLineSchema,
   publishStructureSchema,
 } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
@@ -30,14 +30,21 @@ export async function createDraftStructure(campusId: string, sessionId: string, 
   return { error: null };
 }
 
-// FR-K02: add a line to a draft structure. amountRupees is converted to
-// paisa here, at the server-action boundary — amount_paisa is bigint end
-// to end from this point on, never a float. months (0-11) are packed into
-// the 12-bit billing_month_mask add_structure_line() expects.
+const toMask = (months: number[]) => months.reduce((mask, m) => mask | (1 << m), 0);
+
+function lineError(message: string, fallback: string): ActionState {
+  if (message.includes('STRUCTURE_NOT_DRAFT')) return { error: 'Only a draft structure can be changed. Create the next version to revise a published one.' };
+  if (message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit fee structures.' };
+  return { error: fallback };
+}
+
+// FR-K02: set one fee head for a range of classes (From..To in class order). Classes that already have
+// the head are updated rather than rejected. Rupees become paisa here and stay bigint from this point on.
 export async function addStructureLine(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = addStructureLineSchema.safeParse({
     structureId: formData.get('structureId'),
-    classId: formData.get('classId'),
+    classFromId: formData.get('classFromId'),
+    classToId: formData.get('classToId') || undefined,
     groupCode: formData.get('groupCode') || undefined,
     feeHeadId: formData.get('feeHeadId'),
     amountRupees: formData.get('amountRupees'),
@@ -46,47 +53,31 @@ export async function addStructureLine(_prev: ActionState, formData: FormData): 
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
 
-  const amountPaisa = Math.round(parsed.data.amountRupees * 100);
-  const billingMonthMask = parsed.data.months.reduce((mask, m) => mask | (1 << m), 0);
-
   const supabase = await supabaseServer();
-  const addFor = (classId: string) =>
-    supabase.rpc('add_structure_line', {
-      p_structure_id: parsed.data.structureId,
-      p_class_id: classId,
-      p_fee_head_id: parsed.data.feeHeadId,
-      p_amount_paisa: amountPaisa,
-      p_frequency: parsed.data.frequency,
-      p_group_code: parsed.data.groupCode,
-      p_billing_month_mask: billingMonthMask,
-    });
+  const { data: classes } = await supabase.from('class_level').select('id').eq('is_active', true).order('ordinal');
+  const ids = (classes ?? []).map((c) => c.id);
+  const from = ids.indexOf(parsed.data.classFromId);
+  const to = parsed.data.classToId ? ids.indexOf(parsed.data.classToId) : from;
+  if (from < 0 || to < 0) return { error: 'Choose a class.' };
+  const classIds = ids.slice(Math.min(from, to), Math.max(from, to) + 1);
 
-  if (parsed.data.classId === '__all__') {
-    const { data: classes } = await supabase.from('class_level').select('id').eq('is_active', true);
-    let added = 0;
-    let skipped = 0;
-    for (const c of classes ?? []) {
-      const { error } = await addFor(c.id);
-      if (!error) added += 1;
-      else if (error.message.includes('duplicate key')) skipped += 1;
-      else if (error.message.includes('STRUCTURE_NOT_DRAFT')) return { error: 'This structure is no longer a draft.' };
-      else if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit fee structures.' };
-      else return { error: `Added ${added} lines, then could not add the rest.` };
-    }
-    revalidatePath('/fees/structure');
-    return { error: null, note: skipped ? `Added ${added} lines; ${skipped} classes already had this fee head.` : `Added ${added} lines.` };
-  }
-
-  const { error } = await addFor(parsed.data.classId);
-  if (error) {
-    if (error.message.includes('duplicate key')) return { error: 'A line for this class, group and fee head already exists.' };
-    if (error.message.includes('STRUCTURE_NOT_DRAFT')) return { error: 'This structure is no longer a draft.' };
-    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit fee structures.' };
-    return { error: 'Could not add the line.' };
-  }
+  const { data, error } = await supabase.rpc('set_structure_lines', {
+    p_structure_id: parsed.data.structureId,
+    p_class_ids: classIds,
+    p_fee_head_id: parsed.data.feeHeadId,
+    p_amount_paisa: Math.round(parsed.data.amountRupees * 100),
+    p_frequency: parsed.data.frequency,
+    p_group_code: parsed.data.groupCode,
+    p_billing_month_mask: toMask(parsed.data.months),
+  });
+  if (error) return lineError(error.message, 'Could not save the fee.');
 
   revalidatePath('/fees/structure');
-  return { error: null };
+  const { added, updated } = data as { added: number; updated: number };
+  if (added === 1 && updated === 0) return { error: null, note: 'Line added.' };
+  if (added === 0 && updated === 1) return { error: null, note: 'Line updated.' };
+  const parts = [added && `added ${added}`, updated && `updated ${updated}`].filter(Boolean).join(', ');
+  return { error: null, note: `${parts.charAt(0).toUpperCase()}${parts.slice(1)} lines.` };
 }
 
 export async function publishStructure(structureId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -140,25 +131,32 @@ export async function createNextStructureVersion(_prev: ActionState, formData: F
   return { error: null };
 }
 
-// FR-K03: revise a single draft line's price — amountRupees is converted
-// to paisa at this boundary, same discipline as every other rupee input.
-export async function updateStructureLineAmount(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const parsed = updateStructureLineAmountSchema.safeParse({
+export async function updateStructureLine(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = updateStructureLineSchema.safeParse({
     lineId: formData.get('lineId'),
     amountRupees: formData.get('amountRupees'),
+    frequency: formData.get('frequency'),
+    months: formData.getAll('months').map(Number),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
 
   const supabase = await supabaseServer();
-  const { error } = await supabase.rpc('update_structure_line_amount', {
+  const { error } = await supabase.rpc('update_structure_line', {
     p_line_id: parsed.data.lineId,
     p_amount_paisa: Math.round(parsed.data.amountRupees * 100),
+    p_frequency: parsed.data.frequency,
+    p_billing_month_mask: toMask(parsed.data.months),
   });
-  if (error) {
-    if (error.message.includes('STRUCTURE_NOT_DRAFT')) return { error: "Only a draft structure's lines can be revised." };
-    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit fee structures.' };
-    return { error: 'Could not update the amount.' };
-  }
+  if (error) return lineError(error.message, 'Could not update the line.');
+
+  revalidatePath('/fees/structure');
+  return { error: null };
+}
+
+export async function removeStructureLine(lineId: string): Promise<ActionState> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('remove_structure_line', { p_line_id: lineId });
+  if (error) return lineError(error.message, 'Could not delete the line.');
 
   revalidatePath('/fees/structure');
   return { error: null };

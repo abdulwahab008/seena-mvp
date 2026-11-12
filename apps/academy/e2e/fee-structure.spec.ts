@@ -78,8 +78,7 @@ test('an owner drafts a fee structure line and publishing is blocked by mandator
   await page.getByLabel('Amount (PKR)').fill('5000');
   await page.getByRole('button', { name: 'Add line' }).click();
   await expect(page.getByText('Line added.')).toBeVisible();
-  await expect(page.getByText('Class 1 · Tuition Fee')).toBeVisible();
-  await expect(page.getByText('PKR 5,000')).toBeVisible();
+  await expect(page.getByTestId('structure-line-row-Class 1-Tuition Fee-all')).toContainText('PKR 5,000');
 
   // Every other active class is still missing its mandatory TUITION line.
   await page.getByTestId('publish-structure-button').click();
@@ -87,4 +86,55 @@ test('an owner drafts a fee structure line and publishing is blocked by mandator
     page.getByText('Every active class needs a line for each mandatory fee head before this structure can publish.')
   ).toBeVisible();
   await expect(page.getByTestId('structure-status')).toHaveText('draft');
+});
+
+test('an owner sets a fee for a class range, then edits and deletes a draft line', async ({ page }) => {
+  const { email, password } = await seedOwnerWithFeeHeads();
+
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+
+  await page.goto('/fees/structure');
+  await page.waitForLoadState('networkidle');
+  await page.getByRole('button', { name: 'Create draft structure' }).click();
+  await expect(page.getByText('Draft structure created.')).toBeVisible();
+
+  await page.getByTestId('structure-line-class-trigger').click();
+  await page.getByRole('option', { name: 'Class 1', exact: true }).click();
+  await page.getByTestId('structure-line-class-to-trigger').click();
+  await page.getByRole('option', { name: 'Class 3', exact: true }).click();
+  await page.getByTestId('structure-line-head-trigger').click();
+  await page.getByRole('option', { name: /Tuition Fee/ }).click();
+  await page.getByLabel('Amount (PKR)').fill('3000');
+  await page.getByRole('button', { name: 'Add line' }).click();
+  await expect(page.getByText('Added 3 lines.')).toBeVisible();
+  for (const c of ['Class 1', 'Class 2', 'Class 3']) {
+    await expect(page.getByTestId(`structure-line-row-${c}-Tuition Fee-all`)).toContainText('PKR 3,000');
+  }
+
+  // Re-setting part of the range updates the classes that already have the head.
+  await page.getByTestId('structure-line-class-trigger').click();
+  await page.getByRole('option', { name: 'Class 3', exact: true }).click();
+  await page.getByTestId('structure-line-head-trigger').click();
+  await page.getByRole('option', { name: /Tuition Fee/ }).click();
+  await page.getByLabel('Amount (PKR)').fill('5000');
+  await page.getByRole('button', { name: 'Add line' }).click();
+  await expect(page.getByText('Line updated.')).toBeVisible();
+  await expect(page.getByTestId('structure-line-row-Class 3-Tuition Fee-all')).toContainText('PKR 5,000');
+
+  const class2 = page.getByTestId('structure-line-row-Class 2-Tuition Fee-all');
+  await class2.getByRole('button', { name: 'Edit' }).click();
+  await page.getByRole('combobox', { name: 'Frequency' }).last().click();
+  await page.getByRole('option', { name: 'one time' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Line updated.')).toBeVisible();
+  await expect(class2).toContainText(/one time/i);
+
+  await class2.getByRole('button', { name: 'Delete Tuition Fee for Class 2' }).click();
+  await expect(page.getByText('Deleted Tuition Fee for Class 2.')).toBeVisible();
+  await expect(class2).toHaveCount(0);
 });
