@@ -45,7 +45,7 @@ export function GuardianForm({ studentId }: { studentId: string }) {
   });
 
   return (
-    <form onSubmit={onSubmit} className="grid grid-cols-2 gap-3 rounded-lg border p-4 md:grid-cols-4" noValidate>
+    <form onSubmit={onSubmit} className="grid grid-cols-2 gap-3 rounded-lg bg-muted/50 p-4 md:grid-cols-4" noValidate>
       <div className="space-y-1">
         <Label htmlFor="nameEn">Name</Label>
         <Input id="nameEn" {...register('nameEn')} />

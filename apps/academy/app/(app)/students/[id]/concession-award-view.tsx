@@ -62,7 +62,7 @@ function RequestAwardForm({ studentId, enrolmentId, schemes }: { studentId: stri
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2 rounded-lg border p-3 md:grid-cols-5">
+    <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted/50 p-4 md:grid-cols-5">
       <div className="space-y-1">
         <Label>Scheme</Label>
         <Select value={schemeId} onValueChange={setSchemeId}>

@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { postLedgerEntry, reverseLedgerEntry } from '../actions';
 import { LEDGER_ENTRY_TYPES, LEDGER_DIRECTIONS } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -46,7 +45,7 @@ function PostEntryForm({ studentId, enrolmentId }: { studentId: string; enrolmen
   };
 
   return (
-    <div className="flex flex-wrap items-end gap-2 rounded-lg border p-3">
+    <div className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/50 p-4">
       <div className="space-y-1">
         <Label>Type</Label>
         <Select value={entryType} onValueChange={setEntryType}>
@@ -150,16 +149,14 @@ export function LedgerView({
         <p className="text-sm text-muted-foreground">No ledger entries yet.</p>
       ) : (
         entries.map((e) => (
-          <Card key={e.id} data-testid={`ledger-row-${e.id}`}>
-            <CardContent className="flex items-center justify-between p-3 text-sm">
+          <div key={e.id} data-testid={`ledger-row-${e.id}`} className="rounded-md border flex items-center justify-between p-3 text-sm">
               <span>
                 {e.entryType.replace(/_/g, ' ')} · {e.direction} PKR {(e.amountPaisa / 100).toLocaleString()} · {e.valueDate}
                 {e.reversalOfId && ' (reversal)'}
                 {e.isReversed && ' — reversed'}
               </span>
               {canReverse && !e.reversalOfId && !e.isReversed && <ReverseControl studentId={studentId} ledgerId={e.id} />}
-            </CardContent>
-          </Card>
+            </div>
         ))
       )}
       {canPost && <PostEntryForm studentId={studentId} enrolmentId={enrolmentId} />}

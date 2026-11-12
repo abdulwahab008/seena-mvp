@@ -48,7 +48,7 @@ function BucketRow({
   });
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-2 rounded-lg border p-3" data-testid={`elective-bucket-${bucket.bucket}`}>
+    <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/50 p-4" data-testid={`elective-bucket-${bucket.bucket}`}>
       <div className="space-y-1">
         <p className="text-sm font-medium">Bucket {bucket.bucket}</p>
         <Controller

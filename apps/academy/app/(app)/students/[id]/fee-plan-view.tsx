@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { proposeFeePlanOverride, decideFeePlanOverride, removeFeePlanLine } from '../actions';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
 export type FeePlanLineRow = {
@@ -126,8 +125,7 @@ export function FeePlanView({
       {lines
         .filter((l) => !l.effectiveTo)
         .map((l) => (
-          <Card key={l.id} data-testid={`fee-plan-line-${l.headCode}`}>
-            <CardContent className="flex items-center justify-between gap-3 p-3 text-sm">
+          <div key={l.id} data-testid={`fee-plan-line-${l.headCode}`} className="rounded-md border flex items-center justify-between gap-3 p-3 text-sm">
               <div>
                 <p className="font-medium">
                   {l.headName} — PKR {(l.amountPaisa / 100).toLocaleString()} <span className="text-muted-foreground">({l.frequency})</span>
@@ -148,8 +146,7 @@ export function FeePlanView({
                   </>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
         ))}
     </div>
   );

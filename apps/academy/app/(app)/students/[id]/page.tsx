@@ -12,6 +12,9 @@ import { DeleteStudentControl } from './delete-student-control';
 import { EditStudentControl } from './edit-student-control';
 import { IncidentView } from './incident-view';
 import { canSeeConcessionAwards, hasFeeAccess } from '@/lib/auth/fee-access';
+import { formatDatePk } from '@/lib/dates';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 // supabase-js types every embedded to-one relation as a possible array —
 // the FK is unique per enrolment/section row, so it's really ever 0 or 1.
@@ -236,102 +239,153 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     electiveBuckets = Array.from(bucketMap.values()).sort((a, b) => a.bucket - b.bucket);
   }
 
+  const classLevel = enrolledSection ? one(enrolledSection.class_level) : null;
+  const monthlyPaisa = feePlanLines.filter((l) => !l.effectiveTo && l.frequency === 'monthly').reduce((sum, l) => sum + l.amountPaisa, 0);
+  const initials = student.name_en
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+  const facts: [string, string | null][] = [
+    ['GR number', student.gr_number],
+    ['Class', classLevel && enrolledSection ? `${classLevel.name_en} · ${enrolledSection.name}` : 'Not enrolled'],
+    ['Roll no.', enrolment?.roll_no != null ? String(enrolment.roll_no) : null],
+    ['Gender', student.gender === 'male' ? 'Male' : student.gender === 'female' ? 'Female' : student.gender],
+    ['Date of birth', student.dob ? formatDatePk(student.dob) : null],
+    ["Father's name", student.father_name_en],
+    ['B-Form', student.b_form_no],
+  ];
+  const nav = [
+    ['enrolment', 'Enrolment'],
+    ['guardians', 'Guardians'],
+    ['discipline', 'Discipline'],
+    ...(showFees ? [['fees', 'Fees']] : []),
+    ...(enrolment && showAwards ? [['concessions', 'Concessions']] : []),
+    ...(enrolment && showFees ? [['payments', 'Payments'], ['ledger', 'Ledger']] : []),
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">{student.name_en}</h1>
-          <p className="text-sm text-muted-foreground">
-            GR {student.gr_number} · {student.gender} · DOB {student.dob} · {student.status}
-          </p>
-          {profile.length > 0 && (
-            <p className="text-sm text-muted-foreground" data-testid="student-lookups">
-              {profile.join(' · ')}
-            </p>
-          )}
-        </div>
-        {canDelete && (
-          <div className="flex gap-2">
-            <EditStudentControl
-              student={student}
-              options={{
-                category: lookupOptions('category', [student.category_id]),
-                region: lookupOptions('region', [student.region_id]),
-                school: lookupOptions('school', [student.previous_school_id]),
-              }}
-            />
-            <DeleteStudentControl studentId={student.id} studentName={student.name_en} />
+    <div className="mx-auto max-w-5xl space-y-6">
+      <Card>
+        <CardContent className="space-y-5 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary-muted text-lg font-semibold text-primary" aria-hidden>
+                {initials}
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-2xl font-semibold">{student.name_en}</h1>
+                  <Badge variant={student.status === 'active' ? 'success' : 'outline'} className="capitalize">
+                    {student.status}
+                  </Badge>
+                </div>
+                {student.name_ur && (
+                  <p className="text-sm text-muted-foreground" dir="rtl" lang="ur">
+                    {student.name_ur}
+                  </p>
+                )}
+                {profile.length > 0 && (
+                  <p className="text-sm text-muted-foreground" data-testid="student-lookups">
+                    {profile.join(' · ')}
+                  </p>
+                )}
+              </div>
+            </div>
+            {canDelete && (
+              <div className="flex gap-2">
+                <EditStudentControl
+                  student={student}
+                  options={{
+                    category: lookupOptions('category', [student.category_id]),
+                    region: lookupOptions('region', [student.region_id]),
+                    school: lookupOptions('school', [student.previous_school_id]),
+                  }}
+                />
+                <DeleteStudentControl studentId={student.id} studentName={student.name_en} />
+              </div>
+            )}
           </div>
-        )}
-      </div>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t pt-4 text-sm sm:grid-cols-3 lg:grid-cols-4">
+            {facts
+              .filter(([, v]) => v)
+              .map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-xs text-muted-foreground">{label}</dt>
+                  <dd className="font-medium">{value}</dd>
+                </div>
+              ))}
+          </dl>
+        </CardContent>
+      </Card>
 
-      <section className="space-y-2">
-        <h2 className="text-lg font-medium">Enrolment</h2>
-        {(() => {
-          const section = enrolment ? one(enrolment.class_section) : null;
-          const classLevel = section ? one(section.class_level) : null;
-          return section && classLevel ? (
-            <p data-testid="student-enrolment" className="text-sm">
-              {classLevel.name_en} · Section {section.name} · Roll {enrolment!.roll_no ?? '—'}
-            </p>
-          ) : (
-            <EnrolForm studentId={student.id} sections={sections ?? []} />
-          );
-        })()}
-      </section>
-
-      {enrolment && enrolledClassLevelId && (
-        <section className="space-y-2">
-          <h2 className="text-lg font-medium">Elective choices</h2>
-          <ElectiveChoiceView studentId={student.id} sessionId={enrolment.session_id} classLevelId={enrolledClassLevelId} buckets={electiveBuckets} />
-        </section>
+      {enrolment && showFees && (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Stat label="Balance due" value={`PKR ${(balancePaisa / 100).toLocaleString()}`} tone={balancePaisa > 0 ? 'text-destructive' : 'text-success'} />
+          <Stat label="Monthly fee" value={feePlanLines.length ? `PKR ${(monthlyPaisa / 100).toLocaleString()}` : 'No fee plan'} />
+          <Stat label="Guardians" value={String((guardianLinks ?? []).length)} />
+        </div>
       )}
 
-      <section className="space-y-2">
-        <h2 className="text-lg font-medium">Discipline</h2>
-        <IncidentView studentId={student.id} incidents={incidents ?? []} />
-      </section>
+      <nav aria-label="Sections" className="flex flex-wrap gap-1 rounded-lg border bg-card p-1 text-sm">
+        {nav.map(([id, label]) => (
+          <a key={id} href={`#${id}`} className="rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+            {label}
+          </a>
+        ))}
+      </nav>
 
-      <section className="space-y-2">
-        <h2 className="text-lg font-medium">Guardians</h2>
-        <GuardianList
-          links={guardianLinks ?? []}
-          professions={lookupOptions('profession', (guardianLinks ?? []).map((l) => one(l.guardian)?.profession_id ?? null))}
-          canEditProfession={canDelete}
-        />
-        <GuardianForm studentId={student.id} />
-      </section>
+      <Section id="enrolment" title="Enrolment">
+        {classLevel && enrolledSection ? (
+          <p data-testid="student-enrolment" className="text-sm">
+            {classLevel.name_en} · Section {enrolledSection.name} · Roll {enrolment!.roll_no ?? '—'}
+          </p>
+        ) : (
+          <EnrolForm studentId={student.id} sections={sections ?? []} />
+        )}
+        {enrolment && enrolledClassLevelId && (
+          <div className="mt-4 space-y-2 border-t pt-4">
+            <h3 className="text-sm font-medium">Elective choices</h3>
+            <ElectiveChoiceView studentId={student.id} sessionId={enrolment.session_id} classLevelId={enrolledClassLevelId} buckets={electiveBuckets} />
+          </div>
+        )}
+      </Section>
+
+      <Section id="guardians" title="Guardians" description="Parents and others who may collect the child or receive fee notices.">
+        <div className="space-y-4">
+          <GuardianList
+            links={guardianLinks ?? []}
+            professions={lookupOptions('profession', (guardianLinks ?? []).map((l) => one(l.guardian)?.profession_id ?? null))}
+            canEditProfession={canDelete}
+          />
+          <GuardianForm studentId={student.id} />
+        </div>
+      </Section>
+
+      <Section id="discipline" title="Discipline">
+        <IncidentView studentId={student.id} incidents={incidents ?? []} />
+      </Section>
 
       {showFees && (
-        <section className="space-y-2">
-          <h2 className="text-lg font-medium">Fees</h2>
+        <Section id="fees" title="Fees" description="This student's fee plan. Changes apply to challans generated afterwards.">
           <FeePlanView studentId={student.id} lines={feePlanLines} canAdjust={canAdjust} canApprove={canApprove} />
-        </section>
+        </Section>
       )}
 
       {enrolment && showAwards && (
-        <section className="space-y-2">
-          <h2 className="text-lg font-medium">Concession awards</h2>
-          <ConcessionAwardView
-            studentId={student.id}
-            enrolmentId={enrolment.id}
-            awards={awards}
-            schemes={schemes ?? []}
-            canRequest={canRequestAward}
-          />
-        </section>
+        <Section id="concessions" title="Concession awards">
+          <ConcessionAwardView studentId={student.id} enrolmentId={enrolment.id} awards={awards} schemes={schemes ?? []} canRequest={canRequestAward} />
+        </Section>
       )}
 
       {enrolment && showFees && (
-        <section className="space-y-2">
-          <h2 className="text-lg font-medium">Payments</h2>
+        <Section id="payments" title="Payments">
           <PaymentView studentId={student.id} enrolmentId={enrolment.id} payments={payments} canRecord={canRecordPayment} />
-        </section>
+        </Section>
       )}
 
       {enrolment && showFees && (
-        <section className="space-y-2">
-          <h2 className="text-lg font-medium">Ledger</h2>
+        <Section id="ledger" title="Ledger" description="Every charge, payment and adjustment on this student's account.">
           <LedgerView
             studentId={student.id}
             enrolmentId={enrolment.id}
@@ -340,8 +394,31 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             canPost={canPostLedger}
             canReverse={canReverseLedger}
           />
-        </section>
+        </Section>
       )}
     </div>
+  );
+}
+
+function Section({ id, title, description, children }: { id: string; title: string; description?: string; children: React.ReactNode }) {
+  return (
+    <Card id={id} className="scroll-mt-20">
+      <CardHeader className="p-5 pb-3">
+        <CardTitle className="text-base">{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
+      </CardHeader>
+      <CardContent className="p-5 pt-0">{children}</CardContent>
+    </Card>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: string; tone?: string }) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className={`mt-1 text-xl font-semibold tabular-nums ${tone ?? ''}`}>{value}</p>
+      </CardContent>
+    </Card>
   );
 }
