@@ -1,6 +1,6 @@
 -- pgTAP tests for FR-T16: student data retention and purge policy.
 begin;
-select plan(40);
+select plan(41);
 
 select public.provision_tenant('test-ret-co', 'Retention Co', 'owner@ret.test');
 select id as tenant_id from public.tenant where slug = 'test-ret-co' \gset
@@ -75,7 +75,8 @@ select is((select count(*)::int from public.retention_purge_item where run_id = 
 select is((select count(*)::int from public.retention_blobs_to_delete() where storage_path = 'photos/s1.jpg'), 1, 'and the worker can collect it');
 
 -- ── the purge's own audit rows do not copy what it removed ────────────────
-select is((select count(*)::int from public.audit_log where table_name = 'student' and action = 'update' and tenant_id = :'tenant_id' and (before::text like '%35202-1234567-1%' or after::text like '%35202-1234567-1%')), 0, 'audit rows written by the purge carry no B-Form value');
+select ok((select count(*) from public.audit_log where table_name = 'student' and action = 'update' and tenant_id = :'tenant_id' and after ? 'b_form_no' and after ->> 'b_form_no' is null) > 0, 'the purge writes audit rows for the students it clears');
+select is((select count(*)::int from public.audit_log where table_name = 'student' and action = 'update' and tenant_id = :'tenant_id' and after ? 'b_form_no' and after ->> 'b_form_no' is null and (before::text like '%35202-1234567-1%' or after::text like '%35202-1234567-1%')), 0, 'audit rows written by the purge carry no B-Form value');
 
 -- ── later run: name policy and the 2019 ledger ────────────────────────────
 select app.fn_start_retention_run(:'tenant_id'::uuid, '2027-01-02'::date, false) as run2 \gset
