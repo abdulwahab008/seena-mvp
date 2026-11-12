@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabase/server';
 import { getCurrentActor } from '@/lib/hr/current-role';
@@ -5,6 +6,7 @@ import { pickActiveCampus } from '@/lib/campus-context';
 import { todayPk } from '@/lib/dates';
 import { PageHeader } from '@/components/ui/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Breakdown, KpiGrid } from '@/components/module-dashboard';
 
 export const dynamic = 'force-dynamic';
@@ -53,8 +55,8 @@ export default async function StudentsDashboardPage() {
   ]);
   const perClass = await Promise.all((classes ?? []).map((c) => activeEnrolments().eq('class_level_id', c.id)));
 
-  const classRows = (classes ?? []).map((c, i) => ({ key: c.id, label: c.name_en, value: perClass[i]?.count ?? 0 })).filter((r) => r.value > 0);
-  const genderRows = GENDERS.map((g, i) => ({ key: g.value, label: g.label, value: genders[i]?.count ?? 0 })).filter((r) => r.key !== 'other' || r.value > 0);
+  const classRows = (classes ?? []).map((c, i) => ({ key: c.id, label: c.name_en, value: perClass[i]?.count ?? 0, href: `/students?cls=c:${c.id}` })).filter((r) => r.value > 0);
+  const genderRows = GENDERS.map((g, i) => ({ key: g.value, label: g.label, value: genders[i]?.count ?? 0, href: `/students?gender=${g.value}` })).filter((r) => r.key !== 'other' || r.value > 0);
 
   return (
     <>
@@ -68,21 +70,25 @@ export default async function StudentsDashboardPage() {
           { id: 'birthdays', label: 'Birthdays today', value: (birthdays ?? []).length },
         ]}
       />
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      <div className="mt-6 grid items-start gap-4 lg:grid-cols-3">
         <Breakdown title="Students per class" rows={classRows} empty="No active students yet." bars />
         <Breakdown title="Boys and girls" rows={genderRows} empty="No active students yet." bars />
-        <section className="space-y-2">
-          <h2 className="font-medium">Birthdays today</h2>
-          {(birthdays ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">None today.</p>
-          ) : (
-            (birthdays ?? []).map((s) => (
-              <p key={s.id} className="text-sm" data-testid="students-birthday">
-                {s.name_en} <span className="text-muted-foreground">· GR {s.gr_number}</span>
-              </p>
-            ))
-          )}
-        </section>
+        <Card className="self-start">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-base">Birthdays today</CardTitle>
+          </CardHeader>
+          <CardContent className="p-2 pt-0">
+            {(birthdays ?? []).length === 0 ? (
+              <p className="px-2 pb-2 text-sm text-muted-foreground">None today.</p>
+            ) : (
+              (birthdays ?? []).map((s) => (
+                <Link key={s.id} href={`/students/${s.id}`} className="block rounded-md px-2 py-1.5 text-sm hover:bg-muted" data-testid="students-birthday">
+                  {s.name_en} <span className="text-muted-foreground">· GR {s.gr_number}</span>
+                </Link>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
     </>
   );
