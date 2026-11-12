@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { recordPayment } from '../actions';
 import { FEE_PAYMENT_MODES } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -47,7 +46,7 @@ function RecordPaymentForm({ studentId, enrolmentId }: { studentId: string; enro
   };
 
   return (
-    <div className="flex flex-wrap items-end gap-2 rounded-lg border p-3">
+    <div className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/50 p-4">
       <div className="space-y-1">
         <Label htmlFor="payment-amount">Amount (PKR)</Label>
         <Input
@@ -111,8 +110,7 @@ export function PaymentView({
           const allocated = p.allocations.reduce((sum, a) => sum + a.amountPaisa, 0);
           const unallocated = p.amountPaisa - allocated;
           return (
-            <Card key={p.id} data-testid={`payment-row-${p.id}`}>
-              <CardContent className="space-y-1 p-3 text-sm">
+            <div key={p.id} data-testid={`payment-row-${p.id}`} className="rounded-md border space-y-1 p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <span>
                     {p.mode.replace(/_/g, ' ')} · PKR {(p.amountPaisa / 100).toLocaleString()} · {p.valueDate}
@@ -129,8 +127,7 @@ export function PaymentView({
                     PKR {(unallocated / 100).toLocaleString()} held as advance credit, applied automatically to the next challan.
                   </p>
                 )}
-              </CardContent>
-            </Card>
+              </div>
           );
         })
       )}
