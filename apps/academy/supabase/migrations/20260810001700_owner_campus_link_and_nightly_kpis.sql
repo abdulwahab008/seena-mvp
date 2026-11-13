@@ -29,12 +29,12 @@ drop trigger if exists campus_link_owners on public.campus;
 create trigger campus_link_owners after insert on public.campus
   for each row execute function app.tg_campus_link_owners();
 
--- The nightly KPI refresh was only scheduled if pg_cron was already enabled, and on the hosted
--- project it was not, so it never ran. Enable it where the platform offers it and schedule the job.
+-- The nightly KPI refresh was only scheduled if pg_cron was enabled when that migration ran, and on
+-- the hosted project it was not, so it never ran. pg_cron is enabled there by hand (enabling it here
+-- would also arm every other job written conditionally on it); schedule this one job where it is on.
 do $$
 begin
-  if exists (select 1 from pg_available_extensions where name = 'pg_cron') then
-    create extension if not exists pg_cron;
+  if exists (select 1 from pg_extension where extname = 'pg_cron') then
     perform cron.unschedule(jobid) from cron.job where jobname = 'agg_campus_day_nightly';
     perform cron.schedule('agg_campus_day_nightly', '30 20 * * *', 'select public.refresh_agg_nightly();');
   end if;
