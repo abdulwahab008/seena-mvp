@@ -2,7 +2,10 @@
 import { describe, expect, it } from 'vitest';
 import { readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import { NAV_SECTIONS, navSectionsForRole } from './navigation';
+import { NAV_SECTIONS, navSectionsForRole, type NavItem } from './navigation';
+
+/** Every page an item opens: its tabs, or the item itself. */
+const pages = (items: NavItem[]) => items.flatMap((i) => (i.tabs ? i.tabs.map((t) => t.href) : [i.href]));
 import { canOpenFeesPath } from './auth/fee-access';
 
 const APP_DIR = path.resolve(__dirname, '../app/(app)');
@@ -26,10 +29,10 @@ function staticRoutes(dir: string, segments: string[] = []): string[] {
 
 // Pages that are deliberately not in the sidebar: reached from the header, or from a page of their own.
 // Pages opened from a hub page rather than the sidebar.
-const REACHED_ELSEWHERE = new Set(['/account', '/exams/mastery/capture', '/academic-setup/class-reports/class-list', '/students/reports/strength', '/students/reports/admission-form', '/staff/reports/strength', '/dashboard/today', '/dashboard/owner', '/dashboard/collection']);
+const REACHED_ELSEWHERE = new Set(['/account', '/exams/mastery/capture', '/academic-setup/class-reports/class-list', '/students/reports/strength', '/students/reports/admission-form', '/staff/reports/strength']);
 
 describe('sidebar', () => {
-  const hrefs = new Set(NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.href)));
+  const hrefs = new Set(NAV_SECTIONS.flatMap((s) => pages(s.items)));
 
   it('links to every page a staff member can use', () => {
     const orphans = staticRoutes(APP_DIR).filter((r) => !hrefs.has(r) && !REACHED_ELSEWHERE.has(r));
@@ -54,8 +57,8 @@ describe('the Fees section', () => {
 
   it('lists exactly the pages each role is allowed to open', () => {
     for (const role of ALL_ROLES) {
-      const shown = navSectionsForRole(NAV_SECTIONS, role).find((s) => s.id === 'fees')?.items.map((i) => i.href) ?? [];
-      const allowed = feeItems.map((i) => i.href).filter((href) => canOpenFeesPath(role, href));
+      const shown = pages(navSectionsForRole(NAV_SECTIONS, role).find((s) => s.id === 'fees')?.items ?? []);
+      const allowed = pages(feeItems).filter((href) => canOpenFeesPath(role, href));
       expect(shown, role).toEqual(allowed);
     }
   });
@@ -67,8 +70,8 @@ describe('the Fees section', () => {
   });
 
   it('shows an accountant every fees page and an admissions officer the counter and two more', () => {
-    expect(navSectionsForRole(NAV_SECTIONS, 'accountant').find((s) => s.id === 'fees')!.items).toHaveLength(feeItems.length);
-    expect(navSectionsForRole(NAV_SECTIONS, 'admissions_officer').find((s) => s.id === 'fees')!.items.map((i) => i.href)).toEqual([
+    expect(pages(navSectionsForRole(NAV_SECTIONS, 'accountant').find((s) => s.id === 'fees')!.items)).toEqual(pages(feeItems));
+    expect(pages(navSectionsForRole(NAV_SECTIONS, 'admissions_officer').find((s) => s.id === 'fees')!.items)).toEqual([
       '/fees/counter',
       '/fees/concessions',
       '/fees/sibling-discounts',

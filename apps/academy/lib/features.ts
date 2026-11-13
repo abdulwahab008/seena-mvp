@@ -1,4 +1,4 @@
-import type { NavSection } from './navigation';
+import { filterNavTabs, type NavSection } from './navigation';
 
 export type FeatureSet = Record<string, boolean>;
 
@@ -69,7 +69,7 @@ export function isFeatureEnabled(features: FeatureSet, code: string | undefined)
  * RPC behind it are gated in the database.
  */
 export function visibleNavSections(sections: NavSection[], features: FeatureSet): NavSection[] {
-  return sections
+  return filterNavTabs(sections, (tab) => isFeatureEnabled(features, tab.feature))
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => isFeatureEnabled(features, item.feature)),
