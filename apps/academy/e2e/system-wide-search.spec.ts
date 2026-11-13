@@ -52,6 +52,8 @@ async function seedTenant() {
     p_name: 'DHA Campus',
   });
   if (e7) throw e7;
+  // Creating a campus links the owner to it, which makes this token stale.
+  await ownerClient.auth.refreshSession();
 
   // The FR's literal AC1 GR number.
   const { error: e8 } = await ownerClient.rpc('set_gr_sequence', {
