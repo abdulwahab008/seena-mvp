@@ -36,6 +36,9 @@ export async function createCampus(
     return { error: 'Could not create campus.' };
   }
 
+  // Campus links ride in the token, and changing them marks it stale (owners are linked to every
+  // new campus); reissue it so the next request is not refused.
+  await supabase.auth.refreshSession();
   revalidatePath('/campuses');
   return { error: null };
 }
@@ -53,6 +56,7 @@ export async function archiveCampus(campusId: string): Promise<ArchiveCampusStat
     return { error: 'Could not archive campus.' };
   }
 
+  await supabase.auth.refreshSession();
   revalidatePath('/campuses');
   return { error: null };
 }
@@ -64,6 +68,7 @@ export async function restoreCampus(campusId: string): Promise<ArchiveCampusStat
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to restore this campus.' };
     return { error: 'Could not restore campus.' };
   }
+  await supabase.auth.refreshSession();
   revalidatePath('/campuses');
   return { error: null };
 }
