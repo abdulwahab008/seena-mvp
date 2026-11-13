@@ -20,8 +20,8 @@ export default async function OwnerDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Owner dashboard</h1>
-        <p className="text-sm text-muted-foreground">This month to date, every campus you can see, from the nightly aggregates.</p>
+        <h1 className="text-2xl font-semibold">School KPIs</h1>
+        <p className="text-sm text-muted-foreground">Fees billed and collected, money still owed, staff cost and attendance for each campus this month. Updated every night.</p>
       </div>
 
       {fresh?.is_stale && (

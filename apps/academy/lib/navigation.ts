@@ -60,14 +60,14 @@ export type NavSection = {
 // Who sees which modules in the sidebar. Presentation only (see NavItem.roles): every page and
 // its data are still gated by the route and by row-level security. The point is that a teacher,
 // a librarian or a nurse is not shown dozens of screens that would only refuse them.
-const LEADERSHIP = ['super_admin', 'owner', 'principal', 'vice_principal'] as const;
-const OWNERS = ['super_admin', 'owner'] as const;
+export const LEADERSHIP = ['super_admin', 'owner', 'principal', 'vice_principal'] as const;
+export const OWNERS = ['super_admin', 'owner'] as const;
 const SCHOOL_ADMIN = ['super_admin', 'owner', 'principal'] as const;
 const FRONT_OFFICE = [...LEADERSHIP, 'admissions_officer', 'receptionist'] as const;
 const HR_ROLES = [...LEADERSHIP, 'hr_manager'] as const;
 const SCHOOL_ADMIN_HR = [...SCHOOL_ADMIN, 'hr_manager'] as const;
 const PAYROLL_ROLES = ['super_admin', 'owner', 'principal', 'hr_manager', 'accountant'] as const;
-const FINANCE_ROLES = ['super_admin', 'owner', 'principal', 'accountant'] as const;
+export const FINANCE_ROLES = ['super_admin', 'owner', 'principal', 'accountant'] as const;
 const ACADEMIC_LEADS = [...LEADERSHIP, 'head_of_department', 'hr_manager'] as const;
 
 /** The fee staff, plus the admissions officer for the two fees pages their admissions work uses. */
@@ -87,9 +87,6 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: LayoutDashboard,
     items: [
       { href: '/dashboard', label: 'Dashboard' },
-      { href: '/dashboard/owner', label: 'Owner KPIs', roles: OWNERS },
-      { href: '/dashboard/today', label: 'Today', roles: LEADERSHIP },
-      { href: '/dashboard/collection', label: 'Billing vs Collection', roles: FINANCE_ROLES },
       { href: '/office', label: 'Tasks & Contacts' },
     ],
   },

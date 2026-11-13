@@ -16,12 +16,12 @@ export default async function PrincipalTodayPage() {
   const panels = await Promise.all(
     campuses.map(async (c) => {
       const campusId = c.campus_id as string;
-      const [{ data: unmarked }, { data: absentees }, { data: campus }] = await Promise.all([
+      const [{ data: unmarked, error: unmarkedError }, { data: absentees, error: absenteesError }, { data: campus }] = await Promise.all([
         supabase.rpc('fn_unmarked_sections', { p_campus_id: campusId }),
         supabase.rpc('fn_today_absentees', { p_campus_id: campusId }),
         supabase.from('campus').select('name').eq('id', campusId).maybeSingle(),
       ]);
-      return { c, name: campus?.name ?? 'Campus', unmarked: unmarked ?? [], absentees: absentees ?? [] };
+      return { c, name: campus?.name ?? 'Campus', unmarked: unmarked ?? [], absentees: absentees ?? [], failed: Boolean(unmarkedError || absenteesError) };
     }),
   );
 
@@ -32,7 +32,7 @@ export default async function PrincipalTodayPage() {
         <p className="text-sm text-muted-foreground">Live, not the nightly rollup: what needs attention right now.</p>
       </div>
 
-      {panels.map(({ c, name, unmarked, absentees }) => (
+      {panels.map(({ c, name, unmarked, absentees, failed }) => (
         <section key={c.campus_id} className="space-y-4" data-testid="today-campus">
           <h2 className="text-lg font-medium">
             {name} · {c.on_date}
@@ -69,12 +69,18 @@ export default async function PrincipalTodayPage() {
             </Card>
           </div>
 
+          {failed && (
+            <div role="alert" className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              The section and absence lists could not be loaded for this campus. If you were just given access to it, sign out and sign in again.
+            </div>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Sections that have not marked attendance ({unmarked.length})</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
-              {unmarked.length === 0 && <p className="text-muted-foreground">Every section has marked attendance.</p>}
+              {!failed && unmarked.length === 0 && <p className="text-muted-foreground">Every section has marked attendance.</p>}
               {unmarked.map((u) => (
                 <div key={u.section_id} className="flex justify-between border-b py-1" data-testid="unmarked-section">
                   <span>
@@ -91,7 +97,7 @@ export default async function PrincipalTodayPage() {
               <CardTitle className="text-base">Absent students ({absentees.length})</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
-              {absentees.length === 0 && <p className="text-muted-foreground">No absences recorded yet.</p>}
+              {!failed && absentees.length === 0 && <p className="text-muted-foreground">No absences recorded yet.</p>}
               {absentees.map((a) => (
                 <div key={a.enrolment_id} className="flex items-center justify-between gap-2 border-b py-1" data-testid="absentee-row">
                   <span>
