@@ -7,18 +7,21 @@ import { ChevronDown, Search } from 'lucide-react';
 import { BrandMark } from '@/components/brand';
 import { cn } from '@/lib/utils';
 import { NAV_SECTIONS, findActiveItem, navSectionsForRole, type NavSection } from '@/lib/navigation';
+
+type ActiveItem = ReturnType<typeof findActiveItem>;
 import { visibleNavSections, type FeatureSet } from '@/lib/features';
 
 function SectionGroup({
   section,
   pathname,
+  active,
   onNavigate,
 }: {
   section: NavSection;
   pathname: string;
+  active: ActiveItem;
   onNavigate?: () => void;
 }) {
-  const active = findActiveItem(pathname);
   const sectionActive = active?.section.id === section.id;
   const single = section.items.length === 1;
 
@@ -37,7 +40,7 @@ function SectionGroup({
 
   if (single) {
     const item = section.items[0]!;
-    const isActive = active?.href === item.href;
+    const isActive = sectionActive;
     return (
       <Link
         href={item.href}
@@ -133,9 +136,13 @@ export function SidebarContent({
   const sections = features ? visibleNavSections(forRole, features) : forRole;
   const [query, setQuery] = React.useState('');
   const q = query.trim().toLowerCase();
+  const active = findActiveItem(pathname, sections);
   const matches = q
     ? sections.flatMap((s) =>
-        s.items.filter((i) => i.label.toLowerCase().includes(q) || s.label.toLowerCase().includes(q)).map((i) => ({ ...i, section: s.label })),
+        s.items
+          .flatMap((i) => i.tabs ?? [i])
+          .filter((i) => i.label.toLowerCase().includes(q) || s.label.toLowerCase().includes(q))
+          .map((i) => ({ href: i.href, label: i.label, section: s.label })),
       )
     : [];
 
@@ -197,7 +204,7 @@ export function SidebarContent({
               {section.group && section.group !== sections[i - 1]?.group ? (
                 <p className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-sidebar-muted">{section.group}</p>
               ) : null}
-              <SectionGroup section={section} pathname={pathname} onNavigate={onNavigate} />
+              <SectionGroup section={section} pathname={pathname} active={active} onNavigate={onNavigate} />
             </React.Fragment>
           ))
         )}

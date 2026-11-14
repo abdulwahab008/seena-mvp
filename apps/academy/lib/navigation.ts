@@ -26,8 +26,12 @@ import {
 } from 'lucide-react';
 import { FEE_STAFF_ROLES, FRONT_DESK_ROLES } from '@/lib/auth/fee-access';
 
+export type NavTab = { href: string; label: string; roles?: readonly string[]; feature?: string };
+
 export type NavItem = {
   href: string;
+  /** Related pages shown as tabs across the top of each other instead of as separate sidebar links. */
+  tabs?: NavTab[];
   label: string;
   /** Extra path prefixes that should also light this item up. */
   match?: string[];
@@ -86,7 +90,16 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Overview',
     icon: LayoutDashboard,
     items: [
-      { href: '/dashboard', label: 'Dashboard' },
+      {
+        href: '/dashboard',
+        label: 'Dashboard',
+        tabs: [
+          { href: '/dashboard', label: 'Overview' },
+          { href: '/dashboard/today', label: 'Today', roles: LEADERSHIP },
+          { href: '/dashboard/owner', label: 'School KPIs', roles: OWNERS },
+          { href: '/dashboard/collection', label: 'Billing vs Collection', roles: FINANCE_ROLES },
+        ],
+      },
       { href: '/office', label: 'Tasks & Contacts' },
     ],
   },
@@ -127,18 +140,37 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/students/families', label: 'Family List', roles: FRONT_OFFICE },
       { href: '/students/reports', label: 'Student Reports', roles: FRONT_OFFICE },
       { href: '/students/documents', label: 'Student Documents', roles: FRONT_OFFICE },
-      { href: '/students/alumni', label: 'Alumni' },
       { href: '/students/transfers', label: 'Campus Transfers', roles: FRONT_OFFICE },
-      { href: '/students/admission-register', label: 'Admission Register', roles: FRONT_OFFICE },
-      { href: '/students/withdrawals', label: 'Withdrawal Register', roles: FRONT_OFFICE },
-      { href: '/students/discipline', label: 'Discipline Register', roles: LEADERSHIP },
+      {
+        href: '/students/admission-register',
+        label: 'Registers',
+        tabs: [
+          { href: '/students/admission-register', label: 'Admissions', roles: FRONT_OFFICE },
+          { href: '/students/withdrawals', label: 'Withdrawals', roles: FRONT_OFFICE },
+          { href: '/students/discipline', label: 'Discipline', roles: LEADERSHIP },
+          { href: '/students/alumni', label: 'Alumni' },
+        ],
+      },
       { href: '/students/coaching', label: 'Extra Coaching', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/students/vaccinations', label: 'Vaccinations', roles: [...LEADERSHIP, 'nurse'] },
-      { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
-      { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
+      {
+        href: '/students/import',
+        label: 'Student Tools',
+        tabs: [
+          { href: '/students/import', label: 'Bulk Import', roles: FRONT_OFFICE },
+          { href: '/students/merge', label: 'Merge Duplicates', roles: ['super_admin', 'owner', 'principal'] },
+          { href: '/students/recycle-bin', label: 'Recycle Bin', roles: FRONT_OFFICE },
+        ],
+      },
       { href: '/id-cards', label: 'Student & Staff ID Cards', roles: [...FRONT_OFFICE, 'hr_manager'] },
-      { href: '/students/promotion', label: 'Promotion', roles: [...LEADERSHIP, 'exam_controller'] },
-      { href: '/students/recycle-bin', label: 'Recycle Bin', roles: FRONT_OFFICE },
+      {
+        href: '/students/promotion',
+        label: 'Promotion',
+        tabs: [
+          { href: '/students/promotion', label: 'Promote Students', roles: [...LEADERSHIP, 'exam_controller'] },
+          { href: '/exams/promotion', label: 'Promotion Decisions' },
+        ],
+      },
       { href: '/consent', label: 'Consent' },
       { href: '/houses', label: 'Houses' },
       { href: '/ptm', label: 'Parent-Teacher Meetings' },
@@ -150,15 +182,27 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Certificates',
     icon: Award,
     items: [
-      { href: '/certificates/issue', label: 'Issue Transfer Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/issue/character', label: 'Issue Character Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/issue/leaving', label: 'Issue Leaving Certificate', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      {
+        href: '/certificates/issue',
+        label: 'Issue Certificate',
+        tabs: [
+          { href: '/certificates/issue', label: 'Transfer', roles: [...FRONT_OFFICE, 'exam_controller'] },
+          { href: '/certificates/issue/character', label: 'Character', roles: [...FRONT_OFFICE, 'exam_controller'] },
+          { href: '/certificates/issue/leaving', label: 'Leaving', roles: [...FRONT_OFFICE, 'exam_controller'] },
+        ],
+      },
       { href: '/certificates/requests', label: 'Bonafide Requests', roles: [...FRONT_OFFICE, 'exam_controller'] },
       { href: '/certificates/verification', label: 'Verification Activity', roles: [...FRONT_OFFICE, 'exam_controller'] },
       { href: '/certificates/register', label: 'Register', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/templates', label: 'Templates', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/serials', label: 'Serial Numbers', roles: [...FRONT_OFFICE, 'exam_controller'] },
-      { href: '/certificates/signing', label: 'Signing Identities', roles: [...FRONT_OFFICE, 'exam_controller'] },
+      {
+        href: '/certificates/templates',
+        label: 'Certificate Settings',
+        tabs: [
+          { href: '/certificates/templates', label: 'Templates', roles: [...FRONT_OFFICE, 'exam_controller'] },
+          { href: '/certificates/serials', label: 'Serial Numbers', roles: [...FRONT_OFFICE, 'exam_controller'] },
+          { href: '/certificates/signing', label: 'Signing Identities', roles: [...FRONT_OFFICE, 'exam_controller'] },
+        ],
+      },
       { href: '/certificates/board-export', label: 'Board Registration Export', roles: [...FRONT_OFFICE, 'exam_controller'] },
     ],
   },
@@ -171,22 +215,40 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/academic-setup/subjects', label: 'Subjects' },
       { href: '/academic-setup/classes-sections', label: 'Classes & Sections' },
       { href: '/academic-setup/class-reports', label: 'Class Reports' },
-      { href: '/academic-setup/curriculum', label: 'Curriculum' },
-      { href: '/academic-setup/syllabus', label: 'Syllabus' },
+      {
+        href: '/academic-setup/syllabus',
+        label: 'Syllabus',
+        tabs: [
+          { href: '/academic-setup/syllabus', label: 'Syllabus' },
+          { href: '/syllabus-coverage', label: 'Coverage' },
+          { href: '/syllabus-variance', label: 'Variance' },
+          { href: '/academic-setup/curriculum', label: 'Curriculum' },
+          { href: '/academic-setup/curriculum-reports', label: 'Curriculum Reports', roles: ACADEMIC_LEADS },
+        ],
+      },
       { href: '/academic-setup/rooms', label: 'Rooms' },
       { href: '/homework', label: 'Homework', feature: 'module.homework' },
       { href: '/quizzes', label: 'Online Quizzes' },
       { href: '/live-classes', label: 'Live Classes' },
-      { href: '/hifz', label: 'Hifz & Quran' },
-      { href: '/hifz/progress', label: 'Hifz Progress Register' },
+      {
+        href: '/hifz',
+        label: 'Hifz & Quran',
+        tabs: [
+          { href: '/hifz', label: 'Hifz & Quran' },
+          { href: '/hifz/progress', label: 'Progress Register' },
+        ],
+      },
       { href: '/downloads', label: 'Download Centre' },
       { href: '/lesson-plans', label: 'Lesson Plans' },
-      { href: '/syllabus-coverage', label: 'Syllabus Coverage' },
-      { href: '/syllabus-variance', label: 'Syllabus Variance' },
       { href: '/academic-setup/rollover', label: 'Session Rollover' },
-      { href: '/academic-setup/competency', label: 'Teacher Competency', roles: ACADEMIC_LEADS },
-      { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects', roles: ACADEMIC_LEADS },
-      { href: '/academic-setup/curriculum-reports', label: 'Curriculum Reports', roles: ACADEMIC_LEADS },
+      {
+        href: '/academic-setup/competency',
+        label: 'Teacher Subjects',
+        tabs: [
+          { href: '/academic-setup/competency', label: 'Competency', roles: ACADEMIC_LEADS },
+          { href: '/academic-setup/teachable-subjects', label: 'Teachable Subjects', roles: ACADEMIC_LEADS },
+        ],
+      },
     ],
   },
   {
@@ -195,11 +257,17 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Timetable',
     icon: CalendarClock,
     items: [
-      { href: '/academic-setup/timetable', label: 'Timetable' },
-      { href: '/academic-setup/bell-templates', label: 'Bell Templates' },
+      {
+        href: '/academic-setup/timetable',
+        label: 'Timetable',
+        tabs: [
+          { href: '/academic-setup/timetable', label: 'Timetable' },
+          { href: '/academic-setup/bell-templates', label: 'Bell Templates' },
+          { href: '/academic-setup/timetable-export', label: 'Print & Export' },
+        ],
+      },
       { href: '/academic-setup/substitutions', label: 'Substitutions' },
       { href: '/academic-setup/free-periods', label: 'Free Teachers & Rooms' },
-      { href: '/academic-setup/timetable-export', label: 'Print & Export' },
       { href: '/my-timetable', label: 'My Timetable' },
     ],
   },
@@ -214,10 +282,16 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/attendance/staff', label: 'Staff Attendance', roles: ['super_admin', 'owner', 'principal', 'hr_manager'] },
       { href: '/attendance/periods', label: 'Period Attendance' },
       { href: '/attendance/corrections', label: 'Corrections' },
-      { href: '/attendance/unmarked', label: 'Unmarked Registers' },
-      { href: '/attendance/monthly-summary', label: 'Monthly Summary' },
-      { href: '/attendance/daily-report', label: 'Daily Report' },
-      { href: '/attendance/shortage', label: 'Shortage Warnings' },
+      {
+        href: '/attendance/daily-report',
+        label: 'Attendance Reports',
+        tabs: [
+          { href: '/attendance/daily-report', label: 'Daily Report' },
+          { href: '/attendance/monthly-summary', label: 'Monthly Summary' },
+          { href: '/attendance/unmarked', label: 'Unmarked Registers' },
+          { href: '/attendance/shortage', label: 'Shortage Warnings' },
+        ],
+      },
       { href: '/attendance/absentee-notifications', label: 'Absentee Alerts' },
       { href: '/academic-setup/attendance-policy', label: 'Attendance Policy' },
     ],
@@ -235,12 +309,24 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/exams/class-tests', label: 'Class Tests', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'head_of_department', 'exam_controller', 'class_teacher', 'subject_teacher'] },
       { href: '/exams/paper-scope', label: 'Syllabus Paper Scope' },
       { href: '/exams/remarks', label: 'Teacher Remarks' },
-      { href: '/exams/moderation', label: 'Moderation' },
-      { href: '/exams/approvals', label: 'Mark Approval' },
-      { href: '/exams/unlocks', label: 'Break-Glass Unlocks' },
-      { href: '/exams/datesheet', label: 'Datesheet' },
-      { href: '/exams/invigilation', label: 'Invigilation' },
-      { href: '/exams/seating', label: 'Seating Plans' },
+      {
+        href: '/exams/moderation',
+        label: 'Mark Review',
+        tabs: [
+          { href: '/exams/moderation', label: 'Moderation' },
+          { href: '/exams/approvals', label: 'Mark Approval' },
+          { href: '/exams/unlocks', label: 'Break-Glass Unlocks' },
+        ],
+      },
+      {
+        href: '/exams/datesheet',
+        label: 'Exam Schedule',
+        tabs: [
+          { href: '/exams/datesheet', label: 'Datesheet' },
+          { href: '/exams/invigilation', label: 'Invigilation' },
+          { href: '/exams/seating', label: 'Seating Plans' },
+        ],
+      },
       { href: '/exams/papers', label: 'Question Papers' },
     ],
   },
@@ -251,14 +337,25 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: FileBarChart,
     items: [
       { href: '/exams/grading', label: 'Grading Schemes' },
-      { href: '/exams/results', label: 'Term Results & Positions' },
-      { href: '/exams/failures', label: 'Failure List' },
-      { href: '/exams/tabulation', label: 'Tabulation, Merit & Failure Lists' },
+      {
+        href: '/exams/results',
+        label: 'Results',
+        tabs: [
+          { href: '/exams/results', label: 'Term Results & Positions' },
+          { href: '/exams/annual', label: 'Annual Results' },
+          { href: '/exams/external-results', label: 'Board Results' },
+        ],
+      },
+      {
+        href: '/exams/tabulation',
+        label: 'Tabulation & Lists',
+        tabs: [
+          { href: '/exams/tabulation', label: 'Tabulation & Merit' },
+          { href: '/exams/failures', label: 'Failure List' },
+        ],
+      },
       { href: '/exams/behaviour', label: 'Behaviour Ratings' },
       { href: '/exams/rechecks', label: 'Re-checks' },
-      { href: '/exams/external-results', label: 'Board Results' },
-      { href: '/exams/annual', label: 'Annual Results' },
-      { href: '/exams/promotion', label: 'Promotion Decisions' },
       { href: '/exams/analytics', label: 'Subject Analytics' },
       { href: '/exams/mastery', label: 'Topic Mastery' },
       { href: '/exams/packets', label: 'Report Card Packets' },
@@ -273,7 +370,14 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Fees',
     icon: Wallet,
     items: [
-      { href: '/fees/heads', label: 'Fee Heads', roles: FEE_STAFF_ROLES },
+      {
+        href: '/fees/heads',
+        label: 'Fee Heads',
+        tabs: [
+          { href: '/fees/heads', label: 'Fee Heads', roles: FEE_STAFF_ROLES },
+          { href: '/fees/late-fee-rules', label: 'Late Fee Rules', roles: FEE_STAFF_ROLES },
+        ],
+      },
       { href: '/fees/structure', label: 'Fee Structure', roles: FEE_STAFF_ROLES },
       { href: '/fees/student-fees', label: 'Student Fees', roles: FEE_STAFF_ROLES },
       { href: '/fees/challans', label: 'Challans', roles: FEE_STAFF_ROLES },
@@ -283,17 +387,34 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/fees/reminders', label: 'Reminders', roles: FEE_STAFF_ROLES },
       { href: '/fees/settlements', label: 'Withdrawal Settlements', roles: FEE_STAFF_ROLES },
       { href: '/fees/no-dues', label: 'Deposits and No-Dues', roles: FEE_STAFF_ROLES },
-      { href: '/fees/gateway-settlements', label: 'Gateway Settlements', roles: FEE_STAFF_ROLES },
-      { href: '/fees/attendance-concessions', label: 'Attendance Concessions', roles: FEE_STAFF_ROLES },
-      { href: '/fees/concessions', label: 'Concessions', roles: FEES_ADMISSIONS_ROLES },
-      { href: '/fees/sibling-discounts', label: 'Sibling Discounts', roles: FEES_ADMISSIONS_ROLES },
-      { href: '/fees/late-fee-rules', label: 'Late Fee Rules', roles: FEE_STAFF_ROLES },
-      { href: '/fees/gateways', label: 'Online Payments', roles: FEE_STAFF_ROLES },
-      { href: '/fees/bank-statements', label: 'Bank Statements', roles: FEE_STAFF_ROLES },
-      { href: '/fees/class-report', label: 'Fee Reports', roles: FEE_STAFF_ROLES },
-      { href: '/fees/reports', label: 'Collection Reports', roles: FEE_STAFF_ROLES },
+      {
+        href: '/fees/concessions',
+        label: 'Discounts',
+        tabs: [
+          { href: '/fees/concessions', label: 'Concessions', roles: FEES_ADMISSIONS_ROLES },
+          { href: '/fees/sibling-discounts', label: 'Sibling Discounts', roles: FEES_ADMISSIONS_ROLES },
+          { href: '/fees/attendance-concessions', label: 'Attendance Concessions', roles: FEE_STAFF_ROLES },
+        ],
+      },
+      {
+        href: '/fees/gateways',
+        label: 'Online & Bank',
+        tabs: [
+          { href: '/fees/gateways', label: 'Online Payments', roles: FEE_STAFF_ROLES },
+          { href: '/fees/gateway-settlements', label: 'Gateway Settlements', roles: FEE_STAFF_ROLES },
+          { href: '/fees/bank-statements', label: 'Bank Statements', roles: FEE_STAFF_ROLES },
+        ],
+      },
+      {
+        href: '/fees/class-report',
+        label: 'Fee Reports',
+        tabs: [
+          { href: '/fees/class-report', label: 'Class Report', roles: FEE_STAFF_ROLES },
+          { href: '/fees/reports', label: 'Collection Reports', roles: FEE_STAFF_ROLES },
+          { href: '/fees/analytics', label: 'Fee Analytics', roles: FEE_STAFF_ROLES },
+        ],
+      },
       { href: '/fees/donors', label: 'Donors & Sponsorships', roles: ['super_admin', 'owner', 'principal', 'accountant'] },
-      { href: '/fees/analytics', label: 'Fee Analytics', roles: FEE_STAFF_ROLES },
       { href: '/fees/installments', label: 'Installments', roles: FEE_STAFF_ROLES },
     ],
   },
@@ -328,14 +449,26 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Banknote,
     items: [
       { href: '/payroll/runs', label: 'Payroll Runs', roles: PAYROLL_ROLES },
-      { href: '/payroll/components', label: 'Salary Components', roles: PAYROLL_ROLES },
-      { href: '/payroll/structures', label: 'Salary Structures', roles: PAYROLL_ROLES },
-      { href: '/payroll/pay-scales', label: 'Pay Scales', roles: PAYROLL_ROLES },
-      { href: '/payroll/reports', label: 'Payroll Reports', roles: PAYROLL_ROLES },
+      {
+        href: '/payroll/components',
+        label: 'Salary Setup',
+        tabs: [
+          { href: '/payroll/components', label: 'Components', roles: PAYROLL_ROLES },
+          { href: '/payroll/structures', label: 'Structures', roles: PAYROLL_ROLES },
+          { href: '/payroll/pay-scales', label: 'Pay Scales', roles: PAYROLL_ROLES },
+          { href: '/payroll/tax-slabs', label: 'Tax Slabs', roles: PAYROLL_ROLES },
+        ],
+      },
+      {
+        href: '/payroll/reports',
+        label: 'Payroll Reports',
+        tabs: [
+          { href: '/payroll/reports', label: 'Payroll Reports', roles: PAYROLL_ROLES },
+          { href: '/payroll/statutory', label: 'Statutory Report', roles: PAYROLL_ROLES },
+        ],
+      },
       { href: '/payroll/loans', label: 'Staff Loans', roles: PAYROLL_ROLES },
       { href: '/payroll/security-deposits', label: 'Security Deposits', roles: PAYROLL_ROLES },
-      { href: '/payroll/tax-slabs', label: 'Tax Slabs', roles: PAYROLL_ROLES },
-      { href: '/payroll/statutory', label: 'Statutory Report', roles: PAYROLL_ROLES },
       { href: '/payroll/gratuity', label: 'Gratuity & Provident Fund', roles: ['super_admin', 'owner', 'hr_manager', 'accountant'] },
     ],
   },
@@ -345,22 +478,40 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Staff',
     icon: UserCog,
     items: [
-      { href: '/staff', label: 'All Staff', roles: HR_ROLES },
-      { href: '/staff/directory', label: 'Directory' },
+      {
+        href: '/staff',
+        label: 'All Staff',
+        tabs: [
+          { href: '/staff', label: 'All Staff', roles: HR_ROLES },
+          { href: '/staff/directory', label: 'Directory' },
+        ],
+      },
       { href: '/staff/reports', label: 'Staff Reports', roles: HR_ROLES },
       { href: '/staff/org-chart', label: 'Org Chart' },
       { href: '/staff/departments', label: 'Departments', roles: HR_ROLES },
-      { href: '/staff/qualifications', label: 'Qualifications', roles: HR_ROLES },
-      { href: '/staff/compliance', label: 'Compliance', roles: HR_ROLES },
+      {
+        href: '/staff/qualifications',
+        label: 'Staff Records',
+        tabs: [
+          { href: '/staff/qualifications', label: 'Qualifications', roles: HR_ROLES },
+          { href: '/staff/compliance', label: 'Compliance', roles: HR_ROLES },
+          { href: '/staff/certificates', label: 'Certificates', roles: HR_ROLES },
+        ],
+      },
       { href: '/staff/biometric', label: 'Biometric Attendance', roles: HR_ROLES },
       { href: '/staff/discipline', label: 'Disciplinary', roles: HR_ROLES },
       { href: '/staff/exits', label: 'Exits', roles: HR_ROLES },
-      { href: '/staff/certificates', label: 'Certificates', roles: HR_ROLES },
       { href: '/staff/workload', label: 'Teacher Workload', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
       { href: '/staff/recruitment', label: 'Recruitment', roles: HR_ROLES },
       { href: '/staff/hr-dashboard', label: 'HR Dashboard', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'hr_manager'] },
-      { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
-      { href: '/staff/training', label: 'Training & CPD', roles: SCHOOL_ADMIN_HR },
+      {
+        href: '/staff/appraisals',
+        label: 'Development',
+        tabs: [
+          { href: '/staff/appraisals', label: 'Appraisals', roles: HR_ROLES },
+          { href: '/staff/training', label: 'Training & CPD', roles: SCHOOL_ADMIN_HR },
+        ],
+      },
       { href: '/staff/grievances', label: 'Grievances' },
       { href: '/staff/remarks', label: 'Remarks Moderation', roles: [...ACADEMIC_LEADS, 'exam_controller'] },
       { href: '/staff/tickets', label: 'Support Tickets' },
@@ -373,20 +524,32 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Communication',
     icon: MessageSquare,
     items: [
-      { href: '/communication/outbox', label: 'Message Outbox', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
-      { href: '/communication/sms-gateway', label: 'SMS Gateway', roles: OWNERS },
+      {
+        href: '/communication/outbox',
+        label: 'Message Log',
+        tabs: [
+          { href: '/communication/outbox', label: 'Outbox', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+          { href: '/communication/receipts', label: 'Delivery Receipts', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+          { href: '/communication/emails', label: 'Email Log', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+        ],
+      },
+      {
+        href: '/communication/sms-gateway',
+        label: 'Messaging Settings',
+        tabs: [
+          { href: '/communication/sms-gateway', label: 'SMS Gateway', roles: OWNERS },
+          { href: '/communication/wallet', label: 'Credit & Wallet', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+          { href: '/communication/fallback-chains', label: 'Fallback Chains', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+          { href: '/communication/whatsapp', label: 'WhatsApp Compliance', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+          { href: '/communication/opt-outs', label: 'Opt-Outs', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
+        ],
+      },
       { href: '/communication/scheduled', label: 'Scheduled Sends', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/triggers', label: 'Trigger Rules', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
-      { href: '/communication/receipts', label: 'Delivery Receipts', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
-      { href: '/communication/emails', label: 'Email Log', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
-      { href: '/communication/wallet', label: 'Credit & Wallet', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
-      { href: '/communication/opt-outs', label: 'Opt-Outs & Suppression', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/circulars', label: 'Circulars', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/calendar', label: 'Events Calendar', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/segments', label: 'Audience Segments', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/templates', label: 'Template Library', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
-      { href: '/communication/fallback-chains', label: 'Fallback Chains', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
-      { href: '/communication/whatsapp', label: 'WhatsApp Compliance', roles: [...LEADERSHIP, 'admissions_officer', 'receptionist'] },
       { href: '/communication/discussions', label: 'Staff Discussions' },
     ],
   },
@@ -451,10 +614,16 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/inventory/dashboard', label: 'Shop Dashboard', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory', label: 'Stores and Stock', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/inventory/sales', label: 'Counter Sales', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory/sales-report', label: 'Sales Report', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory/dues', label: 'Shop Dues', roles: [...LEADERSHIP, 'accountant'] },
+      {
+        href: '/inventory/sales-report',
+        label: 'Shop Reports',
+        tabs: [
+          { href: '/inventory/sales-report', label: 'Sales Report', roles: [...LEADERSHIP, 'accountant'] },
+          { href: '/inventory/profit', label: 'Shop Profit', roles: [...LEADERSHIP, 'accountant'] },
+          { href: '/inventory/dues', label: 'Shop Dues', roles: [...LEADERSHIP, 'accountant'] },
+        ],
+      },
       { href: '/inventory/movements', label: 'Stock Movements', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/inventory/profit', label: 'Shop Profit', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets', label: 'Asset Register', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets/custody', label: 'Asset Custody', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/assets/maintenance', label: 'Maintenance', roles: [...LEADERSHIP, 'accountant'] },
@@ -470,8 +639,14 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Reports',
     icon: FileBarChart,
     items: [
-      { href: '/reports/exports', label: 'Excel Exports', roles: [...LEADERSHIP, 'accountant'] },
-      { href: '/reports/audit', label: 'Export Audit', roles: [...LEADERSHIP, 'accountant'] },
+      {
+        href: '/reports/exports',
+        label: 'Excel Exports',
+        tabs: [
+          { href: '/reports/exports', label: 'Excel Exports', roles: [...LEADERSHIP, 'accountant'] },
+          { href: '/reports/audit', label: 'Export Audit', roles: [...LEADERSHIP, 'accountant'] },
+        ],
+      },
       { href: '/reports/digests', label: 'Scheduled Digests', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/reports/year-on-year', label: 'Year on Year', roles: [...LEADERSHIP, 'accountant'] },
       { href: '/reports/builder', label: 'Report Builder', roles: [...LEADERSHIP, 'accountant'] },
@@ -507,22 +682,43 @@ export const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-const ALL_ITEMS = NAV_SECTIONS.flatMap((s) => s.items.map((i) => ({ ...i, section: s })));
-
 /**
- * Longest-prefix match, so `/students/import` selects Bulk Import rather than
- * All Students. Exact match always wins.
+ * Longest-prefix match over each item's own href and its tabs, so `/students/import` selects the
+ * item holding Bulk Import rather than All Students. Exact match always wins.
  */
-export function findActiveItem(pathname: string) {
-  const exact = ALL_ITEMS.find((i) => i.href === pathname);
-  if (exact) return exact;
+export function findActiveItem(pathname: string, sections: NavSection[] = NAV_SECTIONS) {
+  const candidates = sections.flatMap((section) =>
+    section.items.flatMap((item) => [item.href, ...(item.tabs?.map((t) => t.href) ?? [])].map((href) => ({ href, item: { ...item, section } }))),
+  );
+  const exact = candidates.find((c) => c.href === pathname);
+  if (exact) return exact.item;
 
-  const prefixed = ALL_ITEMS.filter(
-    (i) => pathname.startsWith(`${i.href}/`) || i.match?.some((m) => pathname.startsWith(m)),
+  const prefixed = candidates.filter(
+    (c) => pathname.startsWith(`${c.href}/`) || c.item.match?.some((m) => pathname.startsWith(m)),
   );
   if (prefixed.length === 0) return undefined;
 
-  return prefixed.reduce((best, cur) => (cur.href.length > best.href.length ? cur : best));
+  return prefixed.reduce((best, cur) => (cur.href.length > best.href.length ? cur : best)).item;
+}
+
+/** The tab of `item` that `pathname` is on: exact, else the longest tab href it sits under. */
+export function activeTabHref(item: NavItem, pathname: string): string | undefined {
+  const hits = (item.tabs ?? []).filter((t) => t.href === pathname || pathname.startsWith(`${t.href}/`));
+  return hits.reduce<NavTab | undefined>((best, t) => (!best || t.href.length > best.href.length ? t : best), undefined)?.href;
+}
+
+/** Keeps the tabs `keep` allows; an item whose tabs are all gone is dropped, and it opens on its first remaining tab. */
+export function filterNavTabs(sections: NavSection[], keep: (tab: NavTab) => boolean): NavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.flatMap((item) => {
+        if (!item.tabs) return [item];
+        const tabs = item.tabs.filter(keep);
+        return tabs.length ? [{ ...item, href: tabs[0]!.href, tabs }] : [];
+      }),
+    }))
+    .filter((section) => section.items.length > 0);
 }
 
 export function isSectionActive(section: NavSection, pathname: string) {
@@ -547,10 +743,11 @@ export function breadcrumbsFor(pathname: string): Crumb[] {
  * only: see NavItem.roles.
  */
 export function navSectionsForRole(sections: NavSection[], role: string | undefined): NavSection[] {
-  return sections
+  const allowed = (roles?: readonly string[]) => !roles || (role !== undefined && roles.includes(role));
+  return filterNavTabs(sections, (tab) => allowed(tab.roles))
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => !item.roles || (role !== undefined && item.roles.includes(role))),
+      items: section.items.filter((item) => allowed(item.roles)),
     }))
     .filter((section) => section.items.length > 0);
 }

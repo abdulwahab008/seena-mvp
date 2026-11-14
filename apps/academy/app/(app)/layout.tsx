@@ -11,6 +11,7 @@ import { AppHeader } from './app-header';
 import { pickActiveCampus } from '@/lib/campus-context';
 import { ImpersonationBanner } from './impersonation-banner';
 import { ImpersonationEnded } from './impersonation-ended';
+import { SectionTabs } from './section-tabs';
 import { Sidebar } from './sidebar';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -142,6 +143,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           activeCampusId={activeCampus?.id ?? null}
         />
         <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <SectionTabs role={appUser.app_role} features={features} />
           {children}
         </main>
       </div>
