@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
   if (q.data.kind === 'student') {
     let query = supabase
       .from('enrolment')
-      .select('student:student_id!inner(name_en, father_name_en, gr_number, blood_group), class_level:class_level_id(name_en), section:section_id(name)')
+      .select('student:student_id!inner(name_en, father_name_en, gr_number, blood_group, photo_path), class_level:class_level_id(name_en), section:section_id(name)')
       .eq('campus_id', campus.id)
       .eq('status', 'active')
       .limit(MAX_CARDS);
@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
       return [{
         name: s.name_en,
         code: s.gr_number,
+        photo: s.photo_path,
         lines: [
           { label: 'Father', value: s.father_name_en },
           { label: 'GR No', value: s.gr_number },
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
   } else {
     const { data, error } = await supabase
       .from('staff')
-      .select('full_name, employee_code, cnic, designation:designation_id(name_en), department:department_id(name_en)')
+      .select('full_name, employee_code, cnic, photo_path, designation:designation_id(name_en), department:department_id(name_en)')
       .eq('campus_id', campus.id)
       .eq('employment_status', 'active')
       .order('full_name')
@@ -68,6 +69,7 @@ export async function GET(req: NextRequest) {
     cards = (data ?? []).map((s) => ({
       name: s.full_name,
       code: s.employee_code,
+      photo: s.photo_path,
       lines: [
         { label: 'Employee No', value: s.employee_code },
         { label: 'Designation', value: one(s.designation)?.name_en ?? null },
@@ -81,6 +83,13 @@ export async function GET(req: NextRequest) {
     cards.sort((a, b) => classOf(a).localeCompare(classOf(b), undefined, { numeric: true }) || a.name.localeCompare(b.name));
   }
   if (cards.length === 0) return NextResponse.json({ error: 'Nobody matches these filters.' }, { status: 404 });
+
+  // photo holds the storage path until here; swap in the image itself.
+  // ponytail: batches of 20 downloads; a signed-URL renderer with network access would skip this.
+  const bucket = q.data.kind === 'student' ? 'student-photos' : 'staff-photos';
+  for (let i = 0; i < cards.length; i += 20) {
+    await Promise.all(cards.slice(i, i + 20).map(async (c) => (c.photo = await assetDataUri(supabase, bucket, c.photo ?? null))));
+  }
 
   const { data: logo } = await supabase.rpc('resolve_branding', { p_campus_id: campus.id, p_asset_type: 'logo' });
   const logoPath = (logo as { storage_path?: string } | null)?.storage_path ?? null;

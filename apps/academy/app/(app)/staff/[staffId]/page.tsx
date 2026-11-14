@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabase/server';
 import { getCurrentActor, isHrWriter, one } from '@/lib/hr/current-role';
+import { PhotoUpload } from '@/components/photo-upload';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CorrectionForm, IssueForm, ReinstateForm } from './discipline-forms';
@@ -41,7 +42,7 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
 
   const { data: staff } = await supabase
     .from('staff')
-    .select('id, employee_code, full_name, full_name_ur, employment_status, contract_type, doj, designation:designation_id(name_en), department:department_id(name_en)')
+    .select('id, employee_code, full_name, full_name_ur, employment_status, contract_type, doj, photo_path, designation:designation_id(name_en), department:department_id(name_en)')
     .eq('id', staffId)
     .maybeSingle();
   if (!staff) notFound();
@@ -72,6 +73,7 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
   const canHr = isHrWriter(actor?.role);
   const { data: openExit } = canHr ? await supabase.from('staff_exit').select('id, status, exit_type, last_working_date').eq('staff_id', staffId).neq('status', 'completed').maybeSingle() : { data: null };
 
+  const { data: photo } = staff.photo_path ? await supabase.storage.from('staff-photos').createSignedUrl(staff.photo_path, 3600) : { data: null };
   const designation = one(staff.designation)?.name_en;
   const department = one(staff.department)?.name_en;
   const complianceStatus = compliance?.compliance_status ?? null;
@@ -79,13 +81,16 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="flex items-center gap-4">
+          <PhotoUpload kind="staff" id={staff.id} name={staff.full_name} url={photo?.signedUrl ?? null} canEdit={canHr} />
+          <div>
           <h1 className="text-2xl font-semibold" data-testid="staff-name">
             {staff.full_name}
           </h1>
           <p className="text-sm text-muted-foreground">
             {staff.employee_code} · {designation ?? 'No designation'} · {department ?? 'No department'}
           </p>
+          </div>
         </div>
         <Badge variant={staff.employment_status === 'active' ? 'success' : 'outline'}>{staff.employment_status.replace('_', ' ')}</Badge>
       </div>

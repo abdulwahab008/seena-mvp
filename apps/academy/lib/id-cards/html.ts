@@ -7,6 +7,8 @@ export const ID_CARD_ROLES = ['super_admin', 'owner', 'principal', 'vice_princip
 export type IdCard = {
   name: string;
   code: string;
+  /** data: URI; the renderer has no network. */
+  photo?: string | null;
   lines: { label: string; value: string | null }[];
 };
 
@@ -42,7 +44,8 @@ body { margin: 0; font-family: 'Inter', Arial, sans-serif; color: #111; }
 .head .school { font-weight: 700; font-size: 8.5pt; line-height: 1.1; }
 .head .kind { font-size: 6.5pt; opacity: .85; }
 .body { flex: 1; display: flex; gap: 2.5mm; padding: 2mm 3mm 0; }
-.photo { width: 18mm; height: 22mm; border: 0.2mm dashed #888; font-size: 5.5pt; color: #888; display: flex; align-items: center; justify-content: center; text-align: center; flex-shrink: 0; }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo { width: 18mm; height: 22mm; border: 0.2mm dashed #888; overflow: hidden; font-size: 5.5pt; color: #888; display: flex; align-items: center; justify-content: center; text-align: center; flex-shrink: 0; }
 .info { font-size: 7pt; line-height: 1.35; min-width: 0; }
 .info .name { font-weight: 700; font-size: 8.5pt; margin-bottom: .5mm; }
 .info span { color: #555; }
@@ -68,7 +71,7 @@ export function buildIdCardsHtml(sheet: IdCardSheet): string {
     .map(
       (c) => side === 'back' ? back : `<div class="card">
   <div class="head">${logo}<div><div class="school">${escapeHtml(sheet.schoolName)}</div><div class="kind">${escapeHtml(sheet.kindLabel)}</div></div></div>
-  <div class="body"><div class="photo">Photo</div><div class="info"><div class="name">${escapeHtml(c.name)}</div>${c.lines
+  <div class="body"><div class="photo">${c.photo ? `<img src="${escapeHtml(c.photo)}" alt="">` : 'Photo'}</div><div class="info"><div class="name">${escapeHtml(c.name)}</div>${c.lines
     .filter((l) => l.value)
     .map((l) => `<div><span>${escapeHtml(l.label)}:</span> ${escapeHtml(l.value)}</div>`)
     .join('')}</div></div>

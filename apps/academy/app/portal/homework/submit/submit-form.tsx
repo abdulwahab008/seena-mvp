@@ -25,7 +25,7 @@ export function SubmitForm({ homeworkId, enrolmentId, locked }: { homeworkId: st
     startTransition(async () => {
       setResult(null);
       const picked = Array.from(fileRef.current?.files ?? []);
-      const files = await Promise.all(picked.map(compressImage));
+      const files = await Promise.all(picked.map((f) => compressImage(f)));
       const tooBig = files.find((f) => f.size > MAX_BYTES);
       if (tooBig) return setResult({ error: `${tooBig.name}: File exceeds 5 MB limit` });
       if (files.length > 5) return setResult({ error: 'Maximum 5 files per submission' });

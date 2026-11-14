@@ -32572,6 +32572,7 @@ export type Database = {
       }
       staff: {
         Row: {
+          photo_path: string | null
           cnic_expires_on: string | null
           campus_id: string
           cnic: string | null
@@ -32596,6 +32597,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          photo_path?: string | null
           cnic_expires_on?: string | null
           campus_id: string
           cnic?: string | null
@@ -32620,6 +32622,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          photo_path?: string | null
           cnic_expires_on?: string | null
           campus_id?: string
           cnic?: string | null
@@ -50587,6 +50590,10 @@ export type Database = {
         Args: { p_id: string; p_name_en: string }
         Returns: undefined
       }
+      set_staff_photo: {
+        Args: { p_path: string | null; p_staff_id: string }
+        Returns: string | null
+      }
       set_structure_lines: {
         Args: {
           p_amount_paisa: number
@@ -50598,6 +50605,10 @@ export type Database = {
           p_structure_id: string
         }
         Returns: Json
+      }
+      set_student_photo: {
+        Args: { p_path: string | null; p_student_id: string }
+        Returns: string | null
       }
       sms_gateway_for_dispatch: {
         Args: { p_tenant_id: string }

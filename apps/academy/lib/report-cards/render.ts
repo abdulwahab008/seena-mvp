@@ -30,7 +30,7 @@ import {
 
 type ServerClient = Awaited<ReturnType<typeof supabaseServer>>;
 
-const MIME_BY_EXT: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
+const MIME_BY_EXT: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' };
 
 export type ReservedReportCard = {
   report_card_id: string;

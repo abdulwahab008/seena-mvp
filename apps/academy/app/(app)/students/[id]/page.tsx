@@ -13,6 +13,7 @@ import { EditStudentControl } from './edit-student-control';
 import { IncidentView } from './incident-view';
 import { canSeeConcessionAwards, hasFeeAccess } from '@/lib/auth/fee-access';
 import { formatDatePk } from '@/lib/dates';
+import { PhotoUpload } from '@/components/photo-upload';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -33,7 +34,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   // a deleted student's record now.
   const { data: student } = await supabase
     .from('student')
-    .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status, father_name_en, b_form_no, category_id, region_id, previous_school_id')
+    .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status, father_name_en, b_form_no, category_id, region_id, previous_school_id, photo_path')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
@@ -241,11 +242,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
   const classLevel = enrolledSection ? one(enrolledSection.class_level) : null;
   const monthlyPaisa = feePlanLines.filter((l) => !l.effectiveTo && l.frequency === 'monthly').reduce((sum, l) => sum + l.amountPaisa, 0);
-  const initials = student.name_en
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('');
+  const { data: photo } = student.photo_path
+    ? await supabase.storage.from('student-photos').createSignedUrl(student.photo_path, 3600)
+    : { data: null };
   const facts: [string, string | null][] = [
     ['GR number', student.gr_number],
     ['Class', classLevel && enrolledSection ? `${classLevel.name_en} · ${enrolledSection.name}` : 'Not enrolled'],
@@ -270,9 +269,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <CardContent className="space-y-5 p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary-muted text-lg font-semibold text-primary" aria-hidden>
-                {initials}
-              </div>
+              <PhotoUpload kind="student" id={student.id} name={student.name_en} url={photo?.signedUrl ?? null} canEdit={canDelete} />
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-2xl font-semibold">{student.name_en}</h1>
