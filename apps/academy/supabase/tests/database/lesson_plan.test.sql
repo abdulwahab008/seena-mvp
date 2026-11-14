@@ -31,7 +31,7 @@ select public.set_class_level_active(id, false) from public.class_level where te
 select public.create_section(:'campus_id'::uuid, :'session_id'::uuid, :'class1_id'::uuid, 'A', 30) as sec \gset
 reset role;
 insert into public.section_subject_teacher (tenant_id, campus_id, session_id, section_id, subject_id, staff_id, effective_from) values
-  (:'tenant_id', :'campus_id', :'session_id', :'sec', :'phy', :'teach_uid', current_date - 60),
+  (:'tenant_id', :'campus_id', :'session_id', :'sec', :'phy', :'teach_uid', current_date - 400),
   (:'tenant_id', :'campus_id', :'session_id', :'sec', :'mth', :'teach2_uid', current_date - 60);
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', :'ec_uid', 'tenant_id', :'tenant_id', 'app_role', 'exam_controller', 'campus_ids', json_build_array(:'campus_id'))::text, true);
