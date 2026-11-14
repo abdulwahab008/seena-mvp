@@ -20,6 +20,21 @@ describe('buildIdCardsHtml', () => {
     expect(html.match(/<svg/g)).toHaveLength(2);
   });
 
+  it('prints a photo when there is one and the placeholder otherwise', () => {
+    const html = buildIdCardsHtml({
+      schoolName: 'Seena',
+      logoDataUri: null,
+      kindLabel: 'Student card',
+      validUntil: '31 Mar 2027',
+      cards: [
+        { name: 'Ali', code: 'GR-1', photo: 'data:image/jpeg;base64,AAAA', lines: [] },
+        { name: 'Sara', code: 'GR-2', lines: [] },
+      ],
+    });
+    expect(html).toContain('<div class="photo"><img src="data:image/jpeg;base64,AAAA" alt=""></div>');
+    expect(html).toContain('<div class="photo">Photo</div>');
+  });
+
   it('prints portrait fronts and backs in the chosen colour and ignores an unsafe colour', () => {
     const base = { schoolName: 'Seena', logoDataUri: null, kindLabel: 'Student card', validUntil: '31 Mar 2027', cards: [{ name: 'Ali', code: 'GR-1', lines: [] }] };
     const both = buildIdCardsHtml({ ...base, orientation: 'portrait', side: 'both', color: '#0f766e' });

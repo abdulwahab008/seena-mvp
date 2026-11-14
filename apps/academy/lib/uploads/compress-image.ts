@@ -4,11 +4,11 @@
 const MAX_SIDE = 1600;
 const SKIP_BELOW_BYTES = 600 * 1024;
 
-export async function compressImage(file: File): Promise<File> {
-  if (!/^image\/(jpeg|png)$/.test(file.type) || file.size <= SKIP_BELOW_BYTES || typeof createImageBitmap !== 'function') return file;
+export async function compressImage(file: File, maxSide = MAX_SIDE, skipBelowBytes = SKIP_BELOW_BYTES): Promise<File> {
+  if (!/^image\/(jpeg|png)$/.test(file.type) || file.size <= skipBelowBytes || typeof createImageBitmap !== 'function') return file;
   try {
     const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
