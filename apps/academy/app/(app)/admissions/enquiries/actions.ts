@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createEnquirySchema, submitApplicationSchema } from '@/lib/validation';
+import { completeFollowupSchema, createEnquirySchema, karachiLocalToIso, scheduleFollowupSchema, submitApplicationSchema } from '@/lib/validation';
 import { supabaseServer } from '@/lib/supabase/server';
 
 export type DuplicateCandidate = {
@@ -146,5 +146,41 @@ export async function submitApplication(_prev: SubmitApplicationState, formData:
 
   revalidatePath('/admissions/enquiries');
   revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export async function scheduleFollowup(enquiryId: string, formData: FormData): Promise<{ error: string | null }> {
+  const parsed = scheduleFollowupSchema.safeParse({ dueAt: formData.get('dueAt'), channel: formData.get('channel') });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('create_followup', {
+    p_enquiry_id: enquiryId,
+    p_due_at: karachiLocalToIso(parsed.data.dueAt)!,
+    p_channel: parsed.data.channel,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to schedule follow-ups.' };
+    return { error: 'Could not schedule the follow-up.' };
+  }
+  revalidatePath('/admissions/follow-ups');
+  revalidatePath('/admissions/enquiries');
+  return { error: null };
+}
+
+export async function completeFollowup(followupId: string, formData: FormData): Promise<{ error: string | null }> {
+  const parsed = completeFollowupSchema.safeParse({ outcome: formData.get('outcome'), note: formData.get('note') || undefined });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_complete_followup', {
+    p_followup_id: followupId,
+    p_outcome: parsed.data.outcome,
+    p_outcome_note: parsed.data.note,
+  });
+  if (error) {
+    if (error.message.includes('ALREADY_COMPLETED')) return { error: 'This follow-up is already done.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to complete follow-ups.' };
+    return { error: 'Could not save the follow-up.' };
+  }
+  revalidatePath('/admissions/follow-ups');
   return { error: null };
 }

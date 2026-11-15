@@ -121,6 +121,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/front-desk', label: 'Front Desk', roles: FRONT_OFFICE },
       { href: '/admissions/walk-in', label: 'Walk-in Desk', roles: FRONT_OFFICE },
       { href: '/admissions/enquiries', label: 'Enquiries', roles: FRONT_OFFICE },
+      { href: '/admissions/follow-ups', label: 'Follow-ups', roles: ['super_admin', 'owner', 'principal', 'admissions_officer'] },
       { href: '/admissions/applications', label: 'Applications', roles: FRONT_OFFICE },
       { href: '/admissions/checklist', label: 'Document Checklist', roles: FRONT_OFFICE },
       { href: '/admissions/test-sittings', label: 'Test Sittings', roles: FRONT_OFFICE },

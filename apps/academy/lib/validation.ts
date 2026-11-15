@@ -160,6 +160,8 @@ export const readmitStudentSchema = z.object({
   overrideReason: z.string().trim().max(500).optional(),
 });
 
+const keysOf = <T extends object>(o: T) => Object.keys(o) as [keyof T & string, ...(keyof T & string)[]];
+
 // Mirrors public.disability_type.
 export const DISABILITY_LABEL = {
   none: 'None',
@@ -179,10 +181,28 @@ export const studentMedicalSchema = z.object({
   allergies: list,
   conditions: list,
   medications: list,
-  disabilityType: z.enum(Object.keys(DISABILITY_LABEL) as [keyof typeof DISABILITY_LABEL, ...(keyof typeof DISABILITY_LABEL)[]]),
+  disabilityType: z.enum(keysOf(DISABILITY_LABEL)),
   hasCriticalAllergy: z.boolean(),
   emergencyContactName: z.string().trim().max(100),
   emergencyContactPhone: z.string().trim().regex(/^(\+?\d[\d\s-]{6,18})?$/, 'Enter a phone number'),
+});
+
+export const FOLLOWUP_CHANNEL_LABEL = { call: 'Phone call', whatsapp: 'WhatsApp', sms: 'SMS', email: 'Email', in_person: 'In person' } as const;
+export const FOLLOWUP_OUTCOME_LABEL = {
+  connected: 'Spoke to them',
+  no_answer: 'No answer',
+  wrong_number: 'Wrong number',
+  call_later: 'Call again later',
+  visit_scheduled: 'Visit booked',
+  not_interested: 'Not interested',
+} as const;
+export const scheduleFollowupSchema = z.object({
+  dueAt: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, 'Choose when to follow up'),
+  channel: z.enum(keysOf(FOLLOWUP_CHANNEL_LABEL), { errorMap: () => ({ message: 'Choose how to follow up' }) }),
+});
+export const completeFollowupSchema = z.object({
+  outcome: z.enum(keysOf(FOLLOWUP_OUTCOME_LABEL), { errorMap: () => ({ message: 'Choose what happened' }) }),
+  note: z.string().trim().max(500).optional(),
 });
 
 // Mirrors public.fee_frequency in supabase/migrations/20260731050000_fee_heads.sql.
