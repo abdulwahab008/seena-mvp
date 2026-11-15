@@ -13,6 +13,8 @@ import {
   recordPaymentSchema,
   setStudentElectiveChoiceSchema,
   withdrawStudentSchema,
+  readmitStudentSchema,
+  studentMedicalSchema,
 } from '@/lib/validation';
 import { siteUrl } from '@/lib/auth/recovery';
 import { supabaseServer } from '@/lib/supabase/server';
@@ -516,5 +518,64 @@ export async function withdrawStudent(studentId: string, formData: FormData): Pr
   }
   revalidatePath(`/students/${studentId}`);
   revalidatePath('/students');
+  return { error: null };
+}
+
+export async function readmitStudent(studentId: string, formData: FormData): Promise<{ error: string | null }> {
+  const parsed = readmitStudentSchema.safeParse({
+    sectionId: formData.get('sectionId'),
+    overrideReason: formData.get('overrideReason') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_readmit_student', {
+    p_student_id: studentId,
+    p_section_id: parsed.data.sectionId,
+    p_override_reason: parsed.data.overrideReason,
+  });
+  if (error) {
+    if (error.message.includes('READMISSION_BLOCKED')) return { error: 'This student is flagged "no readmission". Only the owner can readmit them.' };
+    if (error.message.includes('OVERRIDE_REASON_REQUIRED')) return { error: 'Give a reason for overriding the "no readmission" flag.' };
+    if (error.message.includes('ILLEGAL_STATUS_TRANSITION')) return { error: 'This student cannot be readmitted from their current status.' };
+    if (error.message.includes('SECTION_FULL')) return { error: 'This section is full.' };
+    if (error.message.includes('SECTION_GENDER_RESTRICTED')) return { error: 'This section does not admit this student’s gender.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only the principal or owner can readmit a student.' };
+    return { error: 'Could not readmit the student.' };
+  }
+  revalidatePath(`/students/${studentId}`);
+  revalidatePath('/students');
+  return { error: null };
+}
+
+export async function saveStudentMedical(studentId: string, formData: FormData): Promise<{ error: string | null }> {
+  const parsed = studentMedicalSchema.safeParse({
+    allergies: formData.get('allergies') ?? '',
+    conditions: formData.get('conditions') ?? '',
+    medications: formData.get('medications') ?? '',
+    disabilityType: formData.get('disabilityType'),
+    hasCriticalAllergy: formData.get('hasCriticalAllergy') === 'on',
+    emergencyContactName: formData.get('emergencyContactName') ?? '',
+    emergencyContactPhone: formData.get('emergencyContactPhone') ?? '',
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const d = parsed.data;
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_upsert_student_medical', {
+    p_student_id: studentId,
+    p_allergies: d.allergies,
+    p_conditions: d.conditions,
+    p_medications: d.medications,
+    p_disability_type: d.disabilityType,
+    p_has_critical_allergy: d.hasCriticalAllergy,
+    p_emergency_contact_name: d.emergencyContactName || undefined,
+    p_emergency_contact_phone: d.emergencyContactPhone || undefined,
+  });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only the principal, owner or nurse can edit medical details.' };
+    return { error: 'Could not save the medical details.' };
+  }
+  revalidatePath(`/students/${studentId}`);
   return { error: null };
 }

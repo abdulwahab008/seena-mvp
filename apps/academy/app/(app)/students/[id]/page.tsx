@@ -12,6 +12,8 @@ import { ElectiveChoiceView, type ElectiveBucket } from './elective-choice-view'
 import { DeleteStudentControl } from './delete-student-control';
 import { EditStudentControl } from './edit-student-control';
 import { WithdrawStudentControl } from './withdraw-student-control';
+import { ReadmitStudentControl } from './readmit-student-control';
+import { MedicalView, type StudentMedical } from './medical-view';
 import { IncidentView } from './incident-view';
 import { canSeeConcessionAwards, hasFeeAccess } from '@/lib/auth/fee-access';
 import { formatDatePk } from '@/lib/dates';
@@ -36,7 +38,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   // a deleted student's record now.
   const { data: student } = await supabase
     .from('student')
-    .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status, father_name_en, b_form_no, category_id, region_id, previous_school_id, photo_path')
+    .select('id, name_en, name_ur, gr_number, dob, gender, campus_id, status, father_name_en, b_form_no, category_id, region_id, previous_school_id, photo_path, no_readmission_flag')
     .eq('id', id)
     .is('deleted_at', null)
     .maybeSingle();
@@ -116,7 +118,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   // can admit a student are the roles who can undo admitting one.
   const canDelete = role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'admissions_officer';
   // Mirrors withdraw_student()'s own role check.
-  const canWithdraw = (role === 'super_admin' || role === 'owner' || role === 'principal') && (student.status === 'active' || student.status === 'on_leave');
+  const isLeadership = role === 'super_admin' || role === 'owner' || role === 'principal';
+  const canWithdraw = isLeadership && (student.status === 'active' || student.status === 'on_leave');
+  const canReadmit = isLeadership && (student.status === 'left' || student.status === 'struck_off' || student.status === 'transferred');
+  // Mirrors fn_get_student_medical()'s staff roles; each read is logged as a health-record access.
+  const showMedical = isLeadership || role === 'nurse';
   const lookupName = new Map((lookups ?? []).map((l) => [l.id, l.area ? `${l.name} (${l.area})` : l.name]));
   const lookupOptions = (kind: string, current: (string | null)[]) =>
     (lookups ?? []).filter((l) => l.kind === kind && (l.is_active || current.includes(l.id))).map((l) => ({ id: l.id, label: lookupName.get(l.id)! }));
@@ -250,6 +256,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     student.status === 'left'
       ? await supabase.from('enrolment').select('left_on').eq('student_id', student.id).eq('status', 'left').is('deleted_at', null).order('left_on', { ascending: false }).limit(1).maybeSingle()
       : { data: null };
+  const { data: medical } = showMedical ? await supabase.rpc('fn_get_student_medical', { p_student_id: student.id }) : { data: null };
   const { data: photo } = student.photo_path
     ? await supabase.storage.from('student-photos').createSignedUrl(student.photo_path, 3600)
     : { data: null };
@@ -266,6 +273,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     ['enrolment', 'Enrolment'],
     ['guardians', 'Guardians'],
     ['discipline', 'Discipline'],
+    ...(showMedical ? [['medical', 'Medical']] : []),
     ...(showFees ? [['fees', 'Fees']] : []),
     ...(enrolment && showAwards ? [['concessions', 'Concessions']] : []),
     ...(enrolment && showFees ? [['payments', 'Payments'], ['ledger', 'Ledger']] : []),
@@ -307,6 +315,14 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                     school: lookupOptions('school', [student.previous_school_id]),
                   }}
                 />
+                {canReadmit && (
+                  <ReadmitStudentControl
+                    studentId={student.id}
+                    studentName={student.name_en}
+                    flagged={student.no_readmission_flag}
+                    sections={(sections ?? []).map((s) => ({ id: s.id, label: `${one(s.class_level)?.name_en ?? ''} · ${s.name}` }))}
+                  />
+                )}
                 {canWithdraw && <WithdrawStudentControl studentId={student.id} studentName={student.name_en} />}
                 <DeleteStudentControl studentId={student.id} studentName={student.name_en} />
               </div>
@@ -388,6 +404,12 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       <Section id="discipline" title="Discipline">
         <IncidentView studentId={student.id} incidents={incidents ?? []} />
       </Section>
+
+      {showMedical && (
+        <Section id="medical" title="Medical">
+          <MedicalView studentId={student.id} medical={medical?.student_id ? (medical as StudentMedical) : null} />
+        </Section>
+      )}
 
       {showFees && (
         <Section id="fees" title="Fees" description="This student's fee plan. Changes apply to challans generated afterwards.">
