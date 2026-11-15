@@ -139,6 +139,22 @@ export type LinkGuardianInput = z.infer<typeof linkGuardianSchema>;
 export const enrolStudentSchema = z.object({ sectionId: z.string().uuid('Choose a section') });
 export type EnrolStudentInput = z.infer<typeof enrolStudentSchema>;
 
+export const WITHDRAWAL_REASON_CODES = ['relocation', 'transfer_out', 'fee_default', 'long_absence', 'medical', 'disciplinary', 'other'] as const;
+export const WITHDRAWAL_REASON_LABEL: Record<(typeof WITHDRAWAL_REASON_CODES)[number], string> = {
+  relocation: 'Family moved away',
+  transfer_out: 'Moved to another school',
+  fee_default: 'Fees not paid',
+  long_absence: 'Long absence',
+  medical: 'Medical',
+  disciplinary: 'Disciplinary',
+  other: 'Other',
+};
+export const withdrawStudentSchema = z.object({
+  leavingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the leaving date'),
+  reason: z.enum(WITHDRAWAL_REASON_CODES, { errorMap: () => ({ message: 'Choose a reason' }) }),
+  note: z.string().trim().max(500).optional(),
+});
+
 // Mirrors public.fee_frequency in supabase/migrations/20260731050000_fee_heads.sql.
 export const FEE_FREQUENCIES = ['monthly', 'quarterly', 'annual', 'one_time'] as const;
 
