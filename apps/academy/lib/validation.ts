@@ -155,6 +155,36 @@ export const withdrawStudentSchema = z.object({
   note: z.string().trim().max(500).optional(),
 });
 
+export const readmitStudentSchema = z.object({
+  sectionId: z.string().uuid('Choose a section'),
+  overrideReason: z.string().trim().max(500).optional(),
+});
+
+// Mirrors public.disability_type.
+export const DISABILITY_LABEL = {
+  none: 'None',
+  visual_impairment: 'Visual impairment',
+  hearing_impairment: 'Hearing impairment',
+  physical_disability: 'Physical disability',
+  learning_disability: 'Learning disability',
+  speech_impairment: 'Speech impairment',
+  autism_spectrum: 'Autism spectrum',
+  other: 'Other',
+} as const;
+const list = z
+  .string()
+  .max(500)
+  .transform((v) => v.split(',').map((x) => x.trim()).filter(Boolean));
+export const studentMedicalSchema = z.object({
+  allergies: list,
+  conditions: list,
+  medications: list,
+  disabilityType: z.enum(Object.keys(DISABILITY_LABEL) as [keyof typeof DISABILITY_LABEL, ...(keyof typeof DISABILITY_LABEL)[]]),
+  hasCriticalAllergy: z.boolean(),
+  emergencyContactName: z.string().trim().max(100),
+  emergencyContactPhone: z.string().trim().regex(/^(\+?\d[\d\s-]{6,18})?$/, 'Enter a phone number'),
+});
+
 // Mirrors public.fee_frequency in supabase/migrations/20260731050000_fee_heads.sql.
 export const FEE_FREQUENCIES = ['monthly', 'quarterly', 'annual', 'one_time'] as const;
 
