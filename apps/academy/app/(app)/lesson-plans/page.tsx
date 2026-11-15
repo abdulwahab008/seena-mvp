@@ -33,7 +33,7 @@ export default async function LessonPlansPage({ searchParams }: { searchParams: 
   const chosen = assignments.find((a) => a.key === sp.assignment) ?? assignments[0];
 
   let groups: TopicGroup[] = [];
-  let existing: { id: string; status: string } | null = null;
+  let existing: { id: string; status: string; objectives: string | null; resources: string | null; topics: { syllabus_topic_id: string }[] } | null = null;
   if (chosen?.classLevelId) {
     const [{ data: units }, { data: plan }] = await Promise.all([
       supabase
@@ -43,7 +43,7 @@ export default async function LessonPlansPage({ searchParams }: { searchParams: 
         .eq('subject_id', chosen.subjectId)
         .order('board')
         .order('sequence'),
-      supabase.from('lesson_plan').select('id, status').eq('section_id', chosen.sectionId).eq('subject_id', chosen.subjectId).eq('week_start_date', week).maybeSingle(),
+      supabase.from('lesson_plan').select('id, status, objectives, resources, topics:lesson_plan_topic(syllabus_topic_id)').eq('section_id', chosen.sectionId).eq('subject_id', chosen.subjectId).eq('week_start_date', week).maybeSingle(),
     ]);
     groups = (units ?? []).map((u) => ({ unitId: u.id, unitTitle: `${u.board} · ${u.sequence}. ${u.title}`, topics: [...(u.topics ?? [])].sort((a, b) => a.sequence - b.sequence).map((t) => ({ id: t.id, title: t.title })) }));
     existing = plan;
@@ -107,7 +107,21 @@ export default async function LessonPlansPage({ searchParams }: { searchParams: 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {existing ? <p className="text-sm text-muted-foreground">You already planned this week ({existing.status.replace('_', ' ')}).</p> : <PlanForm key={`${chosen.key}-${week}`} sectionId={chosen.sectionId} subjectId={chosen.subjectId} weekStart={week} groups={groups} />}
+            {existing?.status === 'completed' ? (
+              <p className="text-sm text-muted-foreground">This week&apos;s plan is completed.</p>
+            ) : (
+              <>
+                {existing && <p className="mb-3 text-sm text-muted-foreground">You already planned this week ({existing.status.replace('_', ' ')}). Change it below.</p>}
+                <PlanForm
+                  key={`${chosen.key}-${week}-${existing?.id ?? 'new'}`}
+                  sectionId={chosen.sectionId}
+                  subjectId={chosen.subjectId}
+                  weekStart={week}
+                  groups={groups}
+                  plan={existing ? { id: existing.id, objectives: existing.objectives, resources: existing.resources, topicIds: existing.topics.map((t) => t.syllabus_topic_id) } : undefined}
+                />
+              </>
+            )}
           </CardContent>
         </Card>
       )}

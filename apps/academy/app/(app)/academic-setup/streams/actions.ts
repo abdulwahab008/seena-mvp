@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
-import { campusBoardSchema, homeworkLoadSchema, homeworkNotificationCapSchema, markPrecisionSchema, sectionStreamSchema, streamSchema } from '@/lib/validation';
+import { campusBoardSchema, subjectBoardCodeSchema, homeworkLoadSchema, homeworkNotificationCapSchema, markPrecisionSchema, sectionStreamSchema, streamSchema } from '@/lib/validation';
 import { parseValues, rpcError, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
@@ -98,4 +98,22 @@ export async function setHomeworkNotificationCap(values: Record<string, string>)
   const supabase = await supabaseServer();
   const { error } = await supabase.rpc('set_homework_notification_cap', { p_cap: p.data.cap });
   return error ? { error: rpcError(error.message) } : done('Daily message limit saved.');
+}
+
+export async function setClassOffered(classLevelId: string, active: boolean): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!active) {
+    const { count } = await supabase.from('enrolment').select('id', { count: 'exact', head: true }).eq('class_level_id', classLevelId).eq('status', 'active').is('deleted_at', null);
+    if ((count ?? 0) > 0) return { error: `${count} students are studying in this class. Move or promote them before hiding it.` };
+  }
+  const { error } = await supabase.rpc('set_class_level_active', { p_id: classLevelId, p_is_active: active });
+  return error ? { error: rpcError(error.message) } : done(active ? 'Class offered again.' : 'Class hidden.');
+}
+
+export async function setSubjectBoardCode(values: Record<string, string>): Promise<ActionResult> {
+  const p = parseValues(subjectBoardCodeSchema, values);
+  if (!p.ok) return { error: p.error };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_subject_board_code', { p_subject_id: p.data.subjectId, p_board: p.data.board, p_board_code: p.data.code });
+  return error ? { error: rpcError(error.message) } : done('Board code saved.');
 }

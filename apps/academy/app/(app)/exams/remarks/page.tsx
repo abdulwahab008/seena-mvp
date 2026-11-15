@@ -1,6 +1,8 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LibraryEntryForm, RemarkSheet, RemarksRequiredToggle, type SheetRow } from './remark-sheet';
+import { ActionButton } from '@/components/spec-form';
+import { deleteLibraryEntry } from './actions';
 import { pickActiveCampus } from '@/lib/campus-context';
 
 type SearchParams = { section?: string; term?: string };
@@ -105,9 +107,12 @@ export default async function RemarksPage({ searchParams }: { searchParams: Prom
             <LibraryEntryForm campusId={campusId} />
             <ul className="space-y-1 text-sm text-muted-foreground" data-testid="library-list">
               {(library ?? []).map((l) => (
-                <li key={l.id}>
-                  [{l.category}] {l.text_en}
-                  {l.text_ur ? ` · ${l.text_ur}` : ''}
+                <li key={l.id} className="flex items-center justify-between gap-2">
+                  <span>
+                    [{l.category}] {l.text_en}
+                    {l.text_ur ? ` · ${l.text_ur}` : ''}
+                  </span>
+                  <ActionButton label="Delete" variant="ghost" confirm="Remove this remark from the library?" action={deleteLibraryEntry} args={[l.id]} />
                 </li>
               ))}
             </ul>

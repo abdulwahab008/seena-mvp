@@ -6,20 +6,22 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { lessonPlanSchema, type LessonPlanInput } from '@/lib/validation';
-import { createPlan, setPlanStatus } from './actions';
+import { createPlan, setPlanStatus, updatePlan } from './actions';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 export type TopicGroup = { unitId: string; unitTitle: string; topics: { id: string; title: string }[] };
 
-export function PlanForm({ sectionId, subjectId, weekStart, groups }: { sectionId: string; subjectId: string; weekStart: string; groups: TopicGroup[] }) {
+export type ExistingPlan = { id: string; objectives: string | null; resources: string | null; topicIds: string[] };
+
+export function PlanForm({ sectionId, subjectId, weekStart, groups, plan }: { sectionId: string; subjectId: string; weekStart: string; groups: TopicGroup[]; plan?: ExistingPlan }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const form = useForm<LessonPlanInput>({ resolver: zodResolver(lessonPlanSchema), defaultValues: { sectionId, subjectId, weekStart, objectives: '', resources: '', topicIds: [] } });
+  const form = useForm<LessonPlanInput>({ resolver: zodResolver(lessonPlanSchema), defaultValues: { sectionId, subjectId, weekStart, objectives: plan?.objectives ?? '', resources: plan?.resources ?? '', topicIds: plan?.topicIds ?? [] } });
   const onSubmit = form.handleSubmit((v) =>
     startTransition(async () => {
-      const r = await createPlan(v);
+      const r = plan ? await updatePlan(plan.id, v) : await createPlan(v);
       setError(r.error);
       if (!r.error) {
         toast.success('Lesson plan saved.');
@@ -55,7 +57,7 @@ export function PlanForm({ sectionId, subjectId, weekStart, groups }: { sectionI
       </fieldset>
       {error && <p role="alert" className="text-sm text-destructive" data-testid="plan-error">{error}</p>}
       <Button type="submit" disabled={pending} data-testid="save-plan">
-        Save plan
+        {plan ? 'Save changes' : 'Save plan'}
       </Button>
     </form>
   );

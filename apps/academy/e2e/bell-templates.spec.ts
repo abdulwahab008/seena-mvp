@@ -75,6 +75,12 @@ test('an owner builds a bell template, sees correct period numbering, and overla
   await expect(row).toContainText('BREAK — 08:40–08:50');
   await expect(row.getByTestId(/is-default-/)).toBeVisible();
 
+  // Period 2 now runs five minutes longer; a time that runs into the next segment is refused.
+  await row.getByRole('button', { name: 'change' }).nth(3).click();
+  await row.getByLabel('Period 2 ends').fill('09:35');
+  await row.getByRole('button', { name: 'Save' }).click();
+  await expect(row).toContainText('Period 2 — 08:50–09:35');
+
   // AC: nominating a default clears the MORNING gap in the banner but
   // AFTERNOON still has none.
   await expect(page.getByTestId('no-default-banner')).not.toContainText('MORNING');

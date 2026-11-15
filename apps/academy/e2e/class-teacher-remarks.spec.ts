@@ -58,6 +58,13 @@ test('a class teacher writes remarks with the library, the 250 cap and apply-to-
   await page.getByTestId('apply-selected').click();
   await expect(page.getByTestId('missing-count')).toHaveText('0');
 
+  // A remark written by mistake is cleared, and a stock remark nobody uses is removed from the library.
+  await page.getByTestId('remark-row').first().getByTestId('clear-remark').click();
+  await expect(page.getByTestId('missing-count')).toHaveText('1');
+  page.once('dialog', (d) => d.accept());
+  await page.getByTestId('library-list').locator('li').first().getByRole('button', { name: 'Delete' }).click();
+  await expect(page.getByTestId('library-list').locator('li')).toHaveCount(7);
+
   // With remarks_required on, a missing remark would block bulk generation: clear one and the batch is refused naming its GR number.
   const { data: enrolments } = await db.from('enrolment').select('id, student:student_id(gr_number)').eq('section_id', section!.id);
   const victim = enrolments![0]!;

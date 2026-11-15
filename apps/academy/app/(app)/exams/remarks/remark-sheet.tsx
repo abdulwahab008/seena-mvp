@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { REMARK_MAX_LENGTH } from '@/lib/validation';
-import { addLibraryEntry, applyRemark, saveRemark, seedLibrary, setRemarksRequired } from './actions';
+import { addLibraryEntry, applyRemark, clearRemark, saveRemark, seedLibrary, setRemarksRequired } from './actions';
 import { Button } from '@/components/ui/button';
 
 export type SheetRow = { enrolmentId: string; grNumber: string; name: string; nameUr: string | null; rollNo: number | null; text: string; libraryId: string | null };
@@ -102,9 +102,32 @@ function RemarkRow({ row, examTermId, options, lang, selected, onToggle }: { row
         />
         <div className="flex items-center justify-between gap-2">
           <Counter value={text} />
-          <Button size="sm" variant={dirty ? 'default' : 'outline'} disabled={pending || text.trim() === ''} onClick={save} data-testid="save-remark">
-            Save
-          </Button>
+          <span className="flex gap-1">
+            {row.text && (
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={pending}
+                data-testid="clear-remark"
+                onClick={() =>
+                  startTransition(async () => {
+                    const r = await clearRemark(row.enrolmentId, examTermId);
+                    setError(r.error);
+                    if (!r.error) {
+                      setText('');
+                      toast.success('Remark cleared.');
+                      router.refresh();
+                    }
+                  })
+                }
+              >
+                Clear
+              </Button>
+            )}
+            <Button size="sm" variant={dirty ? 'default' : 'outline'} disabled={pending || text.trim() === ''} onClick={save} data-testid="save-remark">
+              Save
+            </Button>
+          </span>
         </div>
         {error && (
           <p role="alert" className="text-xs text-destructive" data-testid="remark-error">

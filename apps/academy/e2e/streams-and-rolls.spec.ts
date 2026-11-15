@@ -5,6 +5,8 @@ import { signInAs } from './support/hr-seed';
 test('an owner sets the campus exam board, adds a stream and puts a section on it', async ({ page }) => {
   test.setTimeout(120000);
   const seed = await seedFeesTenant(0, 'streams-e2e');
+  const { error: subjectError } = await seed.db.from('subject').insert({ tenant_id: seed.tenant, code: 'PHY', name_en: 'Physics' });
+  if (subjectError) throw subjectError;
   await signInAs(page, seed.email);
 
   await page.goto('/academic-setup/streams');
@@ -42,6 +44,20 @@ test('an owner sets the campus exam board, adds a stream and puts a section on i
   await hw.getByLabel('Most assignments a day').fill('3');
   await page.getByTestId('homework-load-form-submit').click();
   await expect(page.getByTestId('campus-rules')).toContainText('at most 3 assignments a day per section');
+
+  const code = page.getByTestId('board-code-form');
+  await code.getByLabel('Subject').selectOption({ label: 'Physics' });
+  await code.getByLabel('Board', { exact: true }).selectOption('PUNJAB');
+  await code.getByLabel('Code used by the board').fill('PHY-12');
+  await page.getByTestId('board-code-form-submit').click();
+  await expect(page.getByTestId('board-codes')).toContainText('Physics · BISE Punjab: PHY-12');
+
+  // Class 1 holds no students in this seed, so it can be hidden and offered again.
+  const class1 = page.getByTestId('class-offered-Class 1');
+  await class1.getByRole('button', { name: 'Hide' }).click();
+  await expect(class1.getByRole('button', { name: 'Offer again' })).toBeVisible();
+  await class1.getByRole('button', { name: 'Offer again' }).click();
+  await expect(class1.getByRole('button', { name: 'Hide' })).toBeVisible();
 });
 
 test('a roll number is changed by hand, then the section is renumbered A to Z', async ({ page }) => {
