@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
-import { fareSlabSchema, transportRouteSchema, transportStopSchema } from '@/lib/validation';
+import { fareSlabSchema, transportRouteSchema, transportStopEditSchema, transportStopSchema } from '@/lib/validation';
 import { loose, parseValues, rpcError, rupeesToPaisa, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
@@ -52,6 +52,32 @@ export async function addStop(values: Record<string, string>): Promise<ActionRes
   if (error) return { error: rpcError(error.message, MESSAGES) };
   revalidatePath(`/transport/routes/${p.data.routeId}`);
   return { error: null, message: 'Stop added.' };
+}
+
+export async function editStop(values: Record<string, string>): Promise<ActionResult> {
+  const p = parseValues(transportStopEditSchema, values);
+  if (!p.ok) return { error: p.error };
+  const supabase = loose(await supabaseServer());
+  const { data: stop } = await supabase
+    .from('transport_stop')
+    .select('route_id, name, name_ur, lat, lng, pickup_time, drop_time, fare_slab_id')
+    .eq('id', p.data.stopId)
+    .maybeSingle();
+  if (!stop) return { error: MESSAGES.STOP_NOT_FOUND };
+  // update_transport_stop overwrites every column, so a blank field sends the stop's current value.
+  const { error } = await supabase.rpc('update_transport_stop', {
+    p_stop_id: p.data.stopId,
+    p_name: p.data.name ?? stop.name,
+    p_name_ur: p.data.nameUr ?? stop.name_ur,
+    p_lat: stop.lat,
+    p_lng: stop.lng,
+    p_pickup_time: p.data.pickupTime ?? stop.pickup_time,
+    p_drop_time: p.data.dropTime ?? stop.drop_time,
+    p_fare_slab_id: p.data.fareSlabId ?? stop.fare_slab_id,
+  });
+  if (error) return { error: rpcError(error.message, MESSAGES) };
+  revalidatePath(`/transport/routes/${stop.route_id}`);
+  return { error: null, message: 'Stop updated.' };
 }
 
 export async function moveStop(routeId: string, stopId: string, newSeq: number): Promise<ActionResult> {

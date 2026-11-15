@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SpecForm } from '@/components/spec-form';
 import { currentRole, loose, pkr, TRANSPORT_STAFF } from '@/lib/transport/rpc';
-import { addStop } from '../actions';
+import { addStop, editStop } from '../actions';
 import { StopControls } from './stop-controls';
 
 export const dynamic = 'force-dynamic';
@@ -95,6 +95,30 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ ro
           </table>
         </CardContent>
       </Card>
+
+      {canManage && rows.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Edit a stop</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SpecForm
+              testId="stop-edit-form"
+              submitLabel="Save stop"
+              action={editStop}
+              columns={3}
+              fields={[
+                { name: 'stopId', label: 'Stop', type: 'select', required: true, options: rows.map((s) => ({ value: s.id, label: `${s.seq}. ${s.name}` })) },
+                { name: 'name', label: 'New name (blank keeps it)' },
+                { name: 'nameUr', label: 'New Urdu name', dir: 'rtl' },
+                { name: 'pickupTime', label: 'New pickup time', type: 'time' },
+                { name: 'dropTime', label: 'New drop time', type: 'time' },
+                { name: 'fareSlabId', label: 'New fare slab', type: 'select', options: slabOptions },
+              ]}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {canManage && (
         <Card>

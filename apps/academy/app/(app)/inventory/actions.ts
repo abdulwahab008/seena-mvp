@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
 import { mapRpcError, toPaisa, type ActionError } from '@/lib/rpc-action';
-import { invItemSchema, invStoreSchema, stockReceiptSchema, stockTakeSchema, stockTransferSchema } from '@/lib/validation';
+import { invItemEditSchema, invItemSchema, invStoreSchema, stockReceiptSchema, stockTakeSchema, stockTransferSchema } from '@/lib/validation';
 
 const MESSAGES: [string, string][] = [
   ['INSUFFICIENT_STOCK', 'Not enough stock on hand for this movement.'],
@@ -31,6 +31,25 @@ export async function createItem(input: Record<string, string>): Promise<ActionE
     p_subject_id: p.data.subjectId || undefined,
     p_reorder_level: p.data.reorderLevel,
     p_sale_price: toPaisa(p.data.salePricePkr),
+  });
+  if (error) return { error: mapRpcError(error.message, MESSAGES) };
+  revalidatePath('/inventory');
+  return { error: null };
+}
+
+export async function updateItem(input: Record<string, string>): Promise<ActionError> {
+  const p = invItemEditSchema.safeParse(input);
+  if (!p.success) return { error: first(p.error) };
+  const supabase = await supabaseServer();
+  const { data: item } = await supabase.from('inv_item').select('name, reorder_level, sale_price, active').eq('id', p.data.itemId).maybeSingle();
+  if (!item) return { error: 'That item was not found.' };
+  // A blank field keeps the item's current value.
+  const { error } = await supabase.rpc('update_inv_item', {
+    p_item_id: p.data.itemId,
+    p_name: p.data.name || item.name,
+    p_reorder_level: p.data.reorderLevel ?? Number(item.reorder_level),
+    p_sale_price: p.data.salePricePkr === undefined ? item.sale_price : toPaisa(p.data.salePricePkr),
+    p_active: p.data.active ? p.data.active === 'yes' : item.active,
   });
   if (error) return { error: mapRpcError(error.message, MESSAGES) };
   revalidatePath('/inventory');
