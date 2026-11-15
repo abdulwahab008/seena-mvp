@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { submitApplication } from './actions';
-import { ACADEMIC_GROUPS } from '@/lib/validation';
+import { scheduleFollowup, submitApplication } from './actions';
+import { ACADEMIC_GROUPS, FOLLOWUP_CHANNEL_LABEL } from '@/lib/validation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -53,6 +53,50 @@ function SubmitApplicationControl({ enquiryId }: { enquiryId: string }) {
   );
 }
 
+function ScheduleFollowupControl({ enquiryId, enquiryNo }: { enquiryId: string; enquiryNo: string | null }) {
+  const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+  if (!open) {
+    return (
+      <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} data-testid={`schedule-followup-${enquiryNo}`}>
+        Follow up
+      </Button>
+    );
+  }
+  return (
+    <form
+      className="flex flex-wrap items-center gap-1"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        startTransition(async () => {
+          const r = await scheduleFollowup(enquiryId, fd);
+          if (r.error) toast.error(r.error);
+          else {
+            toast.success('Follow-up scheduled.');
+            setOpen(false);
+          }
+        });
+      }}
+    >
+      <input name="dueAt" type="datetime-local" required aria-label="Follow up on" className="h-9 rounded-md border bg-background px-2 text-sm" />
+      <select name="channel" required defaultValue="call" aria-label="Follow up by" className="h-9 rounded-md border bg-background px-2 text-sm">
+        {Object.entries(FOLLOWUP_CHANNEL_LABEL).map(([v, label]) => (
+          <option key={v} value={v}>
+            {label}
+          </option>
+        ))}
+      </select>
+      <Button type="submit" size="sm" disabled={pending}>
+        {pending ? 'Saving…' : 'Save'}
+      </Button>
+      <Button type="button" size="sm" variant="ghost" onClick={() => setOpen(false)}>
+        Cancel
+      </Button>
+    </form>
+  );
+}
+
 export function EnquiryList({ enquiries }: { enquiries: EnquiryRow[] }) {
   if (enquiries.length === 0) {
     return <p className="text-sm text-muted-foreground">No enquiries yet.</p>;
@@ -62,7 +106,7 @@ export function EnquiryList({ enquiries }: { enquiries: EnquiryRow[] }) {
     <div className="space-y-2">
       {enquiries.map((e) => (
         <Card key={e.id} data-testid={`enquiry-row-${e.enquiry_no}`}>
-          <CardContent className="flex items-center justify-between p-4">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
             <div>
               <p className="font-medium">
                 {e.child_name} <span className="text-muted-foreground">({e.enquiry_no})</span>
@@ -71,7 +115,12 @@ export function EnquiryList({ enquiries }: { enquiries: EnquiryRow[] }) {
                 {e.phone_e164} · {e.source.replace(/_/g, ' ')} · <span data-testid={`enquiry-status-${e.enquiry_no}`}>{e.status}</span>
               </p>
             </div>
-            {e.status === 'open' && <SubmitApplicationControl enquiryId={e.id} />}
+            {e.status === 'open' && (
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <ScheduleFollowupControl enquiryId={e.id} enquiryNo={e.enquiry_no} />
+                <SubmitApplicationControl enquiryId={e.id} />
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}
