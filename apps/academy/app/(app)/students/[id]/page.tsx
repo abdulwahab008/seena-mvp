@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabase/server';
 import { GuardianForm } from './guardian-form';
@@ -10,6 +11,7 @@ import { PaymentView, type PaymentRow } from './payment-view';
 import { ElectiveChoiceView, type ElectiveBucket } from './elective-choice-view';
 import { DeleteStudentControl } from './delete-student-control';
 import { EditStudentControl } from './edit-student-control';
+import { WithdrawStudentControl } from './withdraw-student-control';
 import { IncidentView } from './incident-view';
 import { canSeeConcessionAwards, hasFeeAccess } from '@/lib/auth/fee-access';
 import { formatDatePk } from '@/lib/dates';
@@ -113,6 +115,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   // FR-A15: mirrors soft_delete()'s own FORBIDDEN role list — the roles who
   // can admit a student are the roles who can undo admitting one.
   const canDelete = role === 'super_admin' || role === 'owner' || role === 'principal' || role === 'admissions_officer';
+  // Mirrors withdraw_student()'s own role check.
+  const canWithdraw = (role === 'super_admin' || role === 'owner' || role === 'principal') && (student.status === 'active' || student.status === 'on_leave');
   const lookupName = new Map((lookups ?? []).map((l) => [l.id, l.area ? `${l.name} (${l.area})` : l.name]));
   const lookupOptions = (kind: string, current: (string | null)[]) =>
     (lookups ?? []).filter((l) => l.kind === kind && (l.is_active || current.includes(l.id))).map((l) => ({ id: l.id, label: lookupName.get(l.id)! }));
@@ -242,6 +246,10 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
   const classLevel = enrolledSection ? one(enrolledSection.class_level) : null;
   const monthlyPaisa = feePlanLines.filter((l) => !l.effectiveTo && l.frequency === 'monthly').reduce((sum, l) => sum + l.amountPaisa, 0);
+  const { data: leftEnrolment } =
+    student.status === 'left'
+      ? await supabase.from('enrolment').select('left_on').eq('student_id', student.id).eq('status', 'left').is('deleted_at', null).order('left_on', { ascending: false }).limit(1).maybeSingle()
+      : { data: null };
   const { data: photo } = student.photo_path
     ? await supabase.storage.from('student-photos').createSignedUrl(student.photo_path, 3600)
     : { data: null };
@@ -299,6 +307,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                     school: lookupOptions('school', [student.previous_school_id]),
                   }}
                 />
+                {canWithdraw && <WithdrawStudentControl studentId={student.id} studentName={student.name_en} />}
                 <DeleteStudentControl studentId={student.id} studentName={student.name_en} />
               </div>
             )}
@@ -336,6 +345,23 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         {classLevel && enrolledSection ? (
           <p data-testid="student-enrolment" className="text-sm">
             {classLevel.name_en} · Section {enrolledSection.name} · Roll {enrolment!.roll_no ?? '—'}
+          </p>
+        ) : student.status === 'left' ? (
+          <p data-testid="student-left" className="text-sm">
+            Left the school{leftEnrolment?.left_on ? ` on ${formatDatePk(leftEnrolment.left_on)}` : ''} and is listed in the{' '}
+            <Link href="/students/withdrawals" className="underline">
+              withdrawal register
+            </Link>
+            .
+            {showFees && (
+              <>
+                {' '}Settle the final fees in{' '}
+                <Link href="/fees/settlements" className="underline">
+                  Withdrawal Settlements
+                </Link>
+                .
+              </>
+            )}
           </p>
         ) : (
           <EnrolForm studentId={student.id} sections={sections ?? []} />

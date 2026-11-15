@@ -12,6 +12,7 @@ import {
   reverseLedgerEntrySchema,
   recordPaymentSchema,
   setStudentElectiveChoiceSchema,
+  withdrawStudentSchema,
 } from '@/lib/validation';
 import { siteUrl } from '@/lib/auth/recovery';
 import { supabaseServer } from '@/lib/supabase/server';
@@ -489,5 +490,31 @@ export async function setGuardianProfession(guardianId: string, professionId: st
     if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to edit this guardian.' };
     return { error: 'Could not save the profession.' };
   }
+  return { error: null };
+}
+
+export async function withdrawStudent(studentId: string, formData: FormData): Promise<{ error: string | null }> {
+  const parsed = withdrawStudentSchema.safeParse({
+    leavingDate: formData.get('leavingDate'),
+    reason: formData.get('reason'),
+    note: formData.get('note') || undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('withdraw_student', {
+    p_student_id: studentId,
+    p_leaving_date: parsed.data.leavingDate,
+    p_reason_code: parsed.data.reason,
+    p_reason_note: parsed.data.note,
+  });
+  if (error) {
+    if (error.message.includes('LEAVING_DATE_INVALID')) return { error: 'The leaving date cannot be in the future or before the student joined the class.' };
+    if (error.message.includes('STUDENT_NOT_ACTIVE')) return { error: 'This student is not currently studying here.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only the principal or owner can withdraw a student.' };
+    return { error: 'Could not withdraw the student.' };
+  }
+  revalidatePath(`/students/${studentId}`);
+  revalidatePath('/students');
   return { error: null };
 }

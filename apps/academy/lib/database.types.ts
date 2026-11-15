@@ -50729,6 +50729,15 @@ export type Database = {
       resolve_username_login: { Args: { p_school_code: string; p_username: string }; Returns: string }
       add_fee_commitment: { Args: { p_enrolment_id: string; p_promised_date: string; p_amount_paisa: number; p_note?: string }; Returns: string }
       set_fee_commitment_status: { Args: { p_id: string; p_status: Database['public']['Enums']['fee_commitment_status'] }; Returns: undefined }
+      withdraw_student: {
+        Args: {
+          p_leaving_date: string
+          p_reason_code: Database['public']['Enums']['status_reason_code']
+          p_reason_note?: string
+          p_student_id: string
+        }
+        Returns: undefined
+      }
       write_off_bad_debt: { Args: { p_enrolment_id: string; p_amount_paisa: number; p_reason: string }; Returns: string }
       dashboard_summary: { Args: never; Returns: Json }
       mark_hostel_roll_call: { Args: { p_campus_id: string; p_date: string; p_session: string; p_rows: Json }; Returns: number }
