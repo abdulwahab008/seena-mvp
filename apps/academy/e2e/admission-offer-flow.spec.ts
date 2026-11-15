@@ -92,6 +92,14 @@ test('an owner takes an enquiry through application, offer, and acceptance', asy
   await expect(page.getByText('Offer issued.')).toBeVisible();
   await expect(appCard).toContainText('offer expires');
 
+  // The parents ask for a few more days: the principal extends the offer.
+  await appCard.getByRole('button', { name: 'Extend' }).click();
+  await appCard.getByLabel('New expiry date').fill('2099-01-15');
+  await appCard.getByLabel('Reason for extension').fill('Father abroad until next week');
+  await appCard.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Offer extended.')).toBeVisible();
+  await expect(appCard).toContainText('offer expires 15');
+
   // Accept the offer (FR-B16).
   await appCard.getByRole('button', { name: 'Accept' }).click();
   await expect(page.getByText('Offer accepted.')).toBeVisible();

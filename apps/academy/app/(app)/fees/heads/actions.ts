@@ -64,3 +64,18 @@ export async function setFeeHeadActive(id: string, isActive: boolean, _prev: Act
   revalidatePath('/fees/heads');
   return { error: null };
 }
+
+export async function setFeeHeadRules(id: string, priority: number | null, treatment: 'none' | 'prorate' | null): Promise<ActionState> {
+  const supabase = await supabaseServer();
+  if (priority !== null) {
+    if (!Number.isInteger(priority) || priority < 1 || priority > 999) return { error: 'Payment order must be a whole number from 1 to 999.' };
+    const { error } = await supabase.rpc('set_fee_head_priority', { p_fee_head_id: id, p_priority: priority });
+    if (error) return { error: error.message.includes('FORBIDDEN') ? 'You do not have permission to change fee heads.' : 'Could not save the payment order.' };
+  }
+  if (treatment !== null) {
+    const { error } = await supabase.rpc('set_fee_head_withdrawal_treatment', { p_fee_head_id: id, p_treatment: treatment });
+    if (error) return { error: error.message.includes('FORBIDDEN') ? 'You do not have permission to change fee heads.' : 'Could not save the leaving rule.' };
+  }
+  revalidatePath('/fees/heads');
+  return { error: null };
+}

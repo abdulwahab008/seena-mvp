@@ -19,6 +19,8 @@ import {
   reconcileAdmissionFeePayment,
   waiveAdmissionFee,
   enrolFromOffer,
+  extendOffer,
+  reinstateOffer,
   type MissingItem,
 } from './actions';
 import { OFFER_DECLINE_REASONS, DOC_STATUSES, DOCUMENT_TYPES, FEE_PAYMENT_MODES } from '@/lib/validation';
@@ -818,6 +820,65 @@ function EnrolmentPanel({
   );
 }
 
+function ExtendOfferControl({ offerId }: { offerId: string }) {
+  const [open, setOpen] = useState(false);
+  const [date, setDate] = useState('');
+  const [reason, setReason] = useState('');
+  const [pending, startTransition] = useTransition();
+  if (!open) {
+    return (
+      <Button type="button" size="sm" variant="ghost" onClick={() => setOpen(true)} data-testid={`extend-offer-${offerId}`}>
+        Extend
+      </Button>
+    );
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} aria-label="New expiry date" className="h-9 rounded-md border bg-background px-2 text-sm" />
+      <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" aria-label="Reason for extension" maxLength={200} className="h-9 w-40 rounded-md border bg-background px-2 text-sm" />
+      <Button
+        type="button"
+        size="sm"
+        disabled={pending}
+        onClick={() =>
+          startTransition(async () => {
+            const r = await extendOffer(offerId, date, reason);
+            if (r.error) toast.error(r.error);
+            else {
+              toast.success('Offer extended.');
+              setOpen(false);
+            }
+          })
+        }
+      >
+        {pending ? 'Saving…' : 'Save'}
+      </Button>
+    </div>
+  );
+}
+
+function ReinstateOfferButton({ offerId }: { offerId: string }) {
+  const [pending, startTransition] = useTransition();
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      disabled={pending}
+      data-testid={`reinstate-offer-${offerId}`}
+      onClick={() =>
+        startTransition(async () => {
+          const r = await reinstateOffer(offerId);
+          if (r.error) toast.error(r.error);
+          else toast.success('Offer reinstated for 7 days.');
+        })
+      }
+    >
+      {pending ? 'Reinstating…' : 'Reinstate lapsed offer'}
+    </Button>
+  );
+}
+
 export function ApplicationList({ applications }: { applications: ApplicationRow[] }) {
   if (applications.length === 0) {
     return <p className="text-sm text-muted-foreground">No applications yet.</p>;
@@ -842,7 +903,10 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
                 <div className="flex items-center gap-2">
                   <AcceptButton offerId={a.offer.id} />
                   <DeclineControl offerId={a.offer.id} />
+                  <ExtendOfferControl offerId={a.offer.id} />
                 </div>
+              ) : a.offer && a.offer.status === 'lapsed' ? (
+                <ReinstateOfferButton offerId={a.offer.id} />
               ) : a.waitlist ? (
                 <WaitlistBadge waitlist={a.waitlist} />
               ) : (

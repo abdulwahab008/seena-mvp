@@ -61,6 +61,16 @@ test('an owner seeds default fee heads, adds a custom one, and deactivates it', 
   await expect(page.getByText('Fee head deactivated.')).toBeVisible();
   await expect(libraryRow).toContainText('inactive');
   await expect(libraryRow).toContainText('Library Fee');
+
+  // Tuition is cleared first by a part payment, and charged in full when a student leaves mid-month.
+  await page.getByLabel('Payment order for TUITION').fill('1');
+  await page.getByLabel('Payment order for TUITION').blur();
+  await expect(page.getByText('Fee head saved.')).toBeVisible();
+  await page.getByLabel('On leaving for TUITION').selectOption('none');
+  await expect(page.getByText('Fee head saved.')).toHaveCount(1);
+  await page.reload();
+  await expect(page.getByLabel('Payment order for TUITION')).toHaveValue('1');
+  await expect(page.getByLabel('On leaving for TUITION')).toHaveValue('none');
 });
 
 test('a duplicate code differing only in case is rejected', async ({ page }) => {
