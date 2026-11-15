@@ -18,6 +18,7 @@ import {
 type Result = { error: string | null };
 
 const MESSAGES: [string, string][] = [
+  ['REASON_MIN_LENGTH_20', 'Give a reason of at least 20 characters.'],
   ['ENROLMENT_NOT_FOUND', 'No active enrolment found for that GR number.'],
   ['DEPOSIT_ALREADY_HELD', 'This student already has a deposit on hold.'],
   ['NO_DEPOSIT_HELD', 'No deposit is held for this student.'],
@@ -109,4 +110,9 @@ export async function disburseRefund(input: DisburseDepositInput): Promise<Resul
   const p = disburseDepositSchema.safeParse(input);
   if (!p.success) return { error: first(p) };
   return run((s) => s.rpc('disburse_deposit_refund', { p_enrolment_id: p.data.enrolmentId, p_instrument_type: p.data.instrumentType, p_instrument_ref: p.data.instrumentRef }));
+}
+
+export async function forfeitDeposit(enrolmentId: string, reason: string): Promise<Result> {
+  if (!z.string().uuid().safeParse(enrolmentId).success) return { error: 'Invalid enrolment.' };
+  return run((s) => s.rpc('forfeit_security_deposit', { p_enrolment_id: enrolmentId, p_reason: reason }));
 }

@@ -677,6 +677,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: '/users', label: 'User Accounts', roles: SCHOOL_ADMIN },
       { href: '/roles', label: 'Roles', roles: SCHOOL_ADMIN },
       { href: '/feature-flags', label: 'Modules', roles: SCHOOL_ADMIN },
+      { href: '/settings/finance-rules', label: 'Finance Rules', roles: ['super_admin', 'owner'] },
       { href: '/settings/data-export', label: 'Export School Data', roles: SCHOOL_ADMIN },
       { href: '/settings/student-lists', label: 'Student Lists', roles: [...SCHOOL_ADMIN, 'admissions_officer'] },
       { href: '/settings/retention', label: 'Data Retention', roles: SCHOOL_ADMIN },

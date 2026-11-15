@@ -246,6 +246,17 @@ export const staffContractSchema = z.object({
   periodsPerWeek: optInt(80),
 });
 
+const pkrAmount = (msg: string) => z.coerce.number({ message: msg }).min(0, msg).max(1_000_000_000, msg);
+export const expenseApprovalLimitsSchema = z
+  .object({ campusId: z.string().uuid('Choose a campus'), selfMaxPkr: pkrAmount('Enter an amount'), principalMaxPkr: pkrAmount('Enter an amount') })
+  .refine((v) => v.principalMaxPkr > v.selfMaxPkr, { message: 'The principal limit must be above the amount anyone can approve' });
+export const pettyCashLimitsSchema = z
+  .object({ accountId: z.string().uuid('Choose a petty cash account'), floatPkr: pkrAmount('Enter the float').refine((v) => v > 0, 'Enter the float'), txnCapPkr: pkrAmount('Enter the limit per payment').refine((v) => v > 0, 'Enter the limit per payment') })
+  .refine((v) => v.txnCapPkr <= v.floatPkr, { message: 'The limit per payment cannot be above the float' });
+export const settlementThresholdSchema = z.object({ thresholdPkr: pkrAmount('Enter an amount') });
+export const tcNoDuesSchema = z.object({ required: z.enum(['yes', 'no'], { errorMap: () => ({ message: 'Choose yes or no' }) }) });
+export const returnWindowSchema = z.object({ days: z.coerce.number({ message: 'Enter 0 to 90 days' }).int('Enter 0 to 90 days').min(0, 'Enter 0 to 90 days').max(90, 'Enter 0 to 90 days') });
+
 // Mirrors public.fee_frequency in supabase/migrations/20260731050000_fee_heads.sql.
 export const FEE_FREQUENCIES = ['monthly', 'quarterly', 'annual', 'one_time'] as const;
 

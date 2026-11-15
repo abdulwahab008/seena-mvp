@@ -15,7 +15,7 @@ export default async function NoDuesPage() {
       .select('id, enrolment_id, status, requested_at, override_reason, items:no_dues_item(id, domain, outstanding_paisa, netted_paisa, status, note), enrolment:enrolment_id(student:student_id(name_en, gr_number))')
       .order('requested_at', { ascending: false })
       .limit(40),
-    supabase.from('security_deposit').select('enrolment_id, amount_paisa, netted_paisa, status, approved_at, refund_paisa, received_on').in('status', ['held', 'refunded', 'adjusted']),
+    supabase.from('security_deposit').select('enrolment_id, amount_paisa, netted_paisa, status, approved_at, refund_paisa, received_on').in('status', ['held', 'refunded', 'adjusted', 'forfeited']),
   ]);
   const deposits = new Map((depositRes.data ?? []).map((d) => [d.enrolment_id, d]));
 
