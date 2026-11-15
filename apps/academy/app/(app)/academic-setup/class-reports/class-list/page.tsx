@@ -4,6 +4,9 @@ import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
 import { formatDatePk } from '@/lib/dates';
 import { PrintButton } from '@/components/print-button';
+import { ActionButton } from '@/components/spec-form';
+import { renumberAlphabetically } from './actions';
+import { RollInput } from './roll-input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export const dynamic = 'force-dynamic';
@@ -14,15 +17,21 @@ export default async function ClassListPage({ searchParams }: { searchParams: Pr
   const section = z.string().uuid().safeParse((await searchParams).section);
   if (!section.success) notFound();
   const supabase = await supabaseServer();
-  const [{ data: sec }, { data: rows }] = await Promise.all([
-    supabase.from('class_section').select('name, class_level:class_level_id(name_en)').eq('id', section.data).maybeSingle(),
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const [{ data: sec }, { data: rows }, { data: appUser }] = await Promise.all([
+    supabase.from('class_section').select('name, session_id, class_level:class_level_id(name_en)').eq('id', section.data).maybeSingle(),
     supabase
       .from('enrolment')
       .select('id, roll_no, student:student_id!inner(id, name_en, father_name_en, gr_number, gender, dob)')
       .eq('section_id', section.data)
       .eq('status', 'active')
       .is('deleted_at', null),
+    supabase.from('app_user').select('app_role').eq('user_id', user!.id).single(),
   ]);
+  // Mirrors fn_set_roll_no()'s roles.
+  const canEditRolls = ['super_admin', 'owner', 'principal', 'class_teacher'].includes(appUser?.app_role ?? '');
   if (!sec) notFound();
   const students = (rows ?? [])
     .map((r) => ({ id: r.id, roll: r.roll_no, s: one(r.student)! }))
@@ -41,6 +50,15 @@ export default async function ClassListPage({ searchParams }: { searchParams: Pr
           <Link href="/academic-setup/class-reports" className="h-9 px-2 text-sm leading-9 text-muted-foreground underline">
             Back
           </Link>
+          {canEditRolls && students.length > 0 && (
+            <ActionButton
+              label="Renumber A to Z"
+              testId="renumber-rolls"
+              confirm="Give every student in this section a new roll number in alphabetical order?"
+              action={renumberAlphabetically}
+              args={[section.data, sec.session_id]}
+            />
+          )}
           <PrintButton />
         </div>
       </div>
@@ -63,7 +81,7 @@ export default async function ClassListPage({ searchParams }: { searchParams: Pr
             {students.map(({ id, roll, s }, i) => (
               <TableRow key={id} data-testid="class-list-row">
                 <TableCell className="tabular text-muted-foreground">{i + 1}</TableCell>
-                <TableCell className="tabular">{roll ?? ''}</TableCell>
+                <TableCell className="tabular">{canEditRolls ? <RollInput key={`${id}-${roll}`} enrolmentId={id} roll={roll} name={s.name_en} /> : (roll ?? '')}</TableCell>
                 <TableCell className="tabular font-mono">{s.gr_number}</TableCell>
                 <TableCell className="font-medium">{s.name_en}</TableCell>
                 <TableCell>{s.father_name_en ?? ''}</TableCell>
