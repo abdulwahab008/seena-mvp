@@ -69,7 +69,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     supabase.from('class_section').select('id, name, class_level(name_en)').eq('campus_id', student.campus_id).eq('is_active', true),
     supabase
       .from('student_guardian')
-      .select('guardian_id, relationship, is_primary, receives_billing, may_collect_child, guardian(name_en, phone_e164, cnic, auth_user_id, profession_id)')
+      .select('guardian_id, relationship, is_primary, receives_billing, may_collect_child, portal_access, guardian(name_en, phone_e164, cnic, auth_user_id, profession_id)')
       .eq('student_id', id)
       .is('to_date', null),
     supabase.from('app_user').select('app_role').eq('user_id', user!.id).single(),
@@ -393,6 +393,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       <Section id="guardians" title="Guardians" description="Parents and others who may collect the child or receive fee notices.">
         <div className="space-y-4">
           <GuardianList
+            studentId={student.id}
+            canManagePortal={isLeadership || role === 'vice_principal' || role === 'admissions_officer'}
             links={guardianLinks ?? []}
             professions={lookupOptions('profession', (guardianLinks ?? []).map((l) => one(l.guardian)?.profession_id ?? null))}
             canEditProfession={canDelete}

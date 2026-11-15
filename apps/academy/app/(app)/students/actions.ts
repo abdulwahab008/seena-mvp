@@ -579,3 +579,14 @@ export async function saveStudentMedical(studentId: string, formData: FormData):
   revalidatePath(`/students/${studentId}`);
   return { error: null };
 }
+
+export async function setGuardianPortalAccess(studentId: string, guardianId: string, allowed: boolean): Promise<{ error: string | null }> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_guardian_portal_access', { p_student_id: studentId, p_guardian_id: guardianId, p_allowed: allowed });
+  if (error) {
+    if (error.message.includes('FORBIDDEN')) return { error: 'You do not have permission to change portal access.' };
+    return { error: 'Could not change portal access.' };
+  }
+  revalidatePath(`/students/${studentId}`);
+  return { error: null };
+}

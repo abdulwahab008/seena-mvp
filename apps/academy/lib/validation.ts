@@ -225,6 +225,17 @@ export const streamSchema = z.object({
 export const sectionStreamSchema = z.object({ sectionId: z.string().uuid('Choose a section'), streamId: z.string().uuid().or(z.literal('')).optional() });
 export const campusBoardSchema = z.object({ campusId: z.string().uuid('Choose a campus'), board: z.enum(keysOf(BOARD_LABEL), { errorMap: () => ({ message: 'Choose a board' }) }) });
 
+// Mirrors public.contract_type.
+export const CONTRACT_TYPE_LABEL = { permanent: 'Permanent', contract: 'Fixed-term contract', probation: 'Probation', visiting: 'Visiting', part_time: 'Part-time' } as const;
+const optInt = (max: number) => z.preprocess((v) => (v === '' || v == null ? undefined : v), z.coerce.number().int().min(0).max(max).optional());
+export const staffContractSchema = z.object({
+  contractType: z.enum(keysOf(CONTRACT_TYPE_LABEL), { errorMap: () => ({ message: 'Choose a contract type' }) }),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the start date'),
+  grossSalaryPkr: z.coerce.number({ message: 'Enter the monthly gross salary' }).positive('Enter the monthly gross salary').max(100_000_000),
+  noticeDays: optInt(365),
+  periodsPerWeek: optInt(80),
+});
+
 // Mirrors public.fee_frequency in supabase/migrations/20260731050000_fee_heads.sql.
 export const FEE_FREQUENCIES = ['monthly', 'quarterly', 'annual', 'one_time'] as const;
 

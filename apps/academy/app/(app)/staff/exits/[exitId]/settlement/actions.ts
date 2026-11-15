@@ -9,7 +9,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 export type SettlementState = { error: string | null; message?: string | null };
 
 function mapError(message: string): string {
-  if (message.includes('NO_SALARY_ON_FILE')) return 'This person has no salary on a contract, so a settlement cannot be computed.';
+  if (message.includes('NO_SALARY_ON_FILE')) return 'This person has no salary on file. Add a contract with their salary on their staff page, then compute the settlement.';
   if (message.includes('SETTLEMENT_ALREADY_APPROVED')) return 'The statement is already approved. Revise it to make a corrected version.';
   if (message.includes('SETTLEMENT_IMMUTABLE')) return 'An approved statement cannot be changed.';
   if (message.includes('LINE_TYPE_COMPUTED')) return 'Salary, leave encashment and notice recovery are computed; they cannot be typed in.';
