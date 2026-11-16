@@ -4,6 +4,7 @@ import { processDigestDeliveries } from '@/lib/digests/process';
 import { transportFor } from '@/lib/digests/transport';
 import { WhatsAppCloudTransport } from '@/lib/digests/whatsapp';
 import { verifyWorkerSecret } from '@/lib/exports/worker-secret';
+import { verifyCronSecret } from '@/lib/comm/cron-auth';
 
 export const maxDuration = 120;
 
@@ -13,6 +14,16 @@ export const maxDuration = 120;
 // it WhatsApp digests use the dev transport instead of pretending to send.
 export async function POST(req: NextRequest) {
   if (!verifyWorkerSecret(req.headers.get('x-worker-secret'))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  return run();
+}
+
+// Vercel Cron (see vercel.json) sends a GET with the cron secret.
+export async function GET(req: NextRequest) {
+  if (!verifyCronSecret(req.headers.get('authorization'))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  return run();
+}
+
+async function run() {
   const db = supabaseServiceRole();
   const [{ data: token }, { data: phoneId }] = await Promise.all([
     db.rpc('digest_provider_secret', { p_name: 'whatsapp_waba_token' }),
