@@ -51200,7 +51200,7 @@ export type Database = {
         Returns: undefined
       }
       link_staff_user_account: {
-        Args: { p_staff_id: string; p_user_id: string }
+        Args: { p_staff_id: string; p_user_id: string | null }
         Returns: undefined
       }
       link_unit_source_chapter: {

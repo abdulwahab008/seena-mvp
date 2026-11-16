@@ -22,6 +22,7 @@ function mapError(message: string): string {
     ['NOTHING_TO_CLONE', 'There is no syllabus in the source session to copy.'],
     ['SYLLABUS_ALREADY_EXISTS', 'A syllabus already exists for this class, subject and board.'],
     ['ORDER_MUST_LIST_EVERY_UNIT', 'The new order must list every unit.'],
+    ['ORDER_MUST_LIST_EVERY_TOPIC_OF_THE_UNIT', 'The new order must list every topic of the chapter.'],
   ];
   return known.find(([k]) => message.includes(k))?.[1] ?? 'Something went wrong. Please try again.';
 }
@@ -56,6 +57,28 @@ export async function addTopic(unitId: string, input: SyllabusTopicInput): Promi
 export async function reorderUnits(unitIds: string[]): Promise<Result> {
   if (!z.array(z.string().uuid()).min(1).safeParse(unitIds).success) return { error: 'Invalid order.' };
   return run((db) => db.rpc('reorder_syllabus_units', { p_unit_ids: unitIds }));
+}
+
+export async function updateUnit(unitId: string, input: SyllabusUnitInput): Promise<Result> {
+  const u = syllabusUnitSchema.safeParse(input);
+  if (!z.string().uuid().safeParse(unitId).success || !u.success) return { error: u.success ? 'Invalid unit.' : (u.error.issues[0]?.message ?? 'Invalid input.') };
+  return run((db) => db.rpc('update_syllabus_unit', { p_unit_id: unitId, p_title: u.data.title, p_title_ur: u.data.titleUr, p_planned_periods: u.data.plannedPeriods, p_target_month: monthStart(u.data.targetMonth) }));
+}
+
+export async function reorderTopics(unitId: string, topicIds: string[]): Promise<Result> {
+  if (!z.string().uuid().safeParse(unitId).success || !z.array(z.string().uuid()).min(1).safeParse(topicIds).success) return { error: 'Invalid order.' };
+  return run((db) => db.rpc('reorder_syllabus_topics', { p_unit_id: unitId, p_topic_ids: topicIds }));
+}
+
+export async function linkChapter(unitId: string, book: string, chapter: string): Promise<Result> {
+  const p = z.object({ unitId: z.string().uuid(), book: z.string().trim().min(1, 'Enter the textbook').max(120), chapter: z.string().trim().min(1, 'Enter the textbook chapter').max(120) }).safeParse({ unitId, book, chapter });
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
+  return run((db) => db.rpc('link_unit_source_chapter', { p_unit_id: p.data.unitId, p_source_book: p.data.book, p_source_chapter: p.data.chapter }));
+}
+
+export async function unlinkChapter(linkId: string): Promise<Result> {
+  if (!z.string().uuid().safeParse(linkId).success) return { error: 'Invalid link.' };
+  return run((db) => db.rpc('unlink_unit_source_chapter', { p_link_id: linkId }));
 }
 
 export async function deleteUnit(unitId: string): Promise<Result> {

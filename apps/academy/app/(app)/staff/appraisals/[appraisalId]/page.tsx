@@ -5,6 +5,8 @@ import { getCurrentActor, isHrWriter, one } from '@/lib/hr/current-role';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AckForm, FinaliseButton, ScoreForm } from '../appraisal-forms';
+import { ActionForm } from '@/components/action-form';
+import { reassignRater } from './rater-actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +34,11 @@ export default async function AppraisalPage({ params }: { params: Promise<{ appr
   const isAppraisee = staff?.user_id === actor?.userId;
   const canClose = isHrWriter(actor?.role) && (a.status === 'released' || a.status === 'awaiting_acknowledgement');
   const open = a.status === 'in_progress';
+  const canReassign = open && isHrWriter(actor?.role);
+  const { data: raters } = canReassign
+    ? await supabase.from('app_user').select('user_id, full_name, app_role').eq('status', 'active').in('app_role', ['owner', 'principal', 'hr_manager', 'head_of_department', 'class_teacher', 'subject_teacher']).order('full_name')
+    : { data: null };
+  const raterName = (raters ?? []).find((r) => r.user_id === a.rater_id)?.full_name;
   const canRespond = isAppraisee && (a.status === 'released' || a.status === 'awaiting_acknowledgement');
 
   return (
@@ -60,6 +67,31 @@ export default async function AppraisalPage({ params }: { params: Promise<{ appr
           </CardHeader>
           <CardContent>
             <ScoreForm appraisalId={appraisalId} competencies={snapshot} existing={ratings} />
+          </CardContent>
+        </Card>
+      )}
+
+      {canReassign && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Rater</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <p data-testid="appraisal-rater">Being rated by {raterName ?? 'someone who is no longer active'}.</p>
+            <ActionForm
+              testId="reassign-rater-form"
+              submitLabel="Change rater"
+              action={reassignRater.bind(null, appraisalId)}
+              fields={[
+                {
+                  name: 'raterId',
+                  label: 'New rater',
+                  type: 'select',
+                  required: true,
+                  options: (raters ?? []).filter((r) => r.user_id !== a.rater_id && r.user_id !== staff?.user_id).map((r) => ({ value: r.user_id, label: `${r.full_name} (${r.app_role.replaceAll('_', ' ')})` })),
+                },
+              ]}
+            />
           </CardContent>
         </Card>
       )}

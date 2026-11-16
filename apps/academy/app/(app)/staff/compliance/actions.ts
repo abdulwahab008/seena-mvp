@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { complianceDocumentSchema, renewDocumentSchema } from '@/lib/validation';
+import { complianceDocumentSchema, documentPolicySchema, renewDocumentSchema } from '@/lib/validation';
 import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
 
 export type ActionState = { error: string | null; message?: string | null };
@@ -69,4 +69,25 @@ export async function runExpiryCheck(): Promise<ActionState> {
   if (error) return { error: mapError(error.message) };
   revalidatePath('/staff/compliance');
   return { error: null, message: `${data ?? 0} new reminder(s) generated.` };
+}
+
+export async function saveDocumentPolicy(values: Record<string, string>): Promise<{ error: string | null; message?: string }> {
+  const p = documentPolicySchema.safeParse(values);
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
+  const code =
+    p.data.documentType === 'new'
+      ? p.data.label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^[^a-z]+|_+$/g, '').slice(0, 40)
+      : p.data.documentType;
+  if (!/^[a-z][a-z0-9_]{1,39}$/.test(code)) return { error: 'Start the document name with a letter.' };
+  const supabase = await supabaseServer();
+  const { data: existing } = await supabase.from('document_type_policy').select('applies_to_contract_types').eq('document_type', code).maybeSingle();
+  const { error } = await supabase.rpc('upsert_document_type_policy', {
+    p_document_type: code,
+    p_label: p.data.label,
+    p_is_mandatory: p.data.mandatory === 'yes',
+    p_contract_types: existing?.applies_to_contract_types ?? [],
+  });
+  if (error) return { error: mapError(error.message) };
+  revalidatePath('/staff/compliance');
+  return { error: null, message: 'Document rule saved.' };
 }

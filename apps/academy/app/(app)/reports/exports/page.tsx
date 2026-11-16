@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AutoRefresh, ExportForm, type DatasetOption } from './export-form';
 import { formatDateTimePk } from '@/lib/dates';
+import { ActionButton } from '@/components/spec-form';
+import { markNotificationsRead } from './actions';
 
 const KEYS = new Set(['students', 'fee_collection', 'fee_defaulters']);
 
@@ -30,12 +32,13 @@ export default async function ExportsPage() {
 
       {(notesRes.data ?? []).length > 0 && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-2">
             <CardTitle className="text-base">Recent notifications</CardTitle>
+            {(notesRes.data ?? []).some((n) => !n.read_at) && <ActionButton label="Mark all read" action={markNotificationsRead} testId="mark-notifications-read" />}
           </CardHeader>
           <CardContent className="space-y-1 text-sm" data-testid="notifications">
             {(notesRes.data ?? []).map((n) => (
-              <p key={n.id}>
+              <p key={n.id} className={n.read_at ? 'text-muted-foreground' : undefined} data-unread={n.read_at ? undefined : 'true'}>
                 <strong>{n.title}</strong> — {n.body} <span className="text-muted-foreground">{formatDateTimePk(n.created_at)}</span>
               </p>
             ))}

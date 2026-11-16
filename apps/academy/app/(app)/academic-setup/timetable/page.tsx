@@ -3,6 +3,10 @@ import { CreateVersionForm } from './create-version-form';
 import { TimetableGrid, type SlotRow } from './timetable-grid';
 import { AutofillControls } from './autofill-controls';
 import { pickActiveCampus } from '@/lib/campus-context';
+import { ActionForm } from '@/components/action-form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { currentRole, loose } from '@/lib/transport/rpc';
+import { saveTimetableRules } from './rules-actions';
 
 export default async function TimetablePage({
   searchParams,
@@ -92,6 +96,16 @@ export default async function TimetablePage({
         .eq('timetable_version_id', versionId)
     : { data: [] as never[] };
 
+  const role = await currentRole(loose(supabase));
+  const canSetRules = ['super_admin', 'owner', 'principal'].includes(role);
+  const { data: ruleRows } = campusId
+    ? await supabase.from('timetable_constraint').select('key, int_value, is_enabled').eq('campus_id', campusId)
+    : { data: [] as never[] };
+  const rule = (k: string) => (ruleRows ?? []).find((r) => r.key === k);
+  const maxPerDay = rule('max_periods_per_day')?.int_value ?? 7;
+  const maxConsecutive = rule('max_consecutive_periods')?.int_value ?? 4;
+  const flagIsolated = rule('flag_isolated_free_period')?.is_enabled ?? true;
+
   return (
     <div className="space-y-6">
       <div>
@@ -139,6 +153,40 @@ export default async function TimetablePage({
               />
             </>
           )}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Teacher load warnings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <p data-testid="timetable-rules">
+                A teacher is flagged above {maxPerDay} periods a day or {maxConsecutive} periods in a row{flagIsolated ? ', and for a single free period stuck between classes' : ''}.
+              </p>
+              {canSetRules && (
+                <ActionForm
+                  testId="timetable-rules-form"
+                  submitLabel="Save rules"
+                  action={saveTimetableRules}
+                  resetOnSuccess={false}
+                  fields={[
+                    { name: 'campusId', label: 'Campus', type: 'hidden', defaultValue: campusId },
+                    { name: 'maxPerDay', label: 'Most periods a day', type: 'number', required: true, defaultValue: String(maxPerDay) },
+                    { name: 'maxConsecutive', label: 'Most periods in a row', type: 'number', required: true, defaultValue: String(maxConsecutive) },
+                    {
+                      name: 'flagIsolated',
+                      label: 'Flag a single free period between classes',
+                      type: 'select',
+                      required: true,
+                      defaultValue: flagIsolated ? 'yes' : 'no',
+                      options: [
+                        { value: 'yes', label: 'Yes' },
+                        { value: 'no', label: 'No' },
+                      ],
+                    },
+                  ]}
+                />
+              )}
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

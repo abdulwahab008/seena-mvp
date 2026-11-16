@@ -6,12 +6,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { syllabusTopicSchema, syllabusUnitSchema, type SyllabusTopicInput, type SyllabusUnitInput } from '@/lib/validation';
-import { addTopic, addUnit, cloneSyllabus, deleteTopic, deleteUnit, reorderUnits, type SyllabusScope } from './actions';
+import { addTopic, addUnit, cloneSyllabus, deleteTopic, deleteUnit, linkChapter, reorderTopics, reorderUnits, unlinkChapter, updateUnit, type SyllabusScope } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export type UnitRow = { id: string; sequence: number; title: string; titleUr: string | null; plannedPeriods: number; targetMonth: string | null; topics: { id: string; sequence: number; title: string; plannedPeriods: number }[] };
+export type UnitRow = { id: string; sequence: number; title: string; titleUr: string | null; plannedPeriods: number; targetMonth: string | null; topics: { id: string; sequence: number; title: string; plannedPeriods: number }[]; chapters: { id: string; book: string; chapter: string }[] };
 
 function useRun() {
   const router = useRouter();
@@ -29,33 +29,44 @@ function useRun() {
   return { pending, error, run };
 }
 
-export function UnitForm({ scope }: { scope: SyllabusScope }) {
+export function UnitForm({ scope, unit, onDone }: { scope?: SyllabusScope; unit?: UnitRow; onDone?: () => void }) {
   const { pending, error, run } = useRun();
-  const form = useForm<SyllabusUnitInput>({ resolver: zodResolver(syllabusUnitSchema), defaultValues: { title: '', titleUr: '', plannedPeriods: 8, targetMonth: '' } });
-  const onSubmit = form.handleSubmit((v) => run(() => addUnit(scope, v), 'Chapter added.'));
+  const form = useForm<SyllabusUnitInput>({
+    resolver: zodResolver(syllabusUnitSchema),
+    defaultValues: unit ? { title: unit.title, titleUr: unit.titleUr ?? '', plannedPeriods: unit.plannedPeriods, targetMonth: unit.targetMonth?.slice(0, 7) ?? '' } : { title: '', titleUr: '', plannedPeriods: 8, targetMonth: '' },
+  });
+  const onSubmit = form.handleSubmit((v) => {
+    if (unit) run(async () => {
+      const r = await updateUnit(unit.id, v);
+      if (!r.error) onDone?.();
+      return r;
+    }, 'Chapter saved.');
+    else if (scope) run(() => addUnit(scope, v), 'Chapter added.');
+  });
+  const id = (k: string) => `${k}${unit ? `-${unit.id}` : ''}`;
   return (
     <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-5" noValidate>
       <div className="space-y-1 sm:col-span-2">
-        <Label htmlFor="unitTitle">Chapter title</Label>
-        <Input id="unitTitle" {...form.register('title')} />
+        <Label htmlFor={id('unitTitle')}>Chapter title</Label>
+        <Input id={id('unitTitle')} {...form.register('title')} />
         {form.formState.errors.title && <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>}
       </div>
       <div className="space-y-1">
-        <Label htmlFor="unitTitleUr">Urdu title</Label>
-        <Input id="unitTitleUr" dir="rtl" {...form.register('titleUr')} />
+        <Label htmlFor={id('unitTitleUr')}>Urdu title</Label>
+        <Input id={id('unitTitleUr')} dir="rtl" {...form.register('titleUr')} />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="unitPeriods">Planned periods</Label>
-        <Input id="unitPeriods" type="number" {...form.register('plannedPeriods', { valueAsNumber: true })} />
+        <Label htmlFor={id('unitPeriods')}>Planned periods</Label>
+        <Input id={id('unitPeriods')} type="number" {...form.register('plannedPeriods', { valueAsNumber: true })} />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="unitMonth">Target month</Label>
-        <Input id="unitMonth" type="month" {...form.register('targetMonth')} />
+        <Label htmlFor={id('unitMonth')}>Target month</Label>
+        <Input id={id('unitMonth')} type="month" {...form.register('targetMonth')} />
       </div>
       {error && <p role="alert" className="text-sm text-destructive sm:col-span-5">{error}</p>}
       <div className="sm:col-span-5">
-        <Button type="submit" disabled={pending} data-testid="add-unit">
-          Add chapter
+        <Button type="submit" disabled={pending} data-testid={unit ? 'save-unit' : 'add-unit'}>
+          {unit ? 'Save chapter' : 'Add chapter'}
         </Button>
       </div>
     </form>
@@ -81,8 +92,55 @@ function TopicForm({ unitId }: { unitId: string }) {
   );
 }
 
+function ChapterLinks({ unit }: { unit: UnitRow }) {
+  const { pending, error, run } = useRun();
+  const [book, setBook] = useState('');
+  const [chapter, setChapter] = useState('');
+  return (
+    <div className="space-y-1 pl-4" data-testid="unit-chapters">
+      {unit.chapters.map((c) => (
+        <div key={c.id} className="flex items-center gap-2 text-muted-foreground">
+          <span>
+            Textbook: {c.book}, {c.chapter}
+          </span>
+          <Button size="sm" variant="ghost" disabled={pending} onClick={() => run(() => unlinkChapter(c.id))}>
+            Unlink
+          </Button>
+        </div>
+      ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <Input aria-label="Textbook" className="h-8 w-40" placeholder="Textbook" value={book} onChange={(e) => setBook(e.target.value)} />
+        <Input aria-label="Textbook chapter" className="h-8 w-40" placeholder="Chapter" value={chapter} onChange={(e) => setChapter(e.target.value)} />
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={pending}
+          onClick={() =>
+            run(async () => {
+              const r = await linkChapter(unit.id, book, chapter);
+              if (!r.error) setChapter('');
+              return r;
+            })
+          }
+        >
+          Link textbook chapter
+        </Button>
+        {error && <span role="alert" className="text-xs text-destructive">{error}</span>}
+      </div>
+    </div>
+  );
+}
+
 export function UnitList({ units }: { units: UnitRow[] }) {
   const { pending, error, run } = useRun();
+  const [editing, setEditing] = useState<string | null>(null);
+  const moveTopic = (u: UnitRow, index: number, by: -1 | 1) => {
+    const ids = u.topics.map((t) => t.id);
+    const target = index + by;
+    if (target < 0 || target >= ids.length) return;
+    [ids[index], ids[target]] = [ids[target]!, ids[index]!];
+    run(() => reorderTopics(u.id, ids));
+  };
   const move = (index: number, by: -1 | 1) => {
     const ids = units.map((u) => u.id);
     const target = index + by;
@@ -110,24 +168,37 @@ export function UnitList({ units }: { units: UnitRow[] }) {
               <Button size="sm" variant="ghost" aria-label={`Move ${u.title} down`} disabled={pending || i === units.length - 1} onClick={() => move(i, 1)}>
                 Down
               </Button>
+              <Button size="sm" variant="ghost" disabled={pending} onClick={() => setEditing(editing === u.id ? null : u.id)}>
+                {editing === u.id ? 'Close' : 'Edit'}
+              </Button>
               <Button size="sm" variant="ghost" disabled={pending} onClick={() => run(() => deleteUnit(u.id), 'Chapter deleted.')}>
                 Delete
               </Button>
             </span>
           </div>
+          {editing === u.id && <UnitForm unit={u} onDone={() => setEditing(null)} />}
           <ul className="space-y-1 pl-4">
-            {u.topics.map((t) => (
+            {u.topics.map((t, ti) => (
               <li key={t.id} className="flex items-center justify-between">
                 <span>
                   {u.sequence}.{t.sequence} {t.title} <span className="text-muted-foreground">({t.plannedPeriods})</span>
                 </span>
-                <Button size="sm" variant="ghost" disabled={pending} onClick={() => run(() => deleteTopic(t.id))}>
-                  Remove
-                </Button>
+                <span className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost" aria-label={`Move ${t.title} up`} disabled={pending || ti === 0} onClick={() => moveTopic(u, ti, -1)}>
+                    Up
+                  </Button>
+                  <Button size="sm" variant="ghost" aria-label={`Move ${t.title} down`} disabled={pending || ti === u.topics.length - 1} onClick={() => moveTopic(u, ti, 1)}>
+                    Down
+                  </Button>
+                  <Button size="sm" variant="ghost" disabled={pending} onClick={() => run(() => deleteTopic(t.id))}>
+                    Remove
+                  </Button>
+                </span>
               </li>
             ))}
           </ul>
           <TopicForm unitId={u.id} />
+          <ChapterLinks unit={u} />
         </div>
       ))}
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

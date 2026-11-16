@@ -1,6 +1,8 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { ClassesSectionsView } from './classes-sections-view';
 import { pickActiveCampus } from '@/lib/campus-context';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AutoPlace } from './auto-place';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +50,7 @@ export default async function ClassesSectionsPage() {
   const { data: enrolments } = campus && currentSession
     ? await supabase
         .from('enrolment')
-        .select('section_id')
+        .select('section_id, student_id')
         .eq('campus_id', campus.id)
         .eq('session_id', currentSession.id)
         .eq('status', 'active')
@@ -81,17 +83,39 @@ export default async function ClassesSectionsPage() {
     .in('app_role', ['subject_teacher', 'class_teacher', 'head_of_department', 'principal', 'vice_principal'])
     .order('full_name');
 
+  const enrolled = new Set((enrolments ?? []).map((e) => e.student_id));
+  const { data: activeStudents } = campus && currentSession
+    ? await supabase.from('student').select('id, name_en, gr_number').eq('campus_id', campus.id).eq('status', 'active').is('deleted_at', null).order('name_en')
+    : { data: [] };
+  const unplaced = (activeStudents ?? []).filter((s) => !enrolled.has(s.id));
+
   return (
-    <ClassesSectionsView
-      campus={campus ?? null}
-      campuses={campuses ?? []}
-      currentSession={currentSession ?? null}
-      sessions={sessions ?? []}
-      classLevels={classLevels ?? []}
-      sections={sections ?? []}
-      studentCountMap={studentCountMap}
-      teacherAssignmentMap={teacherAssignmentMap}
-      staffList={staffList ?? []}
-    />
+    <div className="space-y-6">
+      <ClassesSectionsView
+        campus={campus ?? null}
+        campuses={campuses ?? []}
+        currentSession={currentSession ?? null}
+        sessions={sessions ?? []}
+        classLevels={classLevels ?? []}
+        sections={sections ?? []}
+        studentCountMap={studentCountMap}
+        teacherAssignmentMap={teacherAssignmentMap}
+        staffList={staffList ?? []}
+      />
+      {currentSession && unplaced.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Students without a section this session ({unplaced.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AutoPlace
+              sessionId={currentSession.id}
+              classes={(classLevels ?? []).map((c) => ({ id: c.id, name: c.name_en }))}
+              students={unplaced.map((s) => ({ id: s.id, name: s.name_en, gr: s.gr_number }))}
+            />
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

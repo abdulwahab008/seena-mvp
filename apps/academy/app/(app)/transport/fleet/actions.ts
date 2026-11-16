@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
-import { tokenTaxSettingSchema, transportVehicleSchema, vehicleDocumentSchema } from '@/lib/validation';
+import { tokenTaxSettingSchema, transportVehicleSchema, vehicleDocumentSchema, vehicleOverrideSchema } from '@/lib/validation';
 import { loose, parseValues, rpcError, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
@@ -46,4 +46,15 @@ export async function setTokenTaxPolicy(values: Record<string, string>): Promise
   if (error) return { error: rpcError(error.message, MESSAGES) };
   revalidatePath('/transport/fleet');
   return { error: null, message: 'Policy saved.' };
+}
+
+export async function overrideVehicleBlock(values: Record<string, string>): Promise<ActionResult> {
+  const p = parseValues(vehicleOverrideSchema, values);
+  if (!p.ok) return { error: p.error };
+  const supabase = loose(await supabaseServer());
+  const { error } = await supabase.rpc('override_vehicle_block', { p_vehicle_id: p.data.vehicleId, p_from: p.data.from, p_to: p.data.to, p_reason: p.data.reason });
+  if (error) return { error: rpcError(error.message, { ...MESSAGES, REASON_MIN_LENGTH_10: 'Give a reason of at least 10 characters.', OVERRIDE_SPAN_INVALID: 'The last day cannot be before the first day.' }) };
+  revalidatePath('/transport/fleet');
+  revalidatePath('/transport/assignments');
+  return { error: null, message: 'Override recorded. The vehicle can be assigned on those dates.' };
 }

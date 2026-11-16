@@ -145,3 +145,19 @@ export async function assignClassTeacher(formData: FormData): Promise<{ error: s
   revalidatePath('/academic-setup/classes-sections');
   return { error: null, warning: data?.warning ?? null };
 }
+
+export async function autoPlaceStudents(classLevelId: string, sessionId: string, studentIds: string[]): Promise<{ error: string | null; message?: string }> {
+  const p = z.object({ classLevelId: z.string().uuid('Choose a class'), sessionId: z.string().uuid(), studentIds: z.array(z.string().uuid()).min(1, 'Tick at least one student').max(200) }).safeParse({ classLevelId, sessionId, studentIds });
+  if (!p.success) return { error: p.error.issues[0]?.message ?? 'Invalid input.' };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('fn_auto_balance_sections', { p_class_level_id: p.data.classLevelId, p_session_id: p.data.sessionId, p_student_ids: p.data.studentIds });
+  if (error) {
+    if (error.message.includes('NO_SECTIONS_FOR_CLASS')) return { error: 'That class has no active section in this session. Add a section first.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only the Principal or Owner can place students.' };
+    if (error.message.includes('SECTION_FULL') || error.message.includes('CAPACITY')) return { error: 'Every section of that class is full.' };
+    return { error: 'Could not place the students. Please try again.' };
+  }
+  revalidatePath('/academic-setup/classes-sections');
+  const placed = (data as { placed?: number } | null)?.placed ?? p.data.studentIds.length;
+  return { error: null, message: `Placed ${placed} student${placed === 1 ? '' : 's'} in the emptiest sections.` };
+}
