@@ -46,10 +46,13 @@ test('a roll number is changed by hand, then the section is renumbered A to Z', 
   await kid3.fill('9');
   await kid3.blur();
   await expect(page.getByText('Roll number saved.')).toBeVisible();
+  // Let the saved roll's page refresh land before the next action, so a late refresh cannot overwrite the renumbering.
+  await page.waitForLoadState('networkidle');
   await expect(page.getByLabel('Roll number of rolls-e2e Kid 3')).toHaveValue('9');
 
   page.once('dialog', (d) => d.accept());
   await page.getByTestId('renumber-rolls').click();
+  await expect(page.getByText('Renumbered 3 students A to Z.')).toBeVisible();
   await expect(page.getByLabel('Roll number of rolls-e2e Kid 3')).toHaveValue('3');
   await expect(page.getByLabel('Roll number of rolls-e2e Kid 1')).toHaveValue('1');
 });

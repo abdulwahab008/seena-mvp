@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { setRollNo } from './actions';
 
 export function RollInput({ enrolmentId, roll, name }: { enrolmentId: string; roll: number | null; name: string }) {
-  const router = useRouter();
   const [value, setValue] = useState(roll == null ? '' : String(roll));
   const [pending, startTransition] = useTransition();
   const save = () => {
@@ -16,10 +14,7 @@ export function RollInput({ enrolmentId, roll, name }: { enrolmentId: string; ro
       if (r.error) {
         toast.error(r.error);
         setValue(roll == null ? '' : String(roll));
-      } else {
-        toast.success(r.message);
-        router.refresh();
-      }
+      } else toast.success(r.message);
     });
   };
   return (
