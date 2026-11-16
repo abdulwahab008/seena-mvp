@@ -59,6 +59,14 @@ test('the transport office builds a route, re-orders a stop and prints the sheet
   const { data: stops } = await db.from('transport_stop').select('seq').eq('tenant_id', tenant);
   expect((stops ?? []).map((s) => s.seq).sort()).toEqual([1, 2, 3]);
 
+  // The van now reaches Gate One five minutes later; nothing else about the stop changes.
+  const edit = page.getByTestId('stop-edit-form');
+  await edit.getByLabel(/^Stop/).selectOption({ label: '2. Gate One' });
+  await edit.getByLabel(/New pickup time/).fill('06:50');
+  await page.getByTestId('stop-edit-form-submit').click();
+  await expect(page.getByTestId('stop-row').nth(1)).toContainText('06:50');
+  await expect(page.getByTestId('stop-row').nth(1)).toContainText('14:10');
+
   await page.getByTestId('route-sheet-link').click();
   await expect(page.getByTestId('route-sheet')).toBeVisible();
   await expect(page.getByTestId('sheet-row')).toHaveCount(3);

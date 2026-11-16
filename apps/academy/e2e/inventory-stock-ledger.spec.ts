@@ -52,4 +52,15 @@ test('receive stock, take a physical count and see on-hand follow the immutable 
   expect(rows).toHaveLength(2);
   expect(rows!.map((r) => Number(r.qty))).toEqual([200, -2]);
   expect(rows![1]?.reason_code).toBe('SHRINKAGE');
+
+  const edit = page.getByTestId('item-edit-form');
+  await edit.getByLabel('Item').selectOption({ index: 1 });
+  await edit.getByLabel('New sale price (PKR)').fill('1350');
+  await page.getByTestId('item-edit-form-submit').click();
+  await expect.poll(async () => (await db.from('inv_item').select('name, sale_price').eq('tenant_id', tenant).single()).data).toEqual({ name: 'School shirt', sale_price: 135000 });
+
+  await edit.getByLabel('Item').selectOption({ index: 1 });
+  await edit.getByLabel('Status').selectOption('no');
+  await page.getByTestId('item-edit-form-submit').click();
+  await expect(page.getByTestId('stock-row')).toContainText('Inactive');
 });

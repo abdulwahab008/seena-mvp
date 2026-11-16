@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { ActionForm } from '@/components/action-form';
 import { pkr } from '@/lib/rpc-action';
-import { createItem, createStore, postStockTake, receiveStock, transferStock } from './actions';
+import { createItem, createStore, postStockTake, receiveStock, transferStock, updateItem } from './actions';
 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 
@@ -68,7 +68,9 @@ export default async function InventoryPage() {
                   return (
                     <tr key={i.id} className="border-t" data-testid="stock-row">
                       <td className="py-1 pr-3 font-mono">{i.item_code}</td>
-                      <td className="pr-3">{i.name}</td>
+                      <td className="pr-3">
+                        {i.name} {!i.active && <Badge variant="outline">Inactive</Badge>}
+                      </td>
                       <td className="pr-3">{i.size ?? '—'}</td>
                       <td className="pr-3 text-right" data-testid={`on-hand-${i.item_code}`}>
                         {qty}
@@ -112,6 +114,33 @@ export default async function InventoryPage() {
         </Card>
 
         <div className="space-y-6">
+          {itemRows.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Edit an item</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ActionForm
+                  testId="item-edit-form"
+                  submitLabel="Save item"
+                  action={updateItem}
+                  fields={[
+                    {
+                      name: 'itemId',
+                      label: 'Item',
+                      type: 'select',
+                      required: true,
+                      options: itemRows.map((i) => ({ value: i.id, label: `${i.item_code} · ${i.name}${i.size ? ` (${i.size})` : ''} · ${pkr(i.sale_price)}${i.active ? '' : ' · inactive'}` })),
+                    },
+                    { name: 'name', label: 'New name (blank keeps it)' },
+                    { name: 'salePricePkr', label: 'New sale price (PKR)', type: 'number' },
+                    { name: 'reorderLevel', label: 'New reorder level', type: 'number' },
+                    { name: 'active', label: 'Status', type: 'select', options: [{ value: 'yes', label: 'Active' }, { value: 'no', label: 'Inactive (stop selling)' }] },
+                  ]}
+                />
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Receive stock</CardTitle>

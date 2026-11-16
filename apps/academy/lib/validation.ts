@@ -2972,6 +2972,14 @@ export const transportStopSchema = z.object({
   fareSlabId: toptUuid,
   seq: toptNumber('position'),
 });
+export const transportStopEditSchema = z.object({
+  stopId: tuuid,
+  name: toptText(120),
+  nameUr: toptText(120),
+  pickupTime: toptTime,
+  dropTime: toptTime,
+  fareSlabId: toptUuid,
+});
 // FR-P02
 export const transportVehicleSchema = z.object({
   campusId: tuuid,
@@ -3162,6 +3170,14 @@ export const invItemSchema = z.object({
   salePricePkr: nonNegNumber('Enter a sale price').default(0),
 });
 export type InvItemInput = z.input<typeof invItemSchema>;
+const optNonNeg = (msg: string) => z.preprocess((v) => (v === '' || v == null ? undefined : v), z.coerce.number({ message: msg }).min(0, msg).optional());
+export const invItemEditSchema = z.object({
+  itemId: z.string().uuid('Choose an item'),
+  name: z.string().trim().max(200).optional(),
+  reorderLevel: optNonNeg('Enter a reorder level'),
+  salePricePkr: optNonNeg('Enter a sale price'),
+  active: z.enum(['', 'yes', 'no']).optional(),
+});
 export const invStoreSchema = z.object({
   campusId: z.string().uuid('Choose a campus'),
   name: z.string().trim().min(1, 'Enter a store name').max(100),
