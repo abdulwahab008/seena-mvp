@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { sendGuardianPortalInvite, setGuardianProfession } from '../actions';
+import { useRouter } from 'next/navigation';
+import { sendGuardianPortalInvite, setGuardianPortalAccess, setGuardianProfession } from '../actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,6 +14,7 @@ export type GuardianLink = {
   is_primary: boolean;
   receives_billing: boolean;
   may_collect_child: boolean;
+  portal_access: boolean;
   guardian:
     | GuardianSummary
     | GuardianSummary[];
@@ -46,6 +48,33 @@ function ProfessionSelect({ guardianId, value, options }: { guardianId: string; 
         </option>
       ))}
     </select>
+  );
+}
+
+function PortalAccessToggle({ studentId, guardianId, allowed }: { studentId: string; guardianId: string; allowed: boolean }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="ghost"
+      disabled={pending}
+      data-testid={`guardian-portal-toggle-${guardianId}`}
+      onClick={() => {
+        if (allowed && !window.confirm('Stop this parent seeing this child in the parent portal?')) return;
+        startTransition(async () => {
+          const r = await setGuardianPortalAccess(studentId, guardianId, !allowed);
+          if (r.error) toast.error(r.error);
+          else {
+            toast.success(allowed ? 'Portal access blocked for this child.' : 'Portal access allowed.');
+            router.refresh();
+          }
+        });
+      }}
+    >
+      {allowed ? 'Block portal access' : 'Allow portal access'}
+    </Button>
   );
 }
 
@@ -111,7 +140,19 @@ function InvitePanel({ guardianId, phone }: { guardianId: string; phone: string 
   );
 }
 
-export function GuardianList({ links, professions, canEditProfession }: { links: GuardianLink[]; professions: Option[]; canEditProfession: boolean }) {
+export function GuardianList({
+  studentId,
+  links,
+  professions,
+  canEditProfession,
+  canManagePortal,
+}: {
+  studentId: string;
+  links: GuardianLink[];
+  professions: Option[];
+  canEditProfession: boolean;
+  canManagePortal: boolean;
+}) {
   if (links.length === 0) {
     return <p className="text-sm text-muted-foreground">No guardians linked yet.</p>;
   }
@@ -144,7 +185,12 @@ export function GuardianList({ links, professions, canEditProfession }: { links:
                   )}
                 </div>
                 {guardian.auth_user_id && (
-                  <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">portal active</span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground" data-testid={`guardian-portal-state-${l.guardian_id}`}>
+                      {l.portal_access ? 'portal active' : 'portal blocked for this child'}
+                    </span>
+                    {canManagePortal && <PortalAccessToggle studentId={studentId} guardianId={l.guardian_id} allowed={l.portal_access} />}
+                  </div>
                 )}
               </div>
               {!guardian.auth_user_id && <InvitePanel guardianId={l.guardian_id} phone={guardian.phone_e164} />}

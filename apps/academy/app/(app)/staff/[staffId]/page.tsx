@@ -7,6 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CorrectionForm, IssueForm, ReinstateForm } from './discipline-forms';
 import { InitiateExitForm } from '../exits/exit-forms';
+import { ActionForm } from '@/components/action-form';
+import { ActionButton } from '@/components/spec-form';
+import { CONTRACT_TYPE_LABEL } from '@/lib/validation';
+import { formatDatePk, todayPk } from '@/lib/dates';
+import { pkr } from '@/lib/rpc-action';
+import { addStaffContract, confirmProbation } from './contract-actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +79,13 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
   const canHr = isHrWriter(actor?.role);
   const { data: openExit } = canHr ? await supabase.from('staff_exit').select('id, status, exit_type, last_working_date').eq('staff_id', staffId).neq('status', 'completed').maybeSingle() : { data: null };
 
+  const { data: contracts } = canHr
+    ? await supabase
+        .from('staff_contract')
+        .select('id, contract_type, start_date, end_date, notice_period_days, contracted_periods_per_week, probation_confirmed_at, staff_contract_pay(gross_salary)')
+        .eq('staff_id', staffId)
+        .order('start_date', { ascending: false })
+    : { data: null };
   const { data: photo } = staff.photo_path ? await supabase.storage.from('staff-photos').createSignedUrl(staff.photo_path, 3600) : { data: null };
   const designation = one(staff.designation)?.name_en;
   const department = one(staff.department)?.name_en;
@@ -112,6 +125,67 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
           </p>
         </CardContent>
       </Card>
+
+      {canHr && (
+        <Card data-testid="contract-card">
+          <CardHeader>
+            <CardTitle className="text-base">Contract and salary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            {(contracts ?? []).length === 0 ? (
+              <p className="text-muted-foreground">No contract on file. Add one so the final settlement and security deposit know this person&apos;s salary.</p>
+            ) : (
+              <table className="w-full">
+                <thead className="text-left text-muted-foreground">
+                  <tr>
+                    <th className="py-1 pr-3">Type</th>
+                    <th className="pr-3">From</th>
+                    <th className="pr-3">To</th>
+                    <th className="pr-3 text-right">Gross / month</th>
+                    <th className="pr-3">Notice</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {(contracts ?? []).map((c) => {
+                    const gross = one(c.staff_contract_pay)?.gross_salary;
+                    return (
+                      <tr key={c.id} className="border-t" data-testid="contract-row">
+                        <td className="py-1 pr-3">{CONTRACT_TYPE_LABEL[c.contract_type]}</td>
+                        <td className="pr-3">{formatDatePk(c.start_date)}</td>
+                        <td className="pr-3">{c.end_date ? formatDatePk(c.end_date) : 'Current'}</td>
+                        <td className="pr-3 text-right tabular">{gross == null ? '-' : pkr(Math.round(Number(gross) * 100))}</td>
+                        <td className="pr-3">{c.notice_period_days ? `${c.notice_period_days} days` : '-'}</td>
+                        <td className="text-right">
+                          {c.contract_type === 'probation' && !c.end_date && !c.probation_confirmed_at && (
+                            <ActionButton label="Confirm probation" testId="confirm-probation" action={confirmProbation} args={[staffId, c.id]} />
+                          )}
+                          {c.probation_confirmed_at && <Badge variant="success">Confirmed</Badge>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+            <div className="max-w-xl">
+              <h3 className="mb-2 font-medium">{(contracts ?? []).length === 0 ? 'Add the contract' : 'New contract or salary revision'}</h3>
+              <ActionForm
+                testId="contract-form"
+                submitLabel="Save contract"
+                action={addStaffContract.bind(null, staffId)}
+                fields={[
+                  { name: 'contractType', label: 'Type', type: 'select', required: true, options: Object.entries(CONTRACT_TYPE_LABEL).map(([value, label]) => ({ value, label })) },
+                  { name: 'startDate', label: 'Starts on', type: 'date', required: true, defaultValue: todayPk() },
+                  { name: 'grossSalaryPkr', label: 'Gross salary per month (PKR)', type: 'number', required: true },
+                  { name: 'noticeDays', label: 'Notice period (days)', type: 'number' },
+                  { name: 'periodsPerWeek', label: 'Periods per week (teachers)', type: 'number' },
+                ]}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {canHr && staff.employment_status !== 'exited' && (
         <Card data-testid="exit-card">
