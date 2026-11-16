@@ -205,6 +205,26 @@ export const completeFollowupSchema = z.object({
   note: z.string().trim().max(500).optional(),
 });
 
+// Mirrors public.board.
+export const BOARD_LABEL = {
+  FBISE: 'Federal Board (FBISE)',
+  PUNJAB: 'BISE Punjab',
+  SINDH: 'BISE Sindh',
+  KPK: 'BISE Khyber Pakhtunkhwa',
+  BALOCHISTAN: 'BISE Balochistan',
+  AKU_EB: 'Aga Khan University Board',
+  CAMBRIDGE: 'Cambridge',
+} as const;
+export const streamSchema = z.object({
+  code: z.string().trim().min(1, 'Enter a code').max(20),
+  nameEn: z.string().trim().min(1, 'Enter a name').max(100),
+  nameUr: z.string().trim().max(100).optional(),
+  board: z.enum(keysOf(BOARD_LABEL), { errorMap: () => ({ message: 'Choose a board' }) }),
+  fromOrdinal: z.coerce.number({ message: 'Choose the first class' }).int().min(1, 'Choose the first class').max(32767),
+});
+export const sectionStreamSchema = z.object({ sectionId: z.string().uuid('Choose a section'), streamId: z.string().uuid().or(z.literal('')).optional() });
+export const campusBoardSchema = z.object({ campusId: z.string().uuid('Choose a campus'), board: z.enum(keysOf(BOARD_LABEL), { errorMap: () => ({ message: 'Choose a board' }) }) });
+
 // Mirrors public.fee_frequency in supabase/migrations/20260731050000_fee_heads.sql.
 export const FEE_FREQUENCIES = ['monthly', 'quarterly', 'annual', 'one_time'] as const;
 

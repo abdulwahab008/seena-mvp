@@ -53300,7 +53300,7 @@ export type Database = {
         Returns: undefined
       }
       set_section_stream: {
-        Args: { p_section_id: string; p_stream_id: string }
+        Args: { p_section_id: string; p_stream_id: string | null }
         Returns: undefined
       }
       set_settlement_owner_threshold: {
