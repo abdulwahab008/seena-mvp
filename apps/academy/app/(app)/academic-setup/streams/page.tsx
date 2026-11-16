@@ -5,7 +5,7 @@ import { ActionButton } from '@/components/spec-form';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
-import { createStream, deleteStream, setCampusBoard, setSectionStream, setStreamActive } from './actions';
+import { createStream, deleteStream, setCampusBoard, setHomeworkLoad, setHomeworkNotificationCap, setMarkPrecision, setSectionStream, setStreamActive } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,16 +14,22 @@ const boardOptions = Object.entries(BOARD_LABEL).map(([value, label]) => ({ valu
 
 export default async function StreamsPage() {
   const supabase = await supabaseServer();
-  const [{ data: streams }, { data: classes }, { data: campuses }, { data: boards }, { data: sections }] = await Promise.all([
+  const [{ data: streams }, { data: classes }, { data: campuses }, { data: settings }, { data: sections }, { data: loads }, { data: notifyCap }] = await Promise.all([
     supabase.from('stream').select('id, code, name_en, board, applies_from_ordinal, is_active').order('code'),
     supabase.from('class_level').select('name_en, ordinal').eq('is_active', true).order('ordinal'),
     supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
-    supabase.from('campus_setting').select('campus_id, value').eq('key', 'board'),
+    supabase.from('campus_setting').select('campus_id, key, value').in('key', ['board', 'mark_precision']),
     supabase
       .from('class_section')
       .select('id, name, stream_id, campus:campus_id(name), class_level:class_level_id(name_en, ordinal), session:session_id(is_current)')
       .eq('is_active', true),
+    supabase.from('homework_load_policy').select('campus_id, max_assignments_per_day, max_minutes_per_day, session:session_id(is_current)'),
+    supabase.from('homework_notification_policy').select('daily_cap_per_campus').maybeSingle(),
   ]);
+  const boards = (settings ?? []).filter((x) => x.key === 'board');
+  const precisionOf = new Map((settings ?? []).filter((x) => x.key === 'mark_precision').map((x) => [x.campus_id, Number(x.value)]));
+  const loadOf = new Map((loads ?? []).filter((l) => one(l.session)?.is_current).map((l) => [l.campus_id, l]));
+  const campusOptions = (campuses ?? []).map((c) => ({ value: c.id, label: c.name }));
   const className = new Map((classes ?? []).map((c) => [c.ordinal, c.name_en]));
   const boardOf = new Map((boards ?? []).map((b) => [b.campus_id, String(b.value) as keyof typeof BOARD_LABEL]));
   const streamName = new Map((streams ?? []).map((s) => [s.id, s.name_en]));
@@ -37,8 +43,8 @@ export default async function StreamsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Streams and exam board"
-        description="The board each campus sits its exams with, and the groups offered from Class 9 (Science, Arts, Pre-Medical, Pre-Engineering). A section's stream decides its board and subjects."
+        title="Board, streams and academic rules"
+        description="The board each campus sits its exams with, the groups offered from Class 9 (Science, Arts, Pre-Medical, Pre-Engineering), and the rules for marks and homework."
       />
 
       <Card>
@@ -61,7 +67,7 @@ export default async function StreamsPage() {
             submitLabel="Save board"
             action={setCampusBoard}
             fields={[
-              { name: 'campusId', label: 'Campus', type: 'select', required: true, options: (campuses ?? []).map((c) => ({ value: c.id, label: c.name })) },
+              { name: 'campusId', label: 'Campus', type: 'select', required: true, options: campusOptions },
               { name: 'board', label: 'Board', type: 'select', required: true, options: boardOptions },
             ]}
           />
@@ -148,6 +154,75 @@ export default async function StreamsPage() {
                 ]}
               />
               <p className="text-xs text-muted-foreground">Leave the stream empty to take a section off its stream.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Marks and homework</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <ul className="space-y-1 text-sm" data-testid="campus-rules">
+            {(campuses ?? []).map((c) => {
+              const p = precisionOf.get(c.id) ?? 0;
+              const l = loadOf.get(c.id);
+              const limits = [l?.max_assignments_per_day && `${l.max_assignments_per_day} assignments`, l?.max_minutes_per_day && `${l.max_minutes_per_day} minutes`].filter(Boolean);
+              return (
+                <li key={c.id}>
+                  <span className="font-medium">{c.name}:</span> marks {p === 0 ? 'in whole numbers' : `up to ${p} decimal place${p === 1 ? '' : 's'}`}; homework{' '}
+                  {limits.length ? `at most ${limits.join(' or ')} a day per section` : 'not limited'}
+                </li>
+              );
+            })}
+            <li>
+              <span className="font-medium">Homework messages to parents:</span> at most {notifyCap?.daily_cap_per_campus ?? 100} a day per campus
+            </li>
+          </ul>
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Marks entry</h3>
+              <ActionForm
+                testId="mark-precision-form"
+                submitLabel="Save"
+                action={setMarkPrecision}
+                fields={[
+                  { name: 'campusId', label: 'Campus', type: 'select', required: true, options: campusOptions },
+                  {
+                    name: 'precision',
+                    label: 'Decimal places',
+                    type: 'select',
+                    required: true,
+                    options: [
+                      { value: '0', label: 'Whole marks only (45)' },
+                      { value: '1', label: 'One decimal (45.5)' },
+                      { value: '2', label: 'Two decimals (45.25)' },
+                    ],
+                  },
+                ]}
+              />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Homework per day (this session)</h3>
+              <ActionForm
+                testId="homework-load-form"
+                submitLabel="Save"
+                action={setHomeworkLoad}
+                fields={[
+                  { name: 'campusId', label: 'Campus', type: 'select', required: true, options: campusOptions },
+                  { name: 'maxAssignments', label: 'Most assignments a day', type: 'number' },
+                  { name: 'maxMinutes', label: 'Most minutes a day', type: 'number' },
+                ]}
+              />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Homework messages to parents</h3>
+              <ActionForm
+                testId="homework-notify-form"
+                submitLabel="Save"
+                action={setHomeworkNotificationCap}
+                fields={[{ name: 'cap', label: 'Most messages a day per campus', type: 'number', required: true, defaultValue: String(notifyCap?.daily_cap_per_campus ?? 100) }]}
+              />
             </div>
           </div>
         </CardContent>

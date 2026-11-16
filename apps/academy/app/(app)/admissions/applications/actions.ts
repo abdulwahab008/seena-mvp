@@ -472,3 +472,35 @@ export async function quickAdmission(
     receiptNo: res?.receipt_no ?? null,
   };
 }
+
+export async function extendOffer(offerId: string, newExpiry: string, reason: string): Promise<{ error: string | null }> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(newExpiry)) return { error: 'Choose the new expiry date.' };
+  if (reason.trim().length < 3) return { error: 'Give a reason for the extension.' };
+  if (newExpiry < new Date().toISOString().slice(0, 10)) return { error: 'The new expiry date must be in the future.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_extend_offer', {
+    p_offer_id: offerId,
+    p_new_expires_at: new Date(`${newExpiry}T23:59:59+05:00`).toISOString(),
+    p_reason: reason.trim(),
+  });
+  if (error) {
+    if (error.message.includes('OFFER_NOT_EXTENDABLE')) return { error: 'Only an open offer can be extended.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only the principal or owner can extend an offer.' };
+    return { error: 'Could not extend the offer.' };
+  }
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}
+
+export async function reinstateOffer(offerId: string): Promise<{ error: string | null }> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('fn_reinstate_offer', { p_offer_id: offerId });
+  if (error) {
+    if (error.message.includes('NO_SEATS_AVAILABLE')) return { error: 'No seats are free in this class to reinstate the offer.' };
+    if (error.message.includes('OFFER_NOT_LAPSED')) return { error: 'Only a lapsed offer can be reinstated.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only the principal or owner can reinstate an offer.' };
+    return { error: 'Could not reinstate the offer.' };
+  }
+  revalidatePath('/admissions/applications');
+  return { error: null };
+}

@@ -30,6 +30,18 @@ test('an owner sets the campus exam board, adds a stream and puts a section on i
 
   await page.getByTestId('stream-toggle-SCI').click();
   await expect(page.getByTestId('stream-SCI')).toContainText('Inactive');
+
+  const marks = page.getByTestId('mark-precision-form');
+  await marks.getByLabel('Campus').selectOption({ index: 1 });
+  await marks.getByLabel('Decimal places').selectOption('1');
+  await page.getByTestId('mark-precision-form-submit').click();
+  await expect(page.getByTestId('campus-rules')).toContainText('marks up to 1 decimal place');
+
+  const hw = page.getByTestId('homework-load-form');
+  await hw.getByLabel('Campus').selectOption({ index: 1 });
+  await hw.getByLabel('Most assignments a day').fill('3');
+  await page.getByTestId('homework-load-form-submit').click();
+  await expect(page.getByTestId('campus-rules')).toContainText('at most 3 assignments a day per section');
 });
 
 test('a roll number is changed by hand, then the section is renumbered A to Z', async ({ page }) => {

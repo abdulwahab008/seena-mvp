@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
-import { campusBoardSchema, sectionStreamSchema, streamSchema } from '@/lib/validation';
+import { campusBoardSchema, homeworkLoadSchema, homeworkNotificationCapSchema, markPrecisionSchema, sectionStreamSchema, streamSchema } from '@/lib/validation';
 import { parseValues, rpcError, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
@@ -60,4 +60,42 @@ export async function setCampusBoard(values: Record<string, string>): Promise<Ac
   const supabase = await supabaseServer();
   const { error } = await supabase.rpc('set_campus_board', { p_campus_id: p.data.campusId, p_board: p.data.board });
   return error ? { error: rpcError(error.message, MESSAGES) } : done('Exam board saved.');
+}
+
+export async function setMarkPrecision(values: Record<string, string>): Promise<ActionResult> {
+  const p = parseValues(markPrecisionSchema, values);
+  if (!p.ok) return { error: p.error };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_mark_precision', { p_campus_id: p.data.campusId, p_precision: Number(p.data.precision) });
+  return error ? { error: rpcError(error.message) } : done('Mark entry rule saved.');
+}
+
+export async function setHomeworkLoad(values: Record<string, string>): Promise<ActionResult> {
+  const p = parseValues(homeworkLoadSchema, values);
+  if (!p.ok) return { error: p.error };
+  const supabase = await supabaseServer();
+  const { data: session } = await supabase
+    .from('academic_session')
+    .select('id')
+    .eq('is_current', true)
+    .or(`campus_id.eq.${p.data.campusId},campus_id.is.null`)
+    .order('campus_id', { nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+  if (!session) return { error: 'This campus has no current session.' };
+  const { error } = await supabase.rpc('set_homework_load_policy', {
+    p_campus_id: p.data.campusId,
+    p_session_id: session.id,
+    p_max_assignments_per_day: p.data.maxAssignments,
+    p_max_minutes_per_day: p.data.maxMinutes,
+  });
+  return error ? { error: rpcError(error.message) } : done('Homework limit saved.');
+}
+
+export async function setHomeworkNotificationCap(values: Record<string, string>): Promise<ActionResult> {
+  const p = parseValues(homeworkNotificationCapSchema, values);
+  if (!p.ok) return { error: p.error };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_homework_notification_cap', { p_cap: p.data.cap });
+  return error ? { error: rpcError(error.message) } : done('Daily message limit saved.');
 }

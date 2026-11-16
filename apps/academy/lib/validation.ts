@@ -223,6 +223,16 @@ export const streamSchema = z.object({
   fromOrdinal: z.coerce.number({ message: 'Choose the first class' }).int().min(1, 'Choose the first class').max(32767),
 });
 export const sectionStreamSchema = z.object({ sectionId: z.string().uuid('Choose a section'), streamId: z.string().uuid().or(z.literal('')).optional() });
+export const markPrecisionSchema = z.object({ campusId: z.string().uuid('Choose a campus'), precision: z.enum(['0', '1', '2'], { errorMap: () => ({ message: 'Choose decimal places' }) }) });
+const optCap = (max: number, msg: string) => z.preprocess((v) => (v === '' || v == null ? undefined : v), z.coerce.number({ message: msg }).int(msg).min(1, msg).max(max, msg).optional());
+export const homeworkLoadSchema = z
+  .object({
+    campusId: z.string().uuid('Choose a campus'),
+    maxAssignments: optCap(20, 'Enter 1 to 20 assignments'),
+    maxMinutes: optCap(600, 'Enter 1 to 600 minutes'),
+  })
+  .refine((v) => v.maxAssignments !== undefined || v.maxMinutes !== undefined, { message: 'Set at least one limit' });
+export const homeworkNotificationCapSchema = z.object({ cap: z.coerce.number({ message: 'Enter a number from 0 to 5000' }).int().min(0, 'Enter a number from 0 to 5000').max(5000, 'Enter a number from 0 to 5000') });
 export const campusBoardSchema = z.object({ campusId: z.string().uuid('Choose a campus'), board: z.enum(keysOf(BOARD_LABEL), { errorMap: () => ({ message: 'Choose a board' }) }) });
 
 // Mirrors public.contract_type.

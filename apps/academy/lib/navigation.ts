@@ -214,7 +214,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: BookOpen,
     items: [
       { href: '/academic-setup/subjects', label: 'Subjects' },
-      { href: '/academic-setup/streams', label: 'Streams & Board', roles: ['super_admin', 'owner', 'principal'] },
+      { href: '/academic-setup/streams', label: 'Board, Streams & Rules', roles: ['super_admin', 'owner', 'principal'] },
       { href: '/academic-setup/classes-sections', label: 'Classes & Sections' },
       { href: '/academic-setup/class-reports', label: 'Class Reports' },
       {
