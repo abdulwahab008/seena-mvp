@@ -62,3 +62,21 @@ export async function setRemarksRequired(campusId: string, required: boolean): P
   revalidatePath('/exams/remarks');
   return { error: null };
 }
+
+export async function clearRemark(enrolmentId: string, examTermId: string): Promise<Result> {
+  if (!z.string().uuid().safeParse(enrolmentId).success || !z.string().uuid().safeParse(examTermId).success) return { error: 'Invalid remark.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('clear_term_remark', { p_enrolment_id: enrolmentId, p_exam_term_id: examTermId });
+  if (error) return { error: error.message.includes('FORBIDDEN') ? 'You cannot change remarks for this section.' : 'Could not clear the remark.' };
+  revalidatePath('/exams/remarks');
+  return { error: null };
+}
+
+export async function deleteLibraryEntry(entryId: string): Promise<{ error: string | null; message?: string }> {
+  if (!z.string().uuid().safeParse(entryId).success) return { error: 'Invalid entry.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('delete_remark_library_entry', { p_entry_id: entryId });
+  if (error) return { error: error.message.includes('FORBIDDEN') ? 'You can only delete remarks you added.' : 'Could not delete the remark.' };
+  revalidatePath('/exams/remarks');
+  return { error: null, message: 'Removed from the library.' };
+}

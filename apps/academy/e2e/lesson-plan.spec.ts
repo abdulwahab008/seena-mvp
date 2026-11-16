@@ -47,6 +47,11 @@ test('a teacher plans a week from the syllabus and completes it; the Principal s
   const { data: week } = await db.from('lesson_plan').select('week_start_date').eq('tenant_id', tenant).single();
   expect(week!.week_start_date).toBe('2026-09-07');
 
+  // The teacher sharpens the objective before the week starts.
+  await page.getByLabel(/Learning objectives/).fill('Calculate speed from distance and time');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByTestId('plan-row')).toContainText('Calculate speed from distance and time');
+
   await page.getByTestId('complete-plan').click();
   await expect(page.getByTestId('plan-row')).toContainText('completed');
 

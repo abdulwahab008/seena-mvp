@@ -1,8 +1,9 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { setBellTemplateDefault } from './actions';
+import { setBellTemplateDefault, updateBellPeriodTime } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -43,7 +44,53 @@ function SetDefaultButton({ id }: { id: string }) {
   );
 }
 
-export function BellTemplateList({ templates }: { templates: BellTemplateRow[] }) {
+function PeriodTime({ period, editable }: { period: BellPeriodRow; editable: boolean }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [start, setStart] = useState(period.start_time.slice(0, 5));
+  const [end, setEnd] = useState(period.end_time.slice(0, 5));
+  const [pending, startTransition] = useTransition();
+  const label = period.period_no ? `Period ${period.period_no}` : period.kind;
+  if (!open) {
+    return (
+      <li>
+        {label} — {period.start_time.slice(0, 5)}–{period.end_time.slice(0, 5)}
+        {editable && (
+          <button type="button" className="ml-2 text-xs underline" onClick={() => setOpen(true)} data-testid={`edit-period-${period.id}`}>
+            change
+          </button>
+        )}
+      </li>
+    );
+  }
+  return (
+    <li className="flex flex-wrap items-center gap-1">
+      {label}
+      <input type="time" value={start} onChange={(e) => setStart(e.target.value)} aria-label={`${label} starts`} className="h-8 rounded-md border bg-background px-1 text-foreground" />
+      <input type="time" value={end} onChange={(e) => setEnd(e.target.value)} aria-label={`${label} ends`} className="h-8 rounded-md border bg-background px-1 text-foreground" />
+      <Button
+        type="button"
+        size="sm"
+        disabled={pending}
+        onClick={() =>
+          startTransition(async () => {
+            const r = await updateBellPeriodTime(period.id, start, end);
+            if (r.error) toast.error(r.error);
+            else {
+              toast.success(`${label} time saved.`);
+              setOpen(false);
+              router.refresh();
+            }
+          })
+        }
+      >
+        Save
+      </Button>
+    </li>
+  );
+}
+
+export function BellTemplateList({ templates, canEdit }: { templates: BellTemplateRow[]; canEdit: boolean }) {
   if (templates.length === 0) {
     return <p className="text-sm text-muted-foreground">No bell templates yet.</p>;
   }
@@ -70,9 +117,7 @@ export function BellTemplateList({ templates }: { templates: BellTemplateRow[] }
               {[...t.bell_period]
                 .sort((a, b) => a.segment_ordinal - b.segment_ordinal)
                 .map((p) => (
-                  <li key={p.id}>
-                    {p.period_no ? `Period ${p.period_no}` : p.kind} — {p.start_time.slice(0, 5)}–{p.end_time.slice(0, 5)}
-                  </li>
+                  <PeriodTime key={`${p.id}-${p.start_time}-${p.end_time}`} period={p} editable={canEdit && !t.is_locked} />
                 ))}
             </ul>
           </CardContent>

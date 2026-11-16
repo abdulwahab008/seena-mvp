@@ -233,6 +233,7 @@ export const homeworkLoadSchema = z
   })
   .refine((v) => v.maxAssignments !== undefined || v.maxMinutes !== undefined, { message: 'Set at least one limit' });
 export const homeworkNotificationCapSchema = z.object({ cap: z.coerce.number({ message: 'Enter a number from 0 to 5000' }).int().min(0, 'Enter a number from 0 to 5000').max(5000, 'Enter a number from 0 to 5000') });
+export const subjectBoardCodeSchema = z.object({ subjectId: z.string().uuid('Choose a subject'), board: z.enum(keysOf(BOARD_LABEL), { errorMap: () => ({ message: 'Choose a board' }) }), code: z.string().trim().min(1, 'Enter the board code').max(20) });
 export const campusBoardSchema = z.object({ campusId: z.string().uuid('Choose a campus'), board: z.enum(keysOf(BOARD_LABEL), { errorMap: () => ({ message: 'Choose a board' }) }) });
 
 // Mirrors public.contract_type.

@@ -28,6 +28,21 @@ export async function createPlan(input: LessonPlanInput): Promise<Result> {
   return { error: null };
 }
 
+export async function updatePlan(planId: string, input: LessonPlanInput): Promise<Result> {
+  const p = lessonPlanSchema.safeParse(input);
+  if (!p.success || !z.string().uuid().safeParse(planId).success) return { error: p.success ? 'Invalid plan.' : (p.error.issues[0]?.message ?? 'Invalid input.') };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('update_lesson_plan', {
+    p_plan_id: planId,
+    p_objectives: p.data.objectives ?? '',
+    p_resources: p.data.resources ?? '',
+    p_topic_ids: p.data.topicIds,
+  });
+  if (error) return { error: mapError(error.message) };
+  revalidatePath('/lesson-plans');
+  return { error: null };
+}
+
 export async function setPlanStatus(planId: string, status: 'planned' | 'in_progress' | 'completed'): Promise<Result> {
   if (!z.string().uuid().safeParse(planId).success) return { error: 'Invalid plan.' };
   const supabase = await supabaseServer();

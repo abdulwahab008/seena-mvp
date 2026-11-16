@@ -5,7 +5,7 @@ import { ActionButton } from '@/components/spec-form';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
-import { createStream, deleteStream, setCampusBoard, setHomeworkLoad, setHomeworkNotificationCap, setMarkPrecision, setSectionStream, setStreamActive } from './actions';
+import { createStream, deleteStream, setCampusBoard, setClassOffered, setSubjectBoardCode, setHomeworkLoad, setHomeworkNotificationCap, setMarkPrecision, setSectionStream, setStreamActive } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +26,12 @@ export default async function StreamsPage() {
     supabase.from('homework_load_policy').select('campus_id, max_assignments_per_day, max_minutes_per_day, session:session_id(is_current)'),
     supabase.from('homework_notification_policy').select('daily_cap_per_campus').maybeSingle(),
   ]);
+  const [{ data: allClasses }, { data: subjects }, { data: codes }] = await Promise.all([
+    supabase.from('class_level').select('id, name_en, is_active').order('ordinal'),
+    supabase.from('subject').select('id, name_en').eq('is_active', true).order('name_en'),
+    supabase.from('subject_board_code').select('subject_id, board, board_code'),
+  ]);
+  const subjectName = new Map((subjects ?? []).map((x) => [x.id, x.name_en]));
   const boards = (settings ?? []).filter((x) => x.key === 'board');
   const precisionOf = new Map((settings ?? []).filter((x) => x.key === 'mark_precision').map((x) => [x.campus_id, Number(x.value)]));
   const loadOf = new Map((loads ?? []).filter((l) => one(l.session)?.is_current).map((l) => [l.campus_id, l]));
@@ -227,6 +233,49 @@ export default async function StreamsPage() {
           </div>
         </CardContent>
       </Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Classes offered</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1 text-sm" data-testid="classes-offered">
+              {(allClasses ?? []).map((c) => (
+                <li key={c.id} className="flex items-center justify-between gap-2" data-testid={`class-offered-${c.name_en}`}>
+                  <span className={c.is_active ? '' : 'text-muted-foreground line-through'}>{c.name_en}</span>
+                  <ActionButton label={c.is_active ? 'Hide' : 'Offer again'} variant="ghost" action={setClassOffered} args={[c.id, !c.is_active]} />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Subject codes on board forms</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(codes ?? []).length > 0 && (
+              <ul className="space-y-1 text-sm" data-testid="board-codes">
+                {(codes ?? []).map((c) => (
+                  <li key={`${c.subject_id}-${c.board}`}>
+                    {subjectName.get(c.subject_id) ?? 'Subject'} · {BOARD_LABEL[c.board]}: <span className="font-mono">{c.board_code}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <ActionForm
+              testId="board-code-form"
+              submitLabel="Save code"
+              action={setSubjectBoardCode}
+              fields={[
+                { name: 'subjectId', label: 'Subject', type: 'select', required: true, options: (subjects ?? []).map((x) => ({ value: x.id, label: x.name_en })) },
+                { name: 'board', label: 'Board', type: 'select', required: true, options: boardOptions },
+                { name: 'code', label: 'Code used by the board', required: true },
+              ]}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

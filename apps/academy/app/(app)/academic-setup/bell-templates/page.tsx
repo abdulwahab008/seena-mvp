@@ -10,7 +10,15 @@ const SHIFTS = ['MORNING', 'AFTERNOON'] as const;
 export default async function BellTemplatesPage() {
   const supabase = await supabaseServer();
 
-  const { data: campuses } = await supabase.from('campus').select('id').eq('status', 'active').order('code');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const [{ data: campuses }, { data: appUser }] = await Promise.all([
+    supabase.from('campus').select('id').eq('status', 'active').order('code'),
+    supabase.from('app_user').select('app_role').eq('user_id', user!.id).single(),
+  ]);
+  // Mirrors update_bell_period_time()'s roles.
+  const canEdit = ['super_admin', 'owner', 'principal'].includes(appUser?.app_role ?? '');
   const campusId = (await pickActiveCampus(campuses))?.id;
 
   const { data: templates } = campusId
@@ -58,7 +66,7 @@ export default async function BellTemplatesPage() {
             </p>
           )}
           <CreateBellTemplateForm campusId={campusId} />
-          <BellTemplateList templates={rows} />
+          <BellTemplateList templates={rows} canEdit={canEdit} />
           <BellCalendarRules campusId={campusId} templates={rows} rules={ruleRows} />
           <RamadanOverrides campusId={campusId} templates={rows} rules={dateRuleRows} />
         </>

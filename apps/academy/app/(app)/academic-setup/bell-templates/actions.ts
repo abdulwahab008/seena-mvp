@@ -152,3 +152,17 @@ export async function deleteBellCalendarRule(id: string, _prev: ActionState, _fo
   revalidatePath('/academic-setup/bell-templates');
   return { error: null };
 }
+
+export async function updateBellPeriodTime(periodId: string, start: string, end: string): Promise<ActionState> {
+  if (!/^\d{2}:\d{2}$/.test(start) || !/^\d{2}:\d{2}$/.test(end)) return { error: 'Enter a start and end time.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('update_bell_period_time', { p_period_id: periodId, p_start_time: start, p_end_time: end });
+  if (error) {
+    if (error.message.includes('BELL_PERIOD_TIME_ORDER_INVALID')) return { error: 'The period must end after it starts.' };
+    if (error.message.includes('BELL_PERIOD_OVERLAP')) return { error: 'These times overlap another period in this template.' };
+    if (error.message.includes('BELL_TEMPLATE_LOCKED')) return { error: 'This template is locked because a timetable uses it.' };
+    return { error: mapError(error.message) };
+  }
+  revalidatePath('/academic-setup/bell-templates');
+  return { error: null };
+}
