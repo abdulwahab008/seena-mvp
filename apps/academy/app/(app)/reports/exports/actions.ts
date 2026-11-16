@@ -62,3 +62,11 @@ export async function requestExport(input: ExportRequestInput): Promise<RequestE
   revalidatePath('/reports/exports');
   return { error: null, jobId: result.data.job_id, deduplicated: result.data.deduplicated };
 }
+
+export async function markNotificationsRead(): Promise<{ error: string | null; message?: string }> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('mark_notifications_read');
+  if (error) return { error: 'Could not update your notifications. Please try again.' };
+  revalidatePath('/reports/exports');
+  return { error: null, message: 'All notifications marked as read.' };
+}

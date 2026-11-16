@@ -3,6 +3,8 @@ import { getCurrentActor, isHrWriter, todayKarachi } from '@/lib/hr/current-role
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AddDocumentForm, RenewForm, RunCheckButton } from './compliance-forms';
+import { ActionForm } from '@/components/action-form';
+import { saveDocumentPolicy } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +24,7 @@ export default async function StaffCompliancePage() {
   const [{ data: compliance }, { data: documents }, { data: policies }, { data: staffWithLogin }, { data: reminders }] = await Promise.all([
     supabase.from('v_staff_compliance').select('staff_id, employee_code, full_name, compliance_status, expired_types, missing_types').order('full_name'),
     supabase.from('staff_document').select('id, staff_id, label, document_type, expires_on').not('expires_on', 'is', null).order('expires_on'),
-    supabase.from('document_type_policy').select('document_type, label, is_mandatory').order('label'),
+    supabase.from('document_type_policy').select('document_type, label, is_mandatory, applies_to_contract_types').order('label'),
     supabase.from('staff').select('user_id, full_name').not('user_id', 'is', null).neq('employment_status', 'exited').order('full_name'),
     supabase.from('staff_document_reminder').select('document_id, threshold_days, generated_at').order('generated_at', { ascending: false }).limit(200),
   ]);
@@ -118,6 +120,52 @@ export default async function StaffCompliancePage() {
               </div>
             );
           })}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Documents staff must keep on file</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-6 text-sm md:grid-cols-2">
+          <ul className="space-y-1" data-testid="document-policies">
+            {(policies ?? []).map((p) => (
+              <li key={p.document_type} className="flex justify-between gap-2">
+                <span>{p.label}</span>
+                <span className={p.is_mandatory ? 'font-medium' : 'text-muted-foreground'}>
+                  {p.is_mandatory ? 'Required' : 'Optional'}
+                  {p.is_mandatory && p.applies_to_contract_types.length > 0 ? ` (${p.applies_to_contract_types.join(', ').replaceAll('_', ' ')} only)` : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {canWrite && (
+            <ActionForm
+              testId="document-policy-form"
+              submitLabel="Save rule"
+              action={saveDocumentPolicy}
+              fields={[
+                {
+                  name: 'documentType',
+                  label: 'Paperwork',
+                  type: 'select',
+                  required: true,
+                  options: [...(policies ?? []).map((p) => ({ value: p.document_type, label: p.label })), { value: 'new', label: 'A new document type' }],
+                },
+                { name: 'label', label: 'Name shown to HR', required: true },
+                {
+                  name: 'mandatory',
+                  label: 'Required',
+                  type: 'select',
+                  required: true,
+                  options: [
+                    { value: 'yes', label: 'Yes, flag staff without it' },
+                    { value: 'no', label: 'No, optional' },
+                  ],
+                },
+              ]}
+            />
+          )}
         </CardContent>
       </Card>
 

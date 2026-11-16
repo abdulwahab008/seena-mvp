@@ -3083,6 +3083,18 @@ export const assignTripSchema = z.object({
   to: toptDate,
   overrideReason: toptText(500),
 });
+export const endAssignmentSchema = z.object({ assignmentId: tuuid, lastDay: tdate });
+export const timetableRulesSchema = z.object({
+  campusId: tuuid,
+  maxPerDay: z.coerce.number().int('Use a whole number').min(1, 'At least 1').max(12, 'At most 12'),
+  maxConsecutive: z.coerce.number().int('Use a whole number').min(1, 'At least 1').max(12, 'At most 12'),
+  flagIsolated: z.enum(['yes', 'no']),
+});
+export const documentPolicySchema = z.object({
+  documentType: z.string().min(1, 'Choose a document'),
+  label: z.string().trim().min(2, 'Enter the document name').max(80),
+  mandatory: z.enum(['yes', 'no']),
+});
 // FR-P04
 const grNumber = z.string().trim().min(1, 'Enter the GR number').max(40);
 export const allocateTransportSchema = z.object({

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
-import { assignTripSchema } from '@/lib/validation';
+import { assignTripSchema, endAssignmentSchema } from '@/lib/validation';
 import { loose, parseValues, rpcError, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
@@ -36,4 +36,14 @@ export async function assignTrip(values: Record<string, string>): Promise<Action
   revalidatePath('/transport/assignments');
   const warning = (data as { warning?: string | null } | null)?.warning;
   return { error: null, message: warning ? `Assigned. Warning: ${warning.replaceAll('_', ' ').toLowerCase()}.` : 'Assigned.' };
+}
+
+export async function endAssignment(values: Record<string, string>): Promise<ActionResult> {
+  const p = parseValues(endAssignmentSchema, values);
+  if (!p.ok) return { error: p.error };
+  const supabase = loose(await supabaseServer());
+  const { error } = await supabase.rpc('end_transport_assignment', { p_assignment_id: p.data.assignmentId, p_last_day: p.data.lastDay });
+  if (error) return { error: rpcError(error.message, { ...MESSAGES, SPAN_INVALID: 'The last day cannot be before the assignment started.', ASSIGNMENT_NOT_FOUND: 'That assignment was not found.' }) };
+  revalidatePath('/transport/assignments');
+  return { error: null, message: 'Assignment ended.' };
 }

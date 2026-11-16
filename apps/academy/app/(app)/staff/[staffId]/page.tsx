@@ -12,7 +12,7 @@ import { ActionButton } from '@/components/spec-form';
 import { CONTRACT_TYPE_LABEL } from '@/lib/validation';
 import { formatDatePk, todayPk } from '@/lib/dates';
 import { pkr } from '@/lib/rpc-action';
-import { addStaffContract, confirmProbation } from './contract-actions';
+import { addStaffContract, confirmProbation, linkStaffLogin } from './contract-actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,7 +48,7 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
 
   const { data: staff } = await supabase
     .from('staff')
-    .select('id, employee_code, full_name, full_name_ur, employment_status, contract_type, doj, photo_path, designation:designation_id(name_en), department:department_id(name_en)')
+    .select('id, user_id, employee_code, full_name, full_name_ur, employment_status, contract_type, doj, photo_path, designation:designation_id(name_en), department:department_id(name_en)')
     .eq('id', staffId)
     .maybeSingle();
   if (!staff) notFound();
@@ -86,6 +86,15 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
         .eq('staff_id', staffId)
         .order('start_date', { ascending: false })
     : { data: null };
+  const canLink = canHr;
+  const [{ data: users }, { data: linkedStaff }] = canLink
+    ? await Promise.all([
+        supabase.from('app_user').select('user_id, full_name, app_role').eq('status', 'active').neq('app_role', 'parent').order('full_name'),
+        supabase.from('staff').select('user_id').not('user_id', 'is', null),
+      ])
+    : [{ data: null }, { data: null }];
+  const taken = new Set((linkedStaff ?? []).map((r) => r.user_id).filter((u) => u !== staff.user_id));
+  const linkedUser = (users ?? []).find((u) => u.user_id === staff.user_id);
   const { data: photo } = staff.photo_path ? await supabase.storage.from('staff-photos').createSignedUrl(staff.photo_path, 3600) : { data: null };
   const designation = one(staff.designation)?.name_en;
   const department = one(staff.department)?.name_en;
@@ -125,6 +134,38 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
           </p>
         </CardContent>
       </Card>
+
+      {canLink && (
+        <Card data-testid="login-card">
+          <CardHeader>
+            <CardTitle className="text-base">Login</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 text-sm md:grid-cols-2">
+            <p data-testid="linked-login">
+              {staff.user_id ? `Signs in as ${linkedUser?.full_name ?? 'a user'}${linkedUser ? ` (${linkedUser.app_role.replaceAll('_', ' ')})` : ''}.` : 'Not linked to a login, so this person cannot see their own leave, payslips or timetable.'}
+            </p>
+            <ActionForm
+              testId="link-login-form"
+              submitLabel="Save"
+              action={linkStaffLogin.bind(null, staff.id)}
+              resetOnSuccess={false}
+              fields={[
+                {
+                  name: 'userId',
+                  label: 'Login',
+                  type: 'select',
+                  required: true,
+                  defaultValue: staff.user_id ?? undefined,
+                  options: [
+                    ...(staff.user_id ? [{ value: 'none', label: 'No login (unlink)' }] : []),
+                    ...(users ?? []).filter((u) => !taken.has(u.user_id)).map((u) => ({ value: u.user_id, label: `${u.full_name} (${u.app_role.replaceAll('_', ' ')})` })),
+                  ],
+                },
+              ]}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {canHr && (
         <Card data-testid="contract-card">

@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { ActionForm } from '@/components/action-form';
 import { pkr } from '@/lib/rpc-action';
 import { SaleForm, type SaleItem } from './sale-form';
-import { returnItemAction } from './actions';
+import { grantPackageItem, returnItemAction } from './actions';
 
 type SearchParams = { gr?: string };
 
@@ -67,6 +67,20 @@ export default async function SalesPage({ searchParams }: { searchParams: Promis
                 </p>
               )}
               <SaleForm studentId={student.id} items={items} />
+              <details className="text-sm">
+                <summary className="cursor-pointer text-muted-foreground">Add an item to this student&apos;s admission package (free)</summary>
+                <div className="pt-2">
+                  <ActionForm
+                    testId="grant-package-form"
+                    submitLabel="Add to package"
+                    action={grantPackageItem.bind(null, student.id)}
+                    fields={[
+                      { name: 'itemId', label: 'Item', type: 'select', required: true, options: items.map((i) => ({ value: i.id, label: `${i.code} · ${i.name}${i.size ? ` (${i.size})` : ''}` })) },
+                      { name: 'qty', label: 'Quantity', type: 'number', required: true, defaultValue: '1' },
+                    ]}
+                  />
+                </div>
+              </details>
             </div>
           )}
         </CardContent>

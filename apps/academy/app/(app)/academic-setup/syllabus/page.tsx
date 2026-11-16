@@ -25,12 +25,13 @@ export default async function SyllabusPage({ searchParams }: { searchParams: Pro
   if (campusId && classId && subjectId && sessionId) {
     const { data } = await supabase
       .from('syllabus_unit')
-      .select('id, sequence, title, title_ur, planned_periods, target_month, topics:syllabus_topic(id, sequence, title, planned_periods)')
+      .select('id, sequence, title, title_ur, planned_periods, target_month, topics:syllabus_topic(id, sequence, title, planned_periods), chapters:syllabus_unit_source_chapter(id, source_book, source_chapter)')
       .eq('campus_id', campusId).eq('session_id', sessionId).eq('class_level_id', classId).eq('subject_id', subjectId).eq('board', board)
       .order('sequence');
     units = (data ?? []).map((u) => ({
       id: u.id, sequence: u.sequence, title: u.title, titleUr: u.title_ur, plannedPeriods: u.planned_periods, targetMonth: u.target_month,
       topics: [...(u.topics ?? [])].sort((a, b) => a.sequence - b.sequence).map((t) => ({ id: t.id, sequence: t.sequence, title: t.title, plannedPeriods: t.planned_periods })),
+      chapters: (u.chapters ?? []).map((c) => ({ id: c.id, book: c.source_book, chapter: c.source_chapter })),
     }));
   }
 

@@ -42,3 +42,14 @@ export async function returnItemAction(input: Record<string, string>): Promise<A
   revalidatePath('/inventory/sales');
   return { error: null };
 }
+
+export async function grantPackageItem(studentId: string, values: Record<string, string>): Promise<ActionError & { message?: string }> {
+  const qty = Number(values.qty);
+  if (!/^[0-9a-f-]{36}$/i.test(values.itemId ?? '')) return { error: 'Choose an item.' };
+  if (!Number.isInteger(qty) || qty < 1 || qty > 100) return { error: 'Enter a quantity from 1 to 100.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('grant_student_entitlement', { p_student_id: studentId, p_item_id: values.itemId!, p_qty: qty });
+  if (error) return { error: mapRpcError(error.message, [['ITEM_NOT_FOUND', 'That item was not found.'], ...MESSAGES]) };
+  revalidatePath('/inventory/sales');
+  return { error: null, message: 'Added to the admission package.' };
+}

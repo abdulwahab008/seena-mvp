@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SpecForm } from '@/components/spec-form';
 import { currentRole, loose, pickCampus, todayPk, TRANSPORT_STAFF } from '@/lib/transport/rpc';
-import { saveVehicle, setTokenTaxPolicy } from './actions';
+import { overrideVehicleBlock, saveVehicle, setTokenTaxPolicy } from './actions';
 import { DocumentForm } from './document-form';
 
 export const dynamic = 'force-dynamic';
@@ -25,11 +25,12 @@ export default async function FleetPage({ searchParams }: { searchParams: Promis
   const canManage = TRANSPORT_STAFF.includes(role);
   const today = todayPk();
 
-  const [{ data: vehicles }, { data: docs }, { data: appUser }, { data: setting }] = await Promise.all([
+  const [{ data: vehicles }, { data: docs }, { data: appUser }, { data: setting }, { data: overrides }] = await Promise.all([
     supabase.from('transport_vehicle').select('id, reg_no, make, model, seat_capacity, fuel, ownership, active').eq('campus_id', campus.id).order('reg_no'),
     supabase.from('transport_vehicle_document').select('id, vehicle_id, doc_type, doc_no, expires_on, mandatory').eq('campus_id', campus.id).order('expires_on', { ascending: false }),
     supabase.from('app_user').select('tenant_id').maybeSingle(),
     supabase.from('tenant_setting').select('value').eq('key', 'transport.token_tax_mandatory_for_contracted').maybeSingle(),
+    supabase.from('transport_vehicle_override').select('id, vehicle_id, valid_from, valid_to, reason').eq('campus_id', campus.id).gte('valid_to', today).order('valid_from'),
   ]);
   const tokenTaxMandatory = (setting as { value: unknown } | null)?.value !== false;
   const byVehicle = new Map<string, Map<string, Doc>>();
@@ -123,6 +124,34 @@ export default async function FleetPage({ searchParams }: { searchParams: Promis
             </CardContent>
           </Card>
         </>
+      )}
+      {['owner', 'super_admin', 'principal'].includes(role) && list.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Let a blocked vehicle run</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <ul className="space-y-1" data-testid="vehicle-overrides">
+              {((overrides ?? []) as { id: string; vehicle_id: string; valid_from: string; valid_to: string; reason: string }[]).map((o) => (
+                <li key={o.id}>
+                  <span className="font-medium">{list.find((v) => v.id === o.vehicle_id)?.reg_no ?? 'Vehicle'}</span> may run {o.valid_from} to {o.valid_to}: {o.reason}
+                </li>
+              ))}
+            </ul>
+            <SpecForm
+              testId="vehicle-override-form"
+              submitLabel="Allow"
+              action={overrideVehicleBlock}
+              columns={3}
+              fields={[
+                { name: 'vehicleId', label: 'Vehicle', type: 'select', required: true, options: list.map((v) => ({ value: v.id, label: v.reg_no })) },
+                { name: 'from', label: 'From', type: 'date', required: true, defaultValue: today },
+                { name: 'to', label: 'Last day', type: 'date', required: true },
+                { name: 'reason', label: 'Reason', type: 'textarea', required: true },
+              ]}
+            />
+          </CardContent>
+        </Card>
       )}
       {['owner', 'super_admin', 'principal'].includes(role) && (
         <Card>

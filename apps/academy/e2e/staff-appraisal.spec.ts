@@ -36,6 +36,16 @@ test('a weighted appraisal is hidden until released, scores 80.00, and a dispute
   await expect(page.getByTestId('report-excluded')).toContainText('45 days');
   const { data: ap } = await db.from('appraisal').select('id').eq('tenant_id', tenantId).single();
 
+  // HR hands the rating to the Owner, then back to the Principal
+  await page.goto(`/staff/appraisals/${ap!.id}`);
+  await expect(page.getByTestId('appraisal-rater')).toContainText('principal user');
+  await page.getByTestId('reassign-rater-form').getByLabel('New rater').selectOption({ label: 'owner user (owner)' });
+  await page.getByTestId('reassign-rater-form-submit').click();
+  await expect(page.getByTestId('appraisal-rater')).toContainText('owner user');
+  await page.getByTestId('reassign-rater-form').getByLabel('New rater').selectOption({ label: 'principal user (principal)' });
+  await page.getByTestId('reassign-rater-form-submit').click();
+  await expect(page.getByTestId('appraisal-rater')).toContainText('principal user');
+
   const open = async (email: string): Promise<Page> => {
     const ctx = await browser.newContext({ baseURL: baseURL ?? undefined });
     const p = await ctx.newPage();

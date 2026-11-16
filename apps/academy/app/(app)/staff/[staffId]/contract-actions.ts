@@ -34,3 +34,14 @@ export async function confirmProbation(staffId: string, contractId: string): Pro
   revalidatePath(`/staff/${staffId}`);
   return { error: null, message: 'Probation confirmed.' };
 }
+
+export async function linkStaffLogin(staffId: string, values: Record<string, string>): Promise<ActionResult> {
+  const raw = values.userId ?? '';
+  if (raw !== 'none' && !/^[0-9a-f-]{36}$/i.test(raw)) return { error: 'Choose a login.' };
+  const userId = raw === 'none' ? null : raw;
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('link_staff_user_account', { p_staff_id: staffId, p_user_id: userId });
+  if (error) return { error: rpcError(error.message, { ...MESSAGES, USER_ALREADY_LINKED: 'That login is already linked to another staff member.', USER_NOT_FOUND: 'That login is not an active user of this school.' }) };
+  revalidatePath(`/staff/${staffId}`);
+  return { error: null, message: userId ? 'Login linked.' : 'Login unlinked.' };
+}

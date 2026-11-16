@@ -2,7 +2,7 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SpecForm } from '@/components/spec-form';
 import { currentRole, loose, pickCampus, TRANSPORT_STAFF } from '@/lib/transport/rpc';
-import { assignTrip } from './actions';
+import { assignTrip, endAssignment } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,6 +70,31 @@ export default async function AssignmentsPage({ searchParams }: { searchParams: 
           </table>
         </CardContent>
       </Card>
+      {canManage && ((current ?? []) as Assignment[]).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">End an assignment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SpecForm
+              testId="end-assignment-form"
+              submitLabel="End assignment"
+              action={endAssignment}
+              columns={2}
+              fields={[
+                {
+                  name: 'assignmentId',
+                  label: 'Assignment',
+                  type: 'select',
+                  required: true,
+                  options: ((current ?? []) as Assignment[]).map((a) => ({ value: a.assignment_id, label: `${routeName.get(a.route_id) ?? 'Route'} · ${a.vehicle_reg_no} · ${a.driver_name}` })),
+                },
+                { name: 'lastDay', label: 'Last day', type: 'date', required: true },
+              ]}
+            />
+          </CardContent>
+        </Card>
+      )}
       {canManage && (
         <Card>
           <CardHeader>
