@@ -53130,6 +53130,10 @@ export type Database = {
         Args: { p_id: string; p_is_active: boolean }
         Returns: undefined
       }
+      set_expense_approval_limits: {
+        Args: { p_campus_id: string; p_principal_max_paisa: number; p_self_max_paisa: number }
+        Returns: undefined
+      }
       set_fee_head_priority: {
         Args: { p_fee_head_id: string; p_priority: number }
         Returns: undefined

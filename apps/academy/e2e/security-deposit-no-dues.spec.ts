@@ -46,3 +46,28 @@ test('a deposit is refunded once every no-dues item is cleared', async ({ page }
   await page.getByTestId('disburse-refund').click();
   await expect(page.getByTestId('deposit-line')).toContainText('refunded');
 });
+
+test('the owner forfeits a held deposit with a reason', async ({ page }) => {
+  test.setTimeout(120000);
+  const { db, email, owner$, challans } = await seedFeesTenant(1, 'forfeit-e2e');
+  const challan = challans[0]!;
+  const { error } = await owner$.rpc('build_no_dues_checklist', { p_enrolment_id: challan.enrolment_id });
+  expect(error).toBeNull();
+  const { error: depError } = await owner$.rpc('record_security_deposit', { p_enrolment_id: challan.enrolment_id, p_amount_paisa: 500000, p_received_on: '2021-03-01', p_mode: 'cash' });
+  expect(depError).toBeNull();
+
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(SEED_PASSWORD);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+
+  await page.goto('/fees/no-dues');
+  await page.getByLabel('Forfeit reason').fill('Lab equipment broken and not paid for');
+  page.once('dialog', (d) => d.accept());
+  await page.getByTestId('forfeit-deposit').click();
+  await expect(page.getByTestId('deposit-line')).toContainText('forfeited');
+  const { data } = await db.from('security_deposit').select('status, forfeit_reason').eq('enrolment_id', challan.enrolment_id).single();
+  expect(data).toEqual({ status: 'forfeited', forfeit_reason: 'Lab equipment broken and not paid for' });
+});

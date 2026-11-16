@@ -13,7 +13,7 @@ import {
   type RecordDepositInput,
   type StartClearanceInput,
 } from '@/lib/validation';
-import { approveRefund, clearItem, disburseRefund, netItem, overrideClearance, recordDeposit, setItemOutstanding, startClearance, waiveItem } from './actions';
+import { approveRefund, clearItem, disburseRefund, forfeitDeposit, netItem, overrideClearance, recordDeposit, setItemOutstanding, startClearance, waiveItem } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -136,6 +136,7 @@ export function ItemControls({ itemId, domain, hasDeposit }: { itemId: string; d
 export function ClearanceActions({ clearanceId, enrolmentId, status, hasDeposit, approved }: { clearanceId: string; enrolmentId: string; status: string; hasDeposit: boolean; approved: boolean }) {
   const { pending, error, run } = useAction();
   const [reason, setReason] = useState('');
+  const [forfeitReason, setForfeitReason] = useState('');
   const form = useForm<DisburseDepositInput>({ resolver: zodResolver(disburseDepositSchema), defaultValues: { enrolmentId, instrumentType: 'cheque', instrumentRef: '' } });
   const onDisburse = form.handleSubmit((v) => run(() => disburseRefund(v), 'Refund disbursed.'));
   return (
@@ -152,6 +153,20 @@ export function ClearanceActions({ clearanceId, enrolmentId, status, hasDeposit,
         <Button size="sm" disabled={pending} onClick={() => run(() => approveRefund(enrolmentId), 'Refund approved.')} data-testid="approve-refund">
           Approve deposit refund
         </Button>
+      )}
+      {hasDeposit && !approved && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Input aria-label="Forfeit reason" className="h-8 w-72" placeholder="Owner: reason to forfeit the deposit (20+ characters)" value={forfeitReason} onChange={(e) => setForfeitReason(e.target.value)} />
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={pending}
+            onClick={() => window.confirm('Keep this deposit instead of refunding it?') && run(() => forfeitDeposit(enrolmentId, forfeitReason), 'Deposit forfeited.')}
+            data-testid="forfeit-deposit"
+          >
+            Forfeit deposit
+          </Button>
+        </div>
       )}
       {status === 'cleared' && hasDeposit && approved && (
         <form onSubmit={onDisburse} className="flex flex-wrap items-center gap-2" noValidate>
