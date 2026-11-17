@@ -4,31 +4,33 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    /* Unslop graphite ramp (github.com/heydamir/unslop, CC BY 4.0, Damir Sokolovsky).
+       Surfaces stay neutral; Classora cobalt is the one accent. */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
     --surface: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 0 0% 45%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 9%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    --border: 0 0% 91%;
+    --input: 0 0% 87%;
 
     --primary: 231 60% 45%;
     --primary-foreground: 0 0% 100%;
     --primary-muted: 231 70% 96%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 0 0% 9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 0 0% 9%;
 
     --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
@@ -50,65 +52,65 @@
     --radius: 0.625rem;
 
     /* Sidebar reads as its own surface, not a tinted page. */
-    --sidebar: 222 44% 13%;
-    --sidebar-foreground: 213 27% 84%;
-    --sidebar-muted: 215 20% 55%;
-    --sidebar-accent: 222 40% 20%;
-    --sidebar-active: 231 60% 58%;
-    --sidebar-border: 222 34% 20%;
+    --sidebar: 240 3% 6%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-muted: 240 3% 53%;
+    --sidebar-accent: 240 3% 14%;
+    --sidebar-active: 231 70% 66%;
+    --sidebar-border: 240 2% 15%;
   }
 
   .dark {
-    --background: 224 47% 7%;
-    --foreground: 213 31% 91%;
-    --surface: 222 44% 11%;
+    --background: 240 2% 8%;
+    --foreground: 0 0% 93%;
+    --surface: 240 4% 10%;
 
-    --muted: 223 30% 16%;
-    --muted-foreground: 215 20% 62%;
+    --muted: 240 3% 14%;
+    --muted-foreground: 240 3% 53%;
 
-    --card: 222 44% 11%;
-    --card-foreground: 213 31% 91%;
+    --card: 240 4% 10%;
+    --card-foreground: 0 0% 93%;
 
-    --popover: 222 44% 11%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 240 4% 10%;
+    --popover-foreground: 0 0% 93%;
 
-    --border: 216 30% 20%;
-    --input: 216 30% 22%;
+    --border: 240 2% 15%;
+    --input: 240 2% 18%;
 
     --primary: 231 70% 66%;
-    --primary-foreground: 224 47% 9%;
-    --primary-muted: 231 40% 20%;
+    --primary-foreground: 240 2% 8%;
+    --primary-muted: 231 30% 18%;
 
-    --secondary: 222 33% 18%;
-    --secondary-foreground: 213 31% 91%;
+    --secondary: 240 3% 14%;
+    --secondary-foreground: 0 0% 93%;
 
-    --accent: 222 33% 18%;
-    --accent-foreground: 213 31% 91%;
+    --accent: 240 3% 14%;
+    --accent-foreground: 0 0% 93%;
 
-    --destructive: 0 70% 60%;
-    --destructive-foreground: 224 47% 9%;
-    --destructive-muted: 0 40% 20%;
+    --destructive: 358 75% 59%;
+    --destructive-foreground: 240 2% 8%;
+    --destructive-muted: 0 30% 16%;
 
-    --success: 152 50% 52%;
-    --success-foreground: 224 47% 9%;
-    --success-muted: 152 30% 18%;
+    --success: 151 50% 53%;
+    --success-foreground: 240 2% 8%;
+    --success-muted: 152 25% 15%;
 
     --warning: 38 80% 60%;
-    --warning-foreground: 224 47% 9%;
-    --warning-muted: 38 35% 20%;
+    --warning-foreground: 240 2% 8%;
+    --warning-muted: 38 30% 16%;
 
     --info: 205 75% 62%;
-    --info-foreground: 224 47% 9%;
-    --info-muted: 205 40% 20%;
+    --info-foreground: 240 2% 8%;
+    --info-muted: 205 30% 16%;
 
     --ring: 231 70% 66%;
 
-    --sidebar: 222 47% 9%;
-    --sidebar-foreground: 213 27% 84%;
-    --sidebar-muted: 215 20% 55%;
-    --sidebar-accent: 222 40% 16%;
+    --sidebar: 240 3% 6%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-muted: 240 3% 53%;
+    --sidebar-accent: 240 3% 14%;
     --sidebar-active: 231 70% 66%;
-    --sidebar-border: 222 34% 16%;
+    --sidebar-border: 240 2% 15%;
   }
 }
 
@@ -119,7 +121,6 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'cv11', 'ss01';
   }
 
   /* Tabular figures everywhere numbers are compared down a column —
@@ -138,12 +139,12 @@
 @layer components {
   /* Native <dialog> backdrop — used by Modal/Sheet so no JS overlay is needed. */
   dialog::backdrop {
-    background: hsl(222 47% 11% / 0.45);
+    background: rgb(0 0 0 / 0.45);
     backdrop-filter: blur(2px);
   }
 
   dialog[open] {
-    animation: dialog-in 140ms ease-out;
+    animation: dialog-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 

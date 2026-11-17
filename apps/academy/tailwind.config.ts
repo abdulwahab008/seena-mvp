@@ -4,6 +4,8 @@ const withVar = (name: string) => `hsl(var(--${name}))`;
 
 const config: Config = {
   darkMode: 'class',
+  // Nothing toggles .dark yet, so without this Tailwind purges the .dark token block
+  safelist: ['dark'],
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}'],
   theme: {
     container: {
@@ -78,11 +80,18 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      fontFamily: {
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
+      },
       boxShadow: {
-        xs: '0 1px 2px 0 hsl(222 47% 11% / 0.05)',
-        sm: '0 1px 3px 0 hsl(222 47% 11% / 0.08), 0 1px 2px -1px hsl(222 47% 11% / 0.06)',
-        md: '0 4px 10px -2px hsl(222 47% 11% / 0.08), 0 2px 6px -2px hsl(222 47% 11% / 0.05)',
-        lg: '0 12px 28px -6px hsl(222 47% 11% / 0.12), 0 4px 10px -4px hsl(222 47% 11% / 0.06)',
+        xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        md: '0 4px 12px 0 rgb(0 0 0 / 0.05)',
+        lg: '0 8px 24px 0 rgb(0 0 0 / 0.06)',
+      },
+      transitionTimingFunction: {
+        DEFAULT: 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
       keyframes: {
         'fade-in': {
@@ -98,8 +107,8 @@ const config: Config = {
         },
       },
       animation: {
-        'fade-in': 'fade-in 150ms ease-out',
-        'slide-in-left': 'slide-in-left 180ms ease-out',
+        'fade-in': 'fade-in 160ms cubic-bezier(0.22, 1, 0.36, 1)',
+        'slide-in-left': 'slide-in-left 300ms cubic-bezier(0.22, 1, 0.36, 1)',
         shimmer: 'shimmer 1.6s infinite',
       },
     },
