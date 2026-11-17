@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServiceRole } from '@/lib/supabase/server';
 import { verifyWorkerSecret } from '@/lib/exports/worker-secret';
+import { verifyCronSecret } from '@/lib/comm/cron-auth';
 
 export const maxDuration = 300;
 
@@ -9,6 +10,16 @@ export const maxDuration = 300;
 // items through the storage API (bucket lifecycle rules cannot be set from SQL).
 export async function POST(req: NextRequest) {
   if (!verifyWorkerSecret(req.headers.get('x-worker-secret'))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  return run();
+}
+
+// Vercel Cron (see vercel.json) sends a GET with the cron secret.
+export async function GET(req: NextRequest) {
+  if (!verifyCronSecret(req.headers.get('authorization'))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  return run();
+}
+
+async function run() {
   const db = supabaseServiceRole();
   const { data: tenants } = await db.rpc('retention_purge_nightly');
   const { data: blobs } = await db.rpc('retention_blobs_to_delete', { p_limit: 500 });
