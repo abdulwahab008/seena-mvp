@@ -60,6 +60,7 @@ export type ApplicationRow = {
     expiry_pause_reason: string | null;
   } | null;
   availableSeats: number | null;
+  defaultAdmissionFee: number | null;
   waitlist: { id: string; position: number | null; status: string } | null;
   checklistSnapshot: { doc_type: string; is_mandatory: boolean; min_count: number }[];
   documents: DocumentRow[];
@@ -412,9 +413,17 @@ function WaitlistBadge({ waitlist }: { waitlist: { id: string; position: number 
   );
 }
 
-function IssueOfferForm({ applicationId, availableSeats }: { applicationId: string; availableSeats: number }) {
+function IssueOfferForm({
+  applicationId,
+  availableSeats,
+  defaultFee,
+}: {
+  applicationId: string;
+  availableSeats: number;
+  defaultFee: number | null;
+}) {
   const [pending, startTransition] = useTransition();
-  const [fee, setFee] = useState('');
+  const [fee, setFee] = useState(defaultFee !== null ? String(defaultFee) : '');
 
   const onClick = () => {
     const amount = Number(fee);
@@ -917,7 +926,7 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
                       {a.availableSeats} seat(s) left
                     </span>
                     {a.availableSeats > 0 ? (
-                      <IssueOfferForm applicationId={a.id} availableSeats={a.availableSeats} />
+                      <IssueOfferForm applicationId={a.id} availableSeats={a.availableSeats} defaultFee={a.defaultAdmissionFee} />
                     ) : (
                       <JoinWaitlistButton applicationId={a.id} />
                     )}

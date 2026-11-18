@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { todayPk } from '@/lib/dates';
+import { loadAdmissionFeeDefaults } from '@/lib/admissions/admission-fee-defaults';
 import { WalkInForm } from './walk-in-form';
 
 export const metadata = {
@@ -28,6 +29,7 @@ export default async function WalkInAdmissionPage() {
       .order('created_at', { ascending: false })
       .limit(10),
   ]);
+  const admissionFeeDefaults = await loadAdmissionFeeDefaults(supabase);
 
   return (
     <WalkInForm
@@ -35,6 +37,7 @@ export default async function WalkInAdmissionPage() {
       sessions={sessions ?? []}
       classLevels={classLevels ?? []}
       sections={sections ?? []}
+      admissionFeeDefaults={admissionFeeDefaults}
       recentAdmissions={
         (recentStudents ?? []).map((s) => ({
           id: s.id,

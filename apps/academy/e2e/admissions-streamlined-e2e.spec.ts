@@ -77,6 +77,7 @@ test.describe('Admissions Module E2E & Streamlined Fast-Track Flow', () => {
     await page.getByTestId('walkin-gender-male').click();
     await page.locator('#walkin-parentName').fill('Farhan Qureshi');
     await page.locator('#walkin-phone').fill('03009876543');
+    await page.locator('#walkin-admissionFee').fill('4000');
 
     // Submit the spot admission
     const submitBtn = page.getByTestId('walkin-submit-btn');

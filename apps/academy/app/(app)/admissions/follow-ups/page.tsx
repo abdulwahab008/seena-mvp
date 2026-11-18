@@ -14,7 +14,14 @@ export default async function FollowupsPage() {
   const supabase = await supabaseServer();
   const select = 'id, channel, due_at, outcome, outcome_note, completed_at, enquiry:enquiry_id(enquiry_no, child_name, phone_e164, status)';
   const [{ data: open }, { data: done }] = await Promise.all([
-    supabase.from('admission_followup').select(select).is('completed_at', null).order('due_at').limit(300),
+    // Once the enquiry has become an application there is nothing left to chase.
+    supabase
+      .from('admission_followup')
+      .select('id, channel, due_at, outcome, outcome_note, completed_at, enquiry:enquiry_id!inner(enquiry_no, child_name, phone_e164, status)')
+      .is('completed_at', null)
+      .eq('enquiry.status', 'open')
+      .order('due_at')
+      .limit(300),
     supabase.from('admission_followup').select(select).not('completed_at', 'is', null).order('completed_at', { ascending: false }).limit(30),
   ]);
   const now = Date.now();

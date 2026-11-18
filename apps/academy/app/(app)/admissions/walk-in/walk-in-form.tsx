@@ -26,12 +26,14 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { quickAdmission } from '@/app/(app)/admissions/applications/actions';
 import { PrintableReceiptModal } from '@/components/admissions/printable-receipt-modal';
 import { formatDatePk, formatDateTimePk } from '@/lib/dates';
+import { admissionFeeKey } from '@/lib/admissions/admission-fee-defaults';
 
 export interface WalkInFormProps {
   campuses: { id: string; name: string; code: string }[];
   sessions: { id: string; name: string }[];
   classLevels: { id: string; name_en: string; code: string }[];
   sections: { id: string; class_level_id: string; campus_id: string; session_id: string; name: string }[];
+  admissionFeeDefaults: Record<string, number>;
   recentAdmissions: {
     id: string;
     gr_number: string;
@@ -45,6 +47,7 @@ export function WalkInForm({
   sessions,
   classLevels,
   sections: initialSections,
+  admissionFeeDefaults,
   recentAdmissions,
 }: WalkInFormProps) {
   const router = useRouter();
@@ -63,7 +66,7 @@ export function WalkInForm({
   const [parentName, setParentName] = React.useState('');
   const [phone, setPhone] = React.useState('');
   const [bFormNo, setBFormNo] = React.useState('');
-  const [admissionFee, setAdmissionFee] = React.useState('4000');
+  const [admissionFee, setAdmissionFee] = React.useState('');
   const [paymentMode, setPaymentMode] = React.useState('cash');
   const [paymentReference, setPaymentReference] = React.useState('');
 
@@ -103,6 +106,12 @@ export function WalkInForm({
       setSectionId('');
     }
   }, [availableSections, sectionId]);
+
+  // The fee follows the published fee structure's ADMISSION line for the chosen class; staff can still edit it.
+  React.useEffect(() => {
+    const fee = admissionFeeDefaults[admissionFeeKey(campusId, sessionId, classLevelId)];
+    setAdmissionFee(fee !== undefined ? String(fee) : '');
+  }, [admissionFeeDefaults, campusId, sessionId, classLevelId]);
 
   const selectedClass = classLevels.find((c) => c.id === classLevelId);
   const selectedSection = availableSections.find((s) => s.id === sectionId);
@@ -460,6 +469,7 @@ export function WalkInForm({
                         onChange={(e) => setAdmissionFee(e.target.value)}
                         min="0"
                         step="100"
+                        required
                         className="h-9 font-semibold"
                       />
                     </div>
@@ -505,7 +515,7 @@ export function WalkInForm({
                 <div className="flex items-center justify-end gap-3 pt-3 border-t">
                   <Button
                     type="submit"
-                    disabled={pending || !sectionId || !dob || !childName || !parentName || !phone || (paymentMode !== 'cash' && !paymentReference.trim())}
+                    disabled={pending || !sectionId || !dob || !childName || !parentName || !phone || admissionFee === '' || (paymentMode !== 'cash' && !paymentReference.trim())}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[220px]"
                     data-testid="walkin-submit-btn"
                   >
