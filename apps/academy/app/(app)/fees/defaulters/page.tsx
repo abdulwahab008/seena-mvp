@@ -149,7 +149,7 @@ export default async function DefaultersPage({ searchParams }: { searchParams: P
 
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
-          Showing {offset + 1}–{offset + (rows ?? []).length} of {count ?? 0}
+          {count ? `Showing ${offset + 1}–${offset + (rows ?? []).length} of ${count}` : 'No students'}
         </span>
         <span className="flex gap-3">
           {offset > 0 && <Link href={`?${qs({ offset: String(Math.max(0, offset - PAGE)) })}`}>Previous</Link>}

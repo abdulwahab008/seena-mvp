@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { loadAbsenteeNotifications, runAbsenteeDispatch, type NotificationRow, type SectionNotMarked } from './actions';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ export function AbsenteeNotificationsView({ campusId, isAdmin }: { campusId: str
   const [sectionsNotMarked, setSectionsNotMarked] = useState<SectionNotMarked[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  const onLoad = () => {
+  const onLoad = useCallback(() => {
     startTransition(async () => {
       const result = await loadAbsenteeNotifications(campusId, date);
       if (result.error) {
@@ -31,7 +31,12 @@ export function AbsenteeNotificationsView({ campusId, isAdmin }: { campusId: str
       setSectionsNotMarked(result.sectionsNotMarked);
       setLoaded(true);
     });
-  };
+  }, [campusId, date]);
+
+  // Read-only, so show the chosen date straight away instead of waiting for "Load".
+  useEffect(() => {
+    onLoad();
+  }, [onLoad]);
 
   const onDispatch = () => {
     const fd = new FormData();
