@@ -41,7 +41,11 @@ export function IssueLeavingCertificate({ leavers, templates, issued }: { leaver
     <div className="space-y-6">
       {templates.length === 0 ? (
         <p className="text-sm text-muted-foreground" data-testid="slc-no-template">
-          No Leaving Certificate template is active for your campus yet. Design and activate one under Certificate Templates first.
+          No Leaving Certificate template is active for your campus yet.{' '}
+          <Link href="/certificates/templates" className="underline">
+            Create one in Certificate Templates
+          </Link>
+          .
         </p>
       ) : (
         <div className="space-y-4" data-testid="slc-form">
