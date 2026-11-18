@@ -31,7 +31,7 @@ interface Props {
 
 export function StructuresDesk({ initialStructures, staffList, payScales }: Props) {
   const router = useRouter();
-  const [structures] = useState<EmployeeSalaryStructureRow[]>(initialStructures);
+  const structures = initialStructures;
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();

@@ -36,7 +36,7 @@ interface Props {
 
 export function RunsDesk({ initialRuns, campuses, selectedCampusId }: Props) {
   const router = useRouter();
-  const [runs] = useState<PayrollRunRow[]>(initialRuns);
+  const runs = initialRuns;
   const [generateModalOpen, setGenerateModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
