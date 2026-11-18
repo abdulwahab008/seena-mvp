@@ -15,7 +15,11 @@ type Section = { id: string; name: string; class_level: { name_en: string } | { 
 export function EnrolForm({ studentId, sections }: { studentId: string; sections: Section[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const { handleSubmit, control } = useForm<EnrolStudentInput>({ resolver: zodResolver(enrolStudentSchema) });
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<EnrolStudentInput>({ resolver: zodResolver(enrolStudentSchema) });
 
   const label = (s: Section) => {
     const classLevel = Array.isArray(s.class_level) ? s.class_level[0] : s.class_level;
@@ -41,7 +45,7 @@ export function EnrolForm({ studentId, sections }: { studentId: string; sections
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex items-end gap-2" noValidate>
+    <form onSubmit={onSubmit} className="flex items-start gap-2" noValidate>
       <div className="w-64 space-y-1">
         <Controller
           control={control}
@@ -61,6 +65,7 @@ export function EnrolForm({ studentId, sections }: { studentId: string; sections
             </Select>
           )}
         />
+        {errors.sectionId && <p className="text-sm text-destructive">Choose a section.</p>}
       </div>
       <Button type="submit" disabled={pending}>
         {pending ? 'Enrolling…' : 'Enrol into section'}

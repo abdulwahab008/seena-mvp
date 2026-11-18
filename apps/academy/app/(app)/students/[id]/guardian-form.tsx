@@ -11,7 +11,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function GuardianForm({ studentId }: { studentId: string }) {
+export function GuardianForm({ studentId, firstGuardianName }: { studentId: string; firstGuardianName: string | null }) {
+  // A student's first guardian is almost always the father on the profile, the primary contact and the fee payer.
+  const first = firstGuardianName !== null;
+  const blank = {
+    nameEn: first ? firstGuardianName : '',
+    cnic: '',
+    phone: '',
+    relationship: 'father' as const,
+    isPrimary: first,
+    receivesBilling: first,
+    mayCollectChild: true,
+  };
   const [pending, startTransition] = useTransition();
   const {
     register,
@@ -21,7 +32,7 @@ export function GuardianForm({ studentId }: { studentId: string }) {
     formState: { errors },
   } = useForm<LinkGuardianInput>({
     resolver: zodResolver(linkGuardianSchema),
-    defaultValues: { relationship: 'father', isPrimary: false, receivesBilling: false, mayCollectChild: true },
+    defaultValues: blank,
   });
 
   const onSubmit = handleSubmit((values) => {
@@ -39,7 +50,7 @@ export function GuardianForm({ studentId }: { studentId: string }) {
       if (result.error) toast.error(result.error);
       else {
         toast.success(`${values.nameEn} linked.`);
-        reset({ relationship: 'father', isPrimary: false, receivesBilling: false, mayCollectChild: true });
+        reset({ ...blank, nameEn: '', isPrimary: false, receivesBilling: false });
       }
     });
   });

@@ -157,7 +157,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
           )}
         </div>
         <p className="text-muted-foreground">
-          There are <span className="tabular font-medium text-foreground">{total}</span> students matching.
+          {total === 1 ? 'There is' : 'There are'} <span className="tabular font-medium text-foreground">{total}</span> {total === 1 ? 'student' : 'students'} matching.
         </p>
       </form>
 
