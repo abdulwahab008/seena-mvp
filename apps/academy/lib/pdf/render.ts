@@ -28,14 +28,11 @@
  * renderPdf() — they will need the same Urdu shaping and the same paper
  * sizes.
  *
- * The honest caveat: @playwright/test is a devDependency. On this machine
- * (and in the e2e run) it is installed and its Chromium is downloaded, so
- * the export produces genuine PDF bytes. A production deployment has to
- * provide a Chromium — promoting the package, or pointing this module at a
- * remote browser — which is a deployment decision, not a code change. If
- * no browser can be launched the export fails loudly with
- * RENDERER_UNAVAILABLE and the job records it; it never silently returns
- * something that is not a PDF.
+ * Production: @playwright/test is a devDependency, so on Vercel the
+ * browser is @sparticuz/chromium driven by playwright-core (see
+ * launchBrowser below). If no browser can be launched the export fails
+ * loudly with RENDERER_UNAVAILABLE and the job records it; it never
+ * silently returns something that is not a PDF.
  */
 
 /** Paper sizes any caller of this seam prints on, as CSS `@page size` names. */
@@ -57,19 +54,23 @@ export class RendererUnavailableError extends Error {
   }
 }
 
-export async function renderPdf(doc: PrintDocument): Promise<Buffer> {
-  let chromium: typeof import('@playwright/test').chromium;
-  try {
-    ({ chromium } = await import('@playwright/test'));
-  } catch (cause) {
-    throw new RendererUnavailableError(cause);
+// Vercel functions have no Chromium of their own (@playwright/test is a devDependency and its
+// browser download never reaches the deployment), so there the browser comes from
+// @sparticuz/chromium, a Chromium build packaged for serverless. Locally and in CI the browser
+// Playwright already installed is used, or ACADEMY_CHROMIUM_PATH when set.
+async function launchBrowser() {
+  const { chromium } = await import('playwright-core');
+  if (process.env.VERCEL && !process.env.ACADEMY_CHROMIUM_PATH) {
+    const serverless = (await import('@sparticuz/chromium')).default;
+    return chromium.launch({ executablePath: await serverless.executablePath(), args: serverless.args, headless: true });
   }
+  return chromium.launch({ executablePath: process.env.ACADEMY_CHROMIUM_PATH || undefined });
+}
 
+export async function renderPdf(doc: PrintDocument): Promise<Buffer> {
   let browser;
   try {
-    // ACADEMY_CHROMIUM_PATH lets a deployment (or a machine whose Playwright
-    // build differs from its installed browser) point at the Chromium to use.
-    browser = await chromium.launch({ executablePath: process.env.ACADEMY_CHROMIUM_PATH || undefined });
+    browser = await launchBrowser();
   } catch (cause) {
     throw new RendererUnavailableError(cause);
   }

@@ -12,7 +12,10 @@ const nextConfig = {
   // server bundle.
   // Leave applications carry up to 10 MB of attachments through a server action.
   experimental: { serverActions: { bodySizeLimit: '12mb' } },
-  serverExternalPackages: ['@playwright/test', 'playwright', 'playwright-core'],
+  serverExternalPackages: ['@playwright/test', 'playwright', 'playwright-core', '@sparticuz/chromium'],
+  // @sparticuz/chromium unpacks its browser from bin/*.br at runtime; the tracer can't see those
+  // files through a computed path, so ship them with every function that may render a PDF.
+  outputFileTracingIncludes: { '/**': ['./node_modules/@sparticuz/chromium/bin/**'] },
 };
 
 export default nextConfig;
