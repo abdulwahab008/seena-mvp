@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -70,7 +71,7 @@ export function IssueTransferCertificate({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  const [enrolmentId, setEnrolmentId] = useState<string>(candidates[0]?.id ?? '');
+  const [enrolmentId, setEnrolmentId] = useState<string>('');
   const [leavingDate, setLeavingDate] = useState<string>(todayPk());
   const [reason, setReason] = useState('');
   const [conduct, setConduct] = useState('Good');
@@ -157,8 +158,11 @@ export function IssueTransferCertificate({
         <CardContent className="space-y-4 pt-6">
           {templates.length === 0 ? (
             <p className="text-sm text-muted-foreground" data-testid="cert-issue-no-template">
-              No Transfer Certificate template is active for your campus yet. Design and activate one under Certificate
-              Templates first.
+              No Transfer Certificate template is active for your campus yet.{' '}
+              <Link href="/certificates/templates" className="underline">
+                Create one in Certificate Templates
+              </Link>
+              .
             </p>
           ) : candidates.length === 0 ? (
             <p className="text-sm text-muted-foreground" data-testid="cert-issue-no-students">

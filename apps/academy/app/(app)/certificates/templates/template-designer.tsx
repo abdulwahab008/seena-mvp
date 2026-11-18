@@ -53,6 +53,19 @@ const ANY_BOARD = 'Any board';
 const STARTER_BODY =
   '<p>This is to certify that <b>{{student.name_en}}</b>, son/daughter of {{student.father_name_en}}, GR No. {{student.gr_number}}, was a student of this institution.</p>\n<p>Issued on {{issue.date}}.</p>';
 
+const DEFAULT_TITLE: Record<CertificateType, string> = {
+  transfer: 'Transfer Certificate',
+  character: 'Character Certificate',
+  bonafide: 'Bonafide Certificate',
+};
+
+// The starter wording plus a line for every field this certificate type must carry, so a new
+// template can be activated as created instead of being rejected for missing fields.
+function starterBody(type: CertificateType, catalog: CatalogRow[]): string {
+  const missing = catalog.filter((f) => f.certificate_type === type && f.required && !STARTER_BODY.includes(`{{${f.field_path}}}`));
+  return [STARTER_BODY, ...missing.map((f) => `<p>${f.label_en}: {{${f.field_path}}}</p>`)].join('\n');
+}
+
 function scopeLabel(t: TemplateRow): string {
   return t.campus ? `${t.campus.code}` : 'Tenant default';
 }
@@ -76,8 +89,8 @@ export function TemplateDesigner({
   const [newPageSize, setNewPageSize] = useState<CertificatePageSize>('A4');
   const [newScope, setNewScope] = useState<string>(campuses[0]?.id ?? TENANT_DEFAULT);
   const [newBoard, setNewBoard] = useState('');
-  const [newTitle, setNewTitle] = useState('');
-  const [newBody, setNewBody] = useState(STARTER_BODY);
+  const [newTitle, setNewTitle] = useState(DEFAULT_TITLE.transfer);
+  const [newBody, setNewBody] = useState(() => starterBody('transfer', catalog));
 
   const [selectedId, setSelectedId] = useState<string | null>(templates[0]?.id ?? null);
   const [draftTitle, setDraftTitle] = useState(templates[0]?.title ?? '');
@@ -119,7 +132,7 @@ export function TemplateDesigner({
       setDraftBody(newBody);
       setDraftPageSize(newPageSize);
       setActivateError(null);
-      setNewTitle('');
+      setNewTitle(DEFAULT_TITLE[newType]);
       router.refresh();
     });
   };
@@ -173,7 +186,16 @@ export function TemplateDesigner({
         <div className="flex flex-wrap items-end gap-3">
           <div className="space-y-1">
             <Label htmlFor="new-type">Certificate type</Label>
-            <Select value={newType} onValueChange={(v) => setNewType(v as CertificateType)}>
+            <Select
+              value={newType}
+              onValueChange={(v) => {
+                const type = v as CertificateType;
+                // Only replace text the user has not edited.
+                if (newTitle === DEFAULT_TITLE[newType]) setNewTitle(DEFAULT_TITLE[type]);
+                if (newBody === starterBody(newType, catalog)) setNewBody(starterBody(type, catalog));
+                setNewType(type);
+              }}
+            >
               <SelectTrigger id="new-type" className="min-w-56" data-testid="cert-new-type-trigger">
                 <SelectValue />
               </SelectTrigger>
@@ -259,7 +281,7 @@ export function TemplateDesigner({
             id="new-title"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="School Leaving Certificate"
+            placeholder="Title printed on the certificate"
             data-testid="cert-new-title"
           />
         </div>

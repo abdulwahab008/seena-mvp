@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -68,7 +69,7 @@ export function IssueCharacterCertificate({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  const [studentId, setStudentId] = useState<string>(students[0]?.id ?? '');
+  const [studentId, setStudentId] = useState<string>('');
   const [conduct, setConduct] = useState<CharacterConductGrade>('Excellent');
   const [periodFrom, setPeriodFrom] = useState('');
   const [periodTo, setPeriodTo] = useState('');
@@ -130,8 +131,11 @@ export function IssueCharacterCertificate({
         <CardContent className="space-y-4 pt-6">
           {templates.length === 0 ? (
             <p className="text-sm text-muted-foreground" data-testid="cc-issue-no-template">
-              No Character Certificate template is active for your campus yet. Design and activate one under Certificate
-              Templates first.
+              No Character Certificate template is active for your campus yet.{' '}
+              <Link href="/certificates/templates" className="underline">
+                Create one in Certificate Templates
+              </Link>
+              .
             </p>
           ) : students.length === 0 ? (
             <p className="text-sm text-muted-foreground" data-testid="cc-issue-no-students">
