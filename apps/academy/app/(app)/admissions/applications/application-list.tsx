@@ -442,7 +442,7 @@ function IssueOfferForm({ applicationId, availableSeats }: { applicationId: stri
           id={`fee-${applicationId}`}
           type="number"
           step="0.01"
-          placeholder="5000"
+          placeholder="PKR"
           className="w-28"
           value={fee}
           onChange={(e) => setFee(e.target.value)}
@@ -703,8 +703,8 @@ function EnrolForm({
         </SelectContent>
       </Select>
       <Select value={gender || undefined} onValueChange={(v) => setGender(v as 'male' | 'female' | 'other')}>
-        <SelectTrigger className="h-8 w-24" data-testid={`enrol-gender-trigger-${offerId}`}>
-          <SelectValue />
+        <SelectTrigger className="h-8 w-24" aria-label="Gender" data-testid={`enrol-gender-trigger-${offerId}`}>
+          <SelectValue placeholder="Gender" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="male">Male</SelectItem>
@@ -757,7 +757,7 @@ function EnrolmentPanel({
   const totalReconciledRupees = payments
     .filter((p) => p.status === 'reconciled')
     .reduce((sum, p) => sum + p.amountPaisa / 100, 0);
-  const isFullyCovered = totalReconciledRupees >= offer.admission_fee_amount || waivers.some((w) => !w.consumed);
+  const isFullyCovered = totalReconciledRupees >= offer.admission_fee_amount || waivers.length > 0;
 
   const fundingOptions = [
     ...payments

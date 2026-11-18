@@ -24,7 +24,7 @@ test('the front desk logs a visitor in and signs them out, and a gate pass', asy
   const row = page.getByTestId('front-desk-entry').filter({ hasText: 'Mr Khan' });
   await expect(row.getByTestId('entry-open')).toHaveText('Inside');
   await row.getByRole('button', { name: 'Sign out' }).click();
-  await expect(row).toContainText('Sign out');
+  await expect(row).toContainText('Signed out');
   await expect(row.getByTestId('entry-open')).toHaveCount(0);
 
   await page.getByRole('link', { name: 'Gate passes' }).click();

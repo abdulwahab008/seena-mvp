@@ -18,36 +18,27 @@ export function CompleteFollowupControl({ followupId, enquiryNo }: { followupId:
       </Button>
     );
   }
+  const finish = (outcome: string, form: HTMLFormElement | null) => {
+    const fd = new FormData(form ?? undefined);
+    fd.set('outcome', outcome);
+    startTransition(async () => {
+      const r = await completeFollowup(followupId, fd);
+      if (r.error) toast.error(r.error);
+      else {
+        toast.success('Follow-up done.');
+        router.refresh();
+      }
+    });
+  };
+  // One click per outcome: the note is optional and typed first.
   return (
-    <form
-      className="flex flex-wrap items-center gap-1"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        startTransition(async () => {
-          const r = await completeFollowup(followupId, fd);
-          if (r.error) toast.error(r.error);
-          else {
-            toast.success('Follow-up done.');
-            router.refresh();
-          }
-        });
-      }}
-    >
-      <select name="outcome" required defaultValue="" aria-label="What happened" className="h-9 rounded-md border bg-background px-2 text-sm">
-        <option value="" disabled>
-          What happened?
-        </option>
-        {Object.entries(FOLLOWUP_OUTCOME_LABEL).map(([v, label]) => (
-          <option key={v} value={v}>
-            {label}
-          </option>
-        ))}
-      </select>
-      <input name="note" maxLength={500} placeholder="Note" aria-label="Note" className="h-9 w-48 rounded-md border bg-background px-2 text-sm" />
-      <Button type="submit" size="sm" disabled={pending}>
-        {pending ? 'Saving…' : 'Save'}
-      </Button>
+    <form className="flex flex-wrap items-center gap-1" onSubmit={(e) => e.preventDefault()}>
+      <input name="note" maxLength={500} placeholder="Note (optional)" aria-label="Note" className="h-9 w-48 rounded-md border bg-background px-2 text-sm" />
+      {Object.entries(FOLLOWUP_OUTCOME_LABEL).map(([v, label]) => (
+        <Button key={v} type="button" size="sm" variant="outline" disabled={pending} onClick={(e) => finish(v, e.currentTarget.form)}>
+          {label}
+        </Button>
+      ))}
       <Button type="button" size="sm" variant="ghost" onClick={() => setOpen(false)}>
         Cancel
       </Button>

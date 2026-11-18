@@ -68,7 +68,21 @@ export function CreateEnquiryForm({
       if (result.error) toast.error(result.error);
       else {
         toast.success(`Enquiry recorded for ${values.childName}.`);
-        reset({ campusId: values.campusId, sessionId: values.sessionId, whatsappOptIn: false, source: 'walk_in' });
+        reset({
+          campusId: values.campusId,
+          sessionId: values.sessionId,
+          whatsappOptIn: false,
+          source: 'walk_in',
+          childName: '',
+          childNameUr: '',
+          dob: '',
+          classAppliedId: '',
+          parentName: '',
+          parentCnic: '',
+          phone: '',
+          referrerName: '',
+          ageOverrideReason: '',
+        });
         setNewEnquiryId(result.newEnquiryId);
         setDuplicates(result.duplicates && result.duplicates.length > 0 ? result.duplicates : null);
       }

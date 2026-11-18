@@ -63,7 +63,7 @@ export function EntryList({ kind, entries }: { kind: FrontDeskKind; entries: Ent
             <TableCell>
               {e.closed_at ? (
                 <Badge variant="outline">
-                  {config.close} {formatDateTimePk(e.closed_at)}
+                  {config.done} {formatDateTimePk(e.closed_at)}
                 </Badge>
               ) : (
                 <Badge variant="warning" data-testid="entry-open">{config.open}</Badge>

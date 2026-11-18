@@ -8,6 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+// datetime-local values carry no zone; shifting through a local Date keeps the wall clock the user typed.
+function addMinutesLocal(value: string, minutes: number): string {
+  const d = new Date(value);
+  d.setMinutes(d.getMinutes() + minutes);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 type ApplicationOption = { id: string; applicationNo: string | null; childName: string };
 type PanelOption = { userId: string; fullName: string; appRole: string };
 
@@ -83,7 +91,16 @@ export function BookingForm({ applications, panelMembers }: { applications: Appl
         </div>
         <div className="space-y-1">
           <Label htmlFor="interviewStartsAt">Starts at</Label>
-          <Input id="interviewStartsAt" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+          <Input
+            id="interviewStartsAt"
+            type="datetime-local"
+            value={startsAt}
+            onChange={(e) => {
+              const next = e.target.value;
+              setStartsAt(next);
+              if (next && (!endsAt || endsAt <= next)) setEndsAt(addMinutesLocal(next, 30));
+            }}
+          />
         </div>
         <div className="space-y-1">
           <Label htmlFor="interviewEndsAt">Ends at</Label>

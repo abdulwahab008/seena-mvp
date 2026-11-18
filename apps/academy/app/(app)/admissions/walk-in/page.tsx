@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
+import { todayPk } from '@/lib/dates';
 import { WalkInForm } from './walk-in-form';
 
 export const metadata = {
@@ -23,6 +24,7 @@ export default async function WalkInAdmissionPage() {
       .from('student')
       .select('id, name_en, gr_number, created_at')
       .is('deleted_at', null)
+      .gte('created_at', `${todayPk()}T00:00:00+05:00`)
       .order('created_at', { ascending: false })
       .limit(10),
   ]);
