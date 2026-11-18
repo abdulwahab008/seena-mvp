@@ -25,12 +25,15 @@ import { Badge } from '@/components/ui/badge';
 import { DatePicker } from '@/components/ui/date-picker';
 import { quickAdmission } from '@/app/(app)/admissions/applications/actions';
 import { PrintableReceiptModal } from '@/components/admissions/printable-receipt-modal';
+import { formatDatePk, formatDateTimePk } from '@/lib/dates';
+import { admissionFeeKey } from '@/lib/admissions/admission-fee-defaults';
 
 export interface WalkInFormProps {
   campuses: { id: string; name: string; code: string }[];
   sessions: { id: string; name: string }[];
   classLevels: { id: string; name_en: string; code: string }[];
   sections: { id: string; class_level_id: string; campus_id: string; session_id: string; name: string }[];
+  admissionFeeDefaults: Record<string, number>;
   recentAdmissions: {
     id: string;
     gr_number: string;
@@ -44,6 +47,7 @@ export function WalkInForm({
   sessions,
   classLevels,
   sections: initialSections,
+  admissionFeeDefaults,
   recentAdmissions,
 }: WalkInFormProps) {
   const router = useRouter();
@@ -62,8 +66,9 @@ export function WalkInForm({
   const [parentName, setParentName] = React.useState('');
   const [phone, setPhone] = React.useState('');
   const [bFormNo, setBFormNo] = React.useState('');
-  const [admissionFee, setAdmissionFee] = React.useState('4000');
+  const [admissionFee, setAdmissionFee] = React.useState('');
   const [paymentMode, setPaymentMode] = React.useState('cash');
+  const [paymentReference, setPaymentReference] = React.useState('');
 
   // Successful admission record
   const [admittedRecord, setAdmittedRecord] = React.useState<{
@@ -102,6 +107,12 @@ export function WalkInForm({
     }
   }, [availableSections, sectionId]);
 
+  // The fee follows the published fee structure's ADMISSION line for the chosen class; staff can still edit it.
+  React.useEffect(() => {
+    const fee = admissionFeeDefaults[admissionFeeKey(campusId, sessionId, classLevelId)];
+    setAdmissionFee(fee !== undefined ? String(fee) : '');
+  }, [admissionFeeDefaults, campusId, sessionId, classLevelId]);
+
   const selectedClass = classLevels.find((c) => c.id === classLevelId);
   const selectedSection = availableSections.find((s) => s.id === sectionId);
   const selectedCampus = campuses.find((c) => c.id === campusId);
@@ -126,7 +137,7 @@ export function WalkInForm({
     fd.set('bFormNo', bFormNo);
     fd.set('admissionFee', admissionFee);
     fd.set('paymentMode', paymentMode);
-    // Note: paymentReference is omitted so server action auto-generates official receipt sequence!
+    if (paymentMode !== 'cash') fd.set('paymentReference', paymentReference);
 
     startTransition(async () => {
       const res = await quickAdmission(
@@ -161,6 +172,7 @@ export function WalkInForm({
     setParentName('');
     setPhone('');
     setBFormNo('');
+    setPaymentReference('');
   };
 
 
@@ -243,7 +255,8 @@ export function WalkInForm({
                     </Badge>
                   </div>
                   <p className="text-xs text-green-800 dark:text-green-300 mt-0.5">
-                    Placed in <strong>{admittedRecord.className} · Section {admittedRecord.sectionName}</strong> · Receipt: <span className="font-mono">{admittedRecord.receiptNo}</span> (Auto-reconciled)
+                    Placed in <strong>{admittedRecord.className} · Section {admittedRecord.sectionName}</strong> · Receipt: <span className="font-mono">{admittedRecord.receiptNo}</span>
+                    {admittedRecord.mode === 'cash' ? ' (cash received)' : ' (pending bank clearance)'}
                   </p>
                 </div>
               </div>
@@ -456,6 +469,7 @@ export function WalkInForm({
                         onChange={(e) => setAdmissionFee(e.target.value)}
                         min="0"
                         step="100"
+                        required
                         className="h-9 font-semibold"
                       />
                     </div>
@@ -467,7 +481,7 @@ export function WalkInForm({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="cash">Cash (Auto-reconciled)</SelectItem>
+                          <SelectItem value="cash">Cash</SelectItem>
                           <SelectItem value="online">Online Transfer</SelectItem>
                           <SelectItem value="cheque">Cheque</SelectItem>
                           <SelectItem value="pay_order">Pay Order</SelectItem>
@@ -475,10 +489,25 @@ export function WalkInForm({
                       </Select>
                     </div>
 
-                    <div className="text-xs text-muted-foreground pb-2 flex items-center gap-1">
-                      <Receipt className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
-                      <span>Receipt # auto-generated</span>
-                    </div>
+                    {paymentMode === 'cash' ? (
+                      <div className="text-xs text-muted-foreground pb-2 flex items-center gap-1">
+                        <Receipt className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
+                        <span>Receipt # auto-generated</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <Label htmlFor="walkin-paymentReference" className="text-xs font-medium">
+                          {paymentMode === 'cheque' ? 'Cheque number' : 'Transaction / reference no.'} <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="walkin-paymentReference"
+                          value={paymentReference}
+                          onChange={(e) => setPaymentReference(e.target.value)}
+                          required
+                          className="h-9 font-mono"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -486,7 +515,7 @@ export function WalkInForm({
                 <div className="flex items-center justify-end gap-3 pt-3 border-t">
                   <Button
                     type="submit"
-                    disabled={pending || !sectionId || !dob || !childName || !parentName || !phone}
+                    disabled={pending || !sectionId || !dob || !childName || !parentName || !phone || admissionFee === '' || (paymentMode !== 'cash' && !paymentReference.trim())}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[220px]"
                     data-testid="walkin-submit-btn"
                   >
@@ -510,16 +539,16 @@ export function WalkInForm({
           <Card className="border shadow-sm">
             <CardHeader className="pb-3 border-b">
               <CardTitle className="text-sm font-semibold flex items-center justify-between">
-                <span>Today's Counter Enrolments</span>
+                <span>Admitted today</span>
                 <Badge variant="outline" className="text-[10px]">
-                  {recentAdmissions.length} active
+                  {recentAdmissions.length}
                 </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-2">
               {recentAdmissions.length === 0 ? (
                 <p className="text-xs text-muted-foreground py-4 text-center">
-                  No spot admissions recorded yet today.
+                  No students admitted yet today.
                 </p>
               ) : (
                 <div className="divide-y text-xs">
@@ -528,12 +557,7 @@ export function WalkInForm({
                       <div className="space-y-0.5">
                         <p className="font-medium text-foreground truncate max-w-[140px]">{adm.name_en}</p>
                         <p className="text-[10px] text-muted-foreground">
-                          {new Date(adm.created_at).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          {formatDateTimePk(adm.created_at)}
                         </p>
                       </div>
                       <Badge variant="outline" className="font-mono text-[10px] bg-muted/40">
@@ -568,11 +592,7 @@ export function WalkInForm({
                 parentName,
                 feeAmount: admittedRecord.fee,
                 paymentMode: admittedRecord.mode,
-                date: new Date().toLocaleDateString(undefined, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                }),
+                date: formatDatePk(new Date()),
               }
             : null
         }

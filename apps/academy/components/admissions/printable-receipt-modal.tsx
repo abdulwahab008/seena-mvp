@@ -107,10 +107,16 @@ export function PrintableReceiptModal({ open, onClose, receiptData }: PrintableR
 
           {/* Status & Stamp Footer */}
           <div className="flex items-center justify-between pt-2 text-[11px]">
-            <div className="flex items-center gap-1 text-green-700 dark:text-green-400 font-semibold">
-              <CheckCircle2 className="h-4 w-4" />
-              <span>PAID & RECONCILED</span>
-            </div>
+            {receiptData.paymentMode === 'cash' ? (
+              <div className="flex items-center gap-1 text-green-700 dark:text-green-400 font-semibold">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>PAID IN CASH</span>
+              </div>
+            ) : (
+              <div className="font-semibold text-amber-700 dark:text-amber-400">
+                RECEIVED, PENDING BANK CLEARANCE
+              </div>
+            )}
             <div className="text-right text-muted-foreground">
               <div className="h-8 border-b border-dashed border-zinc-400 w-28 ml-auto" />
               <span className="text-[10px]">Cashier Stamp / Signature</span>

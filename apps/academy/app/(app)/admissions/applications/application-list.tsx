@@ -60,6 +60,7 @@ export type ApplicationRow = {
     expiry_pause_reason: string | null;
   } | null;
   availableSeats: number | null;
+  defaultAdmissionFee: number | null;
   waitlist: { id: string; position: number | null; status: string } | null;
   checklistSnapshot: { doc_type: string; is_mandatory: boolean; min_count: number }[];
   documents: DocumentRow[];
@@ -412,9 +413,17 @@ function WaitlistBadge({ waitlist }: { waitlist: { id: string; position: number 
   );
 }
 
-function IssueOfferForm({ applicationId, availableSeats }: { applicationId: string; availableSeats: number }) {
+function IssueOfferForm({
+  applicationId,
+  availableSeats,
+  defaultFee,
+}: {
+  applicationId: string;
+  availableSeats: number;
+  defaultFee: number | null;
+}) {
   const [pending, startTransition] = useTransition();
-  const [fee, setFee] = useState('');
+  const [fee, setFee] = useState(defaultFee !== null ? String(defaultFee) : '');
 
   const onClick = () => {
     const amount = Number(fee);
@@ -442,7 +451,7 @@ function IssueOfferForm({ applicationId, availableSeats }: { applicationId: stri
           id={`fee-${applicationId}`}
           type="number"
           step="0.01"
-          placeholder="5000"
+          placeholder="PKR"
           className="w-28"
           value={fee}
           onChange={(e) => setFee(e.target.value)}
@@ -703,8 +712,8 @@ function EnrolForm({
         </SelectContent>
       </Select>
       <Select value={gender || undefined} onValueChange={(v) => setGender(v as 'male' | 'female' | 'other')}>
-        <SelectTrigger className="h-8 w-24" data-testid={`enrol-gender-trigger-${offerId}`}>
-          <SelectValue />
+        <SelectTrigger className="h-8 w-24" aria-label="Gender" data-testid={`enrol-gender-trigger-${offerId}`}>
+          <SelectValue placeholder="Gender" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="male">Male</SelectItem>
@@ -757,7 +766,7 @@ function EnrolmentPanel({
   const totalReconciledRupees = payments
     .filter((p) => p.status === 'reconciled')
     .reduce((sum, p) => sum + p.amountPaisa / 100, 0);
-  const isFullyCovered = totalReconciledRupees >= offer.admission_fee_amount || waivers.some((w) => !w.consumed);
+  const isFullyCovered = totalReconciledRupees >= offer.admission_fee_amount || waivers.length > 0;
 
   const fundingOptions = [
     ...payments
@@ -917,7 +926,7 @@ export function ApplicationList({ applications }: { applications: ApplicationRow
                       {a.availableSeats} seat(s) left
                     </span>
                     {a.availableSeats > 0 ? (
-                      <IssueOfferForm applicationId={a.id} availableSeats={a.availableSeats} />
+                      <IssueOfferForm applicationId={a.id} availableSeats={a.availableSeats} defaultFee={a.defaultAdmissionFee} />
                     ) : (
                       <JoinWaitlistButton applicationId={a.id} />
                     )}

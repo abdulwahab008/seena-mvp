@@ -463,12 +463,15 @@ export async function quickAdmission(
   revalidatePath('/admissions/applications');
   revalidatePath('/students');
 
-  const res = data as unknown as { gr_number: string; student_id: string; application_no: string; receipt_no: string | null } | null;
+  const res = data as unknown as { gr_number: string; student_id: string; application_id: string; receipt_no: string | null } | null;
+  const { data: app } = res?.application_id
+    ? await supabase.from('admission_application').select('application_no').eq('id', res.application_id).maybeSingle()
+    : { data: null };
   return {
     error: null,
     grNumber: res?.gr_number ?? null,
     studentId: res?.student_id ?? null,
-    applicationNo: res?.application_no ?? null,
+    applicationNo: app?.application_no ?? null,
     receiptNo: res?.receipt_no ?? null,
   };
 }

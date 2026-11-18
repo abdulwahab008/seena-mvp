@@ -39,9 +39,8 @@ test('an owner schedules a follow-up on an enquiry and marks it done with the ou
   await expect(row).toContainText('WhatsApp');
   await expect(row).toContainText('Overdue');
   await page.getByTestId(`complete-followup-${no}`).click();
-  await page.getByLabel('What happened').selectOption('visit_scheduled');
   await page.getByLabel('Note').fill('Coming Saturday');
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('button', { name: 'Visit booked' }).click();
   await expect(page.getByText('Follow-up done.')).toBeVisible();
   await expect(page.getByTestId(`followup-done-${no}`)).toContainText('Visit booked · Coming Saturday');
   await expect(row).toHaveCount(0);

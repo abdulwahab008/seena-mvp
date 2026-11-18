@@ -9,15 +9,26 @@ import { RealtimeEnquiryRefresher } from './realtime-refresher';
 export default async function EnquiriesPage() {
   const supabase = await supabaseServer();
 
-  const [{ data: campuses }, { data: sessions }, { data: classLevels }, { data: enquiries }] = await Promise.all([
+  const [{ data: campuses }, { data: sessions }, { data: classLevels }, { data: enquiries }, { data: followups }] = await Promise.all([
     supabase.from('campus').select('id, code, name').eq('status', 'active').order('code'),
     supabase.from('academic_session').select('id, name').order('is_current', { ascending: false }).order('starts_on', { ascending: false }),
-    supabase.from('class_level').select('id, code, name_en').eq('is_active', true).order('ordinal'),
+    supabase.from('class_level').select('id, code, name_en, ordinal').eq('is_active', true).order('ordinal'),
     supabase
       .from('admission_enquiry')
-      .select('id, enquiry_no, child_name, phone_e164, source, status')
+      .select('id, enquiry_no, child_name, phone_e164, source, status, class_applied_id')
       .order('created_at', { ascending: false }),
+    supabase.from('admission_followup').select('enquiry_id, due_at').is('completed_at', null).order('due_at'),
   ]);
+
+  const ordinalById = new Map((classLevels ?? []).map((c) => [c.id, c.ordinal]));
+  const nextFollowup = new Map<string, string>();
+  for (const f of followups ?? []) if (!nextFollowup.has(f.enquiry_id)) nextFollowup.set(f.enquiry_id, f.due_at);
+  const rows = (enquiries ?? []).map((e) => ({
+    ...e,
+    // fn_submit_application requires a group for ordinals 10-13 (Class 9-12) and ignores it otherwise.
+    needsGroup: (ordinalById.get(e.class_applied_id) ?? 0) >= 10 && (ordinalById.get(e.class_applied_id) ?? 0) <= 13,
+    nextFollowupAt: nextFollowup.get(e.id) ?? null,
+  }));
 
   return (
     <div className="space-y-6">
@@ -35,7 +46,7 @@ export default async function EnquiriesPage() {
       </div>
       <RealtimeEnquiryRefresher />
       <CreateEnquiryForm campuses={campuses ?? []} sessions={sessions ?? []} classLevels={classLevels ?? []} />
-      <EnquiryList enquiries={enquiries ?? []} />
+      <EnquiryList enquiries={rows} />
     </div>
   );
 }

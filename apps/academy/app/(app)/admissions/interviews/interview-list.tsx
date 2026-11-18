@@ -78,6 +78,7 @@ function ScorecardForm({ interviewId }: { interviewId: string }) {
   const [scores, setScores] = useState<Record<string, string>>({});
   const [recommendation, setRecommendation] = useState('');
   const [justification, setJustification] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   const onSubmit = () => {
     const fd = new FormData();
@@ -88,16 +89,27 @@ function ScorecardForm({ interviewId }: { interviewId: string }) {
     startTransition(async () => {
       const result = await submitScorecard({ error: null }, fd);
       if (result.error) toast.error(result.error);
-      else toast.success('Scorecard submitted.');
+      else {
+        toast.success('Scorecard submitted.');
+        setSubmitted(true);
+      }
     });
   };
+
+  if (submitted) {
+    return (
+      <p className="mt-2 border-t pt-2 text-sm text-muted-foreground" data-testid={`scorecard-done-${interviewId}`}>
+        Scorecard submitted: {recommendation}.
+      </p>
+    );
+  }
 
   return (
     <div className="mt-2 space-y-2 border-t pt-2">
       <div className="flex flex-wrap gap-2">
         {INTERVIEW_CRITERIA.map((c) => (
           <div key={c} className="w-32">
-            <label className="text-xs text-muted-foreground">{c.replace(/_/g, ' ')}</label>
+            <label className="text-xs text-muted-foreground">{c.replace(/_/g, ' ')} (1–5)</label>
             <Input
               type="number"
               min={1}
@@ -112,8 +124,8 @@ function ScorecardForm({ interviewId }: { interviewId: string }) {
       </div>
       <div className="flex flex-wrap items-end gap-2">
         <Select value={recommendation} onValueChange={setRecommendation}>
-          <SelectTrigger className="h-8 w-32" data-testid={`scorecard-recommendation-${interviewId}`}>
-            <SelectValue placeholder="Recommend" />
+          <SelectTrigger className="h-8 w-44" aria-label="Recommendation" data-testid={`scorecard-recommendation-${interviewId}`}>
+            <SelectValue placeholder="Choose recommendation" />
           </SelectTrigger>
           <SelectContent>
             {INTERVIEW_RECOMMENDATIONS.map((r) => (
@@ -190,7 +202,7 @@ export function InterviewList({ interviews }: { interviews: InterviewRow[] }) {
                   {i.childName} ({i.applicationNo}) with {i.panelName}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDateTimePk(i.startsAt)} – {new Date(i.endsAt).toLocaleTimeString()} · {i.venue ?? 'No venue set'} ·{' '}
+                  {formatDateTimePk(i.startsAt)} – {formatDateTimePk(i.endsAt).slice(-5)} · {i.venue ?? 'No venue set'} ·{' '}
                   <span data-testid={`interview-status-${i.id}`}>{i.status}</span>
                 </p>
                 <NotificationViewer interviewId={i.id} />
