@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { CreateHomeworkForm } from './create-homework-form';
 import { HomeworkList } from './homework-list';
@@ -25,18 +26,27 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
 
   if (campusId) {
     if (isAdmin) {
-      const [{ data: sections }, { data: subjects }] = await Promise.all([
-        supabase.from('class_section').select('id, name, class_level(name_en)').eq('campus_id', campusId).eq('is_active', true),
-        supabase.from('subject').select('id, name_en').eq('is_active', true),
+      // Only the subjects the curriculum maps to each section's class, not every subject for every section.
+      const [{ data: sections }, { data: mapped }] = await Promise.all([
+        supabase
+          .from('class_section')
+          .select('id, name, class_level_id, session_id, class_level(name_en, ordinal)')
+          .eq('campus_id', campusId)
+          .eq('is_active', true),
+        supabase.from('class_subject').select('class_level_id, session_id, subject:subject_id(id, name_en, is_active)').eq('campus_id', campusId),
       ]);
-      assignments = (sections ?? []).flatMap((s) => {
+      const ordered = [...(sections ?? [])].sort((a, b) => {
+        const la = Array.isArray(a.class_level) ? a.class_level[0] : a.class_level;
+        const lb = Array.isArray(b.class_level) ? b.class_level[0] : b.class_level;
+        return (la?.ordinal ?? 0) - (lb?.ordinal ?? 0) || a.name.localeCompare(b.name);
+      });
+      assignments = ordered.flatMap((s) => {
         const level = Array.isArray(s.class_level) ? s.class_level[0] : s.class_level;
-        return (subjects ?? []).map((subj) => ({
-          sectionId: s.id,
-          sectionLabel: `${level?.name_en ?? ''} · ${s.name}`,
-          subjectId: subj.id,
-          subjectLabel: subj.name_en,
-        }));
+        return (mapped ?? []).flatMap((m) => {
+          const subj = Array.isArray(m.subject) ? m.subject[0] : m.subject;
+          if (m.class_level_id !== s.class_level_id || m.session_id !== s.session_id || !subj?.is_active) return [];
+          return [{ sectionId: s.id, sectionLabel: `${level?.name_en ?? ''} · ${s.name}`, subjectId: subj.id, subjectLabel: subj.name_en }];
+        });
       });
     } else {
       // Listed for convenience only — create_homework()'s own validity @>
@@ -116,7 +126,19 @@ export default async function HomeworkPage({ searchParams }: { searchParams: Pro
       {!campusId ? (
         <p className="text-sm text-muted-foreground">No active campus found.</p>
       ) : assignments.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No section/subject is assigned to you as a subject teacher.</p>
+        <p className="text-sm text-muted-foreground">
+          {isAdmin ? (
+            <>
+              No subjects are mapped to classes yet.{' '}
+              <Link href="/academic-setup/curriculum" className="underline">
+                Map them in Curriculum
+              </Link>
+              .
+            </>
+          ) : (
+            'No section/subject is assigned to you as a subject teacher.'
+          )}
+        </p>
       ) : (
         <CreateHomeworkForm assignments={assignments} />
       )}

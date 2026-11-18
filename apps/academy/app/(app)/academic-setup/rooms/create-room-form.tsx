@@ -82,10 +82,15 @@ export function CreateRoomForm({
   });
 
   // --- BATCH CLASSROOM GENERATOR STATE ---
-  // Default to Class 10 or first class if available
   const defaultClass = classes.find((c) => c.name_en.toLowerCase().includes('10')) || classes[0];
+  const sectionNamesFor = (classId: string) =>
+    sections
+      .filter((s) => s.class_level_id === classId)
+      .map((s) => s.name)
+      .join(', ');
   const [selectedClassId, setSelectedClassId] = useState<string>(defaultClass?.id || '');
-  const [sectionNamesInput, setSectionNamesInput] = useState<string>('Jinnah, Iqbal, Fatima');
+  // Start from the class's own sections, so "Generate" makes one room per section that exists.
+  const [sectionNamesInput, setSectionNamesInput] = useState<string>(() => sectionNamesFor(defaultClass?.id || ''));
   const [batchCapacity, setBatchCapacity] = useState<number>(35);
   const [batchBlock, setBatchBlock] = useState<string>('Senior Wing');
   const [linkHomeroom, setLinkHomeroom] = useState<boolean>(true);
@@ -133,7 +138,9 @@ export function CreateRoomForm({
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(`Successfully generated ${result.count} classrooms for ${selectedClass.name_en}!`);
+        const rooms = result.count === 1 ? 'classroom' : 'classrooms';
+        toast.success(`Generated ${result.count} ${rooms} for ${selectedClass.name_en}.`);
+        if (result.unlinked) toast.warning(`${result.unlinked} could not be set as a section homeroom.`);
       }
     });
   };
@@ -304,7 +311,13 @@ export function CreateRoomForm({
                 <GraduationCap className="h-3.5 w-3.5 text-primary" />
                 Select Class
               </Label>
-              <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+              <Select
+                value={selectedClassId}
+                onValueChange={(id) => {
+                  setSelectedClassId(id);
+                  setSectionNamesInput(sectionNamesFor(id));
+                }}
+              >
                 <SelectTrigger className="h-9">
                   <SelectValue placeholder="Choose Class..." />
                 </SelectTrigger>
