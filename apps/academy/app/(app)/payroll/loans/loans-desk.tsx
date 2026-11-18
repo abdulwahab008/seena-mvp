@@ -32,7 +32,7 @@ interface Props {
 
 export function LoansDesk({ initialLoans, staffList }: Props) {
   const router = useRouter();
-  const [loans] = useState<StaffLoanSummaryRow[]>(initialLoans);
+  const loans = initialLoans;
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [payoffModalOpen, setPayoffModalOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<StaffLoanSummaryRow | null>(null);

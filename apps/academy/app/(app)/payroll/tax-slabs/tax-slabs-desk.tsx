@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function TaxSlabsDesk({ initialSlabs }: Props) {
-  const [slabs] = useState<TaxSlabRow[]>(initialSlabs);
+  const slabs = initialSlabs;
 
   // Simulator state
   const [simSalary, setSimSalary] = useState<number>(100000);

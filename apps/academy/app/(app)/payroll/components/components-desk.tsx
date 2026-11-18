@@ -31,7 +31,7 @@ interface Props {
 
 export function ComponentsDesk({ initialComponents }: Props) {
   const router = useRouter();
-  const [components] = useState<SalaryComponentRow[]>(initialComponents);
+  const components = initialComponents;
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedComp, setSelectedComp] = useState<SalaryComponentRow | null>(null);
   const [isPending, startTransition] = useTransition();
