@@ -55,7 +55,7 @@ test('batch classroom generation for Class 10 (Jinnah, Iqbal, Fatima) and standa
   await page.getByRole('button', { name: /Generate 3 Classrooms/i }).click();
 
   // Verify success toast
-  await expect(page.getByText(/Successfully generated 3 classrooms/i)).toBeVisible();
+  await expect(page.getByText(/Generated 3 classrooms/i)).toBeVisible();
 
   // 4. Verify the generated rooms appear in the list
   await expect(page.getByTestId('room-row-10-JINN')).toBeVisible();

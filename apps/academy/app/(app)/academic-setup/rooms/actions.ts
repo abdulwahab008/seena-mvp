@@ -97,7 +97,7 @@ export async function batchCreateClassrooms(
     blockLabel?: string;
     linkHomeroom?: boolean;
   }
-): Promise<{ error: string | null; count?: number }> {
+): Promise<{ error: string | null; count?: number; unlinked?: number }> {
   if (!data.sectionNames || data.sectionNames.length === 0) {
     return { error: 'Please specify at least one section name.' };
   }
@@ -119,6 +119,7 @@ export async function batchCreateClassrooms(
   }
 
   let createdCount = 0;
+  let unlinked = 0;
   for (const rawName of data.sectionNames) {
     const secName = rawName.trim();
     if (!secName) continue;
@@ -166,14 +167,16 @@ export async function batchCreateClassrooms(
     if (finalRoomId && data.linkHomeroom) {
       const matchSec = existingSections.find((s) => s.name.toLowerCase() === secName.toLowerCase());
       if (matchSec) {
-        await supabase.from('class_section').update({ home_room_id: finalRoomId }).eq('id', matchSec.id);
+        // class_section has no UPDATE policy, so RLS turns this into a silent no-op; count it instead of claiming success.
+        const { data: updated } = await supabase.from('class_section').update({ home_room_id: finalRoomId }).eq('id', matchSec.id).select('id');
+        if (!updated?.length) unlinked++;
       }
     }
   }
 
   revalidatePath('/academic-setup/rooms');
   revalidatePath('/academic-setup/classes-sections');
-  return { error: null, count: createdCount };
+  return { error: null, count: createdCount, unlinked };
 }
 
 // 1-Click Standard Facilities Seeding (Physics, Chemistry, Biology, Computer Labs, Library, Exam Hall, Prayer Area)
