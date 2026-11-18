@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { OnboardingView, type StepRow, type PresetOption } from './onboarding-view';
 import { STEP_META } from './step-meta';
+import { SetupReadiness } from './readiness';
 import { pickActiveCampus, pickSessionForCampus } from '@/lib/campus-context';
 
 export default async function OnboardingPage() {
@@ -33,6 +34,7 @@ export default async function OnboardingPage() {
           you from using the rest of the app.
         </p>
       </div>
+      {activeCampus && <SetupReadiness campusId={activeCampus.id} />}
       {tenant && (
         <OnboardingView
           steps={steps}

@@ -50,6 +50,11 @@ test('a fresh tenant starts the onboarding checklist at 0/7 with every step pend
   for (const key of ['campus_details', 'branding', 'academic_session', 'class_structure', 'fee_heads', 'staff_invitations', 'first_student']) {
     await expect(page.getByTestId(`onboarding-status-${key}`)).toHaveText('Not started');
   }
+
+  // The live readiness list: a fresh school has no bell timings, so it links there.
+  const readiness = page.getByTestId('setup-readiness');
+  await expect(readiness).toContainText('still to set up');
+  await expect(readiness.getByRole('listitem').filter({ hasText: 'Default bell timings' }).getByRole('link', { name: 'Set up' })).toHaveAttribute('href', '/academic-setup/bell-templates');
 });
 
 test('an owner applies a class preset, marks a step done and skips another, and progress is resumable across a reload', async ({ page }) => {
