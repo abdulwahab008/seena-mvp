@@ -131,7 +131,7 @@ export default async function SubjectResultsPage({ searchParams }: { searchParam
           the term&rsquo;s attendance summary with the dates it actually covers, and the campus&rsquo;s own letterhead
           and signature. A card refuses to print while the term is provisional, while a mark has moved under it, or
           while the result is withheld; a correction issues the next revision rather than editing the last one.
-          The same card also becomes into a results-day run: a section, a class or the whole campus in one action,
+          The same card also prints as a results-day run: a section, a class or the whole campus in one action,
           with a merged print-ready file and a per-candidate account of anyone it could not print.
         </p>
         <div className="mt-4">
