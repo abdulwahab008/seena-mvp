@@ -1,6 +1,9 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import { ApplicationList, type ApplicationRow } from './application-list';
-import { QuickAdmissionModal } from '@/components/admissions/quick-admission-modal';
+import Link from 'next/link';
+import { Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { admissionFeeKey, loadAdmissionFeeDefaults } from '@/lib/admissions/admission-fee-defaults';
 
 function one<T>(v: T | T[] | null): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : v;
@@ -14,9 +17,6 @@ export default async function ApplicationsPage() {
     { data: offers },
     { data: waitlistRows },
     { data: documentRows },
-    { data: campuses },
-    { data: sessions },
-    { data: classLevels },
   ] = await Promise.all([
     supabase
       .from('admission_application')
@@ -33,9 +33,6 @@ export default async function ApplicationsPage() {
       .from('admission_document')
       .select('id, application_id, doc_type, status, reject_reason, b_form_no, created_at')
       .order('created_at', { ascending: false }),
-    supabase.from('campus').select('id, name').eq('status', 'active').order('code'),
-    supabase.from('academic_session').select('id, name').order('starts_on', { ascending: false }),
-    supabase.from('class_level').select('id, name_en').eq('is_active', true).order('ordinal'),
   ]);
 
   const latestOfferByApp = new Map<
@@ -86,6 +83,8 @@ export default async function ApplicationsPage() {
     documentsByApp.set(d.application_id, list);
   }
 
+  const feeDefaults = await loadAdmissionFeeDefaults(supabase);
+
   const rows: ApplicationRow[] = await Promise.all(
     (apps ?? []).map(async (a) => {
       const offer = latestOfferByApp.get(a.id) ?? null;
@@ -110,6 +109,7 @@ export default async function ApplicationsPage() {
         className: one(a.class_level)?.name_en ?? 'Unknown',
         offer,
         availableSeats,
+        defaultAdmissionFee: feeDefaults[admissionFeeKey(a.campus_id, a.session_id, a.class_applied_id)] ?? null,
         waitlist: waitlistByApp.get(a.id) ?? null,
         checklistSnapshot: (a.checklist_snapshot ?? []) as { doc_type: string; is_mandatory: boolean; min_count: number }[],
         documents: documentsByApp.get(a.id) ?? [],
@@ -129,18 +129,12 @@ export default async function ApplicationsPage() {
             Issue offers against live seat availability and record responses.
           </p>
         </div>
-        <QuickAdmissionModal
-          campuses={campuses ?? []}
-          sessions={sessions ?? []}
-          classLevels={classLevels ?? []}
-          sections={(sectionRows ?? []).map((s) => ({
-            id: s.id,
-            name: s.name,
-            class_level_id: s.class_level_id,
-            campus_id: s.campus_id,
-            session_id: s.session_id,
-          }))}
-        />
+        <Button asChild size="sm" className="gap-1.5">
+          <Link href="/admissions/walk-in">
+            <Zap className="h-4 w-4" />
+            Walk-in admission
+          </Link>
+        </Button>
       </div>
       <ApplicationList applications={rows} />
     </div>
