@@ -14,5 +14,8 @@ export function parseRegisterFilters(sp: Record<string, string | null | undefine
 
 export async function loadAdmissionRegister(f: RegisterFilters) {
   const supabase = await supabaseServer();
-  return supabase.rpc('admission_register', { p_session_id: f.session, p_class_level_id: f.class });
+  const res = await supabase.rpc('admission_register', { p_session_id: f.session, p_class_level_id: f.class });
+  // The RPC orders GR numbers as text (10, 100, 1000, 11...); a register reads in number order.
+  res.data?.sort((a, b) => a.gr_number.localeCompare(b.gr_number, 'en', { numeric: true }));
+  return res;
 }

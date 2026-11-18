@@ -3,6 +3,7 @@ import { formatDatePk, todayPk } from '@/lib/dates';
 import { cn } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { VaccinationForm } from './vaccination-form';
+import { MarkGivenButton } from './mark-given-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,7 @@ export default async function VaccinationsPage() {
   const [{ data: due }, { data: recent }] = await Promise.all([
     supabase
       .from('student_vaccination')
-      .select('id, vaccine, dose_no, due_on, student(name_en, gr_number)')
+      .select('id, vaccine, dose_no, due_on, notes, student(name_en, gr_number)')
       .is('given_on', null)
       .lte('due_on', addDays(today, 30))
       .order('due_on'),
@@ -50,6 +51,7 @@ export default async function VaccinationsPage() {
                 <TableHead>Vaccine</TableHead>
                 <TableHead>Dose</TableHead>
                 <TableHead>Due</TableHead>
+                <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -66,6 +68,11 @@ export default async function VaccinationsPage() {
                     <TableCell className={cn(overdue && 'font-medium text-destructive')}>
                       {v.due_on ? formatDatePk(v.due_on) : ''}
                       {overdue ? ' (overdue)' : ''}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {s?.gr_number && (
+                        <MarkGivenButton grNumber={s.gr_number} vaccine={v.vaccine} doseNo={v.dose_no} dueOn={v.due_on} notes={v.notes} today={today} />
+                      )}
                     </TableCell>
                   </TableRow>
                 );

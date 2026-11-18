@@ -66,7 +66,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       .eq('status', 'active')
       .is('deleted_at', null)
       .maybeSingle(),
-    supabase.from('class_section').select('id, name, class_level(name_en)').eq('campus_id', student.campus_id).eq('is_active', true),
+    supabase.from('class_section').select('id, name, class_level(name_en, ordinal)').eq('campus_id', student.campus_id).eq('is_active', true),
     supabase
       .from('student_guardian')
       .select('guardian_id, relationship, is_primary, receives_billing, may_collect_child, portal_access, guardian(name_en, phone_e164, cnic, auth_user_id, profession_id)')
@@ -219,6 +219,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   }
 
   let electiveBuckets: ElectiveBucket[] = [];
+  sections?.sort((a, b) => (one(a.class_level)?.ordinal ?? 0) - (one(b.class_level)?.ordinal ?? 0) || a.name.localeCompare(b.name));
   const enrolledSection = enrolment ? one(enrolment.class_section) : null;
   const enrolledClassLevelId = enrolledSection?.class_level_id ?? null;
   if (enrolment && enrolledClassLevelId) {
@@ -254,7 +255,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const monthlyPaisa = feePlanLines.filter((l) => !l.effectiveTo && l.frequency === 'monthly').reduce((sum, l) => sum + l.amountPaisa, 0);
   const { data: leftEnrolment } =
     student.status === 'left'
-      ? await supabase.from('enrolment').select('left_on').eq('student_id', student.id).eq('status', 'left').is('deleted_at', null).order('left_on', { ascending: false }).limit(1).maybeSingle()
+      ? await supabase.from('enrolment').select('left_on, section_id').eq('student_id', student.id).eq('status', 'left').is('deleted_at', null).order('left_on', { ascending: false }).limit(1).maybeSingle()
       : { data: null };
   const { data: medical } = showMedical ? await supabase.rpc('fn_get_student_medical', { p_student_id: student.id }) : { data: null };
   const { data: photo } = student.photo_path
@@ -320,6 +321,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                     studentId={student.id}
                     studentName={student.name_en}
                     flagged={student.no_readmission_flag}
+                    defaultSectionId={leftEnrolment?.section_id ?? ''}
                     sections={(sections ?? []).map((s) => ({ id: s.id, label: `${one(s.class_level)?.name_en ?? ''} · ${s.name}` }))}
                   />
                 )}
@@ -378,6 +380,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                 .
               </>
             )}
+            {' '}Issue the{' '}
+            <Link href="/certificates/issue" className="underline" data-testid="issue-tc-link">
+              transfer certificate
+            </Link>
+            .
           </p>
         ) : (
           <EnrolForm studentId={student.id} sections={sections ?? []} />
@@ -399,7 +406,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             professions={lookupOptions('profession', (guardianLinks ?? []).map((l) => one(l.guardian)?.profession_id ?? null))}
             canEditProfession={canDelete}
           />
-          <GuardianForm studentId={student.id} />
+          <GuardianForm studentId={student.id} firstGuardianName={(guardianLinks ?? []).length === 0 ? (student.father_name_en ?? '') : null} />
         </div>
       </Section>
 

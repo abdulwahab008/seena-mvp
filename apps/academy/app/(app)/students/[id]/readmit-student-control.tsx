@@ -16,11 +16,13 @@ export function ReadmitStudentControl({
   studentName,
   sections,
   flagged,
+  defaultSectionId,
 }: {
   studentId: string;
   studentName: string;
   sections: Section[];
   flagged: boolean;
+  defaultSectionId: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -52,7 +54,7 @@ export function ReadmitStudentControl({
           >
             <div className="space-y-1">
               <Label htmlFor="readmit-section">Section</Label>
-              <select id="readmit-section" name="sectionId" required defaultValue="" className="h-10 w-full rounded-md border bg-background px-3 text-sm">
+              <select id="readmit-section" name="sectionId" required defaultValue={sections.some((s) => s.id === defaultSectionId) ? defaultSectionId : ''} className="h-10 w-full rounded-md border bg-background px-3 text-sm">
                 <option value="" disabled>
                   Choose a section
                 </option>

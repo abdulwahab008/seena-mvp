@@ -14,10 +14,10 @@ import { mergeStudents, previewMerge } from './actions';
 const schema = z.object({ keepGr: z.string().trim().min(1, 'Enter the GR number to keep'), removeGr: z.string().trim().min(1, 'Enter the duplicate GR number') });
 type Preview = { keep: string; remove: string; moves: { table: string; rows: number }[] };
 
-export function MergeForm() {
+export function MergeForm({ initialKeep, initialRemove }: { initialKeep: string; initialRemove: string }) {
   const [pending, startTransition] = useTransition();
   const [preview, setPreview] = useState<Preview | null>(null);
-  const { register, handleSubmit, getValues, reset, formState: { errors } } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { keepGr: '', removeGr: '' } });
+  const { register, handleSubmit, getValues, reset, formState: { errors } } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { keepGr: initialKeep, removeGr: initialRemove } });
   const onPreview = handleSubmit((v) =>
     startTransition(async () => {
       const r = await previewMerge(v);
@@ -31,7 +31,7 @@ export function MergeForm() {
       if (r.error) return void toast.error(r.error);
       toast.success('Students merged.');
       setPreview(null);
-      reset();
+      reset({ keepGr: '', removeGr: '' });
     });
   return (
     <Card>
