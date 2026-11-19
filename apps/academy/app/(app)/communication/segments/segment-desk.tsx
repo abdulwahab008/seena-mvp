@@ -40,6 +40,7 @@ import {
   updateCampusCutoff,
   dispatchCampaignAudienceSnapshot,
 } from './actions';
+import { formatDateTimePk, formatDatePk } from '@/lib/dates';
 
 interface Props {
   initialSegments: MessageSegmentRow[];
@@ -133,7 +134,7 @@ export function DynamicSegmentDesk({
   // Action: Open Dispatch Modal
   const handleOpenDispatch = (segment: MessageSegmentRow) => {
     setDispatchSegment(segment);
-    setDispatchCampaignTitle(`Notice: ${segment.name} - ${new Date().toLocaleDateString('en-GB')}`);
+    setDispatchCampaignTitle(`Notice: ${segment.name} - ${formatDatePk(new Date())}`);
     setDispatchResult(null);
     setIsDispatchModalOpen(true);
   };
@@ -603,7 +604,7 @@ export function DynamicSegmentDesk({
                           )}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">
-                          {new Date(snap.snapshotted_at).toLocaleString('en-GB')}
+                          {formatDateTimePk(snap.snapshotted_at)}
                         </td>
                       </tr>
                     ))

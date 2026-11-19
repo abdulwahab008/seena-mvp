@@ -27,6 +27,7 @@ import {
   Building2,
   DollarSign,
 } from 'lucide-react';
+import { formatDateTimePk } from '@/lib/dates';
 
 interface Props {
   run: PayrollRunRow;
@@ -155,7 +156,7 @@ export function RunDetailDesk({ run, lines }: Props) {
               )}
             </div>
             <p className="text-xs text-slate-500 font-mono mt-0.5">
-              Campus: {run.campus_name} &bull; Generated: {new Date(run.generated_at).toLocaleString('en-PK')}
+              Campus: {run.campus_name} &bull; Generated: {formatDateTimePk(run.generated_at)}
             </p>
           </div>
         </div>

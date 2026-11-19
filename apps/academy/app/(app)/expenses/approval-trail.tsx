@@ -1,6 +1,7 @@
 'use client';
 
 import { APPROVER_ROLE_LABEL, type ApprovalRow } from '@/lib/expenses/voucher-query';
+import { formatDateTimePk } from '@/lib/dates';
 
 const DECISION_LABEL: Record<string, string> = {
   approved: 'Approved',
@@ -39,7 +40,7 @@ export function ApprovalTrail({ approvals, voucherId }: { approvals: ApprovalRow
             {a.approver_role ? ` (${APPROVER_ROLE_LABEL[a.approver_role] ?? a.approver_role})` : ''}
           </div>
           <div className="text-muted-foreground">
-            {a.decided_at ? new Date(a.decided_at).toLocaleString('en-PK') : ''}
+            {a.decided_at ? formatDateTimePk(a.decided_at) : ''}
             {' · IP reported: '}
             <span data-testid={`trail-ip-${a.id}`}>{a.request_ip ?? 'not recorded'}</span>
           </div>

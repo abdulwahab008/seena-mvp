@@ -22,7 +22,7 @@ import {
   processOutboxBatch,
   resolveUnknownOutboxAttempt,
 } from '../actions';
-import { formatDatePk } from '@/lib/dates';
+import { formatDatePk, formatTimePk } from '@/lib/dates';
 
 type Campus = { id: string; code: string; name: string };
 
@@ -321,7 +321,7 @@ export function OutboxDesk({
                 filteredMessages.map((m) => (
                   <tr key={m.id} className="hover:bg-muted/20">
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
-                      {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      {formatTimePk(m.created_at, true)}
                       <div className="text-[10px] text-muted-foreground/70">
                         {formatDatePk(m.created_at)}
                       </div>
@@ -430,7 +430,7 @@ export function OutboxDesk({
                           Attempt #{att.attempt_number} • Status: <span className="uppercase">{att.status}</span>
                         </span>
                         <span className="text-[11px] text-muted-foreground">
-                          {new Date(att.dispatched_at).toLocaleTimeString()}
+                          {formatTimePk(att.dispatched_at, true)}
                         </span>
                       </div>
                       {att.provider_ref && (

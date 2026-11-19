@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
+import { formatTimePk, toPkDate, SCHOOL_TIME_ZONE } from '@/lib/dates';
 
 export const metadata = {
   title: 'School Events Calendar | Parent Portal',
@@ -75,17 +76,19 @@ export default async function PortalCalendarPage() {
                 <div className="text-xs text-muted-foreground flex items-center gap-2">
                   <span>📅</span>
                   <span>
-                    {new Date(ev.starts_at).toLocaleDateString([], {
+                    {new Date(ev.starts_at).toLocaleDateString('en-GB', {
+                      timeZone: SCHOOL_TIME_ZONE,
                       weekday: 'short',
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',
                     })}
-                    {new Date(ev.ends_at).toDateString() !== new Date(ev.starts_at).toDateString() && (
+                    {toPkDate(new Date(ev.ends_at)) !== toPkDate(new Date(ev.starts_at)) && (
                       <span>
                         {' '}
                         to{' '}
-                        {new Date(ev.ends_at).toLocaleDateString([], {
+                        {new Date(ev.ends_at).toLocaleDateString('en-GB', {
+                          timeZone: SCHOOL_TIME_ZONE,
                           weekday: 'short',
                           month: 'short',
                           day: 'numeric',
@@ -95,7 +98,7 @@ export default async function PortalCalendarPage() {
                     )}
                   </span>
                   <span>•</span>
-                  <span>{ev.is_all_day ? 'All Day' : new Date(ev.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span>{ev.is_all_day ? 'All Day' : formatTimePk(ev.starts_at)}</span>
                 </div>
 
                 {ev.description && (

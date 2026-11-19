@@ -36,6 +36,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Modal } from '@/components/ui/modal';
+import { formatTimePk, formatDateTimePk } from '@/lib/dates';
 
 export type CandidateRow = {
   id: string;
@@ -296,7 +297,7 @@ function RollSlipViewer({
 
                   <div className="rounded-lg bg-background p-2.5 text-[11px] text-muted-foreground border">
                     <span className="font-semibold text-foreground mr-1">Instructions:</span>
-                    Arrive 15 minutes before scheduled start ({new Date(startsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}). Bring clipboard, blue pen/pencil, and eraser. Electronic devices are strictly prohibited.
+                    Arrive 15 minutes before scheduled start ({formatTimePk(startsAt)}). Bring clipboard, blue pen/pencil, and eraser. Electronic devices are strictly prohibited.
                   </div>
                 </div>
               ))}
@@ -704,10 +705,7 @@ export function SittingList({
         <div className="space-y-3">
           {filteredSittings.map((s) => {
             const pctFilled = Math.min(100, Math.round((s.activeCount / s.capacity) * 100));
-            const formattedDate = new Date(s.startsAt).toLocaleString(undefined, {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            });
+            const formattedDate = formatDateTimePk(s.startsAt);
 
             return (
               <Card key={s.id} data-testid={`sitting-row-${s.id}`} className="overflow-hidden shadow-xs hover:border-primary/30 transition-all">

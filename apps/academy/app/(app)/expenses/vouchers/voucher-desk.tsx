@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
-import { todayPk } from '@/lib/dates';
+import { todayPk, formatDateTimePk } from '@/lib/dates';
 
 // Radix's Select.Item rejects an empty-string value; '' is this page's
 // "all" sentinel, mapped the same way every other filtered page here does.
@@ -303,7 +303,7 @@ export function VoucherDesk({
                 ) : null}
                 {v.paid_at ? (
                   <div className="mt-1 text-sm text-muted-foreground">
-                    Paid {new Date(v.paid_at).toLocaleString('en-PK')}
+                    Paid {formatDateTimePk(v.paid_at)}
                     {v.paid_by_name ? ` by ${v.paid_by_name}` : ''}
                     {v.paid_reference ? ` · ${v.paid_reference}` : ''}
                   </div>

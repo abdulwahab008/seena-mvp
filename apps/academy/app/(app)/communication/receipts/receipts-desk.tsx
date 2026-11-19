@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { runStaleSweeperAction, submitSimulatedReceiptAction } from './actions';
-import { formatDatePk } from '@/lib/dates';
+import { formatDatePk, formatTimePk } from '@/lib/dates';
 
 interface DeliveryStats {
   campaign_id: string | null;
@@ -340,7 +340,7 @@ export function ReceiptsDesk({
                 initialReceipts.map((r) => (
                   <tr key={r.id} className="hover:bg-muted/20">
                     <td className="p-3 whitespace-nowrap text-muted-foreground">
-                      {new Date(r.received_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      {formatTimePk(r.received_at, true)}
                     </td>
                     <td className="p-3 font-medium">{r.provider}</td>
                     <td className="p-3 font-mono">{r.provider_ref}</td>
@@ -406,7 +406,7 @@ export function ReceiptsDesk({
                 initialDeadLetters.map((dl) => (
                   <tr key={dl.id} className="hover:bg-muted/20">
                     <td className="p-3 whitespace-nowrap text-muted-foreground">
-                      {new Date(dl.received_at).toLocaleTimeString()}
+                      {formatTimePk(dl.received_at, true)}
                     </td>
                     <td className="p-3 font-medium">{dl.provider}</td>
                     <td className="p-3 font-mono text-rose-700">{dl.provider_ref}</td>

@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope, one } from '@/lib/exams/office-scope';
 import { BuildSetsForm, CooldownSettingsForm, JobPoller, PatternForm, RequestForm, RetryButton } from './paper-forms';
+import { formatTimePk } from '@/lib/dates';
 
 /**
  * FR-I05. Ask Seena Exams for a question paper from a board pattern and a list
@@ -115,7 +116,7 @@ export default async function PapersPage() {
                 </p>
                 {j.status === 'queued' && j.attempts > 0 && (
                   <p className="text-xs text-muted-foreground">
-                    Attempt {j.attempts} of {j.max_retries + 1} did not go through; retrying at {new Date(j.next_attempt_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}.
+                    Attempt {j.attempts} of {j.max_retries + 1} did not go through; retrying at {formatTimePk(j.next_attempt_at, true)}.
                   </p>
                 )}
                 {j.last_error && j.status !== 'completed' && (

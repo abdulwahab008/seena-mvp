@@ -25,7 +25,7 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
     <>
       <PageHeader
         title={quiz.title}
-        description={`Open ${formatDateTimePk(quiz.opens_at)} to ${formatDateTimePk(quiz.closes_at)} · ${quiz.duration_min} minutes · ${total} marks`}
+        description={`Open ${formatDateTimePk(quiz.opens_at)} to ${formatDateTimePk(quiz.closes_at)} · ${quiz.duration_min} minutes · ${total} ${total === 1 ? 'mark' : 'marks'}`}
         actions={quiz.status === 'draft' ? <PublishButton quizId={quiz.id} /> : <Badge variant="success" data-testid="quiz-status">published</Badge>}
       />
       <div className="space-y-4">
@@ -38,7 +38,7 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
             {(questions ?? []).map((q) => (
               <div key={q.id} className="border-b pb-2" data-testid="quiz-question">
                 <p className="font-medium">
-                  {q.position}. {q.prompt} <span className="text-muted-foreground">({q.marks} marks)</span>
+                  {q.position}. {q.prompt} <span className="text-muted-foreground">({q.marks} {q.marks === 1 ? 'mark' : 'marks'})</span>
                 </p>
                 <ol className="ml-5 list-[lower-alpha]">
                   {q.options.map((o, i) => (

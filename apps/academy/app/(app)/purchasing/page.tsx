@@ -97,6 +97,9 @@ export default async function PurchasingPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">Each tier approves up to its limit; anything above goes on to the next tier as well. Only the Owner can change these, and changes never re-route a requisition already submitted.</p>
+            {latest.length === 0 && (
+              <p className="text-sm font-medium text-destructive">Not saved yet: these are suggested tiers. Requisitions can't be submitted until they are saved.</p>
+            )}
             <ThresholdForm initial={latest.map((t) => ({ uptoPkr: t.upto_amount == null ? '' : String(Number(t.upto_amount) / 100), role: t.approver_role }))} />
           </CardContent>
         </Card>

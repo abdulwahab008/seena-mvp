@@ -8,7 +8,7 @@ import { goodsReceiptSchema, requisitionSchema, thresholdTiersSchema, type Goods
 
 const MESSAGES: [string, string][] = [
   ['OUT_OF_ORDER', 'An earlier approver must decide this first.'],
-  ['THRESHOLDS_NOT_CONFIGURED', 'Approval thresholds have not been set. Ask the Owner to set them.'],
+  ['THRESHOLDS_NOT_CONFIGURED', 'Approval thresholds have not been saved yet. The Owner saves them under Approval thresholds on the Requisitions page.'],
   ['REQUISITION_LOCKED', 'This requisition has been decided and can no longer be edited.'],
   ['REQUISITION_NOT_PENDING', 'This requisition is not waiting for approval.'],
   ['REQUISITION_NOT_DRAFT', 'This requisition has already been submitted.'],

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope } from '@/lib/exams/office-scope';
 import { PaperFilesPanel, PublishPaperPanel, ReplaceQuestionForm } from './paper-builder';
+import { formatDatePk } from '@/lib/dates';
 
 /**
  * FR-I05 / FR-I06. One generated paper and its builder: sections and questions
@@ -85,7 +86,7 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ pa
 
       {override && (
         <div className="rounded-md border p-3 text-sm" data-testid="override-record">
-          Published with an override by {overrider?.full_name ?? 'a controller'} on {new Date(override.created_at).toLocaleDateString('en-GB')}: {override.reason} ({override.flagged_count} flagged question{override.flagged_count === 1 ? '' : 's'}).
+          Published with an override by {overrider?.full_name ?? 'a controller'} on {formatDatePk(override.created_at)}: {override.reason} ({override.flagged_count} flagged question{override.flagged_count === 1 ? '' : 's'}).
         </div>
       )}
 
