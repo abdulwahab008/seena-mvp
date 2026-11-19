@@ -9,12 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Modal } from '@/components/ui/modal';
-import { resetSectionPasswords, type ResetSlip } from './bulk-reset-actions';
+import { issueStudentLogins, resetSectionPasswords, type ResetSlip } from './bulk-reset-actions';
 
 const SELECT = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm';
 const schema = z.object({ sectionId: z.string().min(1, 'Choose a section') });
 
-export function BulkPasswordReset({ sections }: { sections: { id: string; label: string }[] }) {
+export function BulkPasswordReset({ sections, campuses }: { sections: { id: string; label: string }[]; campuses: { id: string; name: string }[] }) {
   const [pending, startTransition] = useTransition();
   const [confirming, setConfirming] = useState(false);
   const [slips, setSlips] = useState<ResetSlip[] | null>(null);
@@ -27,12 +27,36 @@ export function BulkPasswordReset({ sections }: { sections: { id: string; label:
       setSlips(r.slips ?? []);
       toast.success(`Reset ${r.slips?.length ?? 0} student passwords. Print the slips now; they are not shown again.`);
     });
+  const [campusId, setCampusId] = useState(campuses.length === 1 ? campuses[0]!.id : '');
+  const issue = () =>
+    startTransition(async () => {
+      const r = await issueStudentLogins(campusId);
+      if (r.error) return void toast.error(r.error);
+      setSlips(r.slips ?? []);
+      toast.success(`Issued ${r.slips?.length ?? 0} student logins. Print the slips now; they are not shown again.`);
+    });
   return (
     <Card className="mt-6 print:mt-0 print:border-0 print:shadow-none">
       <CardHeader className="print:hidden">
-        <CardTitle className="text-base">Reset a class&apos;s student passwords</CardTitle>
+        <CardTitle className="text-base">Student logins</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-end gap-2 print:hidden">
+          <div className="min-w-56 space-y-1">
+            <Label htmlFor="il-campus">Campus</Label>
+            <select id="il-campus" className={SELECT} value={campusId} onChange={(e) => setCampusId(e.target.value)}>
+              <option value="">Choose…</option>
+              {campuses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button type="button" onClick={issue} disabled={pending || !campusId} data-testid="issue-student-logins">
+            Issue logins to students without one
+          </Button>
+        </div>
         <form onSubmit={handleSubmit(() => setConfirming(true))} className="flex flex-wrap items-end gap-2 print:hidden" noValidate>
           <div className="min-w-56 space-y-1">
             <Label htmlFor="br-section">Section</Label>

@@ -35,3 +35,21 @@ test("an owner resets a class's student passwords and the student signs in with 
   await sp.waitForURL(/\/student/);
   await sctx.close();
 });
+
+test('an owner issues portal logins to students who have none and gets their slips', async ({ page }) => {
+  test.setTimeout(120000);
+  const seed = await seedFeesTenant(1, 'issue-logins');
+  await seed.db.from('campus_portal_policy').upsert({ tenant_id: seed.tenant, campus_id: seed.campusId, min_class_for_student_login: 1 });
+  const { data: enrolment } = await seed.db.from('enrolment').select('student(gr_number)').eq('campus_id', seed.campusId).single();
+  const gr = (Array.isArray(enrolment!.student) ? enrolment!.student[0] : enrolment!.student) as { gr_number: string };
+
+  await signInAs(page, seed.email);
+  await page.goto('/users');
+  await page.getByTestId('issue-student-logins').click();
+  const slip = page.getByTestId('reset-slip');
+  await expect(slip).toHaveCount(1);
+  await expect(slip).toContainText(gr.gr_number);
+
+  await page.getByTestId('issue-student-logins').click();
+  await expect(page.getByText('Every student from the login class upward already has a login.')).toBeVisible();
+});
