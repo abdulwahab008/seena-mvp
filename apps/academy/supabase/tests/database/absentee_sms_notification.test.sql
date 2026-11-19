@@ -1,6 +1,6 @@
 -- pgTAP tests for FR-G12: automated absentee SMS to parent.
 begin;
-select plan(33);
+select plan(34);
 
 select public.provision_tenant('test-absentee-sms-co', 'Absentee SMS Co', 'owner@absenteesmsco.test');
 select id as tenant_id from public.tenant where slug = 'test-absentee-sms-co' \gset
@@ -362,6 +362,14 @@ select is(
   (select count(*)::int from public.sections_not_marked(:'campus_id'::uuid, :'att_date'::date)),
   0,
   'defense-in-depth: another tenant cannot read this tenant''s not-marked sections via a direct RPC call'
+);
+
+-- Every queued attendance_notification row is copied into public.message, which is what the worker actually sends.
+reset role;
+select is(
+  (select count(*) from public.message where metadata->>'source' = 'attendance_notification' and tenant_id = :'tenant_id'),
+  (select count(*) from public.attendance_notification where tenant_id = :'tenant_id' and status::text not like 'skipped%' and channel <> 'push' and recipient_msisdn is not null),
+  'each queued attendance_notification row is in the message outbox'
 );
 
 select * from finish();
