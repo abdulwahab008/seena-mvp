@@ -35,7 +35,7 @@ import {
   testWhatsAppDispatch,
   resolveComplianceAlert,
 } from './actions';
-import { formatDateTimePk } from '@/lib/dates';
+import { formatDateTimePk, formatTimePk } from '@/lib/dates';
 
 export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppComplianceData }) {
   const router = useRouter();
@@ -448,7 +448,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                             {formatDateTimePk(win.window_opened_at)}
                           </td>
                           <td className="p-3 text-xs text-muted-foreground">
-                            {expiry.toLocaleString()}
+                            {formatDateTimePk(expiry)}
                           </td>
                           <td className="p-3">
                             {isActive ? (
@@ -510,7 +510,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
                         <p className="text-slate-700 dark:text-slate-300 italic">&ldquo;{inb.body}&rdquo;</p>
                       </div>
                       <span className="text-muted-foreground whitespace-nowrap ml-4">
-                        {new Date(inb.received_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {formatTimePk(inb.received_at)}
                       </span>
                     </div>
                   ))}
@@ -602,7 +602,7 @@ export function WhatsAppComplianceDesk({ initialData }: { initialData: WhatsAppC
 
                   <div className="p-3 border-t bg-muted/20 flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
-                      Last synced: {new Date(tmpl.last_synced_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      Last synced: {formatTimePk(tmpl.last_synced_at)}
                     </span>
                     <Button
                       variant="outline"

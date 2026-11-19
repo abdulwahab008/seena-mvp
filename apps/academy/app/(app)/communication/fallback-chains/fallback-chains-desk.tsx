@@ -31,7 +31,7 @@ import {
   triggerTimeoutScan,
   simulateReceiptWebhook,
 } from './actions';
-import { formatDatePk } from '@/lib/dates';
+import { formatDatePk, formatTimePk } from '@/lib/dates';
 
 interface Props {
   initialChains: CommChannelChainRow[];
@@ -478,7 +478,7 @@ export function FallbackChainsDesk({
                           </div>
                         </td>
                         <td className="p-3 text-[11px] text-muted-foreground">
-                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {formatTimePk(msg.created_at)}
                         </td>
                       </tr>
                     );

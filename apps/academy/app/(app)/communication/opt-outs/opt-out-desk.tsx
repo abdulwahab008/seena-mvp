@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { manualOptOutAction, resubscribeAction, simulateInboundStopAction } from './actions';
-import { formatDateTimePk } from '@/lib/dates';
+import { formatDateTimePk, formatTimePk } from '@/lib/dates';
 
 interface OptOutItem {
   id: string;
@@ -324,7 +324,7 @@ export function OptOutDesk({
                 inboundList.map((inb) => (
                   <tr key={inb.id} className="hover:bg-muted/20">
                     <td className="p-3 text-muted-foreground whitespace-nowrap">
-                      {new Date(inb.received_at).toLocaleTimeString()}
+                      {formatTimePk(inb.received_at, true)}
                     </td>
                     <td className="p-3 font-mono font-medium">{inb.from_phone}</td>
                     <td className="p-3 font-semibold text-muted-foreground">{inb.to_mask || 'SEENA'}</td>

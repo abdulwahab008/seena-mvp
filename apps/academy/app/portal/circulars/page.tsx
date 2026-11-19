@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
+import { formatDatePk } from '@/lib/dates';
 
 export const metadata = {
   title: 'School Circulars | Parent Portal',
@@ -67,11 +68,7 @@ export default async function PortalCircularsPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b pb-2">
                 <h3 className="font-semibold text-base text-foreground">{circ.title}</h3>
                 <span className="text-xs text-muted-foreground">
-                  Published: {new Date(circ.publish_at).toLocaleDateString([], {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+                  Published: {formatDatePk(circ.publish_at)}
                 </span>
               </div>
 

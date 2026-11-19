@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { ActionForm } from '@/components/action-form';
 import { pkr } from '@/lib/rpc-action';
+import { STOCK_REASON_CODES } from '@/lib/validation';
 import { createItem, createStore, postStockTake, receiveStock, transferStock, updateItem } from './actions';
 
 const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
@@ -192,7 +193,7 @@ export default async function InventoryPage() {
                   { name: 'storeId', label: 'Store', type: 'select', required: true, options: storeOptions },
                   { name: 'itemId', label: 'Item', type: 'select', required: true, options: itemOptions },
                   { name: 'counted', label: 'Counted quantity', type: 'number' },
-                  { name: 'reasonCode', label: 'Reason', type: 'select', required: true, options: ['SHRINKAGE', 'DAMAGE', 'EXPIRED', 'FOUND', 'COUNT_ERROR', 'OTHER'].map((c) => ({ value: c, label: c })) },
+                  { name: 'reasonCode', label: 'Reason', type: 'select', required: true, options: STOCK_REASON_CODES.map((c) => ({ value: c, label: c.charAt(0) + c.slice(1).toLowerCase().replace('_', ' ') })) },
                 ]}
               />
             </CardContent>

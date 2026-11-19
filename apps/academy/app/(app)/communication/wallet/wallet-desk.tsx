@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { topUpWalletAction, checkCampaignCreditGuardAction } from './actions';
-import { formatDateTimePk } from '@/lib/dates';
+import { formatDateTimePk, formatTimePk } from '@/lib/dates';
 
 interface RateCardItem {
   id: string;
@@ -342,7 +342,7 @@ export function WalletDesk({
                 ledger.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/20">
                     <td className="p-3 whitespace-nowrap text-muted-foreground">
-                      {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {formatTimePk(item.created_at)}
                     </td>
                     <td className="p-3 font-semibold uppercase">{item.channel}</td>
                     <td className="p-3 font-medium">{item.units}</td>

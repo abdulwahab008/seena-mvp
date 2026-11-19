@@ -27,7 +27,7 @@ import {
   processPendingFiresAction,
   TriggerEventType,
 } from './actions';
-import { todayPk } from '@/lib/dates';
+import { todayPk, formatTimePk } from '@/lib/dates';
 
 interface Props {
   initialData: TriggerRulesData;
@@ -411,10 +411,7 @@ export function TriggerRulesDesk({ initialData }: Props) {
                         </td>
                         <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
                           {rule.last_evaluated_at
-                            ? new Date(rule.last_evaluated_at).toLocaleTimeString('en-PK', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
+                            ? formatTimePk(rule.last_evaluated_at)
                             : '—'}
                         </td>
                         <td className="px-5 py-4 text-right">
@@ -506,11 +503,7 @@ export function TriggerRulesDesk({ initialData }: Props) {
                         )}
                       </td>
                       <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">
-                        {new Date(f.fired_at).toLocaleTimeString('en-PK', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        })}
+                        {formatTimePk(f.fired_at, true)}
                       </td>
                       <td className="px-4 py-3.5 text-xs text-muted-foreground">
                         {f.skip_reason ? (

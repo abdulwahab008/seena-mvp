@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope, one } from '@/lib/exams/office-scope';
 import { ModerationForm, ReverseForm } from './moderation-forms';
+import { formatDatePk } from '@/lib/dates';
 
 /**
  * FR-I15. Bounded, reasoned moderation of one section's theory marks, before
@@ -161,7 +162,7 @@ export default async function ModerationPage({ searchParams }: { searchParams: P
               {(history ?? []).map((h) => (
                 <p key={h.id} data-testid="moderation-row" data-reversed={h.reversed_at ? 'true' : 'false'}>
                   Section {one(h.section)?.name}: {h.delta > 0 ? '+' : ''}
-                  {h.delta} marks ({h.affected_count} candidates, {h.capped_count} capped) on {new Date(h.applied_at).toLocaleDateString('en-GB')} — {h.reason}
+                  {h.delta} marks ({h.affected_count} candidates, {h.capped_count} capped) on {formatDatePk(h.applied_at)} — {h.reason}
                   {h.reversed_at ? ` — reversed: ${h.reverse_reason}` : ''}
                 </p>
               ))}

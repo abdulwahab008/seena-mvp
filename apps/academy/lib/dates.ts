@@ -22,3 +22,12 @@ export const formatDateTimePk = (value: string | number | Date): string =>
     minute: '2-digit',
     hour12: false,
   });
+
+export const formatTimePk = (value: string | number | Date, withSeconds = false): string =>
+  new Date(value).toLocaleTimeString('en-GB', {
+    timeZone: SCHOOL_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    ...(withSeconds && { second: '2-digit' }),
+    hour12: false,
+  });

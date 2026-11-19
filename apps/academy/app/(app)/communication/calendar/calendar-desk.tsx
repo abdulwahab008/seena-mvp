@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatTimePk, formatDatePk, toPkDate } from '@/lib/dates';
 
 interface CampusItem {
   id: string;
@@ -379,25 +380,17 @@ export function CalendarDesk({ events, campuses }: CalendarDeskProps) {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs">
                       <div>
-                        {new Date(ev.starts_at).toLocaleDateString([], {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                        {new Date(ev.ends_at).toDateString() !== new Date(ev.starts_at).toDateString() && (
+                        {formatDatePk(ev.starts_at)}
+                        {toPkDate(new Date(ev.ends_at)) !== toPkDate(new Date(ev.starts_at)) && (
                           <span>
                             {' '}
                             -{' '}
-                            {new Date(ev.ends_at).toLocaleDateString([], {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
+                            {formatDatePk(ev.ends_at)}
                           </span>
                         )}
                       </div>
                       <div className="text-muted-foreground">
-                        {ev.is_all_day ? 'All Day' : new Date(ev.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {ev.is_all_day ? 'All Day' : formatTimePk(ev.starts_at)}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -766,7 +759,7 @@ export function CalendarDesk({ events, campuses }: CalendarDeskProps) {
             </p>
             <div className="p-3 bg-muted/40 rounded border font-mono text-xs space-y-1">
               <div>Affected Attendance Days: {recomputeResult.affected_attendance_records}</div>
-              <div>Audit Timestamp: {new Date(recomputeResult.recomputed_at).toLocaleTimeString()}</div>
+              <div>Audit Timestamp: {formatTimePk(recomputeResult.recomputed_at, true)}</div>
             </div>
             <div className="flex justify-end">
               <Button size="sm" onClick={() => setRecomputeResult(null)}>

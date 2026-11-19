@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Textarea } from '@/components/ui/textarea';
 import { resolveGuardianClaim } from './actions';
-import { formatDateTimePk } from '@/lib/dates';
+import { formatDateTimePk, formatTimePk } from '@/lib/dates';
 
 export type ClaimRow = {
   id: string;
@@ -142,7 +142,7 @@ export function ClaimsDesk({ claims, attempts }: { claims: ClaimRow[]; attempts:
               <li key={a.id} className="flex justify-between px-3 py-2">
                 <span>GR {a.gr ?? '—'}</span>
                 <span className="text-muted-foreground">
-                  {a.outcome} · {new Date(a.at).toLocaleTimeString()}
+                  {a.outcome} · {formatTimePk(a.at, true)}
                 </span>
               </li>
             ))}
