@@ -240,7 +240,7 @@ export const NAV_SECTIONS: NavSection[] = [
           { href: '/hifz/progress', label: 'Progress Register' },
         ],
       },
-      { href: '/downloads', label: 'Download Centre' },
+      { href: '/downloads', label: 'Download Centre', roles: ['super_admin', 'owner', 'principal', 'vice_principal', 'head_of_department', 'class_teacher', 'subject_teacher', 'exam_controller', 'admissions_officer'] },
       { href: '/lesson-plans', label: 'Lesson Plans' },
       { href: '/academic-setup/rollover', label: 'Session Rollover' },
       {
