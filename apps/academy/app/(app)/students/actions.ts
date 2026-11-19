@@ -18,6 +18,7 @@ import {
 } from '@/lib/validation';
 import { siteUrl } from '@/lib/auth/recovery';
 import { supabaseServer } from '@/lib/supabase/server';
+import { toPkMobile } from '@/lib/student-import';
 
 export type CreateStudentState = { error: string | null; studentId: string | null };
 
@@ -78,12 +79,15 @@ export async function linkGuardianToStudent(studentId: string, _prev: LinkGuardi
     mayCollectChild: formData.get('mayCollectChild') === 'on',
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+  // Stored as typed ("0300…"), the number could neither receive SMS nor sign in to the portal.
+  const phone = parsed.data.phone ? toPkMobile(parsed.data.phone) : undefined;
+  if (phone === null) return { error: 'Enter a Pakistani mobile number, e.g. 0300 1234567.' };
 
   const supabase = await supabaseServer();
   const { data: guardianId, error: findError } = await supabase.rpc('fn_find_or_create_guardian', {
     p_name_en: parsed.data.nameEn,
     p_cnic: parsed.data.cnic,
-    p_phone_e164: parsed.data.phone,
+    p_phone_e164: phone,
   });
   if (findError) {
     if (findError.message.includes('ID_INVALID_FORMAT')) return { error: 'CNIC must resolve to 13 digits.' };
