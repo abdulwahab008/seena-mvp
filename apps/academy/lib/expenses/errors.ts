@@ -13,6 +13,7 @@ export function expenseError(message: string): string {
   if (message.includes('VOUCHER_NOT_PENDING')) return 'That voucher is no longer waiting for a decision.';
   if (message.includes('VOUCHER_NOT_FOUND')) return 'Voucher not found.';
   if (message.includes('APPROVER_RANK_INSUFFICIENT')) return 'This voucher is above your approval limit.';
+  if (message.includes('SELF_APPROVAL_NOT_ALLOWED')) return 'You raised this voucher, so someone else has to decide it.';
   if (message.includes('REJECTION_REASON_TOO_SHORT')) {
     return 'A rejection has to say why, in at least 10 characters.';
   }
