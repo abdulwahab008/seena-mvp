@@ -53303,6 +53303,7 @@ export type Database = {
         Args: { p_min_pct?: number; p_scheme_id: string }
         Returns: undefined
       }
+      set_section_home_room: { Args: { p_room_id: string; p_section_id: string }; Returns: undefined }
       set_section_stream: {
         Args: { p_section_id: string; p_stream_id: string | null }
         Returns: undefined
