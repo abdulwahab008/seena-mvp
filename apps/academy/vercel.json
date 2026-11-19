@@ -1,6 +1,7 @@
 {
   "regions": ["hnd1"],
   "crons": [
+    { "path": "/api/internal/admissions/reminders", "schedule": "0 4 * * *" },
     { "path": "/api/internal/messages", "schedule": "15 4 * * *" },
     { "path": "/api/internal/digests/run", "schedule": "0 13 * * *" },
     { "path": "/api/internal/exports/purge", "schedule": "0 21 * * *" },

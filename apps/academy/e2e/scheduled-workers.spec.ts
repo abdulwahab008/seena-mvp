@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // vercel.json schedules these with a GET carrying the cron secret; anything else is refused.
-const PATHS = ['/api/internal/messages', '/api/internal/digests/run', '/api/internal/exports/purge', '/api/internal/storage/purge', '/api/internal/retention/run'];
+const PATHS = ['/api/internal/admissions/reminders', '/api/internal/messages', '/api/internal/digests/run', '/api/internal/exports/purge', '/api/internal/storage/purge', '/api/internal/retention/run'];
 
 test('every scheduled worker runs for the cron secret and refuses anyone else', async ({ request }) => {
   test.setTimeout(120000);

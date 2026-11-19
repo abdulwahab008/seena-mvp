@@ -1,7 +1,7 @@
 -- pgTAP tests for FR-B05: dispatch automated follow-up and appointment
 -- reminders.
 begin;
-select plan(21);
+select plan(22);
 
 select public.provision_tenant('test-reminder-co', 'Reminder Co', 'owner@reminderco.test');
 select id as tenant_id from public.tenant where slug = 'test-reminder-co' \gset
@@ -196,6 +196,17 @@ select set_config(
   'request.jwt.claims',
   json_build_object('tenant_id', :'other_tenant_id', 'app_role', 'owner', 'campus_ids', '[]'::json, 'sub', :'other_user_id')::text,
   true
+);
+
+-- Every row queued for sending (including ones later marked failed) is copied into public.message,
+-- which is what the worker actually sends. Rows inserted as already sent are history, not copied.
+reset role;
+select is(
+  (select count(*)::int from public.outbound_message o
+    where o.tenant_id = :'tenant_id' and o.status in ('queued', 'failed')
+      and not exists (select 1 from public.message m where m.idempotency_key = 'outbound_message:' || o.id)),
+  0,
+  'each queued outbound_message row is in the message outbox'
 );
 
 select * from finish();
