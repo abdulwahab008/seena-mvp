@@ -56,8 +56,8 @@ export const SelectContent = React.forwardRef<
   }
 >(({ className, children, position = 'popper', container, ...props }, ref) => {
   const open = React.useContext(SelectOpenContext);
-  const openDialog = open && typeof document !== 'undefined' ? document.querySelector('dialog[open]') : null;
-  const portalContainer = container !== undefined ? container : openDialog instanceof HTMLElement ? openDialog : undefined;
+  const openDialog = open && typeof document !== 'undefined' ? document.querySelector<HTMLElement>('dialog[open]') : null;
+  const portalContainer = container !== undefined ? container : (openDialog ?? undefined);
 
   return (
     <SelectPrimitive.Portal container={portalContainer}>
