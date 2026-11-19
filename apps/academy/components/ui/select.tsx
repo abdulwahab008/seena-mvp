@@ -4,7 +4,28 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export const Select = SelectPrimitive.Root;
+// The open state is mirrored so SelectContent can look for an open <dialog> at the moment
+// it opens. Radix mounts SelectContent at page load (into a fragment), long before any
+// Modal opens, so resolving the container once on mount left the list in <body>, under
+// the modal's top layer: visible to nobody and unclickable.
+const SelectOpenContext = React.createContext(false);
+
+export function Select({ open, defaultOpen, onOpenChange, ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
+  const [innerOpen, setInnerOpen] = React.useState(defaultOpen ?? false);
+  return (
+    <SelectOpenContext.Provider value={open ?? innerOpen}>
+      <SelectPrimitive.Root
+        open={open}
+        defaultOpen={defaultOpen}
+        onOpenChange={(next) => {
+          setInnerOpen(next);
+          onOpenChange?.(next);
+        }}
+        {...props}
+      />
+    </SelectOpenContext.Provider>
+  );
+}
 export const SelectGroup = SelectPrimitive.Group;
 export const SelectValue = SelectPrimitive.Value;
 
@@ -34,18 +55,9 @@ export const SelectContent = React.forwardRef<
     container?: HTMLElement | null;
   }
 >(({ className, children, position = 'popper', container, ...props }, ref) => {
-  const [portalContainer, setPortalContainer] = React.useState<HTMLElement | null | undefined>(container);
-
-  React.useEffect(() => {
-    if (container !== undefined) {
-      setPortalContainer(container);
-      return;
-    }
-    const openDialog = document.querySelector('dialog[open]');
-    if (openDialog instanceof HTMLElement) {
-      setPortalContainer(openDialog);
-    }
-  }, [container]);
+  const open = React.useContext(SelectOpenContext);
+  const openDialog = open && typeof document !== 'undefined' ? document.querySelector<HTMLElement>('dialog[open]') : null;
+  const portalContainer = container !== undefined ? container : (openDialog ?? undefined);
 
   return (
     <SelectPrimitive.Portal container={portalContainer}>

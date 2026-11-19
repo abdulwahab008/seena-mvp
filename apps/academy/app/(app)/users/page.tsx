@@ -63,7 +63,7 @@ export default async function UsersPage() {
           <UserList accounts={accounts ?? []} roles={roles} currentUserId={actor.userId} />
         )}
       </div>
-      <BulkPasswordReset sections={sectionOptions} />
+      <BulkPasswordReset sections={sectionOptions} campuses={campuses ?? []} />
     </>
   );
 }

@@ -161,7 +161,7 @@ export default async function PortalResultsPage({ searchParams }: { searchParams
             </p>
           ) : result.subjects.length === 0 ? (
             <p className="text-sm text-muted-foreground" data-testid="portal-result-empty">
-              No results have been published yet for {result.exam_term_name}.
+              No results have been published yet{result.exam_term_name ? ` for ${result.exam_term_name}` : ''}.
             </p>
           ) : (
             <table className="w-full text-sm" data-testid="portal-result-table">

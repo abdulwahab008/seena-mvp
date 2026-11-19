@@ -47,3 +47,20 @@ export async function resetSectionPasswords(sectionId: string): Promise<{ error:
   }
   return { error: null, slips };
 }
+
+// Students from the campus's login class upward who have no portal login yet get one. The
+// database decides who qualifies and who may do this; the first passwords come back once.
+export async function issueStudentLogins(campusId: string): Promise<{ error: string | null; slips?: ResetSlip[] }> {
+  if (!z.string().uuid().safeParse(campusId).success) return { error: 'Choose a campus.' };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc('provision_student_accounts', { p_campus_id: campusId });
+  if (error) return { error: error.message.includes('FORBIDDEN') ? 'Only the owner or a principal can issue student logins.' : 'Could not issue logins. Try again.' };
+  const created = (data ?? []).filter((r) => r.action === 'created' && r.initial_password);
+  if (created.length === 0) return { error: 'Every student from the login class upward already has a login.' };
+  const { data: students } = await supabase.from('student').select('id, name_en').in('id', created.map((r) => r.student_id));
+  const nameOf = new Map((students ?? []).map((s) => [s.id, s.name_en]));
+  const slips = created
+    .map((r) => ({ name: nameOf.get(r.student_id) ?? '', grNumber: r.gr_number, password: r.initial_password }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return { error: null, slips };
+}
