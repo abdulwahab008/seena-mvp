@@ -167,9 +167,8 @@ export async function batchCreateClassrooms(
     if (finalRoomId && data.linkHomeroom) {
       const matchSec = existingSections.find((s) => s.name.toLowerCase() === secName.toLowerCase());
       if (matchSec) {
-        // class_section has no UPDATE policy, so RLS turns this into a silent no-op; count it instead of claiming success.
-        const { data: updated } = await supabase.from('class_section').update({ home_room_id: finalRoomId }).eq('id', matchSec.id).select('id');
-        if (!updated?.length) unlinked++;
+        const { error: linkError } = await supabase.rpc('set_section_home_room', { p_section_id: matchSec.id, p_room_id: finalRoomId });
+        if (linkError) unlinked++;
       }
     }
   }
