@@ -8,6 +8,8 @@ import { createPaperJob } from '@/lib/exams/paper-request';
  * the queued job row and hands it to the worker. Answers 202 with the job id
  * straight after the row exists; the paper arrives later through the callback.
  */
+export const maxDuration = 300;
+
 const Body = z.object({
   examSubjectId: z.string().uuid(),
   boardPatternId: z.string().uuid(),
