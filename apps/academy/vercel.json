@@ -6,6 +6,7 @@
     { "path": "/api/internal/digests/run", "schedule": "0 13 * * *" },
     { "path": "/api/internal/exports/purge", "schedule": "0 21 * * *" },
     { "path": "/api/internal/storage/purge", "schedule": "30 21 * * *" },
-    { "path": "/api/internal/retention/run", "schedule": "30 22 * * *" }
+    { "path": "/api/internal/retention/run", "schedule": "30 22 * * *" },
+    { "path": "/api/internal/exam-paper/dispatch", "schedule": "45 3 * * *" }
   ]
 }

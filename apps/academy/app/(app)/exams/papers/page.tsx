@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getExamOfficeScope, one } from '@/lib/exams/office-scope';
 import { BuildSetsForm, CooldownSettingsForm, JobPoller, PatternForm, RequestForm, RetryButton } from './paper-forms';
 import { formatTimePk } from '@/lib/dates';
+import { dispatchSoon } from '@/lib/exams/paper-request';
+
+// Requests and page loads write queued papers with an AI model after responding (see dispatchSoon).
+export const maxDuration = 300;
 
 /**
  * FR-I05. Ask Seena Exams for a question paper from a board pattern and a list
@@ -51,13 +55,16 @@ export default async function PapersPage() {
   for (const p of paperList ?? []) papersByJob.set(p.job_id, [...(papersByJob.get(p.job_id) ?? []), p]);
   const { data: cooldown } = scope.campus ? await supabase.from('exam_settings').select('question_cooldown_terms, cooldown_mode').eq('campus_id', scope.campus.id).maybeSingle() : { data: null };
   const active = (jobs ?? []).some((j) => j.status === 'queued' || j.status === 'running');
+  // A job re-queued after a failed attempt waits out its backoff; the poller's
+  // refreshes are what pick it up again once it is due.
+  if ((jobs ?? []).some((j) => j.status === 'queued')) dispatchSoon();
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Question papers</h1>
         <p className="text-sm text-muted-foreground">
-          Generate a paper from the prescribed textbook and the board pattern. A paper is stored only when its sections, question counts and marks equal the pattern exactly.
+          AI writes a paper on the chapters you list, in the board pattern you choose. Review every question before publishing. A paper is stored only when its sections, question counts and marks equal the pattern exactly.
         </p>
       </div>
       <JobPoller active={active} />

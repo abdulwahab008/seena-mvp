@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
-import { createPaperJob, paperRequestError } from '@/lib/exams/paper-request';
+import { createPaperJob, dispatchSoon, paperRequestError } from '@/lib/exams/paper-request';
 import {
   boardPatternSchema,
   buildSetsSchema,
@@ -50,6 +50,7 @@ export async function retryJob(jobId: string): Promise<Result> {
   const supabase = await supabaseServer();
   const { error } = await supabase.rpc('retry_paper_job', { p_job_id: jobId });
   if (error) return { error: paperRequestError(error.message) };
+  dispatchSoon();
   revalidatePath(PATH);
   return { error: null };
 }

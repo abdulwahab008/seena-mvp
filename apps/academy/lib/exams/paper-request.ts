@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabaseServiceRole } from '@/lib/supabase/server';
 import { dispatchDueJobs } from './paper-worker';
@@ -25,11 +26,16 @@ export function paperRequestError(message: string, details?: string | null): str
 }
 
 /**
- * Writes the job row (status 'queued', returned to the caller at once) and then
- * nudges the dispatcher. The nudge is deliberately not awaited: the caller gets
- * its job card in milliseconds, and if the nudge is lost the cron endpoint
- * picks the job up from the queue.
+ * Runs the dispatcher after the response is sent, so the caller gets its job card
+ * at once. Plain un-awaited work is frozen on Vercel once the response is out;
+ * after() keeps the function alive (up to the route's maxDuration). One job per
+ * nudge, because an AI-written paper takes up to a few minutes.
  */
+export function dispatchSoon(): void {
+  after(() => dispatchDueJobs(supabaseServiceRole(), undefined, 1).catch(() => undefined));
+}
+
+/** Writes the job row (status 'queued') and nudges the dispatcher. */
 export async function createPaperJob(supabase: SupabaseClient, input: PaperRequestInput): Promise<{ jobId: string | null; error: string | null }> {
   const { data, error } = await supabase.rpc('request_paper_generation', {
     p_exam_subject_id: input.examSubjectId,
@@ -39,6 +45,6 @@ export async function createPaperJob(supabase: SupabaseClient, input: PaperReque
     p_set_count: input.setCount,
   });
   if (error) return { jobId: null, error: paperRequestError(error.message, error.details) };
-  void dispatchDueJobs(supabaseServiceRole()).catch(() => undefined);
+  dispatchSoon();
   return { jobId: data as string, error: null };
 }

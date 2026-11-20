@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
+  AiPaperWorker,
   DevStubPaperWorker,
   HttpPaperWorker,
   UnconfiguredPaperWorker,
@@ -53,13 +54,16 @@ describe('resolvePaperWorker', () => {
   it('uses the HTTP worker when it is configured', () => {
     expect(resolvePaperWorker(ingest, { EXAM_WORKER_URL: 'https://w', EXAM_WORKER_TOKEN: 't', NODE_ENV: 'production' } as NodeJS.ProcessEnv).name).toBe('http');
   });
+  it('writes papers with AI when an OpenRouter key is set', () => {
+    expect(resolvePaperWorker(ingest, { OPENROUTER_API_KEY: 'k', NODE_ENV: 'production' } as NodeJS.ProcessEnv).name).toBe('ai');
+  });
   it('falls back to the development stub outside production', () => {
     expect(resolvePaperWorker(ingest, { NODE_ENV: 'development' } as NodeJS.ProcessEnv).name).toBe('dev-stub');
   });
   it('is unconfigured, never the stub, in production without a worker', async () => {
     const w = resolvePaperWorker(ingest, { NODE_ENV: 'production' } as NodeJS.ProcessEnv);
     expect(w).toBeInstanceOf(UnconfiguredPaperWorker);
-    await expect(w.submit(job)).rejects.toThrow(/no paper generation worker/);
+    await expect(w.submit(job)).rejects.toThrow(/no paper generator is configured/);
   });
 });
 
@@ -90,6 +94,39 @@ describe('DevStubPaperWorker', () => {
   });
 });
 
+describe('AiPaperWorker', () => {
+  const aiReply = (skip?: string) => {
+    const questions = ['A', 'B'].flatMap((set) => [
+      ...[1, 2, 3, 4].map((n) => ({ id: `${set}-1-${n}`, text: `MCQ ${set}${n}?`, options: ['w', 'x', 'y', 'z'], answer: 'C' })),
+      { id: `${set}-2-1`, text: `Explain ${set}.`, answer: 'Because.' },
+    ]).filter((q) => q.id !== skip);
+    return vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ questions }) } }] }), { status: 200 }));
+  };
+
+  it('ingests the AI-written text in the pattern structure', async () => {
+    let received: { sets: GeneratedPaperSet[] } | null = null;
+    const fetchImpl = aiReply();
+    await new AiPaperWorker(async (_id, payload) => { received = payload as { sets: GeneratedPaperSet[] }; }, 'k', 'm', 'https://ai', fetchImpl as unknown as typeof fetch).submit(job);
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://ai/chat/completions');
+    expect((init.headers as Record<string, string>).authorization).toBe('Bearer k');
+    expect(received!.sets.map((s) => s.set_code)).toEqual(['A', 'B']);
+    for (const s of received!.sets) expect(diffPaperAgainstPattern(pattern, s.questions)).toBeNull();
+    const first = received!.sets[0]!.questions[0]!;
+    expect(first).toMatchObject({ text: 'MCQ A1?', options: ['w', 'x', 'y', 'z'], answer: 'C', chapter: 'Ch.1' });
+  });
+
+  it('throws, so the job is retried, when a question is missing or the reply is not JSON', async () => {
+    const ingest = vi.fn();
+    await expect(new AiPaperWorker(ingest, 'k', 'm', 'https://ai', aiReply('B-2-1') as unknown as typeof fetch).submit(job)).rejects.toThrow('did not write question B-2-1');
+    const notJson = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: 'sorry' } }] }), { status: 200 }));
+    await expect(new AiPaperWorker(ingest, 'k', 'm', 'https://ai', notJson as unknown as typeof fetch).submit(job)).rejects.toThrow('expected format');
+    const down = vi.fn(async () => new Response('', { status: 402 }));
+    await expect(new AiPaperWorker(ingest, 'k', 'm', 'https://ai', down as unknown as typeof fetch).submit(job)).rejects.toThrow('AI service answered 402');
+    expect(ingest).not.toHaveBeenCalled();
+  });
+});
+
 describe('dispatchDueJobs', () => {
   const row = { id: 'job-1', tenant_id: 't', exam_subject_id: 'es', pattern_snapshot: pattern, chapters: ['Ch.1'], total_marks: 6, set_count: 1 };
   const fakeAdmin = (jobs: unknown[]) => {
@@ -99,6 +136,7 @@ describe('dispatchDueJobs', () => {
         calls.push({ fn, args });
         return { data: fn === 'fn_claim_paper_jobs' ? jobs : null, error: null };
       }),
+      from: () => ({ select: () => ({ in: async () => ({ data: [], error: null }) }) }),
     } as unknown as SupabaseClient;
     return { admin, calls };
   };
