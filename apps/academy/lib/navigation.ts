@@ -330,6 +330,7 @@ export const NAV_SECTIONS: NavSection[] = [
         ],
       },
       { href: '/exams/papers', label: 'Question Papers' },
+      { href: '/exams/question-bank', label: 'Question Bank', roles: ['super_admin', 'owner', 'principal', 'exam_controller', 'head_of_department', 'class_teacher', 'subject_teacher'] },
     ],
   },
   {

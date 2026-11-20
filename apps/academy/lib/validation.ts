@@ -2717,6 +2717,27 @@ export const replaceQuestionSchema = z.object({
   text: z.string().trim().min(1, 'Enter the replacement question').max(2000, 'At most 2000 characters'),
 });
 export type ReplaceQuestionInput = z.infer<typeof replaceQuestionSchema>;
+// Teachers typing questions into the bank.
+export const bankQuestionSchema = z
+  .object({
+    classSubjectId: z.string().uuid('Choose a class and subject'),
+    chapter: z.string().trim().min(1, 'Enter the chapter').max(80, 'At most 80 characters'),
+    type: z.enum(['mcq', 'short', 'long']),
+    marks: z.number({ invalid_type_error: 'Enter the marks' }).int().min(1, 'At least 1 mark').max(100),
+    text: z.string().trim().min(1, 'Enter the question').max(2000, 'At most 2000 characters'),
+    optionA: z.string().trim().max(500),
+    optionB: z.string().trim().max(500),
+    optionC: z.string().trim().max(500),
+    optionD: z.string().trim().max(500),
+    answer: z.string().trim().max(2000, 'At most 2000 characters'),
+    difficulty: z.enum(['easy', 'medium', 'hard']),
+  })
+  .superRefine((v, ctx) => {
+    if (v.type !== 'mcq') return;
+    if (![v.optionA, v.optionB, v.optionC, v.optionD].every(Boolean)) ctx.addIssue({ code: 'custom', path: ['optionA'], message: 'An MCQ needs all four options' });
+    if (!['A', 'B', 'C', 'D'].includes(v.answer)) ctx.addIssue({ code: 'custom', path: ['answer'], message: 'Choose the correct option' });
+  });
+export type BankQuestionInput = z.infer<typeof bankQuestionSchema>;
 export const publishPaperSchema = z.object({
   paperId: z.string().uuid(),
   overrideReason: z.string().trim().max(500, 'At most 500 characters').optional(),

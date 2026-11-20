@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { markApprovalError, markEntryError, markUnlockError, ocrReviewError } from '@/lib/exams/errors';
 import {
+  bankQuestionSchema,
   cancelOcrJobSchema,
   markSourceLabel,
   ocrReviewProgressMessage,
@@ -2046,3 +2047,15 @@ describe('bulkFeePlanOverrideSchema', () => {
   });
 });
 
+
+describe('bankQuestionSchema', () => {
+  const base = { classSubjectId: '00000000-0000-4000-8000-000000000000', chapter: 'Ch.1', marks: 1, text: 'Unit of force?', optionA: '', optionB: '', optionC: '', optionD: '', answer: '', difficulty: 'medium' as const };
+  it('needs four options and a correct option for an MCQ', () => {
+    expect(bankQuestionSchema.safeParse({ ...base, type: 'mcq' }).success).toBe(false);
+    expect(bankQuestionSchema.safeParse({ ...base, type: 'mcq', optionA: 'N', optionB: 'J', optionC: 'W', optionD: 'Pa' }).success).toBe(false);
+    expect(bankQuestionSchema.safeParse({ ...base, type: 'mcq', optionA: 'N', optionB: 'J', optionC: 'W', optionD: 'Pa', answer: 'A' }).success).toBe(true);
+  });
+  it('accepts a short question without options or answer', () => {
+    expect(bankQuestionSchema.safeParse({ ...base, type: 'short', marks: 2 }).success).toBe(true);
+  });
+});
