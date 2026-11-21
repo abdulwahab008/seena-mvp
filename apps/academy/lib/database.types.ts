@@ -47041,6 +47041,19 @@ export type Database = {
         Returns: string
       }
       activate_guardian_account: { Args: { p_token: string }; Returns: string }
+      add_bank_question: {
+        Args: {
+          p_answer?: string
+          p_chapter: string
+          p_class_subject_id: string
+          p_difficulty?: string
+          p_marks: number
+          p_options?: Json
+          p_text: string
+          p_type: string
+        }
+        Returns: string
+      }
       add_bank_statement_lines: {
         Args: { p_complete?: boolean; p_import_id: string; p_lines: Json }
         Returns: Json
@@ -48142,6 +48155,15 @@ export type Database = {
       payslip_payload: { Args: { p_run_line_id: string }; Returns: Json }
       payslip_run_lines: { Args: { p_run_id: string }; Returns: { line_id: string; staff_id: string }[] }
       record_payslip_denied: { Args: { p_payslip_id: string }; Returns: undefined }
+      my_bank_class_subjects: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          class_name: string
+          class_ordinal: number
+          class_subject_id: string
+          subject_name: string
+        }[]
+      }
       register_payslip: {
         Args: { p_generated_by?: string; p_run_line_id: string; p_sha256: string; p_storage_path: string; p_version: number }
         Returns: string
@@ -50588,6 +50610,10 @@ export type Database = {
       }
       rename_class_level: {
         Args: { p_id: string; p_name_en: string }
+        Returns: undefined
+      }
+      set_bank_question_active: {
+        Args: { p_active: boolean; p_id: string }
         Returns: undefined
       }
       set_staff_photo: {
