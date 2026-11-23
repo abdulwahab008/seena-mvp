@@ -249,10 +249,11 @@ export async function getEmployeeSalaryStructures(campusId: string | null): Prom
   // Format records
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data || []).map((row: any) => {
-    // Parse postgres daterange e.g. [2026-01-01,2026-12-31]
+    // Postgres returns daterange as [start,end) with end exclusive; show the last day it covers.
     const val = row.validity || '';
     const clean = val.replace(/[[\]()]/g, '');
-    const [start, end] = clean.split(',');
+    const [start, upper] = clean.split(',');
+    const end = upper && upper !== 'infinity' && val.endsWith(')') ? new Date(Date.parse(upper) - 86_400_000).toISOString().slice(0, 10) : upper;
     return {
       id: row.id,
       tenant_id: row.tenant_id,
@@ -315,6 +316,20 @@ export async function saveEmployeeSalaryStructure(
     const tenantId = staffData?.tenant_id;
     const finalCampusId = campusId || staffData?.campus_id;
 
+    // A revision starting later ends the structure that is running on that date.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: existing } = await (supabase as any).from('employee_salary_structure').select('id, validity').eq('staff_id', staffId);
+    const running = ((existing ?? []) as { id: string; validity: string }[]).find((r) => {
+      const [lo, hi] = r.validity.replace(/[[\]()]/g, '').split(',');
+      return !!lo && lo < startDate && (!hi || hi === 'infinity' || hi > startDate);
+    });
+    if (running) {
+      const lo = running.validity.replace(/[[\]()]/g, '').split(',')[0];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: closeError } = await (supabase as any).from('employee_salary_structure').update({ validity: `[${lo},${startDate})` }).eq('id', running.id);
+      if (closeError) throw closeError;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from('employee_salary_structure')
@@ -331,7 +346,13 @@ export async function saveEmployeeSalaryStructure(
         created_by: userId,
       });
 
-    if (error) throw error;
+    if (error) {
+      if (running) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from('employee_salary_structure').update({ validity: running.validity }).eq('id', running.id);
+      }
+      throw error;
+    }
 
     revalidatePath('/payroll/structures');
     return { error: null, success: true };
