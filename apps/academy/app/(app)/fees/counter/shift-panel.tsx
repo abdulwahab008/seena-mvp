@@ -208,9 +208,9 @@ function CreateCounterForm({ campuses }: { campuses: { id: string; name: string 
       <Button type="submit" disabled={pending} data-testid="create-counter">
         Add counter
       </Button>
-      {(error || form.formState.errors.name) && (
+      {(error || form.formState.errors.name || form.formState.errors.thresholdPkr) && (
         <p role="alert" className="w-full text-sm text-destructive">
-          {error ?? form.formState.errors.name?.message}
+          {error ?? form.formState.errors.name?.message ?? form.formState.errors.thresholdPkr?.message}
         </p>
       )}
     </form>

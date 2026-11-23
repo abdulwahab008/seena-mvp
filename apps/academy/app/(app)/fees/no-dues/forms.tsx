@@ -14,6 +14,7 @@ import {
   type StartClearanceInput,
 } from '@/lib/validation';
 import { approveRefund, clearItem, disburseRefund, forfeitDeposit, netItem, overrideClearance, recordDeposit, setItemOutstanding, startClearance, waiveItem } from './actions';
+import { todayPk } from '@/lib/dates';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -57,7 +58,7 @@ export function StartClearanceForm() {
 
 export function RecordDepositForm() {
   const { pending, error, run } = useAction();
-  const form = useForm<RecordDepositInput>({ resolver: zodResolver(recordDepositSchema), defaultValues: { grNumber: '', receivedOn: '', mode: 'cash', receiptRef: '' } });
+  const form = useForm<RecordDepositInput>({ resolver: zodResolver(recordDepositSchema), defaultValues: { grNumber: '', receivedOn: todayPk(), mode: 'cash', receiptRef: '' } });
   const onSubmit = form.handleSubmit((v) => run(() => recordDeposit(v), 'Deposit recorded.'));
   return (
     <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-3" noValidate>
@@ -74,6 +75,7 @@ export function RecordDepositForm() {
       <div className="space-y-1">
         <Label htmlFor="depDate">Received on</Label>
         <Input id="depDate" type="date" {...form.register('receivedOn')} />
+        {form.formState.errors.receivedOn && <p className="text-xs text-destructive">{form.formState.errors.receivedOn.message}</p>}
       </div>
       <div className="space-y-1">
         <Label htmlFor="depMode">Mode</Label>

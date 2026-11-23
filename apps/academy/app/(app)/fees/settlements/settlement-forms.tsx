@@ -50,6 +50,7 @@ export function ProposeForm() {
       <div className="space-y-2">
         <Label htmlFor="leavingDate">Leaving date</Label>
         <Input id="leavingDate" type="date" {...form.register('leavingDate')} />
+        {form.formState.errors.leavingDate && <p className="text-sm text-destructive">{form.formState.errors.leavingDate.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="basis">Pro-rata basis for the leaving month</Label>
