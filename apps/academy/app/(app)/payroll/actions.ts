@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
 import { todayPk } from '@/lib/dates';
+import { getCurrentActor } from '@/lib/hr/current-role';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -122,6 +123,7 @@ function parseDbError(e: unknown): string {
     if (msg.includes('ex_salary_structure_no_overlap')) return 'This employee already has an active salary structure in that date range.';
     if (msg.includes('PAYROLL_RUN_ALREADY_LOCKED') || msg.includes('PAYROLL_RUN_LOCKED')) return 'This payroll run is locked and cannot be recalculated or modified.';
     if (msg.includes('uq_salary_component_tenant_code')) return 'A salary component with that code already exists.';
+    if (msg.includes('row-level security')) return 'Your role cannot make this change.';
     return msg;
   }
   return String(e);
@@ -171,17 +173,12 @@ export async function saveSalaryComponent(
   const calcValuePaisa = Math.round(calcValuePkr * 100);
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userRes = await (supabase as any).auth.getUser();
-    const userId = userRes.data?.user?.id;
-
-    // Get tenant id
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: tenantData } = await (supabase as any).rpc('auth_tenant_id');
-    const tenantId = tenantData;
+    const actor = await getCurrentActor();
+    if (!actor) return { error: 'Sign in again.' };
+    const userId = actor.userId;
 
     const payload = {
-      tenant_id: tenantId,
+      tenant_id: actor.tenantId,
       code,
       name_en: nameEn,
       name_ur: nameUr,

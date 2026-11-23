@@ -41,6 +41,7 @@ export function ComponentsDesk({ initialComponents }: Props) {
   const [calcMethod, setCalcMethod] = useState<'fixed_paisa' | 'pct_of_basic' | 'pct_of_gross'>('fixed_paisa');
   const [isTaxable, setIsTaxable] = useState(true);
   const [prorates, setProrates] = useState(true);
+  const [formKey, setFormKey] = useState(0);
 
   const openCreateModal = () => {
     setSelectedComp(null);
@@ -48,6 +49,7 @@ export function ComponentsDesk({ initialComponents }: Props) {
     setCalcMethod('fixed_paisa');
     setIsTaxable(true);
     setProrates(true);
+    setFormKey((k) => k + 1);
     setModalOpen(true);
   };
 
@@ -57,6 +59,7 @@ export function ComponentsDesk({ initialComponents }: Props) {
     setCalcMethod(c.calc_method);
     setIsTaxable(c.is_taxable);
     setProrates(c.prorates_on_absence);
+    setFormKey((k) => k + 1);
     setModalOpen(true);
   };
 
@@ -272,7 +275,7 @@ export function ComponentsDesk({ initialComponents }: Props) {
         title={selectedComp ? `Edit Component: ${selectedComp.code}` : 'Add Salary Component'}
         description="Define calculation parameters, taxability, and attendance deduction rules."
       >
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+        <form key={formKey} onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="code">Component Code *</Label>
