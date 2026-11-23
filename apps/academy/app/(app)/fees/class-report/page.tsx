@@ -70,7 +70,12 @@ export default async function FeeClassReportPage({ searchParams }: { searchParam
         <Stat label="Billed after concessions" value={`PKR ${pkr(billed)}`} />
         <Stat label="Collected" value={`PKR ${pkr(total('collected_paisa'))}`} tone="success" />
         <Stat label="Collection efficiency" value={efficiency === null ? '—' : `${efficiency}%`} hint="Collected against billed in this period" />
-        <Stat label="Still owed" value={`PKR ${pkr(total('balance_paisa'))}`} tone={total('balance_paisa') > 0 ? 'warning' : 'default'} hint={`As of ${formatDatePk(to)}`} />
+        <Stat
+          label={total('balance_paisa') < 0 ? 'Paid in advance' : 'Still owed'}
+          value={`PKR ${pkr(Math.abs(total('balance_paisa')))}`}
+          tone={total('balance_paisa') > 0 ? 'warning' : 'default'}
+          hint={`As of ${formatDatePk(to)}`}
+        />
       </section>
       {error ? (
         <p className="text-sm text-destructive">Could not load the report. Try again.</p>
