@@ -357,7 +357,7 @@ export function LoansDesk({ initialLoans, staffList }: Props) {
         title="Record Early Loan Payoff"
         description={`Record manual settlement for ${selectedLoan?.staff_name || 'employee'}.`}
       >
-        <form onSubmit={handlePayoffSubmit} className="space-y-4 pt-2">
+        <form key={`${selectedLoan?.id}-${selectedLoan?.outstanding_paisa}`} onSubmit={handlePayoffSubmit} className="space-y-4 pt-2">
           {selectedLoan && (
             <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm space-y-1">
               <div className="flex justify-between">
