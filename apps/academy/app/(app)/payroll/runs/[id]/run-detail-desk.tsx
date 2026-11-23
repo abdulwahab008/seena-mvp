@@ -337,7 +337,7 @@ export function RunDetailDesk({ run, lines }: Props) {
         open={payslipModalOpen}
         onClose={() => setPayslipModalOpen(false)}
         title={`Payslip Breakdown: ${selectedLine?.staff_name || ''}`}
-        description={`Period: ${new Date(run.period_month).toLocaleDateString('en-PK', { month: 'long', year: 'numeric' })} &bull; Code: ${selectedLine?.employee_code || ''}`}
+        description={`Period: ${new Date(run.period_month).toLocaleDateString('en-PK', { month: 'long', year: 'numeric' })} · Code: ${selectedLine?.employee_code || ''}`}
       >
         {selectedLine && (
           <div className="space-y-4 pt-2 text-sm">

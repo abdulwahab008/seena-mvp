@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
+import { todayPk } from '@/lib/dates';
 import {
   Play,
   CheckCircle2,
@@ -297,7 +298,7 @@ export function RunsDesk({ initialRuns, campuses, selectedCampusId }: Props) {
               id="period_month"
               name="period_month"
               type="month"
-              defaultValue={new Date().toISOString().slice(0, 7)}
+              defaultValue={todayPk().slice(0, 7)}
               required
             />
           </div>
