@@ -481,15 +481,18 @@ export type GenerateChallansInput = z.infer<typeof generateChallansSchema>;
 // supabase/migrations/20260731130000_late_fee_rules.sql.
 export const LATE_FEE_BASES = ['flat', 'per_day', 'percentage'] as const;
 
+// A blank number input reaches RHF as '', which z.coerce turns into 0.
+const optNum = <T extends z.ZodTypeAny>(schema: T) => z.preprocess((v) => (v === '' || v == null ? undefined : v), schema.optional());
+
 export const createLateFeeRuleSchema = z
   .object({
     campusId: z.string().uuid(),
     sessionId: z.string().uuid(),
     basis: z.enum(LATE_FEE_BASES),
     graceDays: z.coerce.number().int().nonnegative(),
-    amountRupees: z.coerce.number().nonnegative().optional(),
-    percentage: z.coerce.number().min(0).max(100).optional(),
-    capRupees: z.coerce.number().nonnegative().optional(),
+    amountRupees: optNum(z.coerce.number().nonnegative()),
+    percentage: optNum(z.coerce.number().min(0).max(100)),
+    capRupees: optNum(z.coerce.number().nonnegative()),
   })
   .refine((v) => v.basis !== 'percentage' || v.percentage !== undefined, {
     message: 'Enter a percentage',
@@ -513,7 +516,7 @@ export type PreviewLateFeeInput = z.infer<typeof previewLateFeeSchema>;
 // Mirrors set_fee_policy()'s own signature in
 // supabase/migrations/20260731170000_concession_stacking_cap.sql.
 export const setFeePolicySchema = z.object({
-  maxStackedConcessionPct: z.coerce.number().min(0).max(100).optional(),
+  maxStackedConcessionPct: optNum(z.coerce.number().min(0).max(100)),
   allowNegativeNet: z.boolean(),
 });
 export type SetFeePolicyInput = z.infer<typeof setFeePolicySchema>;
@@ -2193,6 +2196,14 @@ export const paymentGatewayConfigSchema = z.object({
   isEnabled: z.boolean(),
 });
 export type PaymentGatewayConfigInput = z.infer<typeof paymentGatewayConfigSchema>;
+
+export const campusBankAccountSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  bankName: z.string().trim().min(1, 'Enter the bank name').max(100),
+  title: z.string().trim().min(1, 'Enter the account title').max(150),
+  accountNo: z.string().trim().min(1, 'Enter the account number').max(40),
+});
+export type CampusBankAccountInput = z.infer<typeof campusBankAccountSchema>;
 
 export const bankMappingProfileSchema = z
   .object({

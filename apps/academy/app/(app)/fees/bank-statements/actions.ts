@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { supabaseServer, supabaseServiceRole } from '@/lib/supabase/server';
 import { parseStatement, type MappingProfile } from '@/lib/bank/parse-statement';
-import { bankMappingProfileSchema, type BankMappingProfileInput } from '@/lib/validation';
+import { bankMappingProfileSchema, campusBankAccountSchema, type BankMappingProfileInput, type CampusBankAccountInput } from '@/lib/validation';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const CHUNK = 500;
@@ -58,7 +58,10 @@ export async function uploadBankStatement(formData: FormData): Promise<UploadRes
     p_storage_path: storagePath,
   });
   if (startError || !importId) {
-    if (startError?.message.startsWith('duplicate file')) return { error: startError.message };
+    if (startError?.message.startsWith('duplicate file')) {
+      const prior = startError.message.match(/imported (.*)\)/)?.[1];
+      return { error: prior ? `This file was already imported on ${prior}.` : 'This file was already imported.' };
+    }
     return { error: 'Could not start the import.' };
   }
 
@@ -102,6 +105,21 @@ export async function saveMappingProfile(input: BankMappingProfileInput): Promis
   const { error: assignError } = await supabase.rpc('assign_bank_mapping_profile', { p_bank_account_id: v.bankAccountId, p_profile_id: profileId });
   if (assignError) return { error: 'Profile saved, but it could not be assigned to the account.' };
 
+  revalidatePath('/fees/bank-statements');
+  return { error: null };
+}
+
+export async function addBankAccount(input: CampusBankAccountInput): Promise<{ error: string | null }> {
+  const parsed = campusBankAccountSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check the form.' };
+  const v = parsed.data;
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('add_campus_bank_account', { p_campus_id: v.campusId, p_bank_name: v.bankName, p_title: v.title, p_account_no: v.accountNo });
+  if (error) {
+    if (error.message.includes('BANK_ACCOUNT_EXISTS')) return { error: 'That account number is already added for this campus.' };
+    if (error.message.includes('FORBIDDEN')) return { error: 'Only the owner or an accountant can add bank accounts.' };
+    return { error: 'Could not add the bank account.' };
+  }
   revalidatePath('/fees/bank-statements');
   return { error: null };
 }

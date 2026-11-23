@@ -35,7 +35,10 @@ export async function uploadGatewaySettlement(formData: FormData): Promise<Settl
     p_storage_path: storagePath,
   });
   if (startError || !importId) {
-    if (startError?.message.startsWith('duplicate file')) return { error: startError.message };
+    if (startError?.message.startsWith('duplicate file')) {
+      const prior = startError.message.match(/imported (.*)\)/)?.[1];
+      return { error: prior ? `This file was already imported on ${prior}.` : 'This file was already imported.' };
+    }
     if (startError?.message.includes('FORBIDDEN')) return { error: 'You do not have permission to import settlement files.' };
     return { error: 'Could not start the import.' };
   }

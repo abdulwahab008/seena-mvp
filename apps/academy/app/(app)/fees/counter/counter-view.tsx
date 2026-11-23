@@ -139,7 +139,7 @@ export function CounterView() {
             </p>
             <p className="text-muted-foreground">
               Net payable PKR {(lookup.netPaisa / 100).toLocaleString()} · Outstanding PKR{' '}
-              {(lookup.outstandingPaisa / 100).toLocaleString()} · {lookup.status}
+              {(lookup.outstandingPaisa / 100).toLocaleString()} · {lookup.status.replace('_', ' ')}
             </p>
             <div className="flex flex-wrap items-end gap-2">
               <div className="space-y-1">

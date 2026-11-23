@@ -16,7 +16,7 @@ function mapError(message: string): string {
   const known: [string, string][] = [
     ['ENROLMENT_NOT_FOUND', 'No active enrolment found for that GR number.'],
     ['SETTLEMENT_ALREADY_OPEN', 'This student already has a settlement awaiting approval or disbursement.'],
-    ['CANNOT_APPROVE_OWN_PROPOSAL', 'You cannot approve a settlement you proposed.'],
+    ['CANNOT_APPROVE_OWN_PROPOSAL', 'Someone other than the proposer must approve or reject this settlement.'],
     ['OWNER_APPROVAL_NOT_REQUIRED', 'This settlement is under the threshold — the Principal decides it.'],
     ['SETTLEMENT_NOT_APPROVED', 'This settlement is not fully approved yet.'],
     ['LEDGER_MOVED_SINCE_PROPOSAL', 'The student\'s account changed since this was proposed. Reject it and propose again.'],

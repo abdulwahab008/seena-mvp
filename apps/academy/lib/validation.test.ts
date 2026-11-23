@@ -465,6 +465,15 @@ describe('createLateFeeRuleSchema', () => {
     expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'per_day' }).success).toBe(false);
   });
 
+  it('rejects a per_day rule whose amount box was left blank', () => {
+    expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'per_day', amountRupees: '', capRupees: '' }).success).toBe(false);
+  });
+
+  it('leaves a blank cap unset rather than zero', () => {
+    const r = createLateFeeRuleSchema.safeParse({ ...base, basis: 'flat', amountRupees: 200, capRupees: '' });
+    expect(r.success && r.data.capRupees).toBeUndefined();
+  });
+
   it('accepts a percentage rule with a percentage', () => {
     expect(createLateFeeRuleSchema.safeParse({ ...base, basis: 'percentage', percentage: 2 }).success).toBe(true);
   });
