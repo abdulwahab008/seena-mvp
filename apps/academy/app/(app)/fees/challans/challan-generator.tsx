@@ -157,7 +157,7 @@ export function ChallanGenerator({
                     </span>
                   </span>
                   <span className="text-muted-foreground" data-testid={`challan-net-${c.challanNo}`}>
-                    Net PKR {(c.netPaisa / 100).toLocaleString()} · {c.status}
+                    Net PKR {(c.netPaisa / 100).toLocaleString()} · {c.status.replace('_', ' ')}
                   </span>
                 </div>
                 {c.arrearsPaisa > 0 && (

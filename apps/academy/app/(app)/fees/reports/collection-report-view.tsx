@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { todayPk } from '@/lib/dates';
 import { buildCollectionReport, finaliseCashBookDay, type ReportDay } from './actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,8 +24,8 @@ const fromUiValue = (v: string) => (v === UI_ALL_SENTINEL ? ALL_CAMPUSES_VALUE :
 export function CollectionReportView({ campuses, canFinalise }: { campuses: CampusOption[]; canFinalise: boolean }) {
   const [pending, startTransition] = useTransition();
   const [campusId, setCampusId] = useState(campuses[0]?.id ?? ALL_CAMPUSES_VALUE);
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  const [from, setFrom] = useState(todayPk);
+  const [to, setTo] = useState(todayPk);
   const [grandTotalPaisa, setGrandTotalPaisa] = useState<number | null>(null);
   const [byDay, setByDay] = useState<ReportDay[]>([]);
   const [finalisedDate, setFinalisedDate] = useState<string | null>(null);
