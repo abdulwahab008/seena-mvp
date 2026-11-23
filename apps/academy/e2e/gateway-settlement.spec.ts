@@ -30,5 +30,5 @@ test('an accountant imports a gateway settlement file once', async ({ page }) =>
 
   await page.getByLabel('Settlement report (CSV)').setInputFiles({ name: 'jc.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await page.getByTestId('settlement-upload').click();
-  await expect(page.getByTestId('settlement-upload-message')).toContainText('duplicate file');
+  await expect(page.getByTestId('settlement-upload-message')).toContainText('This file was already imported on');
 });

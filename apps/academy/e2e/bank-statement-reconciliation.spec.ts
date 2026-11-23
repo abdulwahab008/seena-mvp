@@ -46,7 +46,7 @@ test('an accountant imports a bank statement once, reconciles it, and resolves a
 
   await page.locator('#file').setInputFiles({ name: 'scroll-again.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await page.getByRole('button', { name: 'Import statement' }).click();
-  await expect(page.getByTestId('upload-message')).toContainText('duplicate file (sha256 match, imported');
+  await expect(page.getByTestId('upload-message')).toContainText('This file was already imported on');
 
   await page.reload();
   await page.getByTestId('bank-import-row').first().getByRole('link').click();
