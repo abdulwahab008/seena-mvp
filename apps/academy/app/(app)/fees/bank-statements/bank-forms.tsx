@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { detectHeader } from '@/lib/bank/parse-statement';
-import { bankMappingProfileSchema, type BankMappingProfileInput } from '@/lib/validation';
-import { saveMappingProfile, uploadBankStatement } from './actions';
+import { bankMappingProfileSchema, campusBankAccountSchema, type BankMappingProfileInput, type CampusBankAccountInput } from '@/lib/validation';
+import { addBankAccount, saveMappingProfile, uploadBankStatement } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -119,6 +119,7 @@ export function ProfileForm({ accounts }: { accounts: Account[] }) {
             </option>
           ))}
         </select>
+        {form.formState.errors.bankAccountId && <p className="text-sm text-destructive">{form.formState.errors.bankAccountId.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="name">Profile name</Label>
@@ -160,6 +161,65 @@ export function ProfileForm({ accounts }: { accounts: Account[] }) {
       <div className="sm:col-span-2">
         <Button type="submit" disabled={pending || header.length === 0}>
           {pending ? 'Saving…' : 'Save and assign profile'}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+export function BankAccountForm({ campuses }: { campuses: { id: string; name: string }[] }) {
+  const [pending, startTransition] = useTransition();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const blank: CampusBankAccountInput = { campusId: campuses[0]?.id ?? '', bankName: '', title: '', accountNo: '' };
+  const form = useForm<CampusBankAccountInput>({ resolver: zodResolver(campusBankAccountSchema), defaultValues: blank });
+  const e = form.formState.errors;
+  const onSubmit = form.handleSubmit((v) =>
+    startTransition(async () => {
+      const r = await addBankAccount(v);
+      setServerError(r.error);
+      if (!r.error) {
+        toast.success('Bank account added.');
+        form.reset({ ...blank, campusId: v.campusId });
+      }
+    }),
+  );
+  return (
+    <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2" noValidate>
+      {campuses.length > 1 && (
+        <div className="space-y-2">
+          <Label htmlFor="baCampus">Campus</Label>
+          <select id="baCampus" className={selectClass} {...form.register('campusId')}>
+            {campuses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      <div className="space-y-2">
+        <Label htmlFor="baBank">Bank name</Label>
+        <Input id="baBank" placeholder="HBL" {...form.register('bankName')} />
+        {e.bankName && <p className="text-sm text-destructive">{e.bankName.message}</p>}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="baTitle">Account title</Label>
+        <Input id="baTitle" {...form.register('title')} />
+        {e.title && <p className="text-sm text-destructive">{e.title.message}</p>}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="baNo">Account number</Label>
+        <Input id="baNo" {...form.register('accountNo')} />
+        {e.accountNo && <p className="text-sm text-destructive">{e.accountNo.message}</p>}
+      </div>
+      {serverError && (
+        <p role="alert" className="text-sm text-destructive sm:col-span-2">
+          {serverError}
+        </p>
+      )}
+      <div className="sm:col-span-2">
+        <Button type="submit" disabled={pending}>
+          {pending ? 'Adding…' : 'Add bank account'}
         </Button>
       </div>
     </form>

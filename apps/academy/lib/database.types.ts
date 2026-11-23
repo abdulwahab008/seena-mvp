@@ -47054,6 +47054,10 @@ export type Database = {
         }
         Returns: string
       }
+      add_campus_bank_account: {
+        Args: { p_account_no: string; p_bank_name: string; p_campus_id: string; p_title: string }
+        Returns: string
+      }
       add_bank_statement_lines: {
         Args: { p_complete?: boolean; p_import_id: string; p_lines: Json }
         Returns: Json

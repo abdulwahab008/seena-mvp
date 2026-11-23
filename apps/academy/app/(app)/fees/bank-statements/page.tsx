@@ -1,18 +1,19 @@
 import Link from 'next/link';
 import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UploadForm, ProfileForm } from './bank-forms';
+import { BankAccountForm, UploadForm, ProfileForm } from './bank-forms';
 import { formatDatePk } from '@/lib/dates';
 
 export default async function BankStatementsPage() {
   const supabase = await supabaseServer();
-  const [accountsRes, importsRes] = await Promise.all([
+  const [accountsRes, importsRes, campusRes] = await Promise.all([
     supabase.from('campus_bank_account').select('id, bank_name, title, account_no, mapping_profile_id').order('bank_name'),
     supabase
       .from('bank_statement_import')
       .select('id, file_name, row_count, parsed_count, failed_count, status, created_at')
       .order('created_at', { ascending: false })
       .limit(30),
+    supabase.from('campus').select('id, name').eq('status', 'active').order('name'),
   ]);
   const accounts = (accountsRes.data ?? []).map((a) => ({ id: a.id, label: `${a.bank_name} · ${a.title} · ${a.account_no}`, hasProfile: Boolean(a.mapping_profile_id) }));
 
@@ -36,10 +37,31 @@ export default async function BankStatementsPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle className="text-base">Bank accounts</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {accounts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Add the account fees are paid into before importing its statements.</p>
+          ) : (
+            <ul className="space-y-1 text-sm">
+              {accounts.map((a) => (
+                <li key={a.id}>
+                  {a.label}
+                  {a.hasProfile ? '' : ' (no mapping profile yet)'}
+                </li>
+              ))}
+            </ul>
+          )}
+          <BankAccountForm campuses={campusRes.data ?? []} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-base">Column mapping profile</CardTitle>
         </CardHeader>
         <CardContent>
-          <ProfileForm accounts={accounts} />
+          <ProfileForm key={accounts.map((a) => a.id).join()} accounts={accounts} />
         </CardContent>
       </Card>
 

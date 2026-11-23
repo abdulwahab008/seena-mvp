@@ -61,7 +61,7 @@ function ExceptionCard({ importId, row }: { importId: string; row: ExceptionRow 
               {row.expected !== null ? ` · expected ${pkr(row.expected)}` : ''}
             </div>
           </div>
-          <Badge variant={row.resolved ? 'outline' : 'warning'}>{row.reason.replace('_', ' ')}</Badge>
+          <Badge variant={row.resolved ? 'outline' : 'warning'}>{row.reason.replace(/_/g, ' ')}</Badge>
         </div>
         {row.resolved ? (
           <p className="text-muted-foreground">Resolved — {row.note}</p>

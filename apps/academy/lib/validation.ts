@@ -2197,6 +2197,14 @@ export const paymentGatewayConfigSchema = z.object({
 });
 export type PaymentGatewayConfigInput = z.infer<typeof paymentGatewayConfigSchema>;
 
+export const campusBankAccountSchema = z.object({
+  campusId: z.string().uuid('Choose a campus'),
+  bankName: z.string().trim().min(1, 'Enter the bank name').max(100),
+  title: z.string().trim().min(1, 'Enter the account title').max(150),
+  accountNo: z.string().trim().min(1, 'Enter the account number').max(40),
+});
+export type CampusBankAccountInput = z.infer<typeof campusBankAccountSchema>;
+
 export const bankMappingProfileSchema = z
   .object({
     bankAccountId: z.string().uuid('Choose a bank account'),
