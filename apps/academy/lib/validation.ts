@@ -3493,7 +3493,7 @@ export const reportFilterSchema = z.object({
   value: z.string().trim().max(200).optional(),
 });
 export const reportDefinitionSchema = z.object({
-  columns: z.array(z.string()).default([]),
+  columns: z.array(z.string()).min(1, 'Choose at least one column').default([]),
   filters: z.array(reportFilterSchema).max(10, 'At most 10 filters').default([]),
   groupBy: z.array(z.string()).max(3, 'Group by at most 3 columns').default([]),
 });
