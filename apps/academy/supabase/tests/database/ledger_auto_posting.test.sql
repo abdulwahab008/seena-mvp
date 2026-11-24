@@ -1,5 +1,5 @@
 begin;
-select plan(25);
+select plan(26);
 
 select public.provision_tenant('test-autopost-co', 'Autopost Co', 'owner@autopost.test') as tenant_id \gset
 select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
@@ -62,6 +62,18 @@ select is((select l.credit from public.journal_entry e join public.journal_line 
             where e.source_id = :'adv_pay' and a.code = '2200'), 30000::bigint, 'an unallocated payment is held as fees received in advance');
 select is((select count(*)::int from public.journal_entry where source_id = :'adj_pay'), 0, 'an adjustment payment posts nothing');
 
+-- A refundable head (security deposit) is held for the family, not income.
+select id as deposit_head from public.fee_head where tenant_id = :'tenant_id' and is_refundable limit 1 \gset
+insert into public.fee_payment (tenant_id, campus_id, enrolment_id, amount_paisa, mode, reference_no)
+values (:'tenant_id', :'campus_id', :'later_enrol', 25000, 'cash', 'DEP-1') returning id as dep_pay \gset
+insert into public.fee_payment_allocation (payment_id, challan_id, fee_head_id, amount_paisa)
+select :'dep_pay', id, :'deposit_head', 25000 from public.fee_challan where enrolment_id = :'later_enrol' limit 1;
+set constraints all immediate;
+set constraints all deferred;
+select is((select string_agg(a.code || case when l.debit > 0 then 'Dr' else 'Cr' end, ',' order by a.code) from public.journal_entry e
+             join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id where e.source_id = :'dep_pay'),
+  '1000Dr,2300Cr', 'a security deposit credits Security deposits held, not income');
+
 -- An expense posts to its head's mapped account and to Cash when paid without a bank reference.
 insert into public.expense_head (tenant_id, code, name_en, name_ur, gl_code) values (:'tenant_id', 'ELEC', 'Electricity', 'بجلی', '5100') returning id as elec_head \gset
 set local role authenticated;
@@ -104,7 +116,7 @@ select is((select sum(l.debit)::bigint from public.journal_entry e join public.j
 insert into public.staff_loan_recovery (loan_id, amount_paisa) values (:'loan_id', 400000) returning id as rec_id \gset
 insert into public.staff_loan_recovery (loan_id, payroll_run_id, amount_paisa) values (:'loan_id', :'run_id', 100000);
 select is((select sum(l.credit)::bigint from public.journal_entry e join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id
-            where e.source_kind = 'staff_loan_recovery' and a.code = '1300'),
+            where e.source_kind = 'staff_loan_recovery' and e.tenant_id = :'tenant_id' and a.code = '1300'),
   400000::bigint, 'a lump-sum repayment credits Advances to staff; a payroll deduction does not post twice');
 insert into public.staff_loan (tenant_id, campus_id, staff_id, loan_type, principal_paisa, installment_paisa, repayment_start_month)
 values (:'tenant_id', :'campus_id', :'staff_id', 'security_deposit', 500000, 50000, date_trunc('month', current_date)::date) returning id as dep_id \gset

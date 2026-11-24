@@ -324,7 +324,7 @@ async function BalanceTab({ asOf }: { asOf: string }) {
 async function MappingTab({ canWrite, accounts }: { canWrite: boolean; accounts: { code: string; name: string; type: string }[] }) {
   const supabase = await supabaseServer();
   const [{ data: feeHeads }, { data: expenseHeads }] = await Promise.all([
-    supabase.from('fee_head').select('id, code, name_en, gl_code').eq('is_active', true).order('code'),
+    supabase.from('fee_head').select('id, code, name_en, gl_code').eq('is_active', true).eq('is_refundable', false).order('code'),
     supabase.from('expense_head').select('id, code, name_en, gl_code').eq('is_active', true).order('code'),
   ]);
   const options = (type: string) => accounts.filter((a) => a.type === type).map((a) => ({ code: a.code, label: `${a.code} · ${a.name}` }));

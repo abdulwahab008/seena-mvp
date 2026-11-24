@@ -4,6 +4,9 @@
 --   lump-sum repayment           Dr 1000 Cash                Cr 1300 (a security deposit paid in cash: Cr 2300)
 --   school's EOBI and PF share   Dr 5000 Salaries            Cr 2400, added to the payroll voucher
 --
+-- And a student's refundable fee (a security deposit) is money held for the
+-- family, not income: it now credits 2300 instead of the head's income account.
+--
 -- Monthly loan deductions already post through the payroll voucher, so only
 -- recoveries without a payroll run post here. A security deposit is collected,
 -- never paid out, so its creation posts nothing.
@@ -15,6 +18,37 @@ alter table public.journal_entry drop constraint journal_entry_source_kind_check
 alter table public.journal_entry add constraint journal_entry_source_kind_check
   check (source_kind in ('fee_payment', 'expense_voucher', 'payroll_accrual', 'payroll_payment', 'inv_sale', 'petty_cash', 'opening', 'year_close',
                          'staff_loan', 'staff_loan_recovery'));
+
+create or replace function app.fn_gl_post_fee_payment(p_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  p       public.fee_payment%rowtype;
+  v_lines jsonb;
+  v_alloc bigint;
+begin
+  select * into p from public.fee_payment where id = p_id;
+  if not found or p.mode = 'adjustment' then
+    return null;
+  end if;
+  select coalesce(sum(amount_paisa), 0) into v_alloc from public.fee_payment_allocation where payment_id = p_id;
+  select jsonb_build_array(jsonb_build_object('code', case p.mode when 'cash' then '1000' else '1010' end, 'debit', p.amount_paisa))
+         || coalesce(jsonb_agg(jsonb_build_object('code', x.code, 'credit', x.amount, 'memo', x.name)), '[]'::jsonb)
+         || jsonb_build_array(jsonb_build_object('code', '2200', 'credit', greatest(p.amount_paisa - v_alloc, 0), 'memo', 'Paid in advance'))
+    into v_lines
+    from (select case when h.is_refundable then '2300' else app.fn_gl_code(p.tenant_id, h.gl_code, '4000') end as code,
+                 string_agg(distinct h.name_en, ', ') as name, sum(fa.amount_paisa) as amount
+            from public.fee_payment_allocation fa
+            join public.fee_head h on h.id = fa.fee_head_id
+           where fa.payment_id = p_id
+           group by 1) x;
+  return app.fn_gl_post_system(p.tenant_id, p.value_date,
+    'Fee received' || coalesce(' · ' || p.reference_no, ''), 'fee_payment', p.id, v_lines);
+end;
+$$;
 
 create or replace function app.fn_gl_post_staff_loan(p_id uuid)
 returns uuid
