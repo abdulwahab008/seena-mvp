@@ -20,11 +20,11 @@ const OTHER = [
 export default async function TransportReportPage() {
   const today = todayPk();
   const supabase = await supabaseServer();
-  const [{ data: routes }, { data: allocations }, { data: assignments }] = await Promise.all([
+  const [{ data: routes }, { data: allocations }, { data: assignments }, { data: slabs }] = await Promise.all([
     supabase.from('transport_route').select('id, code, name, shift').eq('active', true).order('code'),
     supabase
       .from('transport_allocation')
-      .select('route_id, fare_slab:fare_slab_id(monthly_amount_paisa)')
+      .select('route_id, fare_slab:fare_slab_id(campus_id, code)')
       .lte('starts_on', today)
       .or(`ends_on.is.null,ends_on.gte.${today}`),
     supabase
@@ -32,11 +32,17 @@ export default async function TransportReportPage() {
       .select('route_id, vehicle:vehicle_id(reg_no, seat_capacity)')
       .lte('effective_from', today)
       .or(`effective_to.is.null,effective_to.gte.${today}`),
+    supabase.from('transport_fare_slab').select('campus_id, code, monthly_amount_paisa, effective_from').order('effective_from'),
   ]);
+  // A revised fare is a new slab row with the same code; the amount in force is the latest one already effective (as fn_slab_amount).
+  const fareToday = (slab: { campus_id: string; code: string } | null) => {
+    const rows = (slabs ?? []).filter((v) => slab && v.campus_id === slab.campus_id && v.code === slab.code);
+    return (rows.filter((v) => v.effective_from <= today).pop() ?? rows[0])?.monthly_amount_paisa ?? 0;
+  };
   const rows = (routes ?? []).map((r) => {
     const riders = (allocations ?? []).filter((a) => a.route_id === r.id);
     const vehicle = one((assignments ?? []).find((a) => a.route_id === r.id)?.vehicle);
-    const fares = riders.reduce((t, a) => t + (one(a.fare_slab)?.monthly_amount_paisa ?? 0), 0);
+    const fares = riders.reduce((t, a) => t + fareToday(one(a.fare_slab) ?? null), 0);
     const seats = vehicle?.seat_capacity ?? 0;
     return { ...r, riders: riders.length, vehicle: vehicle?.reg_no ?? '', seats, fares, occupancy: seats ? Math.round((riders.length / seats) * 100) : null };
   });
