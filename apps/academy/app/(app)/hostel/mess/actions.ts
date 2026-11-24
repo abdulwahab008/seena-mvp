@@ -7,10 +7,10 @@ import { messOffSchema, publishMessMenuSchema, saveMessMenuSchema } from '@/lib/
 import { loose, parseValues, rpcError, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
-  MENU_INCOMPLETE: 'All 21 meal slots (7 days x 3 meals) must be filled before publishing (MENU_INCOMPLETE).',
+  MENU_INCOMPLETE: 'All 21 meal slots (7 days x 3 meals) must be filled before publishing.',
   MENU_PUBLISHED: 'This week is already published and cannot be rewritten.',
   MESS_OFF_OVERLAP: 'This student already has a mess-off covering some of those dates.',
-  NOTICE_PERIOD_NOT_MET: 'Too late: mess-off must be requested before the notice period (NOTICE_PERIOD_NOT_MET).',
+  NOTICE_PERIOD_NOT_MET: 'Too late: mess-off must be requested before the notice period.',
   NOT_A_BOARDER: 'This student does not hold a hostel bed on those dates.',
   SPAN_INVALID: 'Check the dates (at most 120 days).',
   STUDENT_NOT_FOUND: 'No student has that GR number.',

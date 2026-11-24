@@ -38,13 +38,17 @@ export function VisitorForm() {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
-    if (!student) {
-      setError('Enter a valid GR number first.');
-      return;
-    }
     const visitId = crypto.randomUUID();
     const file = fd.get('photo') instanceof File && (fd.get('photo') as File).size > 0 ? (fd.get('photo') as File) : null;
     startTransition(async () => {
+      // Clicking submit straight from the GR field fires its blur lookup and this handler together, so look up here too.
+      const gr = String(fd.get('gr') ?? '').trim();
+      const visited = student ?? (gr ? await findStudent(gr) : null);
+      if (!visited) {
+        setError('Enter a valid GR number first.');
+        return;
+      }
+      setStudent(visited);
       let photoPath = '';
       if (file) {
         const mime = sniffMime(new Uint8Array(await file.slice(0, 16).arrayBuffer()));
@@ -57,7 +61,7 @@ export function VisitorForm() {
           return;
         }
         const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
-        photoPath = `${student.tenantId}/${student.campusId}/${visitId}.${ext}`;
+        photoPath = `${visited.tenantId}/${visited.campusId}/${visitId}.${ext}`;
         const { error: upErr } = await supabaseBrowser().storage.from('hostel-visitor-photos').upload(photoPath, file, { contentType: mime });
         if (upErr) {
           setError('The photograph could not be uploaded.');
@@ -65,7 +69,7 @@ export function VisitorForm() {
         }
       }
       const r = await logVisit({
-        studentId: student.id,
+        studentId: visited.id,
         visitId,
         visitorName: String(fd.get('visitorName') ?? ''),
         visitorCnic: String(fd.get('visitorCnic') ?? ''),

@@ -7,7 +7,7 @@ import { loose, parseValues, rpcError, type ActionResult } from '@/lib/transport
 
 const MESSAGES = {
   MESS_OFF_OVERLAP: 'You already have a request covering some of these days.',
-  NOTICE_PERIOD_NOT_MET: 'It is too late to request these days. Please ask earlier next time, or contact the hostel (NOTICE_PERIOD_NOT_MET).',
+  NOTICE_PERIOD_NOT_MET: 'It is too late to request these days. Please ask earlier next time, or contact the hostel.',
   NOT_A_BOARDER: 'This child does not hold a hostel bed on those dates.',
   SPAN_INVALID: 'Check the dates (at most 120 days).',
   FORBIDDEN: 'You cannot make this request.',

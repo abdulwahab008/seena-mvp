@@ -40,7 +40,7 @@ test('allocating the same bed twice is refused and a transfer moves the stay', a
   await form.getByLabel(/Bed code/).fill('IQ-105-B3');
   await form.getByLabel(/Starts on/).fill(second);
   await page.getByTestId('bed-form-submit').click();
-  await expect(page.getByTestId('bed-form-error')).toContainText('BED_TAKEN');
+  await expect(page.getByTestId('bed-form-error')).toContainText('That bed is already taken');
 
   const transfer = page.getByTestId('transfer-form');
   await transfer.getByLabel(/GR number/).fill(students![0]!.gr_number);

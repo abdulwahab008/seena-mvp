@@ -3151,6 +3151,10 @@ export const boardingBatchSchema = z.array(boardingEventSchema).min(1, 'Nothing 
 export const openLegSchema = z.object({ routeId: tuuid, legType: z.enum(['pickup', 'drop'], { message: 'Choose pickup or drop' }) });
 // FR-Q01
 const roomTypeEnum = z.enum(['single', 'double', 'triple', 'quad', 'dorm'], { message: 'Choose a room type' });
+// Hostel fees are priced by room type, so a "single" room with three beds would bill three students the single rate.
+const ROOM_TYPE_BEDS = { single: 1, double: 2, triple: 3, quad: 4 } as const;
+const bedsFitRoomType = (beds: number, type: z.infer<typeof roomTypeEnum>) => type === 'dorm' || ROOM_TYPE_BEDS[type] === beds;
+const BEDS_MISMATCH = { message: 'Beds per room must match the room type (single 1, double 2, triple 3, quad 4; a dorm can have any number)' };
 export const hostelBlockSchema = z.object({
   campusId: tuuid,
   code: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{1,6}$/, 'Code is 1 to 6 letters or digits'),
@@ -3161,20 +3165,20 @@ export const hostelBlockSchema = z.object({
   roomsPerFloor: tint('Rooms per floor', 1, 99).optional().or(z.literal('').transform(() => undefined)),
   roomType: roomTypeEnum,
   wardenStaffId: toptUuid,
-});
+}).refine((v) => bedsFitRoomType(v.bedsPerRoom, v.roomType), BEDS_MISMATCH);
 export const hostelRoomUpdateSchema = z.object({
   roomId: tuuid,
   bedCount: tint('Bed count', 1, 40),
   roomType: roomTypeEnum,
   status: z.enum(['in_service', 'out_of_service']),
-});
+}).refine((v) => bedsFitRoomType(v.bedCount, v.roomType), BEDS_MISMATCH);
 export const hostelAddRoomSchema = z.object({
   blockId: tuuid,
   roomNo: z.string().trim().regex(/^[A-Za-z0-9]{1,8}$/, 'Room number is letters and digits'),
   bedCount: tint('Bed count', 1, 40),
   roomType: roomTypeEnum,
   floor: tint('Floor', 0, 30).optional().or(z.literal('').transform(() => undefined)),
-});
+}).refine((v) => bedsFitRoomType(v.bedCount, v.roomType), BEDS_MISMATCH);
 export const hostelBlockUpdateSchema = z.object({ blockId: tuuid, name: z.string().trim().min(1).max(80), wardenStaffId: toptUuid, active: tbool });
 // FR-Q02
 export const hostelAllocateSchema = z.object({
