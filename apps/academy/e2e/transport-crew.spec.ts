@@ -41,7 +41,7 @@ test('crew register enforces licence rules and masks the CNIC from a class teach
   await form.getByLabel(/^CNIC/).fill('35202-1234567-1');
   await form.getByLabel(/^Role/).selectOption('conductor');
   await page.getByTestId('crew-form-submit').click();
-  await expect(page.getByTestId('crew-form-error')).toContainText('DUPLICATE_CNIC');
+  await expect(page.getByTestId('crew-form-error')).toContainText('A crew member with this CNIC already exists');
 
   // An LTV driver on the 42-seat bus is refused.
   await page.goto('/transport/assignments');
@@ -51,7 +51,7 @@ test('crew register enforces licence rules and masks the CNIC from a class teach
   await assign.getByLabel(/^Driver/).selectOption({ index: 1 });
   await assign.getByLabel(/^From/).fill('2030-08-10');
   await page.getByTestId('assign-form-submit').click();
-  await expect(page.getByTestId('assign-form-error')).toContainText('LICENCE_CLASS_INSUFFICIENT');
+  await expect(page.getByTestId('assign-form-error')).toContainText('licence class does not cover this vehicle');
 
   // A class teacher sees the CNIC masked.
   const teacherEmail = `teacher-${tenant.slice(0, 8)}@crew-e2e.test`;

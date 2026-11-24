@@ -6,8 +6,8 @@ import { assignTripSchema, endAssignmentSchema } from '@/lib/validation';
 import { loose, parseValues, rpcError, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
-  LICENCE_CLASS_INSUFFICIENT: 'The driver\'s licence class does not cover this vehicle (LICENCE_CLASS_INSUFFICIENT).',
-  LICENCE_EXPIRED: 'The driver\'s licence is expired on the trip dates (LICENCE_EXPIRED).',
+  LICENCE_CLASS_INSUFFICIENT: 'The driver\'s licence class does not cover this vehicle.',
+  LICENCE_EXPIRED: 'The driver\'s licence is expired on the trip dates.',
   NOT_A_DRIVER: 'The selected crew member is not a driver.',
   CREW_INACTIVE: 'The selected crew member is inactive.',
   ASSIGNMENT_CONFLICT: 'The route, vehicle or driver is already assigned for part of those dates.',

@@ -10,6 +10,7 @@ const MESSAGES = {
   VEHICLE_NOT_FOUND: 'That vehicle was not found.',
   FILE_PATH_INVALID: 'The uploaded file path is not valid for this school.',
   SETTING_INVALID: 'That setting value is not valid.',
+  chk_doc_dates: 'The expiry date cannot be before the issue date.',
 };
 
 export async function saveVehicle(values: Record<string, string>): Promise<ActionResult> {

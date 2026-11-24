@@ -13,6 +13,8 @@ const MESSAGES = {
   SLAB_NOT_FOUND: 'That fare slab was not found on this campus.',
   STOP_IN_USE: 'Students are allocated to this stop, so it cannot be removed.',
   AMOUNT_MUST_BE_POSITIVE: 'The fare must be above zero.',
+  transport_stop_lat_check: 'Latitude must be between -90 and 90.',
+  transport_stop_lng_check: 'Longitude must be between -180 and 180.',
 };
 
 export async function createRoute(values: Record<string, string>): Promise<ActionResult> {

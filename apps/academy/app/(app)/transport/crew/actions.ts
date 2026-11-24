@@ -6,7 +6,7 @@ import { transportCrewSchema } from '@/lib/validation';
 import { loose, parseValues, rpcError, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
-  DUPLICATE_CNIC: 'A crew member with this CNIC already exists (DUPLICATE_CNIC).',
+  DUPLICATE_CNIC: 'A crew member with this CNIC already exists.',
   CNIC_INVALID: 'CNIC must be 13 digits.',
   LICENCE_REQUIRED: 'A driver needs a licence number, class and expiry date.',
   STAFF_NOT_FOUND: 'That staff record was not found.',
