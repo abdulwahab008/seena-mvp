@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { todayPk } from './dates';
 
 // Mirrors the `tenant_slug_format` CHECK constraint in
 // supabase/migrations/20260729135955_foundation.sql — keep these in sync.
@@ -2979,7 +2980,7 @@ export const libraryCopySchema = z.object({
     .trim()
     .regex(/^(\d+(\.\d{1,2})?)?$/, 'Enter the cost in PKR, for example 850 or 850.50')
     .optional(),
-  acquiredOn: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, 'Choose a date').optional(),
+  acquiredOn: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, 'Choose a date').refine((v) => !v || v <= todayPk(), 'The acquisition date cannot be in the future').optional(),
 });
 export type LibraryCopyInput = z.input<typeof libraryCopySchema>;
 
