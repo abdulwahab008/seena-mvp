@@ -14,10 +14,10 @@ export default async function HostelReportsPage({ searchParams }: { searchParams
   const today = todayPk();
   const supabase = await supabaseServer();
   const [{ data: beds }, { data: stays }] = await Promise.all([
-    supabase.from('hostel_bed').select('id, status, room:room_id(block:block_id(id, name))'),
+    supabase.from('hostel_bed').select('id, room:room_id(block:block_id(id, name))'),
     supabase
       .from('hostel_allocation')
-      .select('enrolment_id, starts_on, student:student_id(id, name_en, gr_number), enrolment:enrolment_id(section:section_id(name, class_level:class_level_id(name_en))), bed:bed_id(bed_code, room:room_id(room_no, block:block_id(name)))')
+      .select('enrolment_id, bed_id, starts_on, student:student_id(id, name_en, gr_number), enrolment:enrolment_id(section:section_id(name, class_level:class_level_id(name_en))), bed:bed_id(bed_code, room:room_id(room_no, block:block_id(name)))')
       .lte('starts_on', today)
       .or(`ends_on.is.null,ends_on.gte.${today}`),
   ]);
@@ -47,13 +47,15 @@ export default async function HostelReportsPage({ searchParams }: { searchParams
     .sort((a, b) => a.bed.localeCompare(b.bed, undefined, { numeric: true }));
   const shown = owingOnly ? residents.filter((r) => r.owes > 0) : residents;
 
+  // A bed's stored status turns occupied as soon as a future stay is booked (a transfer next month), so count today's stays.
+  const occupiedToday = new Set((stays ?? []).map((s) => s.bed_id));
   const blocks = new Map<string, { name: string; beds: number; occupied: number }>();
   for (const b of beds ?? []) {
     const block = one(one(b.room)?.block);
     if (!block) continue;
     const e = blocks.get(block.id) ?? { name: block.name, beds: 0, occupied: 0 };
     e.beds++;
-    if (b.status === 'occupied') e.occupied++;
+    if (occupiedToday.has(b.id)) e.occupied++;
     blocks.set(block.id, e);
   }
   const occ = [...blocks.values()].sort((a, b) => a.name.localeCompare(b.name));

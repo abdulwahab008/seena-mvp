@@ -41,7 +41,7 @@ test('gate pass: guardian match, one open pass, override for an unknown collecto
   await form.getByLabel(/Collected by/).fill('Father One');
   await form.getByLabel(/Collector CNIC/).fill('35202-1234567-1');
   await page.getByTestId('pass-form-submit').click();
-  await expect(page.getByTestId('pass-form-error')).toContainText('PASS_ALREADY_OPEN');
+  await expect(page.getByTestId('pass-form-error')).toContainText('already has a pass out');
 
   // Return it, then an unknown collector needs the override reason.
   await page.getByTestId('return-GP-2026-00001').click();

@@ -8,9 +8,9 @@ import { karachiLocalToIso } from '@/lib/hostel/gate-pass';
 import { loose, parseValues, rpcError, type ActionResult } from '@/lib/transport/rpc';
 
 const MESSAGES = {
-  PASS_ALREADY_OPEN: 'This student already has a pass out (PASS_ALREADY_OPEN).',
+  PASS_ALREADY_OPEN: 'This student already has a pass out.',
   NOT_A_BOARDER: 'This student has no hostel stay on that date.',
-  GUARDIAN_NOT_VERIFIED: 'The collector\'s CNIC matches no guardian of this student. Only a Principal can release a student to them, with a reason (GUARDIAN_NOT_VERIFIED).',
+  GUARDIAN_NOT_VERIFIED: 'The collector\'s CNIC matches no guardian of this student. Only a Principal can release a student to them, with a reason.',
   OVERRIDE_REASON_REQUIRED: 'Type the reason for releasing the student to someone who is not a recorded guardian.',
   CNIC_INVALID: 'CNIC must be 13 digits.',
   SPAN_INVALID: 'The return time must be after the departure.',

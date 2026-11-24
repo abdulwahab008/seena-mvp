@@ -40,6 +40,7 @@ export default async function HostelFeesPage({ searchParams }: { searchParams: P
     }
   }
   const n = (k: string) => Number((explain as Record<string, unknown>)?.[k] ?? 0);
+  const housedDays = ((explain?.segments ?? []) as { days?: number }[]).reduce((t, g) => t + Number(g.days ?? 0), 0);
 
   return (
     <div className="space-y-6">
@@ -132,7 +133,7 @@ export default async function HostelFeesPage({ searchParams }: { searchParams: P
               <dt className="text-muted-foreground">Student</dt>
               <dd>{String(explain.name)}</dd>
               <dt className="text-muted-foreground">Room fee</dt>
-              <dd data-testid="explain-room">{pkr(n('room_paisa'))} for {n('days_in_month')} days in month, less concession {pkr(n('room_concession_paisa'))} = {pkr(n('room_net_paisa'))}</dd>
+              <dd data-testid="explain-room">{pkr(n('room_paisa'))} for {housedDays} of {n('days_in_month')} days in the month, less concession {pkr(n('room_concession_paisa'))} = {pkr(n('room_net_paisa'))}</dd>
               <dt className="text-muted-foreground">Mess</dt>
               <dd data-testid="explain-mess">{n('mess_days')} billable days x {pkr(n('mess_rate_paisa'))} = {pkr(n('mess_paisa'))}, less concession {pkr(n('mess_concession_paisa'))} = {pkr(n('mess_net_paisa'))}</dd>
             </dl>

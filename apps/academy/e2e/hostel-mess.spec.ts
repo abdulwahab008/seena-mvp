@@ -38,7 +38,7 @@ test('publish the weekly menu; a parent requests mess-off with and without enoug
     }
   }
   await page.getByTestId('publish-menu').click();
-  await expect(page.getByTestId('menu-error')).toContainText('MENU_INCOMPLETE');
+  await expect(page.getByTestId('menu-error')).toContainText('All 21 meal slots');
   await page.getByLabel('Sunday dinner', { exact: true }).fill('Biryani');
   await page.getByTestId('publish-menu').click();
   await expect(page.getByText(/published/i).first()).toBeVisible();
@@ -55,7 +55,7 @@ test('publish the weekly menu; a parent requests mess-off with and without enoug
   await form.getByLabel('First day away').fill(soon);
   await form.getByLabel('Last day away').fill(soon);
   await form.locator('button[type="submit"]').click();
-  await expect(form.getByRole('alert')).toContainText('NOTICE_PERIOD_NOT_MET');
+  await expect(form.getByRole('alert')).toContainText('before the notice period');
 
   const later = new Date(Date.now() + 6 * 86_400_000).toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' });
   await form.getByLabel('First day away').fill(later);

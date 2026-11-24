@@ -7,9 +7,9 @@ import { hostelAllocateSchema } from '@/lib/validation';
 import { loose, parseValues, rpcError, todayPk, type ActionResult, type LooseClient } from '@/lib/transport/rpc';
 
 const MESSAGES = {
-  BED_TAKEN: 'That bed is already taken for those dates (BED_TAKEN).',
+  BED_TAKEN: 'That bed is already taken for those dates.',
   STUDENT_ALREADY_HOUSED: 'This student already has a bed for those dates.',
-  GENDER_MISMATCH: 'This block is for the other gender (GENDER_MISMATCH).',
+  GENDER_MISMATCH: 'This block is for the other gender.',
   ROOM_OUT_OF_SERVICE: 'That room is out of service for new stays.',
   BED_RETIRED: 'That bed has been retired.',
   NO_ACTIVE_ENROLMENT: 'The student has no active enrolment on this campus.',
