@@ -612,7 +612,7 @@ export function ExpenseChartDesk({
               <SelectContent>
                 {sessions.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.name} {s.status === 'current' ? '(Current)' : ''}
+                    {s.name} {s.status === 'active' ? '(Current)' : ''}
                   </SelectItem>
                 ))}
               </SelectContent>
