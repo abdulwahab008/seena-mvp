@@ -49,7 +49,7 @@ export async function runDepreciationAction(input: Record<string, string>): Prom
   if (error) return { error: mapRpcError(error.message, MESSAGES) };
   revalidatePath('/assets');
   const r = data as { status: string; posted: number };
-  return { error: null, message: r.status === 'ALREADY_POSTED' ? 'ALREADY_POSTED: this period was already run, nothing was posted.' : `Posted ${r.posted} depreciation entries.` };
+  return { error: null, message: r.status === 'ALREADY_POSTED' ? 'This month was already run, so nothing was posted.' : `Posted ${r.posted} depreciation entries.` };
 }
 
 export async function disposeAssetAction(input: Record<string, string>): Promise<ActionError> {

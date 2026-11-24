@@ -3368,7 +3368,7 @@ export const assetSchema = z
   .refine((v) => v.salvagePkr <= v.costPkr, { message: 'Salvage cannot exceed the cost', path: ['salvagePkr'] })
   .refine((v) => v.method !== 'RB' || (typeof v.rate === 'number' && v.rate > 0), { message: 'Enter the annual rate for reducing balance', path: ['rate'] });
 export type AssetInput = z.input<typeof assetSchema>;
-export const depreciationRunSchema = z.object({ period: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Choose a month') });
+export const depreciationRunSchema = z.object({ period: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])(-\d{2})?$/, 'Enter a month as YYYY-MM, for example 2026-10') });
 // FR-R04: custody. The custodian is one select whose value is "<type>:<uuid>".
 export const custodyIssueSchema = z.object({
   assetId: z.string().uuid('Choose an asset'),
