@@ -1,5 +1,5 @@
 begin;
-select plan(21);
+select plan(25);
 
 select public.provision_tenant('test-autopost-co', 'Autopost Co', 'owner@autopost.test') as tenant_id \gset
 select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
@@ -79,16 +79,36 @@ insert into public.staff (tenant_id, campus_id, employee_code, cnic, gender, ful
 values (:'tenant_id', :'campus_id', 'E-1', '35201-1234567-1', 'female', 'Teacher One') returning id as staff_id \gset
 insert into public.payroll_run (tenant_id, campus_id, period_month) values (:'tenant_id', :'campus_id', date_trunc('month', current_date)::date) returning id as run_id \gset
 insert into public.payroll_run_line (payroll_run_id, staff_id, basic_paisa, gross_paisa, attendance_deduction_paisa, tax_withholding_paisa, loan_recovery_paisa, net_paisa)
-values (:'run_id', :'staff_id', 6000000, 6000000, 200000, 300000, 500000, 5000000);
+values (:'run_id', :'staff_id', 6000000, 6000000, 200000, 300000, 500000, 5000000) returning id as line_id \gset
+insert into public.payroll_run_line_component (line_id, code, name_en, component_type, amount_paisa)
+values (:'line_id', 'EOBI_ER', 'EOBI Employer Contribution', 'employer_contribution', 130000);
 update public.payroll_run set status = 'locked', locked_at = now() where id = :'run_id';
 select is((select l.debit from public.journal_entry e join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id
             where e.source_kind = 'payroll_accrual' and e.source_id = :'run_id' and a.code = '5000'),
-  5800000::bigint, 'a locked payroll accrues salaries earned (gross less attendance deductions)');
+  5930000::bigint, 'a locked payroll accrues salaries earned (gross less attendance deductions) plus the school''s EOBI share');
+select is((select l.credit from public.journal_entry e join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id
+            where e.source_kind = 'payroll_accrual' and e.source_id = :'run_id' and a.code = '2400' and l.memo like 'School%'),
+  130000::bigint, 'and owes the school''s EOBI share');
 select is((select l.credit from public.journal_entry e join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id
             where e.source_kind = 'payroll_accrual' and e.source_id = :'run_id' and a.code = '2100'),
   5000000::bigint, 'with net pay owed to staff');
 update public.payroll_run set status = 'paid' where id = :'run_id';
 select is((select count(*)::int from public.journal_entry where source_kind = 'payroll_payment' and source_id = :'run_id'), 1, 'paying the run posts the bank payment');
+
+-- Staff loans: paid out in cash, repaid in cash; a security deposit is never paid out.
+insert into public.staff_loan (tenant_id, campus_id, staff_id, principal_paisa, installment_paisa, repayment_start_month)
+values (:'tenant_id', :'campus_id', :'staff_id', 1000000, 100000, date_trunc('month', current_date)::date) returning id as loan_id \gset
+select is((select sum(l.debit)::bigint from public.journal_entry e join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id
+            where e.source_kind = 'staff_loan' and e.source_id = :'loan_id' and a.code = '1300'),
+  1000000::bigint, 'a staff loan debits Advances to staff');
+insert into public.staff_loan_recovery (loan_id, amount_paisa) values (:'loan_id', 400000) returning id as rec_id \gset
+insert into public.staff_loan_recovery (loan_id, payroll_run_id, amount_paisa) values (:'loan_id', :'run_id', 100000);
+select is((select sum(l.credit)::bigint from public.journal_entry e join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id
+            where e.source_kind = 'staff_loan_recovery' and a.code = '1300'),
+  400000::bigint, 'a lump-sum repayment credits Advances to staff; a payroll deduction does not post twice');
+insert into public.staff_loan (tenant_id, campus_id, staff_id, loan_type, principal_paisa, installment_paisa, repayment_start_month)
+values (:'tenant_id', :'campus_id', :'staff_id', 'security_deposit', 500000, 50000, date_trunc('month', current_date)::date) returning id as dep_id \gset
+select is((select count(*)::int from public.journal_entry where source_kind = 'staff_loan' and source_id = :'dep_id'), 0, 'a security deposit posts nothing when it is set up');
 
 -- Shop: a cash sale is income; its credit note reverses it.
 insert into public.inv_store (tenant_id, campus_id, name) values (:'tenant_id', :'campus_id', 'Shop') returning id as store_id \gset
@@ -106,7 +126,7 @@ set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', :'uid', 'tenant_id', :'tenant_id', 'app_role', 'accountant', 'campus_ids', json_build_array(:'campus_id'))::text, true);
 select is((select sum(debit) - sum(credit) from public.trial_balance(current_date))::bigint, 0::bigint, 'the trial balance still balances');
 select is((select sum(case when type = 'income' then amount else -amount end) from public.income_statement(current_date - 1, current_date))::bigint,
-  (500000 + 500000 + 60000 - 120000 - 5800000)::bigint, 'the income statement nets income against expenses');
+  (500000 + 500000 + 60000 - 120000 - 5930000)::bigint, 'the income statement nets income against expenses');
 select is((select sum(case when type = 'asset' then amount else -amount end) from public.balance_sheet(current_date))::bigint, 0::bigint,
   'assets equal liabilities plus equity');
 
