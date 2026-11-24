@@ -56,7 +56,7 @@ export default async function ExpenseChartPage({
     supabase
       .from('academic_session')
       .select('id, name, status')
-      .order('start_date', { ascending: false })
+      .order('starts_on', { ascending: false })
       .limit(10),
   ]);
 

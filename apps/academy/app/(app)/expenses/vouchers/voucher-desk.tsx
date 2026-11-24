@@ -294,7 +294,7 @@ export function VoucherDesk({
                 <div className="mt-1 text-sm" data-testid={`voucher-required-${v.id}`}>
                   Requires: {requiredApproverLabel(v.required_approver_role)}
                 </div>
-                {v.possible_threshold_split ? (
+                {v.possible_threshold_split && (v.split_sibling_count ?? 0) > 0 ? (
                   <div className="mt-1 text-sm font-medium" data-testid={`voucher-split-${v.id}`}>
                     Possible threshold split — {v.split_sibling_count} other voucher
                     {v.split_sibling_count === 1 ? '' : 's'} for this payee, head and date, PKR{' '}
