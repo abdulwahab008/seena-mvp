@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDateTimePk } from '@/lib/dates';
 import { formatInt, formatPaisa } from '@/lib/reports/pdf-layout';
 
 export type GridColumn = { key: string; label: string; type: string };
@@ -10,6 +11,7 @@ function cell(type: string, v: string | number | boolean | null): string {
   if (type === 'money' && typeof v === 'number') return formatPaisa(v);
   if (type === 'int' && typeof v === 'number') return formatInt(v);
   if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (type === 'timestamptz' && typeof v === 'string') return formatDateTimePk(v);
   return String(v);
 }
 
