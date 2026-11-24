@@ -1,5 +1,5 @@
 begin;
-select plan(26);
+select plan(31);
 
 select public.provision_tenant('test-autopost-co', 'Autopost Co', 'owner@autopost.test') as tenant_id \gset
 select id as campus_id from public.campus where tenant_id = :'tenant_id' \gset
@@ -132,6 +132,29 @@ insert into public.inv_sale (tenant_id, campus_id, store_id, serial, financial_y
 values (:'tenant_id', :'campus_id', :'store_id', 'S-2', 2026, :'later_student', 'GR1', 'Later Payer', 'fee_ledger', 99000) returning id as ledger_sale \gset
 select is((select balance from public.trial_balance(current_date) where code = '4300' and account_id in (select id from public.gl_account where tenant_id = :'tenant_id')), 60000::bigint, 'cash sales less refunds are shop income');
 select is((select count(*)::int from public.journal_entry where source_id = :'ledger_sale'), 0, 'a sale charged to fees waits for the fee payment');
+
+-- Fixed assets: bought from the bank, a capital repair, a month's depreciation, then sold at a loss.
+insert into public.asset (tenant_id, campus_id, tag_no, name, category, purchased_on, capitalised_cost, useful_life_months, salvage_value, method)
+values (:'tenant_id', :'campus_id', 'FA-1', 'Projector', 'it', current_date - 90, 1000000, 60, 0, 'SL') returning id as asset_id \gset
+select is((select string_agg(a.code || case when l.debit > 0 then 'Dr' else 'Cr' end || (l.debit + l.credit), ',' order by a.code) from public.journal_entry e
+             join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id where e.source_kind = 'asset_purchase' and e.source_id = :'asset_id'),
+  '1010Cr1000000,1500Dr1000000', 'registering an asset capitalises it from the bank');
+update public.asset set capitalised_cost = capitalised_cost + 200000 where id = :'asset_id';
+insert into public.asset_maintenance (tenant_id, campus_id, asset_id, reported_on, fault, cost, is_capitalised)
+values (:'tenant_id', :'campus_id', :'asset_id', current_date - 80, 'New lamp unit', 200000, true) returning id as repair_id \gset
+select is((select count(*)::int from public.journal_entry where source_kind = 'asset_improvement' and source_id = :'repair_id'), 1, 'a capital repair is added to the asset at cost');
+insert into public.asset_depreciation_entry (tenant_id, campus_id, asset_id, period, amount, opening_wdv, closing_wdv)
+values (:'tenant_id', :'campus_id', :'asset_id', date_trunc('month', current_date - 70)::date, 100000, 1200000, 1100000) returning id as dep_id \gset
+select is((select string_agg(a.code || case when l.debit > 0 then 'Dr' else 'Cr' end, ',' order by a.code) from public.journal_entry e
+             join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id where e.source_kind = 'asset_depreciation' and e.source_id = :'dep_id'),
+  '1590Cr,5700Dr', 'depreciation is an expense against accumulated depreciation');
+insert into public.asset_disposal (tenant_id, campus_id, asset_id, disposed_on, proceeds, nbv_at_disposal, gain_loss)
+values (:'tenant_id', :'campus_id', :'asset_id', current_date - 30, 1000000, 1100000, -100000) returning id as disposal_id \gset
+select is((select string_agg(a.code || case when l.debit > 0 then 'Dr' else 'Cr' end || (l.debit + l.credit), ',' order by a.code) from public.journal_entry e
+             join public.journal_line l on l.entry_id = e.id join public.gl_account a on a.id = l.account_id where e.source_kind = 'asset_disposal' and e.source_id = :'disposal_id'),
+  '1000Dr1000000,1500Cr1200000,1590Dr100000,5800Dr100000', 'a sale clears cost and depreciation and books the loss');
+select is((select sum(l.debit - l.credit)::bigint from public.journal_line l join public.gl_account a on a.id = l.account_id where a.tenant_id = :'tenant_id' and a.code in ('1500', '1590')),
+  0::bigint, 'once sold, the asset leaves nothing on the balance sheet');
 
 -- Statements, as the school's accountant: RLS is what scopes them to one school.
 set local role authenticated;
