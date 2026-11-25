@@ -18,6 +18,9 @@ create trigger staff_bank_account_audit after insert or update or delete on publ
   for each row execute function app.tg_audit_row();
 
 alter table public.staff_bank_account enable row level security;
+create policy portal_roles_blocked on public.staff_bank_account as restrictive for all to authenticated
+  using ((select app.auth_role()) not in ('parent', 'student'))
+  with check ((select app.auth_role()) not in ('parent', 'student'));
 create policy staff_bank_account_read on public.staff_bank_account
   for select to authenticated
   using (
