@@ -139,6 +139,10 @@ export async function postOpeningBalances(input: unknown): Promise<{ error: stri
 
 export async function closeYear(yearEnd: string): Promise<{ error: string | null }> {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(yearEnd)) return { error: 'Choose the last day of the year.' };
+  // A year end is a month end (30 June for most schools); a mid-month close would lock half a month for good.
+  const next = new Date(`${yearEnd}T00:00:00Z`);
+  next.setUTCDate(next.getUTCDate() + 1);
+  if (next.getUTCDate() !== 1) return { error: 'A financial year ends on the last day of a month, e.g. 30 June.' };
   const supabase = await supabaseServer();
   const { error } = await supabase.rpc('close_financial_year', { p_year_end: yearEnd });
   if (error) return { error: message(error.message) };
