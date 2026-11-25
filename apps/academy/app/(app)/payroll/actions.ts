@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase/server';
 import { todayPk } from '@/lib/dates';
-import { getCurrentActor } from '@/lib/hr/current-role';
+import { getCurrentActor, one } from '@/lib/hr/current-role';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -91,6 +91,7 @@ export type PayrollRunLineRow = {
   staff_id: string;
   staff_name: string;
   employee_code: string;
+  bank: { bank_name: string; account_title: string; account_no: string } | null;
   basic_paisa: number;
   gross_paisa: number;
   attendance_deduction_paisa: number;
@@ -124,6 +125,7 @@ function parseDbError(e: unknown): string {
     if (msg.includes('PAYROLL_RUN_ALREADY_LOCKED') || msg.includes('PAYROLL_RUN_LOCKED')) return 'This payroll run is locked and cannot be recalculated or modified.';
     if (msg.includes('uq_salary_component_tenant_code')) return 'A salary component with that code already exists.';
     if (msg.includes('row-level security')) return 'Your role cannot make this change.';
+    if (msg.includes('RUN_NOT_APPROVED')) return 'Submit the run and approve it before locking.';
     return msg;
   }
   return String(e);
@@ -613,7 +615,7 @@ export async function getPayrollRunDetails(runId: string): Promise<{
     .from('payroll_run_line')
     .select(`
       *,
-      staff:staff_id (id, full_name, employee_code),
+      staff:staff_id (id, full_name, employee_code, bank:staff_bank_account (bank_name, account_title, account_no)),
       components:payroll_run_line_component (*)
     `)
     .eq('payroll_run_id', runId)
@@ -631,6 +633,7 @@ export async function getPayrollRunDetails(runId: string): Promise<{
     staff_id: l.staff_id,
     staff_name: l.staff?.full_name || 'Staff Member',
     employee_code: l.staff?.employee_code || '',
+    bank: one(l.staff?.bank) ?? null,
     basic_paisa: l.basic_paisa,
     gross_paisa: l.gross_paisa,
     attendance_deduction_paisa: l.attendance_deduction_paisa,

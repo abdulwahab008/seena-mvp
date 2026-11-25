@@ -33,6 +33,8 @@ test('payslips are generated for a locked run and guarded for everyone else', as
   const { count: none } = await db.from('payslip').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId);
   expect(none).toBe(0);
 
+  await o.rpc('fn_submit_payroll_for_approval', { p_run_id: runId as string });
+  await o.rpc('fn_approve_payroll_run', { p_run_id: runId as string });
   const { error: lockErr } = await o.rpc('fn_lock_payroll_run', { p_run_id: runId as string });
   expect(lockErr).toBeNull();
 

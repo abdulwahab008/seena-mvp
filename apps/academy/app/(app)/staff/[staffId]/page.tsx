@@ -12,7 +12,7 @@ import { ActionButton } from '@/components/spec-form';
 import { CONTRACT_TYPE_LABEL } from '@/lib/validation';
 import { formatDatePk, todayPk } from '@/lib/dates';
 import { pkr } from '@/lib/rpc-action';
-import { addStaffContract, confirmProbation, linkStaffLogin } from './contract-actions';
+import { addStaffContract, confirmProbation, linkStaffLogin, setStaffBankAccount } from './contract-actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +77,10 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
 
   // FR-D16: an exit in progress (or the chance to start one) for HR.
   const canHr = isHrWriter(actor?.role);
+  const canBank = canHr || actor?.role === 'accountant';
+  const { data: bank } = canBank
+    ? await supabase.from('staff_bank_account').select('bank_name, account_title, account_no').eq('staff_id', staffId).maybeSingle()
+    : { data: null };
   const { data: openExit } = canHr ? await supabase.from('staff_exit').select('id, status, exit_type, last_working_date').eq('staff_id', staffId).neq('status', 'completed').maybeSingle() : { data: null };
 
   const { data: contracts } = canHr
@@ -221,6 +225,31 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ s
                   { name: 'grossSalaryPkr', label: 'Gross salary per month (PKR)', type: 'number', required: true },
                   { name: 'noticeDays', label: 'Notice period (days)', type: 'number' },
                   { name: 'periodsPerWeek', label: 'Periods per week (teachers)', type: 'number' },
+                ]}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {canBank && (
+        <Card data-testid="bank-card">
+          <CardHeader>
+            <CardTitle className="text-base">Salary bank account</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              {bank ? `${bank.bank_name} · ${bank.account_title} · ${bank.account_no}` : 'No bank account on file, so this person shows as MISSING on the payroll bank file.'}
+            </p>
+            <div className="max-w-xl">
+              <ActionForm
+                testId="bank-form"
+                submitLabel={bank ? 'Update bank account' : 'Save bank account'}
+                action={setStaffBankAccount.bind(null, staffId)}
+                fields={[
+                  { name: 'bankName', label: 'Bank', required: true, defaultValue: bank?.bank_name ?? '' },
+                  { name: 'accountTitle', label: 'Account title', required: true, defaultValue: bank?.account_title ?? staff.full_name },
+                  { name: 'accountNo', label: 'IBAN or account number', required: true, placeholder: 'PK36MEZN0000001234567890', defaultValue: bank?.account_no ?? '' },
                 ]}
               />
             </div>

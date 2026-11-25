@@ -247,6 +247,7 @@ begin
   select id into v_run_id from public.payroll_run
   where campus_id = '22222222-2222-2222-2222-222222222222' and period_month = '2026-08-01';
 
+  update public.payroll_run set status = 'pending_approval', approved_at = now() where id = v_run_id;
   perform public.fn_lock_payroll_run(v_run_id);
 end $$;
 

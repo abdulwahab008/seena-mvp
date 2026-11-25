@@ -45,3 +45,27 @@ export async function linkStaffLogin(staffId: string, values: Record<string, str
   revalidatePath(`/staff/${staffId}`);
   return { error: null, message: userId ? 'Login linked.' : 'Login unlinked.' };
 }
+
+export async function setStaffBankAccount(staffId: string, values: Record<string, string>): Promise<ActionResult> {
+  const bankName = (values.bankName ?? '').trim();
+  const accountTitle = (values.accountTitle ?? '').trim();
+  const accountNo = (values.accountNo ?? '').trim();
+  if (!bankName || !accountTitle || !accountNo) return { error: 'Enter the bank, the account title and the account number.' };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc('set_staff_bank_account', {
+    p_staff_id: staffId,
+    p_bank_name: bankName,
+    p_account_title: accountTitle,
+    p_account_no: accountNo,
+  });
+  if (error)
+    return {
+      error: rpcError(error.message, {
+        ...MESSAGES,
+        ACCOUNT_NO_INVALID: 'Enter a Pakistani IBAN (PK + 22 characters) or an account number of 6 to 20 digits.',
+        BANK_FIELDS_REQUIRED: 'Enter the bank and the account title.',
+      }),
+    };
+  revalidatePath(`/staff/${staffId}`);
+  return { error: null, message: 'Bank account saved. It goes on the payroll bank file from the next export.' };
+}
