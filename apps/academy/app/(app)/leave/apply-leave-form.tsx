@@ -53,11 +53,22 @@ export function ApplyLeaveForm({
   const [activeBalances, setActiveBalances] = useState<Record<string, number>>(balances);
 
   // Sync with incoming props when viewing the current staff member
+  // Another staff member's balances are fetched, so refetch them when the page data refreshes (a new policy, say).
   useEffect(() => {
     if (!selectedStaffId || selectedStaffId === staffId) {
       setActiveLeaveTypes(leaveTypes);
       setActiveBalances(balances);
+      return;
     }
+    let cancelled = false;
+    getStaffLeaveBalances(selectedStaffId).then((res) => {
+      if (cancelled || res.error) return;
+      if (res.leaveTypes) setActiveLeaveTypes(res.leaveTypes);
+      if (res.balances) setActiveBalances(res.balances);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [leaveTypes, balances, selectedStaffId, staffId]);
 
   const {
