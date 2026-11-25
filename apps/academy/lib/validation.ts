@@ -727,9 +727,9 @@ export type SuggestSubstitutesInput = z.infer<typeof suggestSubstitutesSchema>;
 // supabase/migrations/20260731340000_academic_structure_rollover.sql.
 export const cloneAcademicStructureSchema = z
   .object({
-    campusId: z.string().uuid('Choose a campus'),
-    fromSessionId: z.string().uuid('Choose the source session'),
-    toSessionId: z.string().uuid('Choose the target session'),
+    campusId: z.string({ required_error: 'Choose a campus' }).uuid('Choose a campus'),
+    fromSessionId: z.string({ required_error: 'Choose the source session' }).uuid('Choose the source session'),
+    toSessionId: z.string({ required_error: 'Choose the target session' }).uuid('Choose the target session'),
   })
   .refine((v) => v.fromSessionId !== v.toSessionId, {
     message: 'The source and target sessions must be different',
