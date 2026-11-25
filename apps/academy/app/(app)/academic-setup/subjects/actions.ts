@@ -52,7 +52,7 @@ export async function saveSubject(
       if (error.message.includes('uq_subject_tenant_code')) {
         return { error: `Subject code "${parsed.data.code}" is already in use.` };
       }
-      return { error: error.message || 'Failed to update subject.' };
+      return { error: 'Could not update the subject. Try again.' };
     }
   } else {
     // Create new subject
@@ -72,7 +72,7 @@ export async function saveSubject(
       if (error.message.includes('uq_subject_tenant_code')) {
         return { error: `Subject code "${parsed.data.code}" already exists.` };
       }
-      return { error: error.message || 'Failed to create subject.' };
+      return { error: 'Could not create the subject. Try again.' };
     }
 
     revalidatePath('/academic-setup/subjects');
@@ -103,7 +103,7 @@ export async function toggleSubjectActive(
     if (error.message.includes('FORBIDDEN')) {
       return { error: 'You do not have permission to modify subjects.' };
     }
-    return { error: error.message || 'Failed to update subject status.' };
+    return { error: 'Could not change the subject status. Try again.' };
   }
 
   revalidatePath('/academic-setup/subjects');

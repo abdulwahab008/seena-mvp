@@ -277,6 +277,8 @@ function WriteSlotForm({
               value={field.value || NONE}
               onValueChange={(v) => {
                 staffTouchedRef.current = true;
+                setNeedsOverride(false);
+                setOverrideReason('');
                 field.onChange(v === NONE ? undefined : v);
               }}
             >
