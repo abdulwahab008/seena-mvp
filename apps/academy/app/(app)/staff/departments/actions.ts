@@ -43,7 +43,9 @@ export async function upsertDepartmentAction(formData: FormData): Promise<{
     if (error.message.includes('FORBIDDEN')) {
       return { error: 'You do not have permission to manage academic departments.' };
     }
-    return { error: error.message || 'Failed to save academic department.' };
+    if (error.message.includes('DEPARTMENT_CODE_EXISTS')) return { error: `The code "${parsed.data.code.toUpperCase()}" is already used by another department.` };
+    if (error.message.includes('DEPARTMENT_NOT_FOUND')) return { error: 'That department no longer exists.' };
+    return { error: 'Could not save the department. Try again.' };
   }
 
   revalidatePath('/staff/departments');
@@ -67,7 +69,7 @@ export async function deleteDepartmentAction(departmentId: string): Promise<{ er
     if (error.message.includes('FORBIDDEN')) {
       return { error: 'You do not have permission to delete academic departments.' };
     }
-    return { error: error.message || 'Failed to delete academic department.' };
+    return { error: 'Could not delete the department. Try again.' };
   }
 
   revalidatePath('/staff/departments');
@@ -89,7 +91,7 @@ export async function assignStaffDepartmentAction(
   });
 
   if (error) {
-    return { error: error.message || 'Failed to assign department.' };
+    return { error: 'Could not assign the department. Try again.' };
   }
 
   revalidatePath('/staff/departments');
