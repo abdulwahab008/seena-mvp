@@ -70,7 +70,10 @@ export function PromotionView({ campuses, sessions }: { campuses: CampusOption[]
       await refreshDecisions(result.summary.run_id);
       toast.success(`Rollover started — ${result.summary.total_count} students in scope.`);
     });
-  }, (errors) => toast.error(Object.values(errors)[0]?.message ?? 'Check the campus and sessions.'));
+  }, (errors) => {
+    const first = Object.values(errors)[0]?.message;
+    toast.error(!first || first === 'Required' ? 'Choose the campus, the session to promote from and the session to promote into.' : first);
+  });
 
   const onOverrideOne = (studentId: string, decision: (typeof OVERRIDABLE_DECISIONS)[number]) => {
     if (!runSummary) return;
