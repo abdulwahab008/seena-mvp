@@ -103,13 +103,14 @@ export async function createSection(formData: FormData): Promise<{ error: string
   });
 
   if (error) {
-    if (error.message.includes('DUPLICATE_SECTION')) {
+    if (error.message.includes('SECTION_NAME_DUPLICATE')) {
       return { error: `A section named "${parsed.data.name}" already exists for this class.` };
     }
     if (error.message.includes('FORBIDDEN')) {
       return { error: 'You do not have permission to create sections.' };
     }
-    return { error: error.message || 'Failed to create section.' };
+    if (error.message.includes('CAPACITY_OUT_OF_RANGE')) return { error: 'Seat capacity must be between 1 and 200.' };
+    return { error: 'Could not create the section. Try again.' };
   }
 
   revalidatePath('/academic-setup/classes-sections');
@@ -139,7 +140,9 @@ export async function assignClassTeacher(formData: FormData): Promise<{ error: s
     if (error.message.includes('FORBIDDEN')) {
       return { error: 'You do not have permission to assign class teachers.' };
     }
-    return { error: error.message || 'Failed to assign class teacher.' };
+    if (error.message.includes('STAFF_NOT_FOUND')) return { error: 'That teacher was not found at this school.' };
+    if (error.message.includes('SECTION_NOT_FOUND')) return { error: 'That section no longer exists.' };
+    return { error: 'Could not assign the class teacher. Try again.' };
   }
 
   revalidatePath('/academic-setup/classes-sections');
