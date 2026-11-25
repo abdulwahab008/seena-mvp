@@ -110,7 +110,8 @@ export default async function TestSittingsPage() {
     candidates: candidatesBySitting.get(s.id) ?? [],
   }));
 
-  const applications: EligibleApplication[] = (appRows ?? []).map((a) => ({
+  const seated = new Set((candidateRows ?? []).map((c) => one(c.admission_application)?.id));
+  const applications: EligibleApplication[] = (appRows ?? []).filter((a) => !seated.has(a.id)).map((a) => ({
     id: a.id,
     applicationNo: a.application_no,
     childName: one(a.admission_enquiry)?.child_name ?? 'Unknown',
