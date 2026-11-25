@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   FileText,
   Plus,
@@ -170,8 +171,11 @@ export function TemplateDesk({
   });
 
   // Available tokens for current selected audience
+  // A token can be declared for the audience and for 'custom' too; list it once.
   const currentTokens = (audience: CommRecipientType) =>
-    placeholders.filter((p) => p.entity === audience || p.entity === 'custom');
+    placeholders.filter(
+      (p, i, all) => (p.entity === audience || p.entity === 'custom') && all.findIndex((q) => q.token === p.token && (q.entity === audience || q.entity === 'custom')) === i,
+    );
 
   // Insert token into active textarea
   const insertToken = (
@@ -268,6 +272,7 @@ export function TemplateDesk({
     setIsCreating(false);
 
     if (res.success) {
+      if (res.error) toast.error(res.error);
       setIsCreateOpen(false);
       setCreateName('');
       setCreateBodyEn('');
@@ -309,6 +314,7 @@ export function TemplateDesk({
     setIsCreatingVersion(false);
 
     if (res.success) {
+      if (res.error) toast.error(res.error);
       setIsVersionDrawerOpen(false);
       try {
         const fresh = await getTemplates();
