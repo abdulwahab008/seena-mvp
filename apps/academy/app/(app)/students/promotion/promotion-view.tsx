@@ -18,6 +18,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+const HOLD_REASON: Record<string, string> = {
+  NO_TARGET_SECTION: 'the target class has no section in the new session. Create its sections (Academic rollover), then start a new run.',
+  NO_TARGET_CLASS: 'there is no next class to promote into. Mark the student Pass out or Retain.',
+  TARGET_CLASS_NOT_FOUND: 'the target class no longer exists.',
+  MANUAL_HOLD: 'held by hand.',
+};
+
 type CampusOption = { id: string; name: string };
 type SessionOption = { id: string; name: string };
 
@@ -63,6 +70,9 @@ export function PromotionView({ campuses, sessions }: { campuses: CampusOption[]
       await refreshDecisions(result.summary.run_id);
       toast.success(`Rollover started — ${result.summary.total_count} students in scope.`);
     });
+  }, (errors) => {
+    const first = Object.values(errors)[0]?.message;
+    toast.error(!first || first === 'Required' ? 'Choose the campus, the session to promote from and the session to promote into.' : first);
   });
 
   const onOverrideOne = (studentId: string, decision: (typeof OVERRIDABLE_DECISIONS)[number]) => {
@@ -115,11 +125,16 @@ export function PromotionView({ campuses, sessions }: { campuses: CampusOption[]
       await refreshDecisions(runId);
       setAutoRunning(false);
       if (latest.status === 'completed') {
-        toast.success(
-          latest.is_no_op
-            ? 'Rollover complete — nothing to do, every eligible student was already rolled over.'
-            : `Rollover complete — ${latest.promoted_count} promoted, ${latest.retained_count} retained, ${latest.passed_out_count} passed out, ${latest.held_count} held.`
-        );
+        if (latest.held_count > 0)
+          toast.warning(
+            `Rollover finished with ${latest.held_count} student${latest.held_count === 1 ? '' : 's'} held — see the exception list. ${latest.promoted_count} promoted, ${latest.retained_count} retained, ${latest.passed_out_count} passed out.`
+          );
+        else
+          toast.success(
+            latest.is_no_op
+              ? 'Rollover complete — nothing to do, every eligible student was already rolled over.'
+              : `Rollover complete — ${latest.promoted_count} promoted, ${latest.retained_count} retained, ${latest.passed_out_count} passed out.`
+          );
       }
     });
   };
@@ -320,7 +335,7 @@ export function PromotionView({ campuses, sessions }: { campuses: CampusOption[]
                       <td className="p-2">{d.targetClassName ?? '—'}</td>
                       <td className="p-2" data-testid={`promotion-row-status-${d.studentId}`}>
                         {d.errorCode ? (
-                          <span className="text-destructive">Held — {d.errorCode}</span>
+                          <span className="text-destructive">Held — {HOLD_REASON[d.errorCode] ?? d.errorCode}</span>
                         ) : d.processedAt ? (
                           'Processed'
                         ) : (
@@ -355,7 +370,7 @@ export function PromotionView({ campuses, sessions }: { campuses: CampusOption[]
                     <td className="p-2">{d.grNumber}</td>
                     <td className="p-2">{d.studentName}</td>
                     <td className="p-2">{d.sourceClassName}</td>
-                    <td className="p-2 text-destructive">{d.errorCode}</td>
+                    <td className="p-2 text-destructive">{(d.errorCode && HOLD_REASON[d.errorCode]) ?? d.errorCode}</td>
                   </tr>
                 ))}
               </tbody>
