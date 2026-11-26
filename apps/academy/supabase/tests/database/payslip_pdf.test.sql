@@ -46,6 +46,8 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('role', 'authenticated', 'sub', :'owner_uid', 'tenant_id', :'tenant_a', 'app_role', 'owner',
   'campus_ids', json_build_array(:'campus_a'))::text, true);
+select public.fn_submit_payroll_for_approval(:'run_a'::uuid);
+select public.fn_approve_payroll_run(:'run_a'::uuid);
 select public.fn_lock_payroll_run(:'run_a'::uuid);
 reset role;
 

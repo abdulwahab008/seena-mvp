@@ -32684,6 +32684,58 @@ export type Database = {
           },
         ]
       }
+      staff_bank_account: {
+        Row: {
+          account_no: string
+          account_title: string
+          bank_name: string
+          staff_id: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          account_no: string
+          account_title: string
+          bank_name: string
+          staff_id: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          account_no?: string
+          account_title?: string
+          bank_name?: string
+          staff_id?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_bank_account_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: true
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_bank_account_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: true
+            referencedRelation: "v_staff_compliance"
+            referencedColumns: ["staff_id"]
+          },
+          {
+            foreignKeyName: "staff_bank_account_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_attendance: {
         Row: {
           anomaly: string | null
@@ -50688,6 +50740,15 @@ export type Database = {
       save_interview_score: { Args: { p_application_id: string; p_attitude: number; p_comment?: string; p_communication: number; p_recommendation: string; p_subject_knowledge: number; p_teaching_demo: number }; Returns: string }
       make_job_offer: { Args: { p_application_id: string; p_joining_on: string; p_note?: string; p_salary_paisa: number }; Returns: undefined }
       hire_applicant: { Args: { p_application_id: string; p_cnic?: string; p_employee_code: string; p_gender: Database['public']['Enums']['gender'] }; Returns: string }
+      set_staff_bank_account: {
+        Args: {
+          p_account_no: string
+          p_account_title: string
+          p_bank_name: string
+          p_staff_id: string
+        }
+        Returns: undefined
+      }
       set_staff_cnic_expiry: { Args: { p_expires_on: string; p_staff_id: string }; Returns: undefined }
       hr_dashboard: { Args: { p_campus_id?: string }; Returns: Json }
       save_donor: { Args: { p_cnic?: string; p_email?: string; p_name: string; p_notes?: string; p_phone?: string }; Returns: string }

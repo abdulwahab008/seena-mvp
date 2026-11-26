@@ -103,25 +103,28 @@ export function RunDetailDesk({ run, lines }: Props) {
   };
 
   const exportBankDisbursementCsv = () => {
-    const headers = ['Employee Code', 'Full Name', 'Gross (PKR)', 'Deductions (PKR)', 'Net Disbursable (PKR)', 'Status'];
+    const q = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const headers = ['Employee Code', 'Full Name', 'Bank', 'Account Title', 'Account No / IBAN', 'Net Disbursable (PKR)'];
     const rows = lines.map((l) => [
-      `"${l.employee_code}"`,
-      `"${l.staff_name}"`,
-      (l.gross_paisa / 100).toFixed(2),
-      ((l.attendance_deduction_paisa + l.tax_withholding_paisa + l.loan_recovery_paisa + l.other_deductions_paisa) / 100).toFixed(2),
+      q(l.employee_code),
+      q(l.staff_name),
+      q(l.bank?.bank_name ?? ''),
+      q(l.bank?.account_title ?? ''),
+      q(l.bank?.account_no ?? 'MISSING'),
       (l.net_paisa / 100).toFixed(2),
-      `"${run.status}"`,
     ]);
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const blob = new Blob([[headers.join(','), ...rows.map((e) => e.join(','))].join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `payroll_${run.campus_name || 'campus'}_${run.period_month}.csv`);
+    link.href = url;
+    link.download = `payroll_${run.campus_name || 'campus'}_${run.period_month}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success('Salary disbursement file exported.');
+    URL.revokeObjectURL(url);
+    const missing = lines.filter((l) => !l.bank).length;
+    if (missing > 0) toast.warning(`Exported. ${missing} staff ${missing === 1 ? 'member has' : 'members have'} no bank account on file; add it on their staff profile.`);
+    else toast.success('Salary disbursement file exported.');
   };
 
   return (
@@ -146,6 +149,10 @@ export function RunDetailDesk({ run, lines }: Props) {
               {run.status === 'locked' ? (
                 <Badge variant="default" className="bg-slate-900 text-white flex items-center gap-1">
                   <Lock className="w-3 h-3" /> Locked
+                </Badge>
+              ) : run.status === 'pending_approval' && run.approved_at ? (
+                <Badge variant="outline" className="border-emerald-400 text-emerald-700 bg-emerald-50/50">
+                  Approved
                 </Badge>
               ) : run.status === 'pending_approval' ? (
                 <Badge variant="outline" className="border-amber-400 text-amber-600 bg-amber-50/50">
@@ -191,7 +198,7 @@ export function RunDetailDesk({ run, lines }: Props) {
             </Button>
           )}
 
-          {run.status === 'pending_approval' && (
+          {run.status === 'pending_approval' && !run.approved_at && (
             <Button
               size="sm"
               onClick={handleApprove}
@@ -203,7 +210,7 @@ export function RunDetailDesk({ run, lines }: Props) {
             </Button>
           )}
 
-          {run.status !== 'locked' && run.status !== 'paid' && (
+          {run.status === 'pending_approval' && run.approved_at && (
             <Button
               size="sm"
               variant="outline"

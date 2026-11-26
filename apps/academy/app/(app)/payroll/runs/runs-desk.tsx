@@ -116,7 +116,8 @@ export function RunsDesk({ initialRuns, campuses, selectedCampusId }: Props) {
     }).format(paisa / 100);
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, approved: boolean) => {
+    if (status === 'pending_approval' && approved) return <Badge variant="outline" className="border-emerald-400 text-emerald-700 bg-emerald-50/50">Approved</Badge>;
     switch (status) {
       case 'draft':
         return <Badge variant="default" className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Draft</Badge>;
@@ -208,7 +209,7 @@ export function RunsDesk({ initialRuns, campuses, selectedCampusId }: Props) {
                       {formatPkr(r.total_net_paisa)}
                     </td>
                     <td className="py-3.5 px-4">
-                      {getStatusBadge(r.status)}
+                      {getStatusBadge(r.status, !!r.approved_at)}
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
@@ -225,7 +226,7 @@ export function RunsDesk({ initialRuns, campuses, selectedCampusId }: Props) {
                           </Button>
                         )}
 
-                        {r.status === 'pending_approval' && (
+                        {r.status === 'pending_approval' && !r.approved_at && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -238,7 +239,7 @@ export function RunsDesk({ initialRuns, campuses, selectedCampusId }: Props) {
                           </Button>
                         )}
 
-                        {r.status !== 'locked' && r.status !== 'paid' && (
+                        {r.status === 'pending_approval' && r.approved_at && (
                           <Button
                             variant="outline"
                             size="sm"
